@@ -4,7 +4,7 @@ UniRoute is a web-based educational guidance platform developed to support Sri L
 
 This project addresses the significant gap between secondary education and higher education opportunities by delivering structured, accessible, and student-centered guidance. UniRoute enables students to align their academic progress with future career prospects.
 
-Key Objectives
+# Key Objectives
 
 Recommend university degree programs for A/L students based on their subject streams and Z-scores.
 
@@ -16,7 +16,7 @@ Facilitate a mentorship network by connecting school students with current unive
 
 Support academic collaboration and tutoring through shared resources, schedules, and student feedback mechanisms.
 
-Technology Stack
+# Technology Stack
 
 Frontend: React.js
 
@@ -28,7 +28,7 @@ Authentication: JWT-based system (in progress)
 
 Hosting: Deployment platform to be finalized (e.g., Vercel/Netlify for frontend; Render/Heroku for backend)
 
-Target Users
+# Target Users
 
 Students completing O/L and A/L examinations seeking academic and career guidance
 
@@ -36,6 +36,6 @@ University students offering mentorship or academic support
 
 Educational organizations involved in student development and outreach
 
-Project Development Status
+# Project Development Status
 
 This is a group project initiated under the University of Colombo School of Computing (UCSC). The initial development phase focuses on the degree recommendation engine, followed by modules for subject stream selection, mentorship, tutoring features, and academic resource sharing.
