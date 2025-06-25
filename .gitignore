@@ -1,0 +1,17 @@
+# dependencies
+node_modules/
+
+# env files
+.env
+.env.*
+
+# Python virtual environments
+.venv/
+
+# build output
+dist/
+build/
+
+# misc
+.DS_Store
+*.log
