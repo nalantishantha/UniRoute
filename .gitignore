@@ -1,12 +1,16 @@
 # dependencies
 node_modules/
 
-# env files
+# Environment files
 .env
 .env.*
+.env
 
 # Python virtual environments
+venv/
 .venv/
+env/
+.env/
 
 # build output
 dist/
