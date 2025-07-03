@@ -42,6 +42,7 @@ class UserDetails(models.Model):
 
     class Meta:
         db_table = 'user_details'
+        db_table_comment = 'User details table'
         
     def __str__(self):
         return f"{self.first_name} {self.last_name}"

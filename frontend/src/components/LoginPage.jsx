@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { GraduationCap, Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { GraduationCap, Mail, Lock, Eye, EyeOff, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
 
 const LoginPage = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState({ type: '', text: '' });
+  
   const [formData, setFormData] = useState({
-    email: '',
+    email: '', // ✅ Changed from username to email
     password: '',
     rememberMe: false
   });
@@ -16,13 +20,83 @@ const LoginPage = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+    
+    // Clear message when user starts typing
+    if (message.text) {
+      setMessage({ type: '', text: '' });
+    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle login logic here
+  // Update the handleSubmit function
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsLoading(true);
+  setMessage({ type: '', text: '' });
+  
+  try {
     console.log('Login attempt:', formData);
-  };
+
+    // Send API request to Django backend
+    const response = await fetch('http://127.0.0.1:8000/api/accounts/login/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password
+      })
+    });
+
+    const data = await response.json();
+    console.log('Login API Response:', data);
+
+    if (data.success) {
+      setMessage({ 
+        type: 'success', 
+        text: 'Login successful! Welcome back!' 
+      });
+      
+      // Store user data in localStorage
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      // Redirect based on user type
+      setTimeout(() => {
+        const userType = data.user.user_type;
+        console.log('User type:', userType);
+        
+        switch(userType) {
+          case 'admin':
+            navigate('/admin/dashboard');
+            break;
+          case 'uni_student':
+            navigate('/university-student/dashboard');
+            break;
+          case 'student':
+          default:
+            navigate('/student/dashboard');
+            break;
+        }
+      }, 1000);
+      
+    } else {
+      setMessage({ 
+        type: 'error', 
+        text: data.message || 'Login failed. Please try again.' 
+      });
+    }
+    
+  } catch (error) {
+    console.error('Login error:', error);
+    setMessage({ 
+      type: 'error', 
+      text: 'Network error. Please check your connection and try again.' 
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50 flex flex-col">
@@ -67,6 +141,26 @@ const LoginPage = () => {
               </p>
             </div>
 
+            {/* Success/Error Message */}
+            {message.text && (
+              <div className={`mb-6 p-4 rounded-xl flex items-center space-x-3 ${
+                message.type === 'success' 
+                  ? 'bg-green-50 border border-green-200' 
+                  : 'bg-red-50 border border-red-200'
+              }`}>
+                {message.type === 'success' ? (
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                ) : (
+                  <AlertCircle className="h-5 w-5 text-red-600" />
+                )}
+                <span className={`text-sm font-medium ${
+                  message.type === 'success' ? 'text-green-800' : 'text-red-800'
+                }`}>
+                  {message.text}
+                </span>
+              </div>
+            )}
+
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Email Field */}
@@ -83,8 +177,9 @@ const LoginPage = () => {
                     value={formData.email}
                     onChange={handleInputChange}
                     className="w-full pl-10 pr-4 py-3 border border-accent-100 rounded-xl focus:ring-2 focus:ring-primary-200 focus:border-primary-300 transition-all bg-white/80 backdrop-blur-sm"
-                    placeholder="Enter your email"
+                    placeholder="Enter your email address"
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -105,11 +200,13 @@ const LoginPage = () => {
                     className="w-full pl-10 pr-12 py-3 border border-accent-100 rounded-xl focus:ring-2 focus:ring-primary-200 focus:border-primary-300 transition-all bg-white/80 backdrop-blur-sm"
                     placeholder="Enter your password"
                     required
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary-300 hover:text-primary-400 transition-colors"
+                    disabled={isLoading}
                   >
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
@@ -126,6 +223,7 @@ const LoginPage = () => {
                     checked={formData.rememberMe}
                     onChange={handleInputChange}
                     className="h-4 w-4 text-primary-400 border-accent-200 rounded focus:ring-primary-200"
+                    disabled={isLoading}
                   />
                   <label htmlFor="rememberMe" className="ml-2 text-sm text-primary-300">
                     Remember me
@@ -139,33 +237,23 @@ const LoginPage = () => {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full bg-primary-400 text-white py-3 px-4 rounded-xl font-semibold hover:bg-primary-600 focus:ring-2 focus:ring-primary-200 focus:outline-none transition-all transform hover:-translate-y-0.5 hover:shadow-lg"
+                disabled={isLoading}
+                className={`w-full py-3 px-4 rounded-xl font-semibold focus:ring-2 focus:ring-primary-200 focus:outline-none transition-all transform hover:-translate-y-0.5 hover:shadow-lg ${
+                  isLoading 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-primary-400 hover:bg-primary-600 text-white'
+                }`}
               >
-                Sign In
+                {isLoading ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Signing In...</span>
+                  </div>
+                ) : (
+                  'Sign In'
+                )}
               </button>
             </form>
-
-            {/* Divider */}
-            <div className="mt-8 mb-6">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-accent-100"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-primary-300">Or continue with</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Social Login */}
-            <div className="grid grid-cols-2 gap-4">
-              <button className="flex items-center justify-center px-4 py-3 border border-accent-100 rounded-xl hover:bg-accent-50 transition-colors">
-                <span className="text-sm font-medium text-primary-300">Google</span>
-              </button>
-              <button className="flex items-center justify-center px-4 py-3 border border-accent-100 rounded-xl hover:bg-accent-50 transition-colors">
-                <span className="text-sm font-medium text-primary-300">Facebook</span>
-              </button>
-            </div>
 
             {/* Sign Up Link */}
             <div className="mt-8 text-center">
@@ -178,14 +266,26 @@ const LoginPage = () => {
             </div>
           </div>
 
-          {/* Additional Info */}
-          <div className="mt-8 text-center">
-            <p className="text-sm text-primary-300">
-              By signing in, you agree to our{' '}
-              <a href="#" className="text-accent-300 hover:text-accent-400 underline">Terms of Service</a>
-              {' '}and{' '}
-              <a href="#" className="text-accent-300 hover:text-accent-400 underline">Privacy Policy</a>
-            </p>
+          {/* Test Credentials Info */}
+          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+            <h3 className="text-sm font-semibold text-blue-800 mb-2">Test Credentials:</h3>
+            <div className="space-y-2">
+              <div className="text-xs text-blue-700">
+                <strong>Student:</strong><br/>
+                Email: <code className="bg-blue-100 px-1 rounded">perera@gmail.com</code><br/>
+                Password: <code className="bg-blue-100 px-1 rounded">mypassword123</code>
+              </div>
+              <div className="text-xs text-blue-700">
+                <strong>Admin:</strong><br/>
+                Email: <code className="bg-blue-100 px-1 rounded">admin@uniroute.com</code><br/>
+                Password: <code className="bg-blue-100 px-1 rounded">admin123</code>
+              </div>
+              <div className="text-xs text-blue-700">
+                <strong>University Student:</strong><br/>
+                Email: <code className="bg-blue-100 px-1 rounded">sarah.silva@university.lk</code><br/>
+                Password: <code className="bg-blue-100 px-1 rounded">sarah123</code>
+              </div>
+            </div>
           </div>
         </div>
       </div>
