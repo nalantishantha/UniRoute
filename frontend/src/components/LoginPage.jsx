@@ -267,23 +267,23 @@ const handleSubmit = async (e) => {
           </div>
 
           {/* Test Credentials Info */}
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-            <h3 className="text-sm font-semibold text-blue-800 mb-2">Test Credentials:</h3>
+          <div className="mt-6 p-4 bg-primary-50 border border-primary-200 rounded-xl">
+            <h3 className="text-sm font-semibold text-primary-800 mb-2">Test Credentials:</h3>
             <div className="space-y-2">
-              <div className="text-xs text-blue-700">
+              <div className="text-xs text-primary-700">
                 <strong>Student:</strong><br/>
-                Email: <code className="bg-blue-100 px-1 rounded">perera@gmail.com</code><br/>
-                Password: <code className="bg-blue-100 px-1 rounded">mypassword123</code>
+                Email: <code className="bg-primary-100 px-1 rounded">perera@gmail.com</code><br/>
+                Password: <code className="bg-primary-100 px-1 rounded">mypassword123</code>
               </div>
-              <div className="text-xs text-blue-700">
+              <div className="text-xs text-primary-700">
                 <strong>Admin:</strong><br/>
-                Email: <code className="bg-blue-100 px-1 rounded">admin@uniroute.com</code><br/>
-                Password: <code className="bg-blue-100 px-1 rounded">admin123</code>
+                Email: <code className="bg-primary-100 px-1 rounded">admin@uniroute.com</code><br/>
+                Password: <code className="bg-primary-100 px-1 rounded">admin123</code>
               </div>
-              <div className="text-xs text-blue-700">
+              <div className="text-xs text-primary-700">
                 <strong>University Student:</strong><br/>
-                Email: <code className="bg-blue-100 px-1 rounded">sarah.silva@university.lk</code><br/>
-                Password: <code className="bg-blue-100 px-1 rounded">sarah123</code>
+                Email: <code className="bg-primary-100 px-1 rounded">sarah.silva@university.lk</code><br/>
+                Password: <code className="bg-primary-100 px-1 rounded">sarah123</code>
               </div>
             </div>
           </div>

@@ -3,10 +3,10 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from './components/LandingPage';
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
-import { StudentLayout, UniversityStudentLayout, AdminLayout } from './components/Navigation';
+import { StudentLayout, UniversityStudentLayout } from './components/Navigation';
 
-// Import the new AdminDashboard from pages
-import { AdminDashboard } from './pages/Admin';
+// Import route components
+import AdminRoutes from './routes/AdminRoutes';
 
 // Test Dashboard Components
 const StudentDashboard = () => (
@@ -50,8 +50,8 @@ function App() {
           </UniversityStudentLayout>
         } />
         
-        {/* Admin Routes - Using the new AdminDashboard */}
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        {/* Admin Routes - All admin routes handled by AdminRoutes */}
+        <Route path="/admin/*" element={<AdminRoutes />} />
       </Routes>
     </Router>
   );

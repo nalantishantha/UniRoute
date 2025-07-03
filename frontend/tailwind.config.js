@@ -8,19 +8,27 @@ export default {
     extend: {
       colors: {
         primary: {
-          50: '#1e293b',     // Dark blue-gray
-          100: '#334155',    // Darker blue-gray
-          200: '#475569',    // Medium dark blue
-          300: '#64748b',    // Dark blue
-          400: '#0f172a',    // Very dark blue
-          500: '#020617',    // Almost black blue
-          600: '#000000',    // Pure black
+          50: '#E8F2FF',     // Very light blue
+          100: '#D1E5FF',    // Light blue
+          200: '#A3CBFF',    // Medium light blue
+          300: '#75C2F6',    // Your light blue
+          400: '#1D5D9B',    // Your main blue
+          500: '#164A7B',    // Darker blue
+          600: '#0F375B',    // Very dark blue
         },
         accent: {
-          50: '#78350f',     // Dark brown-gold
-          100: '#92400e',    // Dark amber
-          200: '#b45309',    // Dark gold
-          300: '#d97706',    // Rich dark yellow
+          50: '#FEFCF0',     // Very light cream
+          100: '#FBEEAC',    // Your cream color
+          200: '#F4D160',    // Your yellow
+          300: '#E6BC3A',    // Darker yellow
+          400: '#D4A71A',    // Golden yellow
+        },
+        gold: {
+          50: '#FFFDF7',
+          100: '#FBEEAC',
+          200: '#F4D160',
+          300: '#E6BC3A',
+          400: '#D4A71A',
         }
       },
       fontFamily: {

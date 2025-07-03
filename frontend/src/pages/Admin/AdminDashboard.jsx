@@ -6,6 +6,10 @@ import {
   Users,
   GraduationCap,
   School,
+  Building2,
+  UserCheck,
+  UserCog,
+  BookOpen,
   BarChart3,
   Settings,
   Bell,
@@ -16,9 +20,8 @@ import {
   User,
   Shield,
   ChevronDown,
-  BookOpen,
   FileText,
-  TrendingUp
+  Briefcase
 } from 'lucide-react';
 
 const AdminDashboard = () => {
@@ -28,7 +31,7 @@ const AdminDashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Sidebar navigation items
+  // Updated sidebar navigation items
   const sidebarItems = [
     {
       label: 'Dashboard',
@@ -40,25 +43,49 @@ const AdminDashboard = () => {
       label: 'Users',
       path: '/admin/users',
       icon: Users,
-      category: 'management'
+      category: 'user-management'
     },
     {
       label: 'Students',
       path: '/admin/students',
       icon: GraduationCap,
-      category: 'management'
+      category: 'user-management'
+    },
+    {
+      label: 'University Students',
+      path: '/admin/university-students',
+      icon: School,
+      category: 'user-management'
+    },
+    {
+      label: 'Mentors',
+      path: '/admin/mentors',
+      icon: UserCheck,
+      category: 'user-management'
+    },
+    {
+      label: 'Tutors',
+      path: '/admin/tutors',
+      icon: UserCog,
+      category: 'user-management'
     },
     {
       label: 'Universities',
       path: '/admin/universities',
-      icon: School,
-      category: 'management'
+      icon: Building2,
+      category: 'institution-management'
+    },
+    {
+      label: 'Companies',
+      path: '/admin/companies',
+      icon: Briefcase,
+      category: 'institution-management'
     },
     {
       label: 'Programs',
       path: '/admin/programs',
       icon: BookOpen,
-      category: 'management'
+      category: 'academic-management'
     },
     {
       label: 'Analytics',
@@ -80,19 +107,19 @@ const AdminDashboard = () => {
     }
   ];
 
-  // Stats cards data
+  // Updated stats cards data
   const statsCards = [
     {
       title: 'Total Users',
-      value: '2,847',
+      value: '4,847',
       change: '+12.3%',
       changeType: 'positive',
       icon: Users,
       color: 'bg-blue-500'
     },
     {
-      title: 'Active Students',
-      value: '1,923',
+      title: 'Students',
+      value: '2,156',
       change: '+8.7%',
       changeType: 'positive',
       icon: GraduationCap,
@@ -100,51 +127,58 @@ const AdminDashboard = () => {
     },
     {
       title: 'Universities',
-      value: '45',
-      change: '+2',
+      value: '67',
+      change: '+3',
       changeType: 'positive',
-      icon: School,
+      icon: Building2,
       color: 'bg-purple-500'
     },
     {
-      title: 'Programs',
-      value: '234',
-      change: '+15',
+      title: 'Companies',
+      value: '89',
+      change: '+12',
       changeType: 'positive',
-      icon: BookOpen,
+      icon: Briefcase,
       color: 'bg-orange-500'
     }
   ];
 
-  // Recent activities
+  // Updated recent activities
   const recentActivities = [
     {
       id: 1,
       user: 'Sarah Silva',
-      action: 'registered for Computer Science program',
+      action: 'registered as University Student',
       time: '2 minutes ago',
       type: 'registration'
     },
     {
       id: 2,
-      user: 'John Doe',
-      action: 'updated profile information',
+      user: 'John Mentor',
+      action: 'approved as Mentor',
       time: '15 minutes ago',
-      type: 'profile'
+      type: 'approval'
     },
     {
       id: 3,
-      user: 'University of Colombo',
-      action: 'added new Engineering program',
+      user: 'Google Inc.',
+      action: 'registered as Company Partner',
       time: '1 hour ago',
-      type: 'program'
+      type: 'company'
     },
     {
       id: 4,
-      user: 'Admin User',
-      action: 'approved 5 new registrations',
+      user: 'University of Moratuwa',
+      action: 'added new Engineering program',
       time: '2 hours ago',
-      type: 'approval'
+      type: 'program'
+    },
+    {
+      id: 5,
+      user: 'Alex Tutor',
+      action: 'created new Mathematics course',
+      time: '3 hours ago',
+      type: 'course'
     }
   ];
 
@@ -152,7 +186,6 @@ const AdminDashboard = () => {
     const currentUser = getCurrentUser();
     if (currentUser) {
       setUser(currentUser);
-      // Verify user is admin
       if (currentUser.user_type !== 'admin') {
         navigate('/login');
       }
@@ -179,7 +212,9 @@ const AdminDashboard = () => {
   const categorizeItems = (items) => {
     const categories = {
       main: { label: 'Main', items: [] },
-      management: { label: 'Management', items: [] },
+      'user-management': { label: 'User Management', items: [] },
+      'institution-management': { label: 'Institution Management', items: [] },
+      'academic-management': { label: 'Academic Management', items: [] },
       insights: { label: 'Insights', items: [] },
       system: { label: 'System', items: [] }
     };
@@ -298,7 +333,7 @@ const AdminDashboard = () => {
               <button className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
                 <Bell className="h-5 w-5" />
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                  3
+                  5
                 </span>
               </button>
 
@@ -425,15 +460,15 @@ const AdminDashboard = () => {
                     to="/admin/universities/new"
                     className="flex items-center p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
                   >
-                    <School className="h-5 w-5 text-gray-600 mr-3" />
+                    <Building2 className="h-5 w-5 text-gray-600 mr-3" />
                     <span className="text-sm font-medium text-gray-900">Add University</span>
                   </Link>
                   <Link
-                    to="/admin/programs/new"
+                    to="/admin/companies/new"
                     className="flex items-center p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
                   >
-                    <BookOpen className="h-5 w-5 text-gray-600 mr-3" />
-                    <span className="text-sm font-medium text-gray-900">Create Program</span>
+                    <Briefcase className="h-5 w-5 text-gray-600 mr-3" />
+                    <span className="text-sm font-medium text-gray-900">Add Company</span>
                   </Link>
                   <Link
                     to="/admin/reports"
