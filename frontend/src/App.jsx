@@ -4,9 +4,13 @@ import LandingPage from './components/LandingPage';
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
 import { StudentLayout, UniversityStudentLayout } from './components/Navigation';
+import { UniStudentLayout } from './components/UniStudent';
 
 // Import route components
 import AdminRoutes from './routes/AdminRoutes';
+import UniStudentRoutes from './routes/UniStudentRoutes';
+import { UniStudentDashboard } from './pages/UniStudents/Dashboard';
+
 
 // Test Dashboard Components
 const StudentDashboard = () => (
@@ -31,27 +35,40 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Public Routes */}
+        {/* Public Routes
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} /> */}
+
+        {/* Uni student Routes */}
+        <Route path="/" element={
+          <UniStudentLayout>
+            <UniStudentDashboard />
+          </UniStudentLayout>
+        } />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        
+
         {/* Student Routes */}
         <Route path="/student/dashboard" element={
           <StudentLayout>
             <StudentDashboard />
           </StudentLayout>
         } />
-        
+
         {/* University Student Routes */}
         <Route path="/university-student/dashboard" element={
           <UniversityStudentLayout>
             <UniversityStudentDashboard />
           </UniversityStudentLayout>
         } />
-        
+
         {/* Admin Routes - All admin routes handled by AdminRoutes */}
         <Route path="/admin/*" element={<AdminRoutes />} />
+
+        {/*Uni Student Routes */}
+
+        <Route path="/unistudent/*" element={<UniStudentRoutes />} />
       </Routes>
     </Router>
   );
