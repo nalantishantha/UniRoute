@@ -47,11 +47,11 @@ function App() {
         <Route path="/register" element={<RegisterPage />} /> */}
 
         {/* Uni student Routes */}
-        <Route path="/" element={
+        {/* <Route path="/" element={
           <UniStudentLayout>
             <UniStudentDashboard />
           </UniStudentLayout>
-        } />
+        } /> */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 

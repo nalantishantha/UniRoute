@@ -1,3 +1,4 @@
+import React from "react";
 import { motion } from "framer-motion";
 import {
   Users,
@@ -6,7 +7,14 @@ import {
   DollarSign,
   ArrowUpRight,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, Button } from "../../../components/UniStudent";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "../../../components/ui/Card";
+import Button from "../../../components/ui/Button";
 
 const recentActivities = [
   {
@@ -35,9 +43,9 @@ const recentActivities = [
   },
 ];
 
-export default function RecentActivities({ variants }) {
+const RecentActivities = ({ itemVariants }) => {
   return (
-    <motion.div variants={variants} className="lg:col-span-2">
+    <motion.div variants={itemVariants} className="lg:col-span-2">
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -65,12 +73,12 @@ export default function RecentActivities({ variants }) {
                 <div className="flex items-start space-x-4">
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center ${activity.type === "enrollment"
-                      ? "bg-primary-100 text-primary-600"
-                      : activity.type === "session"
-                        ? "bg-success/20 text-success"
-                        : activity.type === "feedback"
-                          ? "bg-warning/20 text-yellow-600"
-                          : "bg-info/20 text-info"
+                        ? "bg-primary-100 text-primary-600"
+                        : activity.type === "session"
+                          ? "bg-success/20 text-success"
+                          : activity.type === "feedback"
+                            ? "bg-warning/20 text-yellow-600"
+                            : "bg-info/20 text-info"
                       }`}
                   >
                     {activity.type === "enrollment" && (
@@ -106,4 +114,6 @@ export default function RecentActivities({ variants }) {
       </Card>
     </motion.div>
   );
-}
+};
+
+export default RecentActivities;

@@ -1,5 +1,3 @@
-// export { default as UniStudentDashboard } from './Dashboard';
-
 export { Dashboard } from "./Dashboard";
 
 export { Resources } from "./AcademicResources";

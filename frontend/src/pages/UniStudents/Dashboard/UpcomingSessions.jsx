@@ -1,6 +1,14 @@
+import React from "react";
 import { motion } from "framer-motion";
 import { Calendar } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, Button } from "../../../components/UniStudent";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "../../../components/ui/Card";
+import Button from "../../../components/ui/Button";
 
 const upcomingSessions = [
   {
@@ -26,9 +34,9 @@ const upcomingSessions = [
   },
 ];
 
-export default function UpcomingSessions({ variants }) {
+const UpcomingSessions = ({ itemVariants }) => {
   return (
-    <motion.div variants={variants}>
+    <motion.div variants={itemVariants}>
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
@@ -62,8 +70,8 @@ export default function UpcomingSessions({ variants }) {
                     </span>
                     <span
                       className={`text-xs px-2 py-1 rounded-full ${session.type === "online"
-                        ? "bg-primary-100 text-primary-600"
-                        : "bg-success/20 text-success"
+                          ? "bg-primary-100 text-primary-600"
+                          : "bg-success/20 text-success"
                         }`}
                     >
                       {session.type}
@@ -86,4 +94,6 @@ export default function UpcomingSessions({ variants }) {
       </Card>
     </motion.div>
   );
-}
+};
+
+export default UpcomingSessions;
