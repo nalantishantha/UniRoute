@@ -1,30 +1,20 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Plus,
   Search,
-  Filter,
   BookOpen,
   Users,
-  Clock,
-  DollarSign,
-  Eye,
-  Edit3,
-  Trash2,
-  MoreHorizontal,
-  Star,
   TrendingUp,
-  Calendar,
-  X,
+  Edit3,
 } from "lucide-react";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
 } from "../../../components/ui/Card";
 import Button from "../../../components/ui/Button";
+import CoursesGrid from "./CoursesGrid";
+import CreateCourseModal from "./CreateCourseModal";
 
 const courses = [
   {
@@ -87,13 +77,6 @@ const courses = [
   },
 ];
 
-const statusColors = {
-  Published: "bg-success/20 text-success border-success/30",
-  Draft: "bg-warning/20 text-yellow-600 border-warning/30",
-  Pending: "bg-info/20 text-info border-info/30",
-  Rejected: "bg-error/20 text-error border-error/30",
-};
-
 export default function PreUniCourses() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [filterStatus, setFilterStatus] = useState("All");
@@ -108,140 +91,6 @@ export default function PreUniCourses() {
       filterStatus === "All" || course.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
-
-  const CreateCourseModal = () => (
-    <AnimatePresence>
-      {showCreateModal && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
-          onClick={() => setShowCreateModal(false)}
-        >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-xl shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-6 border-b border-neutral-silver">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-neutral-black">
-                  Create New Course
-                </h2>
-                <button
-                  onClick={() => setShowCreateModal(false)}
-                  className="p-2 hover:bg-neutral-silver rounded-lg transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <p className="text-neutral-grey mt-1">
-                Fill in the details to create your new pre-university course
-              </p>
-            </div>
-
-            <div className="p-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-neutral-black mb-2">
-                    Course Title
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter course title"
-                    className="w-full px-4 py-2 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-neutral-black mb-2">
-                    Category
-                  </label>
-                  <select className="w-full px-4 py-2 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400">
-                    <option>Mathematics</option>
-                    <option>Physics</option>
-                    <option>Chemistry</option>
-                    <option>Biology</option>
-                    <option>English</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-neutral-black mb-2">
-                  Description
-                </label>
-                <textarea
-                  rows="4"
-                  placeholder="Describe your course content and objectives"
-                  className="w-full px-4 py-2 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-neutral-black mb-2">
-                    Price ($)
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="0"
-                    className="w-full px-4 py-2 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-neutral-black mb-2">
-                    Duration
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g., 8 weeks"
-                    className="w-full px-4 py-2 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-neutral-black mb-2">
-                    Difficulty
-                  </label>
-                  <select className="w-full px-4 py-2 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400">
-                    <option>Beginner</option>
-                    <option>Intermediate</option>
-                    <option>Advanced</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-neutral-black mb-2">
-                  Course Thumbnail
-                </label>
-                <div className="border-2 border-dashed border-neutral-light-grey rounded-lg p-6 text-center">
-                  <div className="w-12 h-12 mx-auto mb-4 bg-neutral-silver rounded-lg flex items-center justify-center">
-                    <BookOpen className="w-6 h-6 text-neutral-grey" />
-                  </div>
-                  <p className="text-sm text-neutral-grey">
-                    Click to upload or drag and drop
-                  </p>
-                  <p className="text-xs text-neutral-light-grey mt-1">
-                    PNG, JPG up to 10MB
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 border-t border-neutral-silver flex justify-end space-x-3">
-              <Button variant="ghost" onClick={() => setShowCreateModal(false)}>
-                Cancel
-              </Button>
-              <Button>Create Course</Button>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
 
   return (
     <motion.div
@@ -366,207 +215,17 @@ export default function PreUniCourses() {
       </Card>
 
       {/* Courses Grid */}
-      <motion.div
-        layout
-        className={
-          viewMode === "grid"
-            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            : "space-y-4"
-        }
-      >
-        {filteredCourses.map((course, index) => (
-          <motion.div
-            key={course.id}
-            layout
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-          >
-            {viewMode === "grid" ? (
-              <Card className="overflow-hidden group cursor-pointer">
-                <div className="relative">
-                  <img
-                    src={course.thumbnail}
-                    alt={course.title}
-                    className="w-full h-48 object-cover transition-transform group-hover:scale-105"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <span
-                      className={`px-2 py-1 text-xs font-medium rounded-full border ${
-                        statusColors[course.status]
-                      }`}
-                    >
-                      {course.status}
-                    </span>
-                  </div>
-                  <div className="absolute top-4 right-4">
-                    <button className="p-2 bg-white/90 rounded-lg hover:bg-white transition-colors">
-                      <MoreHorizontal className="w-4 h-4 text-neutral-dark-grey" />
-                    </button>
-                  </div>
-                </div>
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className="font-semibold text-neutral-black group-hover:text-primary-600 transition-colors">
-                        {course.title}
-                      </h3>
-                      <p className="text-sm text-neutral-grey">
-                        {course.category}
-                      </p>
-                    </div>
-                    {course.rating > 0 && (
-                      <div className="flex items-center space-x-1">
-                        <Star className="w-4 h-4 text-warning fill-current" />
-                        <span className="text-sm font-medium">
-                          {course.rating}
-                        </span>
-                      </div>
-                    )}
-                  </div>
+      <CoursesGrid
+        filteredCourses={filteredCourses}
+        viewMode={viewMode}
+        setShowCreateModal={setShowCreateModal}
+      />
 
-                  <p className="text-sm text-neutral-grey mb-4 line-clamp-2">
-                    {course.description}
-                  </p>
-
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="flex items-center space-x-2">
-                      <Users className="w-4 h-4 text-neutral-light-grey" />
-                      <span className="text-sm text-neutral-grey">
-                        {course.enrollments} students
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Clock className="w-4 h-4 text-neutral-light-grey" />
-                      <span className="text-sm text-neutral-grey">
-                        {course.duration}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <DollarSign className="w-4 h-4 text-neutral-light-grey" />
-                      <span className="text-sm text-neutral-grey">
-                        ${course.price}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Calendar className="w-4 h-4 text-neutral-light-grey" />
-                      <span className="text-sm text-neutral-grey">
-                        {course.lastUpdated}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex space-x-2">
-                    <Button size="sm" variant="outline" className="flex-1">
-                      <Eye className="w-4 h-4 mr-1" />
-                      View
-                    </Button>
-                    <Button size="sm" className="flex-1">
-                      <Edit3 className="w-4 h-4 mr-1" />
-                      Edit
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-6">
-                    <img
-                      src={course.thumbnail}
-                      alt={course.title}
-                      className="w-20 h-20 rounded-lg object-cover"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="font-semibold text-neutral-black">
-                            {course.title}
-                          </h3>
-                          <p className="text-sm text-neutral-grey">
-                            {course.category}
-                          </p>
-                        </div>
-                        <span
-                          className={`px-2 py-1 text-xs font-medium rounded-full border ${
-                            statusColors[course.status]
-                          }`}
-                        >
-                          {course.status}
-                        </span>
-                      </div>
-                      <p className="text-sm text-neutral-grey mt-2 line-clamp-1">
-                        {course.description}
-                      </p>
-                      <div className="flex items-center space-x-6 mt-3">
-                        <div className="flex items-center space-x-1">
-                          <Users className="w-4 h-4 text-neutral-light-grey" />
-                          <span className="text-sm text-neutral-grey">
-                            {course.enrollments}
-                          </span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <DollarSign className="w-4 h-4 text-neutral-light-grey" />
-                          <span className="text-sm text-neutral-grey">
-                            ${course.price}
-                          </span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Clock className="w-4 h-4 text-neutral-light-grey" />
-                          <span className="text-sm text-neutral-grey">
-                            {course.duration}
-                          </span>
-                        </div>
-                        {course.rating > 0 && (
-                          <div className="flex items-center space-x-1">
-                            <Star className="w-4 h-4 text-warning fill-current" />
-                            <span className="text-sm font-medium">
-                              {course.rating}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Button size="sm" variant="outline">
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        <Edit3 className="w-4 h-4" />
-                      </Button>
-                      <Button size="sm" variant="ghost">
-                        <MoreHorizontal className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </motion.div>
-        ))}
-      </motion.div>
-
-      {filteredCourses.length === 0 && (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <BookOpen className="w-12 h-12 text-neutral-light-grey mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-neutral-black mb-2">
-              No courses found
-            </h3>
-            <p className="text-neutral-grey mb-6">
-              {searchTerm || filterStatus !== "All"
-                ? "Try adjusting your search or filter criteria"
-                : "Create your first course to get started"}
-            </p>
-            <Button onClick={() => setShowCreateModal(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Create New Course
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      <CreateCourseModal />
+      {/* Create Course Modal */}
+      <CreateCourseModal
+        showCreateModal={showCreateModal}
+        setShowCreateModal={setShowCreateModal}
+      />
     </motion.div>
   );
 }
