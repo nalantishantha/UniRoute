@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
@@ -53,7 +53,6 @@ const navigation = [
 ];
 
 export default function Sidebar({ isOpen, setIsOpen }) {
-  const location = useLocation();
   const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
@@ -109,6 +108,23 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
   return (
     <>
+      <style>
+        {`
+          .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.3);
+            border-radius: 2px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(59, 130, 246, 0.6);
+          }
+        `}
+      </style>
       {/* Mobile backdrop */}
       <AnimatePresence>
         {isOpen && !isDesktop && (
@@ -130,6 +146,12 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           "h-full w-72 bg-gradient-to-b from-primary-900 to-primary-800 shadow-2xl",
           isDesktop ? "relative" : "fixed top-0 left-0 z-50"
         )}
+        style={{
+          '--scrollbar-width': '4px',
+          '--scrollbar-track': '#1e3a8a',
+          '--scrollbar-thumb': '#1e40af',
+          '--scrollbar-thumb-hover': '#3b82f6'
+        }}
       >
         <div className="flex h-full flex-col">
           {/* Header */}
@@ -165,9 +187,14 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+          <nav
+            className="flex-1 px-4 py-6 space-y-2 overflow-y-auto scrollbar-thin scrollbar-track-primary-800 scrollbar-thumb-primary-600 hover:scrollbar-thumb-primary-500 custom-scrollbar"
+            style={{
+              scrollbarWidth: 'thin',
+              scrollbarColor: 'rgba(59, 130, 246, 0.3) transparent',
+            }}
+          >
             {navigation.map((item, index) => {
-              const isActive = location.pathname === item.href;
               return (
                 <motion.div
                   key={item.name}
