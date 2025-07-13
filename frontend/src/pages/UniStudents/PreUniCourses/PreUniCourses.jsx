@@ -2,7 +2,6 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Plus,
-  Search,
   BookOpen,
   Users,
   TrendingUp,
@@ -79,18 +78,6 @@ const courses = [
 
 export default function PreUniCourses() {
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [filterStatus, setFilterStatus] = useState("All");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState("grid"); // 'grid' or 'list'
-
-  const filteredCourses = courses.filter((course) => {
-    const matchesSearch =
-      course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.category.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      filterStatus === "All" || course.status === filterStatus;
-    return matchesSearch && matchesStatus;
-  });
 
   return (
     <motion.div
@@ -166,58 +153,9 @@ export default function PreUniCourses() {
         </Card>
       </div>
 
-      {/* Filters and Search */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-grey" />
-                <input
-                  type="text"
-                  placeholder="Search courses..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
-                />
-              </div>
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-4 py-2 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
-              >
-                <option value="All">All Status</option>
-                <option value="Published">Published</option>
-                <option value="Draft">Draft</option>
-                <option value="Pending">Pending</option>
-                <option value="Rejected">Rejected</option>
-              </select>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-neutral-grey">View:</span>
-              <Button
-                variant={viewMode === "grid" ? "primary" : "ghost"}
-                size="sm"
-                onClick={() => setViewMode("grid")}
-              >
-                Grid
-              </Button>
-              <Button
-                variant={viewMode === "list" ? "primary" : "ghost"}
-                size="sm"
-                onClick={() => setViewMode("list")}
-              >
-                List
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Courses Grid */}
       <CoursesGrid
-        filteredCourses={filteredCourses}
-        viewMode={viewMode}
+        courses={courses}
         setShowCreateModal={setShowCreateModal}
       />
 
