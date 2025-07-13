@@ -22,6 +22,7 @@ import {
   AlertCircle,
   CheckCircle
 } from 'lucide-react';
+import AdminLayout from '../../../components/common/Admin/AdminLayout';
 
 const UserView = () => {
   const { id } = useParams();
@@ -163,34 +164,39 @@ const UserView = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading user details...</p>
+      <AdminLayout pageTitle="User Details">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading user details...</p>
+          </div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">User Not Found</h2>
-          <p className="text-gray-600 mb-4">The user you're looking for doesn't exist.</p>
-          <Link
-            to="/admin/users"
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            Back to Users
-          </Link>
+      <AdminLayout pageTitle="User Not Found">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">User Not Found</h2>
+            <p className="text-gray-600 mb-4">The user you're looking for doesn't exist.</p>
+            <Link
+              to="/admin/users"
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              Back to Users
+            </Link>
+          </div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   return (
+    <AdminLayout pageTitle="User Details">
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
@@ -211,7 +217,7 @@ const UserView = () => {
             <div className="flex items-center space-x-3">
               <Link
                 to={`/admin/users/${user.id}/edit`}
-                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center space-x-2"
+                className="bg-[#1D5D9B] text-white px-4 py-2 rounded-lg hover:bg-[#174A7C] transition-colors flex items-center space-x-2"
               >
                 <Edit className="h-4 w-4" />
                 <span>Edit User</span>
@@ -220,8 +226,8 @@ const UserView = () => {
                 onClick={handleToggleStatus}
                 className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
                   user.is_active
-                    ? 'bg-orange-500 text-white hover:bg-orange-600'
-                    : 'bg-green-500 text-white hover:bg-green-600'
+                    ? 'bg-[#F4D160] text-[#263238] hover:bg-[#D9B23A]'
+                    : 'bg-[#81C784] text-[#263238] hover:bg-[#5EA46A]'
                 }`}
               >
                 {user.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
@@ -229,7 +235,7 @@ const UserView = () => {
               </button>
               <button
                 onClick={handleDeleteUser}
-                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center space-x-2"
+                className="bg-[#E57373] text-white px-4 py-2 rounded-lg hover:bg-[#C94A4A] transition-colors flex items-center space-x-2"
               >
                 <Trash2 className="h-4 w-4" />
                 <span>Delete</span>
@@ -403,6 +409,7 @@ const UserView = () => {
         </div>
       </div>
     </div>
+    </AdminLayout>
   );
 };
 

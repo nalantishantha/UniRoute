@@ -153,13 +153,13 @@ def login_user(request):
                 print(f"Provided password: {password}")
                 
                 # Simple password check for testing - direct comparison
-                if user.password_hash == password:
-                    print("Password verified - direct match")
+                if check_password(password, user.password_hash):
+                    print("Password verified")
                     
                     # Get user details
                     try:
                         user_details = UserDetails.objects.get(user=user)
-                        print(f"Found user details: {user_details.first_name} {user_details.last_name}")
+                        print(f"Found user details: {user_details.full_name}")
                     except UserDetails.DoesNotExist:
                         print("No user details found")
                         user_details = None
@@ -194,9 +194,7 @@ def login_user(request):
                             'id': user.user_id,
                             'username': user.username,
                             'email': user.email,
-                            'first_name': user_details.first_name if user_details else '',
-                            'last_name': user_details.last_name if user_details else '',
-                            'full_name': f"{user_details.first_name} {user_details.last_name}" if user_details else '',
+                            'full_name': user_details.full_name if user_details else '',
                             'contact_number': user_details.contact_number if user_details else '',
                             'user_type': user_type_name,
                             'user_type_id': user.user_type_id,

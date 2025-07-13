@@ -21,6 +21,7 @@ import {
   MapPin,
   Award
 } from 'lucide-react';
+import AdminLayout from '../../../components/common/Admin/AdminLayout';
 
 const UniversityStudentsList = () => {
   const navigate = useNavigate();
@@ -218,16 +219,19 @@ const UniversityStudentsList = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading university students...</p>
+      <AdminLayout pageTitle="University Students" pageDescription="Manage all university students">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading university students...</p>
+          </div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   return (
+    <AdminLayout pageTitle="University Students" pageDescription="Manage all university students">
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
@@ -481,6 +485,7 @@ const UniversityStudentsList = () => {
         </div>
       </div>
     </div>
+    </AdminLayout>
   );
 };
 
