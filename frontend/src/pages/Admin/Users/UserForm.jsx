@@ -15,6 +15,7 @@ import {
   AlertCircle,
   CheckCircle
 } from 'lucide-react';
+import AdminLayout from '../../../components/common/Admin/AdminLayout';
 
 const UserForm = () => {
   const { id } = useParams();
@@ -175,6 +176,10 @@ const UserForm = () => {
   };
 
   return (
+    <AdminLayout
+      pageTitle={isEditing ? 'Edit User' : 'Add New User'}
+      pageDescription={isEditing ? 'Update the user information below.' : 'Fill in the details to create a new user account.'}
+    >
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
@@ -482,6 +487,7 @@ const UserForm = () => {
         </div>
       </div>
     </div>
+     </AdminLayout>
   );
 };
 
