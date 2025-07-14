@@ -41,20 +41,10 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Public Routes
+        Public Routes
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} /> */}
-
-        {/* Uni student Routes */}
-        {/* <Route path="/" element={
-          <UniStudentLayout>
-            <UniStudentDashboard />
-          </UniStudentLayout>
-        } /> */}
-        <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-
         {/* Student Routes */}
         <Route
           path="/student/dashboard"
@@ -64,7 +54,6 @@ function App() {
             </StudentLayout>
           }
         />
-
         {/* University Student Routes */}
         {/* <Route
           path="/university-student/dashboard"
@@ -74,14 +63,10 @@ function App() {
             </UniversityStudentLayout>
           }
         /> */}
-
         <Route path="/university-student/*" element={<UniStudentRoutes />} />
-
         {/* Admin Routes - All admin routes handled by AdminRoutes */}
         <Route path="/admin/*" element={<AdminRoutes />} />
-
         {/*Uni Student Routes */}
-
         <Route path="/unistudent/*" element={<UniStudentRoutes />} />
       </Routes>
     </Router>
