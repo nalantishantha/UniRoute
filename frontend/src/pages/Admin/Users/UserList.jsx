@@ -18,6 +18,8 @@ import {
   ChevronRight
 } from 'lucide-react';
 
+import AdminLayout from '../../../components/common/Admin/AdminLayout';
+
 const UsersList = () => {
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -207,12 +209,14 @@ const UsersList = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading users...</p>
+      <AdminLayout pageTitle="Users Management" pageDescription="Manage all platform users">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading users...</p>
+          </div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
@@ -245,6 +249,8 @@ const UsersList = () => {
         </div>
       </div>
 
+      <AdminLayout pageTitle="Users Management" pageDescription="Manage all platform users">
+      <div className="min-h-screen bg-gray-50">
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filters */}
@@ -449,6 +455,8 @@ const UsersList = () => {
           )}
         </div>
       </div>
+      </div>
+    </AdminLayout>
     </div>
   );
 };
