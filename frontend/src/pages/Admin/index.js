@@ -67,7 +67,9 @@ export {
 //   Reports 
 // } from './Reports';
 
-// // Settings
+// Settings
 // export { 
-//   Settings 
-// } from './Settings';
+//   AdminSettings 
+// } from './AdminSettings';
+
+export { default as AdminSettings } from './AdminSettings';

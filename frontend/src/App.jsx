@@ -9,8 +9,16 @@ import {
 } from "./components/Navigation";
 
 // Import route components
+<<<<<<< HEAD
 import AdminRoutes from "./routes/AdminRoutes";
 import UniStudentRoutes from "./routes/UniStudentRoutes";
+=======
+import AdminRoutes from './routes/AdminRoutes';
+// import AdminRoutes from './routes/AdminRoutes';
+// import AdminRoutes from './routes/AdminRoutes';
+// import AdminRoutes from './routes/AdminRoutes';
+// import AdminRoutes from './routes/AdminRoutes';
+>>>>>>> 80de35d7b0e7a34b7e36b844b57c9f8c3b359328
 
 // Test Dashboard Components
 const StudentDashboard = () => (

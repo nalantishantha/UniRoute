@@ -22,6 +22,7 @@ import {
   Calendar,
   Award
 } from 'lucide-react';
+import AdminLayout from '../../../components/common/Admin/AdminLayout';
 
 const UniversitiesList = () => {
   const navigate = useNavigate();
@@ -162,8 +163,8 @@ const UniversitiesList = () => {
     return (
       <span className={`px-2 py-1 text-xs font-medium rounded-full ${
         type === 'public' 
-          ? 'bg-blue-100 text-blue-800' 
-          : 'bg-purple-100 text-purple-800'
+          ? 'bg-[#E7F3FB] text-[#1D5D9B]' 
+          : 'bg-[#F4D160] text-[#263238]'
       }`}>
         {type === 'public' ? 'Public' : 'Private'}
       </span>
@@ -174,8 +175,8 @@ const UniversitiesList = () => {
     return (
       <span className={`px-2 py-1 text-xs font-medium rounded-full ${
         isActive 
-          ? 'bg-green-100 text-green-800' 
-          : 'bg-red-100 text-red-800'
+          ? 'bg-[#81C784] text-[#263238]' 
+          : 'bg-[#E57373] text-white'
       }`}>
         {isActive ? 'Active' : 'Inactive'}
       </span>
@@ -184,46 +185,74 @@ const UniversitiesList = () => {
 
   if (loading) {
     return (
-      <div className="p-6">
+      <AdminLayout pageTitle="Universities" pageDescription="Manage universities and their information">
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1D5D9B]"></div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-3">
-          <Building2 className="h-8 w-8 text-blue-600" />
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Universities Management</h1>
-            <p className="text-gray-600">Manage universities and their information</p>
+    <AdminLayout pageTitle="Universities" pageDescription="Manage universities and their information">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
+          <div className="flex items-center">
+            <Building2 className="h-8 w-8 text-[#1D5D9B]" />
+            <div className="ml-4">
+              <p className="text-sm font-medium text-[#717171]">Total Universities</p>
+              <p className="text-2xl font-semibold text-[#263238]">{universities.length}</p>
+            </div>
           </div>
         </div>
-        <Link
-          to="/admin/universities/new"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-        >
-          <Plus className="h-5 w-5" />
-          <span>Add University</span>
-        </Link>
+        <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
+          <div className="flex items-center">
+            <Building2 className="h-8 w-8 text-[#75C2F6]" />
+            <div className="ml-4">
+              <p className="text-sm font-medium text-[#717171]">Public Universities</p>
+              <p className="text-2xl font-semibold text-[#263238]">
+                {universities.filter(u => u.type === 'public').length}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
+          <div className="flex items-center">
+            <Building2 className="h-8 w-8 text-[#4C7FB1]" />
+            <div className="ml-4">
+              <p className="text-sm font-medium text-[#717171]">Private Universities</p>
+              <p className="text-2xl font-semibold text-[#263238]">
+                {universities.filter(u => u.type === 'private').length}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
+          <div className="flex items-center">
+            <Users className="h-8 w-8 text-[#81C784]" />
+            <div className="ml-4">
+              <p className="text-sm font-medium text-[#717171]">Total Students</p>
+              <p className="text-2xl font-semibold text-[#263238]">
+                {universities.reduce((sum, u) => sum + u.total_students, 0).toLocaleString()}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-white rounded-lg shadow-sm border p-4 mb-6">
+      <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-4 mb-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#B0B0B0] h-5 w-5" />
               <input
                 type="text"
                 placeholder="Search universities..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-[#C1DBF4] rounded-lg focus:ring-2 focus:ring-[#1D5D9B] focus:border-transparent"
               />
             </div>
           </div>
@@ -232,7 +261,7 @@ const UniversitiesList = () => {
             <select
               value={filters.type}
               onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-3 py-2 border border-[#C1DBF4] rounded-lg focus:ring-2 focus:ring-[#1D5D9B] focus:border-transparent"
             >
               <option value="all">All Types</option>
               <option value="public">Public</option>
@@ -242,7 +271,7 @@ const UniversitiesList = () => {
             <select
               value={filters.status}
               onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-3 py-2 border border-[#C1DBF4] rounded-lg focus:ring-2 focus:ring-[#1D5D9B] focus:border-transparent"
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>
@@ -252,99 +281,53 @@ const UniversitiesList = () => {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <div className="flex items-center">
-            <Building2 className="h-8 w-8 text-blue-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Universities</p>
-              <p className="text-2xl font-semibold text-gray-900">{universities.length}</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <div className="flex items-center">
-            <Building2 className="h-8 w-8 text-purple-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Public Universities</p>
-              <p className="text-2xl font-semibold text-gray-900">
-                {universities.filter(u => u.type === 'public').length}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <div className="flex items-center">
-            <Building2 className="h-8 w-8 text-indigo-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Private Universities</p>
-              <p className="text-2xl font-semibold text-gray-900">
-                {universities.filter(u => u.type === 'private').length}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <div className="flex items-center">
-            <Users className="h-8 w-8 text-green-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Students</p>
-              <p className="text-2xl font-semibold text-gray-900">
-                {universities.reduce((sum, u) => sum + u.total_students, 0).toLocaleString()}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Universities Table */}
-      <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+      <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-[#E7F3FB]">
+            <thead className="bg-[#F5F7FA]">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-[#717171] uppercase tracking-wider">
                   University
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-[#717171] uppercase tracking-wider">
                   Type
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-[#717171] uppercase tracking-wider">
                   Location
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-[#717171] uppercase tracking-wider">
                   Students
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-[#717171] uppercase tracking-wider">
                   Established
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-[#717171] uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-[#717171] uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-[#E7F3FB]">
               {filteredUniversities.map((university) => (
-                <tr key={university.id} className="hover:bg-gray-50">
+                <tr key={university.id} className="hover:bg-[#F5F7FA]">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
-                        <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                          <Building2 className="h-6 w-6 text-blue-600" />
+                        <div className="h-10 w-10 rounded-lg bg-[#E7F3FB] flex items-center justify-center">
+                          <Building2 className="h-6 w-6 text-[#1D5D9B]" />
                         </div>
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-[#263238]">
                           {university.name}
                         </div>
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-[#717171]">
                           {university.short_name}
                         </div>
-                        <div className="text-sm text-gray-500 flex items-center mt-1">
+                        <div className="text-sm text-[#717171] flex items-center mt-1">
                           <Mail className="h-3 w-3 mr-1" />
                           {university.email}
                         </div>
@@ -355,26 +338,26 @@ const UniversitiesList = () => {
                     {getTypeBadge(university.type)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center text-sm text-gray-900">
-                      <MapPin className="h-4 w-4 mr-1 text-gray-400" />
+                    <div className="flex items-center text-sm text-[#263238]">
+                      <MapPin className="h-4 w-4 mr-1 text-[#B0B0B0]" />
                       {university.location}
                     </div>
-                    <div className="text-sm text-gray-500 flex items-center">
+                    <div className="text-sm text-[#717171] flex items-center">
                       <Phone className="h-3 w-3 mr-1" />
                       {university.contact_number}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
+                    <div className="text-sm font-medium text-[#263238]">
                       {university.total_students.toLocaleString()}
                     </div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-[#717171]">
                       {university.total_faculties} faculties
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{university.established_year}</div>
-                    <div className="text-sm text-gray-500">Rank #{university.ranking}</div>
+                    <div className="text-sm text-[#263238]">{university.established_year}</div>
+                    <div className="text-sm text-[#717171]">Rank #{university.ranking}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {getStatusBadge(university.is_active)}
@@ -383,21 +366,21 @@ const UniversitiesList = () => {
                     <div className="flex items-center space-x-2">
                       <Link
                         to={`/admin/universities/${university.id}`}
-                        className="text-blue-600 hover:text-blue-900 p-1 rounded-full hover:bg-blue-50"
+                        className="text-[#1D5D9B] hover:text-[#174A7C] p-1 rounded-full hover:bg-[#E7F3FB]"
                         title="View"
                       >
                         <Eye className="h-4 w-4" />
                       </Link>
                       <Link
                         to={`/admin/universities/${university.id}/edit`}
-                        className="text-green-600 hover:text-green-900 p-1 rounded-full hover:bg-green-50"
+                        className="text-[#81C784] hover:text-[#5EA46A] p-1 rounded-full hover:bg-[#E7F3FB]"
                         title="Edit"
                       >
                         <Edit className="h-4 w-4" />
                       </Link>
                       <button
                         onClick={() => handleDelete(university.id)}
-                        className="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-50"
+                        className="text-[#E57373] hover:text-[#C94A4A] p-1 rounded-full hover:bg-[#E7F3FB]"
                         title="Delete"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -412,9 +395,9 @@ const UniversitiesList = () => {
 
         {filteredUniversities.length === 0 && (
           <div className="text-center py-12">
-            <Building2 className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No universities found</h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <Building2 className="mx-auto h-12 w-12 text-[#B0B0B0]" />
+            <h3 className="mt-2 text-sm font-medium text-[#263238]">No universities found</h3>
+            <p className="mt-1 text-sm text-[#717171]">
               {searchTerm || filters.type !== 'all' || filters.status !== 'all'
                 ? 'Try adjusting your search or filters.'
                 : 'Get started by adding a new university.'}
@@ -423,7 +406,7 @@ const UniversitiesList = () => {
               <div className="mt-6">
                 <Link
                   to="/admin/universities/new"
-                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-[#1D5D9B] hover:bg-[#174A7C]"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Add University
@@ -433,7 +416,7 @@ const UniversitiesList = () => {
           </div>
         )}
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 

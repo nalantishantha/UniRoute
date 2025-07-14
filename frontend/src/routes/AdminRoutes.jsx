@@ -11,6 +11,7 @@ import { TutorsList, TutorForm, TutorView } from '../pages/Admin/Tutors';
 import { UniversitiesList, UniversityForm, UniversityView } from '../pages/Admin/Universities';
 import { CompaniesList, CompanyForm, CompanyView } from '../pages/Admin/Companies';
 import { ProgramsList, ProgramForm, ProgramView } from '../pages/Admin/Programs';
+import { AdminSettings } from '../pages/Admin';
 
 const AdminRoutes = () => {
   return (
@@ -65,6 +66,9 @@ const AdminRoutes = () => {
       <Route path="/programs/new" element={<ProgramForm />} />
       <Route path="/programs/:id" element={<ProgramView />} />
       <Route path="/programs/:id/edit" element={<ProgramForm />} />
+
+      {/* Settings */}
+      <Route path="/settings" element={< AdminSettings />} />
       
       {/* Redirect /admin to /admin/dashboard */}
       <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
