@@ -64,10 +64,18 @@ const LoginPage = () => {
             case 'admin':
               navigate('/admin/dashboard');
               break;
+            case 'student':
+              navigate('/student/home');
+              break;
             case 'uni_student':
               navigate('/university-student/dashboard');
               break;
-            case 'student':
+            case 'institution':
+              navigate('/university/dashboard');
+              break;
+              case 'company':
+              navigate('/company/dashboard');
+              break;
             default:
               navigate('/student/home');
               break;
