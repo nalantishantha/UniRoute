@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import FeedbackDetailModal from "./FeedbackDetailModal";
 import { motion } from "framer-motion";
 import {
   MessageSquare,
@@ -21,6 +22,20 @@ import Button from "../../../components/ui/Button";
 const FeedbackList = ({ feedbackData, filterStatus }) => {
   const [filterSentiment, setFilterSentiment] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedFeedback, setSelectedFeedback] = useState(null);
+
+  const handleViewFeedback = (feedback) => {
+    setSelectedFeedback(feedback);
+    setShowDetailModal(true);
+  };
+
+  const handleReplyFeedback = (feedback, reply) => {
+    // Implement reply logic here (e.g., send to backend)
+    // For now, just log
+    console.log("Reply to feedback:", feedback, reply);
+  };
 
   const filteredFeedback = feedbackData.filter((feedback) => {
     const matchesSearch =
@@ -64,8 +79,8 @@ const FeedbackList = ({ feedbackData, filterStatus }) => {
       <Star
         key={index}
         className={`w-4 h-4 ${index < rating
-            ? "text-warning fill-current"
-            : "text-neutral-light-grey"
+          ? "text-warning fill-current"
+          : "text-neutral-light-grey"
           }`}
       />
     ));
@@ -183,11 +198,7 @@ const FeedbackList = ({ feedbackData, filterStatus }) => {
                         )}
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Button size="sm" variant="outline">
-                          <Eye className="w-4 h-4 mr-1" />
-                          View
-                        </Button>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => handleViewFeedback(feedback)}>
                           <Reply className="w-4 h-4 mr-1" />
                           Reply
                         </Button>
@@ -216,6 +227,13 @@ const FeedbackList = ({ feedbackData, filterStatus }) => {
           </CardContent>
         </Card>
       )}
+      {/* Feedback Detail Modal */}
+      <FeedbackDetailModal
+        feedback={selectedFeedback}
+        showModal={showDetailModal}
+        setShowModal={setShowDetailModal}
+        onReply={handleReplyFeedback}
+      />
     </>
   );
 };
