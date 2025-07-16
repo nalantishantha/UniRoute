@@ -18,7 +18,7 @@ urlpatterns = [
     #path('api/communications/', include('apps.communications.urls')),
     #path('api/payments/', include('apps.payments.urls')),
     
-    #path('api/companies/', include('apps.companies.urls')),
+    path('api/companies/', include('apps.companies.urls')),
     #path('api/advertisements/', include('apps.advertisements.urls')),
     
     path('api/administration/', include('apps.administration.urls')),
