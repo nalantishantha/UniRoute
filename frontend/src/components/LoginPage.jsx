@@ -69,7 +69,7 @@ const LoginPage = () => {
               break;
             case 'student':
             default:
-              navigate('/student/dashboard');
+              navigate('/student/home');
               break;
           }
         }, 1000);
