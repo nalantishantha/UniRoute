@@ -27,7 +27,7 @@ const typeIcons = {
   document: File,
 };
 
-const ResourcesGrid = ({ resources, categories, setShowUploadModal }) => {
+const ResourcesGrid = ({ resources, categories, setShowUploadModal, onViewResource }) => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
@@ -115,8 +115,8 @@ const ResourcesGrid = ({ resources, categories, setShowUploadModal }) => {
                       }
                     }}
                     className={`px-3 py-1 text-xs rounded-full border transition-colors ${isSelected
-                        ? "bg-primary-500 text-white border-primary-500"
-                        : "bg-neutral-silver text-neutral-grey border-neutral-light-grey hover:border-primary-400"
+                      ? "bg-primary-500 text-white border-primary-500"
+                      : "bg-neutral-silver text-neutral-grey border-neutral-light-grey hover:border-primary-400"
                       }`}
                   >
                     {tag}
@@ -231,7 +231,12 @@ const ResourcesGrid = ({ resources, categories, setShowUploadModal }) => {
                       </div>
 
                       <div className="flex space-x-2">
-                        <Button size="sm" variant="outline" className="flex-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() => onViewResource && onViewResource(resource)}
+                        >
                           <Eye className="w-4 h-4 mr-1" />
                           View
                         </Button>
@@ -280,7 +285,11 @@ const ResourcesGrid = ({ resources, categories, setShowUploadModal }) => {
                               ))}
                             </div>
                             <div className="flex items-center space-x-2">
-                              <Button size="sm" variant="outline">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => onViewResource && onViewResource(resource)}
+                              >
                                 <Eye className="w-4 h-4" />
                               </Button>
                               <Button size="sm" variant="outline">

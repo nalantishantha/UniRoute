@@ -14,6 +14,7 @@ import {
 import Button from "../../../components/ui/Button";
 import ResourcesGrid from "./ResourcesGrid";
 import UploadResourcesModal from "./UploadResourcesModal";
+import ResourceDetailModal from "./ResourceDetailModal";
 
 const resources = [
   {
@@ -87,9 +88,33 @@ const categories = [
 
 export default function Resources() {
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedResource, setSelectedResource] = useState(null);
 
   // Get all unique tags
   const allTags = [...new Set(resources.flatMap((resource) => resource.tags))];
+
+  const handleViewResource = (resource) => {
+    setSelectedResource(resource);
+    setShowDetailModal(true);
+  };
+
+  const handleSaveResource = (editedResource) => {
+    // In a real application, this would update the resource in your backend
+    console.log("Resource updated:", editedResource);
+    // For this demo, we'll just update the UI
+    const updatedResources = resources.map(resource =>
+      resource.id === editedResource.id ? editedResource : resource
+    );
+    // You would update your state or dispatch an action here
+  };
+
+  const handleRemoveResource = (resource) => {
+    // In a real application, this would delete the resource from your backend
+    console.log("Resource removed:", resource);
+    // For this demo, we'll just log it
+    // You would update your state or dispatch an action here
+  };
 
   return (
     <motion.div
@@ -182,11 +207,21 @@ export default function Resources() {
         resources={resources}
         categories={categories}
         setShowUploadModal={setShowUploadModal}
+        onViewResource={handleViewResource}
       />
 
       <UploadResourcesModal
         showUploadModal={showUploadModal}
         setShowUploadModal={setShowUploadModal}
+      />
+
+      {/* Resource Detail Modal */}
+      <ResourceDetailModal
+        resource={selectedResource}
+        showModal={showDetailModal}
+        setShowModal={setShowDetailModal}
+        onSave={handleSaveResource}
+        onRemove={handleRemoveResource}
       />
     </motion.div>
   );
