@@ -189,40 +189,6 @@ export default function Profile() {
                     </div>
                   </div>
                 </div>
-
-                {/* Stats */}
-                <div className="grid grid-cols-2 gap-4 mt-6 md:mt-0">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-primary-600">
-                      {formData.stats.totalSessions}
-                    </p>
-                    <p className="text-xs text-neutral-grey">Total Sessions</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center space-x-1">
-                      <Star className="w-4 h-4 text-warning fill-current" />
-                      <p className="text-2xl font-bold text-neutral-black">
-                        {formData.stats.studentRating}
-                      </p>
-                    </div>
-                    <p className="text-xs text-neutral-grey">Student Rating</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center space-x-1">
-                      <Star className="w-4 h-4 text-warning fill-current" />
-                      <p className="text-2xl font-bold text-neutral-black">
-                        {formData.stats.courseRating}
-                      </p>
-                    </div>
-                    <p className="text-xs text-neutral-grey">Course Rating</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-success">
-                      {formData.stats.responseRate}%
-                    </p>
-                    <p className="text-xs text-neutral-grey">Response Rate</p>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -239,11 +205,10 @@ export default function Profile() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                    activeTab === tab.id
+                  className={`flex items-center space-x-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id
                       ? "border-primary-500 text-primary-600"
                       : "border-transparent text-neutral-grey hover:text-neutral-black"
-                  }`}
+                    }`}
                 >
                   <IconComponent className="w-4 h-4" />
                   <span>{tab.label}</span>

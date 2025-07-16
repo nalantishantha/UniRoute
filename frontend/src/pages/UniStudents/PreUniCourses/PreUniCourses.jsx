@@ -14,6 +14,7 @@ import {
 import Button from "../../../components/ui/Button";
 import CoursesGrid from "./CoursesGrid";
 import CreateCourseModal from "./CreateCourseModal";
+import CourseDetailModal from "./CourseDetailModal";
 
 const courses = [
   {
@@ -78,6 +79,20 @@ const courses = [
 
 export default function PreUniCourses() {
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+
+  const handleViewCourse = (course) => {
+    setSelectedCourse(course);
+    setShowDetailModal(true);
+  };
+
+  const handleSaveCourse = (updatedCourse) => {
+    // Here you would typically make an API call to save the changes
+    console.log("Saving course:", updatedCourse);
+    // For now, we'll just close the modal
+    setShowDetailModal(false);
+  };
 
   return (
     <motion.div
@@ -157,12 +172,21 @@ export default function PreUniCourses() {
       <CoursesGrid
         courses={courses}
         setShowCreateModal={setShowCreateModal}
+        onViewCourse={handleViewCourse}
       />
 
       {/* Create Course Modal */}
       <CreateCourseModal
         showCreateModal={showCreateModal}
         setShowCreateModal={setShowCreateModal}
+      />
+
+      {/* Course Detail Modal */}
+      <CourseDetailModal
+        course={selectedCourse}
+        showModal={showDetailModal}
+        setShowModal={setShowDetailModal}
+        onSave={handleSaveCourse}
       />
     </motion.div>
   );
