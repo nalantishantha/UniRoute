@@ -18,6 +18,8 @@ import AdminRoutes from "./routes/AdminRoutes";
 import UniStudentRoutes from "./routes/UniStudentRoutes";
 import { companyRoutes } from './routes/CompanyRoutes';
 import { universityRoutes } from './routes/UniversityRoutes';
+import StudentRoutes from "./routes/StudentRoutes";
+
 
 // // Test Dashboard Components
 // const StudentDashboard = () => (
@@ -52,24 +54,19 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        {/* Student Routes */}
-        {/* <Route
-          path="/student/dashboard"
-          element={
-            <StudentLayout>
-              <StudentDashboard />
-            </StudentLayout>
-          }
-        /> */}
+
+        {/* Student Routes - All student routes handled by StudentRoutes */}
+        <Route path="/student/*" element={<StudentRoutes />} />
+
         {/* University Student Routes */}
-        {/* <Route
+        <Route
           path="/university-student/dashboard"
           element={
             <UniversityStudentLayout>
               <UniversityStudentDashboard />
             </UniversityStudentLayout>
           }
-        /> */}
+        />
         <Route path="/university-student/*" element={<UniStudentRoutes />} />
         {/* Admin Routes - All admin routes handled by AdminRoutes */}
         <Route path="/admin/*" element={<AdminRoutes />} />
