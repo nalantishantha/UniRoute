@@ -122,7 +122,7 @@ const CourseDetailModal = ({ course, showModal, setShowModal, onSave }) => {
                         <Edit3 className="w-4 h-4 mr-2" />
                         Edit Course
                       </Button>
-                      <Button onClick={handleRemoveCourse} variant="destructive">
+                      <Button onClick={handleRemoveCourse} variant="destructive" className="hover:bg-red-600 hover:text-white">
                         Remove Course
                       </Button>
                     </>
