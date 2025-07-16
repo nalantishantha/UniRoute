@@ -60,7 +60,7 @@ const AdminSettings = () => {
     try {
       setDataLoading(true);
       const user = getCurrentUser();
-      if (!user || !user.user_id) {
+      if (!user) {
         navigate('/login');
         return;
       }

@@ -191,7 +191,7 @@ def login_user(request):
                         'success': True,
                         'message': 'Login successful',
                         'user': {
-                            'id': user.user_id,
+                            'user_id': user.user_id,
                             'username': user.username,
                             'email': user.email,
                             'full_name': user_details.full_name if user_details else '',

@@ -42,7 +42,7 @@ const AdminSidebar = ({ isSidebarOpen, toggleSidebar, user, handleLogout }) => {
     { name: 'Companies', path: '/admin/companies', icon: Building2, category: 'users' },
     { name: 'Mentors', path: '/admin/mentors', icon: UserCheck, category: 'users' },
     { name: 'Tutors', path: '/admin/tutors', icon: UserCog, category: 'users' },
-    { name: 'Courses', path: '/admin/courses', icon: BookOpen, category: 'content' },
+    { name: 'Courses', path: '/admin/programs', icon: BookOpen, category: 'content' },
     { name: 'Jobs', path: '/admin/jobs', icon: Briefcase, category: 'content' },
     { name: 'Events', path: '/admin/events', icon: Calendar, category: 'content' },
     { name: 'Analytics', path: '/admin/analytics', icon: BarChart3, category: 'analytics' },
