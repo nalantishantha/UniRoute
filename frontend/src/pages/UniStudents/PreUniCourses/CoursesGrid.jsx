@@ -6,7 +6,6 @@ import {
   Clock,
   DollarSign,
   Eye,
-  Edit3,
   MoreHorizontal,
   Star,
   Calendar,
@@ -26,7 +25,7 @@ const statusColors = {
   Rejected: "bg-error/20 text-error border-error/30",
 };
 
-const CoursesGrid = ({ courses, setShowCreateModal }) => {
+const CoursesGrid = ({ courses, setShowCreateModal, onViewCourse }) => {
   const [filterStatus, setFilterStatus] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState("grid"); // 'grid' or 'list'
@@ -200,13 +199,14 @@ const CoursesGrid = ({ courses, setShowCreateModal }) => {
                     </div>
 
                     <div className="flex space-x-2">
-                      <Button size="sm" variant="outline" className="flex-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-auto" // or use w-28 for fixed width
+                        onClick={() => onViewCourse(course)}
+                      >
                         <Eye className="w-4 h-4 mr-1" />
-                        View
-                      </Button>
-                      <Button size="sm" className="flex-1">
-                        <Edit3 className="w-4 h-4 mr-1" />
-                        Edit
+                        View Details
                       </Button>
                     </div>
                   </CardContent>
@@ -270,11 +270,12 @@ const CoursesGrid = ({ courses, setShowCreateModal }) => {
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Button size="sm" variant="outline">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => onViewCourse(course)}
+                        >
                           <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <Edit3 className="w-4 h-4" />
                         </Button>
                         <Button size="sm" variant="ghost">
                           <MoreHorizontal className="w-4 h-4" />
