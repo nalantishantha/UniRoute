@@ -1,0 +1,637 @@
+/* Base Styles - Same as Course.css but with courseuser prefix */
+.courseuser-page {
+  min-height: 100vh;
+  background: #f8fafc;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.courseuser-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Main Content - Responsive to sidebar state */
+.courseuser-main {
+  flex: 1;
+  margin-left: 80px; /* Default collapsed sidebar width */
+  overflow-y: auto;
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+}
+
+.courseuser-main.sidebar-expanded {
+  margin-left: 280px; /* Expanded sidebar width */
+}
+
+.courseuser-main.sidebar-collapsed {
+  margin-left: 80px; /* Collapsed sidebar width */
+}
+
+/* Hero Section */
+.courseuser-hero-unique {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1920&q=80') center center/cover no-repeat;
+  overflow: hidden;
+}
+
+.courseuser-hero-unique::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(60, 80, 180, 0.55) 0%, rgba(255,255,255,0.6) 100%);
+  z-index: 1;
+}
+
+.courseuser-hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+.courseuser-hero-content h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  color: #222;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.15);
+}
+
+.courseuser-hero-content p {
+  font-size: 1.25rem;
+  color: #222;
+  opacity: 0.85;
+  font-weight: 500;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.10);
+}
+
+/* Search and Filter Section */
+.courseuser-search {
+  padding: 2rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 30rem;
+  flex-direction: row;
+}
+
+.courseuser-search-container {
+  display: flex;
+  gap: 1rem;
+  flex: 1;
+  max-width: 300px;
+}
+
+.courseuser-search-input {
+  flex: 1;
+  padding: 1rem 1.5rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #f8fafc;
+  transition: all 0.3s ease;
+  outline: none;
+  max-width: 300px;
+}
+
+.courseuser-search-input:focus {
+  border-color: #3b82f6;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.courseuser-filter-container {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  align-items: center;
+  flex: none;
+  min-width: 0;
+}
+
+.courseuser-filter-select {
+  padding: 0.75rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 140px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: none;
+}
+
+.courseuser-filter-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Courses Section */
+.courseuser-section-unique {
+  padding: 2rem;
+  background: #f8fafc;
+}
+
+.courseuser-section-header-unique {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto 2rem auto;
+  padding: 0 1rem;
+}
+
+.courseuser-section-header-unique h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+/* Course Grid - Fixed card sizes to match Course.css */
+.courseuser-grid-container-unique {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 340px));
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  justify-content: start;
+}
+
+/* Course Card - Exact same styling as Course.css */
+.courseuser-card-unique {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 1px solid #e5e7eb;
+  position: relative;
+}
+
+.courseuser-card-unique:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  border-color: #3b82f6;
+}
+
+.courseuser-card-image-container {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.courseuser-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.courseuser-card-unique:hover .courseuser-card-image {
+  transform: scale(1.05);
+}
+
+.courseuser-card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7));
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.courseuser-card-unique:hover .courseuser-card-overlay {
+  opacity: 1;
+}
+
+.courseuser-card-category {
+  background: #3b82f6;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 15px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.courseuser-card-stats {
+  display: flex;
+  gap: 1rem;
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.courseuser-card-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 200px);
+}
+
+.courseuser-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.courseuser-card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+  line-height: 1.3;
+  flex: 1;
+}
+
+.courseuser-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.courseuser-status-badge {
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.courseuser-level-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.courseuser-card-details {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  flex-wrap: wrap;
+}
+
+.courseuser-card-instructor {
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+  color: #4b5563;
+  font-weight: 500;
+}
+
+.courseuser-card-description {
+  color: #6b7280;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.courseuser-card-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.courseuser-skill {
+  background: #dbeafe;
+  color: #1d4ed8;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.courseuser-card-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.courseuser-btn-view {
+  flex: 1;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.courseuser-btn-view:hover {
+  background: #2563eb;
+}
+
+/* Modal Styles - Same as Course.css */
+.courseuser-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.courseuser-modal-content {
+  background: white;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 90%;
+  padding: 2rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.courseuser-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.courseuser-modal-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.courseuser-modal-close {
+  background: #ef4444;
+  color: white;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.courseuser-modal-close:hover {
+  background: #dc2626;
+}
+
+.courseuser-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.courseuser-modal-image {
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  object-fit: cover;
+  max-height: 200px;
+}
+
+.courseuser-modal-title-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.courseuser-modal-title-section h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.courseuser-modal-badges {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.courseuser-modal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: #4b5563;
+  margin-bottom: 1rem;
+}
+
+.courseuser-meta-item {
+  flex: 1 1 calc(50% - 0.5rem);
+  min-width: 200px;
+}
+
+.courseuser-modal-description {
+  color: #4b5563;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.courseuser-modal-skills {
+  margin-top: 1rem;
+}
+
+.courseuser-skills-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* Stats Section - Same as Course.css */
+.courseuser-stats {
+  padding: 2rem;
+  background: white;
+}
+
+.courseuser-stats-content h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 2rem;
+}
+.courseuser-stats-grid {
+   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.courseuser-stat-item {
+  background: #f8fafc;
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+.courseuser-stat-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.courseuser-stat-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.courseuser-stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.courseuser-stat-label {
+  font-size: 0.9rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Footer */
+.courseuser-footer {
+  background: #1f2937;
+  color: white;
+  padding: 3rem 2rem 2rem 2rem;
+  text-align: center;
+}
+
+.courseuser-footer-content h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: white;
+}
+
+.courseuser-newsletter {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.courseuser-newsletter input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.courseuser-newsletter button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.courseuser-newsletter button:hover {
+  background: #2563eb;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .courseuser-grid-container-unique {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 280px));
+    padding: 0 1rem;
+  }
+
+  .courseuser-search {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .courseuser-filter-container {
+    justify-content: center;
+  }
+
+  .courseuser-hero-content h1 {
+    font-size: 2rem;
+  }
+
+  .courseuser-hero-content p {
+    font-size: 1rem;
+  }
+
+  .courseuser-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .courseuser-modal-content {
+    width: 95%;
+    padding: 1.5rem;
+  }
+
+  .courseuser-modal-meta {
+    flex-direction: column;
+  }
+
+  .courseuser-meta-item {
+    flex: 1 1 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .courseuser-grid-container-unique {
+    grid-template-columns: 1fr;
+  }
+
+  .courseuser-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .courseuser-newsletter {
+    flex-direction: column;
+  }
+
+  .courseuser-card-actions {
+    flex-direction: column;
+  }
+}
+
+@media (min-width: 1200px) {
+  .courseuser-grid-container-unique {
+    grid-template-columns: repeat(auto-fill, minmax(340px, 340px));
+  }
+}

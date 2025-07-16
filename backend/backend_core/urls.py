@@ -7,7 +7,7 @@ urlpatterns = [
     
     path('api/accounts/', include('apps.accounts.urls')),
     path('api/students/', include('apps.students.urls')),
-    #path('api/universities/', include('apps.universities.urls')),
+    path('api/universities/', include('apps.universities.urls')),
     
     #path('api/student-results/', include('apps.student_results.urls')),
     #path('api/university-programs/', include('apps.university_programs.urls')),
@@ -18,7 +18,7 @@ urlpatterns = [
     #path('api/communications/', include('apps.communications.urls')),
     #path('api/payments/', include('apps.payments.urls')),
     
-    #path('api/companies/', include('apps.companies.urls')),
+    path('api/companies/', include('apps.companies.urls')),
     #path('api/advertisements/', include('apps.advertisements.urls')),
     
     path('api/administration/', include('apps.administration.urls')),
