@@ -1,0 +1,261 @@
+.uni-sidebar {
+  background: #1e293b;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.uni-sidebar.expanded {
+  width: 280px;
+}
+
+.uni-sidebar.collapsed {
+  width: 80px;
+}
+
+/* Header */
+.uni-sidebar-header {
+  padding: 1rem 1.5rem 1rem;
+}
+
+.uni-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.uni-logo-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.uni-logo-text {
+  color: white;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.uni-company-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.uni-company-name {
+  color: white;
+  font-weight: 600;
+  font-size: 1.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Navigation Menu */
+.uni-nav-menu {
+  flex: 1;
+  padding: 1rem 0;
+}
+
+.uni-nav-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.uni-nav-menu li {
+  margin-bottom: 0.25rem;
+}
+
+.uni-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0.875rem 1rem;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  border-radius: 0 25px 25px 0;
+  margin-right: 1rem;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.uni-nav-item:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.uni-nav-item.active {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+  border-right: 3px solid #3b82f6;
+}
+
+.uni-nav-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.uni-nav-item:hover::before {
+  left: 100%;
+}
+
+.uni-nav-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.uni-icon {
+  font-size: 1.2rem;
+}
+
+.uni-nav-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.uni-notification-badge {
+  background: #ef4444;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.125rem 0.375rem;
+  border-radius: 10px;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Bottom Section */
+.uni-sidebar-bottom {
+  padding: 1rem;
+}
+
+.uni-sidebar-bottom .uni-nav-item {
+  margin-right: 0;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.uni-logout {
+  color: #f87171 !important;
+}
+
+.uni-logout:hover {
+  background: rgba(248, 113, 113, 0.1) !important;
+  color: #f87171 !important;
+}
+
+.uni-toggle-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: transparent;
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
+  color: #3b82f6;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.uni-toggle-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+  color: #60a5fa;
+}
+
+.uni-toggle-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.uni-toggle-btn:hover::before {
+  left: 100%;
+}
+
+/* Collapsed State Adjustments */
+.uni-sidebar.collapsed .uni-sidebar-header {
+  padding: 1.5rem 0.5rem;
+}
+
+.uni-sidebar.collapsed .uni-nav-item {
+  padding: 0.875rem 0.5rem;
+  margin-right: 0.5rem;
+  justify-content: center;
+}
+
+.uni-sidebar.collapsed .uni-sidebar-bottom {
+  padding: 1rem 0.5rem;
+}
+
+.uni-sidebar.collapsed .uni-nav-item.active {
+  border-right: none;
+  border-bottom: 3px solid #3b82f6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .uni-sidebar.expanded {
+    width: 100%;
+    transform: translateX(-100%);
+  }
+  
+  .uni-sidebar.expanded.mobile-open {
+    transform: translateX(0);
+  }
+  
+  .uni-sidebar.collapsed {
+    transform: translateX(-100%);
+  }
+}
+
+/* Logo and Logout image styling */
+.uni-logo-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.uni-logout-image {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}

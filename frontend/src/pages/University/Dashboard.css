@@ -1,0 +1,200 @@
+/* Copy all styles from Dashboarduser.css and add these edit button styles */
+
+/* Hero Edit Button */
+.hero-edit-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  color: white;
+  cursor: pointer;
+  z-index: 20;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.hero-edit-btn:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+/* Hero Edit Inputs */
+.hero-title-edit {
+  font-size: 3.5rem;
+  font-weight: 800;
+  background: transparent;
+  border: 2px dashed rgba(255,255,255,0.5);
+  color: white;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem;
+  width: 100%;
+  border-radius: 8px;
+}
+
+.hero-subtitle-edit {
+  font-size: 1.4rem;
+  background: transparent;
+  border: 2px dashed rgba(255,255,255,0.5);
+  color: white;
+  margin-bottom: 2rem;
+  padding: 0.5rem;
+  width: 100%;
+  resize: vertical;
+  min-height: 80px;
+  border-radius: 8px;
+}
+
+/* Stats Section Edit */
+.stats-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.stats-edit-btn {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.stats-edit-btn:hover {
+  background: #e5e7eb;
+}
+
+.stat-edit-individual-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.stat-edit-individual-btn:hover {
+  background: #4f46e5;
+}
+
+/* Section Headers with Edit Buttons */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.section-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-edit-btn {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0.3rem 0.8rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+}
+
+.section-edit-btn:hover {
+  background: #e5e7eb;
+}
+
+/* Action Card Edit Button */
+.action-edit-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(255,255,255,0.9);
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.7rem;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+.action-edit-btn:hover {
+  background: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Activity Item Edit Button */
+.activity-edit-btn {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+  cursor: pointer;
+  margin-left: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.activity-edit-btn:hover {
+  background: #e5e7eb;
+}
+
+/* Metric Card Edit Button */
+.metric-edit-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.metric-edit-btn:hover {
+  background: #2563eb;
+}
+
+/* Status Item Edit Button */
+.status-edit-btn {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+  cursor: pointer;
+  margin-left: auto;
+  transition: all 0.3s ease;
+}
+
+.status-edit-btn:hover {
+  background: #e5e7eb;
+}
+
+/* Update status-item to accommodate edit button */
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.status-item:last-child {
+  border-bottom: none;
+}
