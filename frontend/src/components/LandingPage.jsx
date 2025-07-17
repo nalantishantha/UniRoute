@@ -1,17 +1,17 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { 
-  GraduationCap, 
-  TrendingUp, 
-  Users, 
-  BookOpen, 
-  Award, 
+import React from "react";
+import { Link } from "react-router-dom";
+import {
+  GraduationCap,
+  TrendingUp,
+  Users,
+  BookOpen,
+  Award,
   MapPin,
   ChevronRight,
   Star,
   CheckCircle,
-  ArrowRight
-} from 'lucide-react';
+  ArrowRight,
+} from "lucide-react";
 
 const LandingPage = () => {
   return (
@@ -22,15 +22,32 @@ const LandingPage = () => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
               <GraduationCap className="h-8 w-8 text-primary-400" />
-              <span className="font-display font-bold text-2xl text-primary-400">UniRoute</span>
+              <span className="font-display font-bold text-2xl text-primary-400">
+                UniRoutes
+              </span>
             </div>
-            
+
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-primary-400 hover:text-primary-500 transition-colors duration-200">Features</a>
-              <a href="#about" className="text-primary-400 hover:text-primary-500 transition-colors duration-200">About</a>
-              <a href="#contact" className="text-primary-400 hover:text-primary-500 transition-colors duration-200">Contact</a>
-              <Link 
-                to="/login" 
+              <a
+                href="#features"
+                className="text-primary-400 hover:text-primary-500 transition-colors duration-200"
+              >
+                Features
+              </a>
+              <a
+                href="#about"
+                className="text-primary-400 hover:text-primary-500 transition-colors duration-200"
+              >
+                About
+              </a>
+              <a
+                href="#contact"
+                className="text-primary-400 hover:text-primary-500 transition-colors duration-200"
+              >
+                Contact
+              </a>
+              <Link
+                to="/login"
                 className="bg-accent-200 text-primary-600 px-6 py-2 rounded-full font-medium hover:bg-accent-300 transition-all duration-200 hover:shadow-lg"
               >
                 Sign In
@@ -38,8 +55,8 @@ const LandingPage = () => {
             </div>
 
             <div className="md:hidden">
-              <Link 
-                to="/login" 
+              <Link
+                to="/login"
                 className="bg-accent-200 text-primary-600 px-4 py-2 rounded-full text-sm font-medium"
               >
                 Sign In
@@ -59,20 +76,22 @@ const LandingPage = () => {
                 <span className="block text-primary-300">Higher Education</span>
               </h1>
               <p className="text-xl md:text-2xl text-primary-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-                Navigate Sri Lanka's university landscape with confidence. Get personalized guidance based on your O/L and A/L results, Z-scores, and career aspirations.
+                Navigate Sri Lanka's university landscape with confidence. Get
+                personalized guidance based on your O/L and A/L results,
+                Z-scores, and career aspirations.
               </p>
             </div>
-            
+
             <div className="animate-fade-in flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
-              <Link 
-                to="/register" 
+              <Link
+                to="/register"
                 className="bg-primary-400 text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-primary-500 transition-all duration-200 hover:shadow-xl transform hover:-translate-y-1 flex items-center space-x-2"
               >
                 <span>Start Your Journey</span>
                 <ArrowRight className="h-5 w-5" />
               </Link>
-              <Link 
-                to="/login" 
+              <Link
+                to="/login"
                 className="border-2 border-accent-200 text-primary-400 px-8 py-4 rounded-full font-semibold text-lg hover:bg-accent-200 hover:text-primary-600 transition-all duration-200 hover:shadow-lg"
               >
                 Explore Features
@@ -82,15 +101,27 @@ const LandingPage = () => {
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
               <div className="text-center animate-bounce-subtle">
-                <div className="text-4xl font-bold text-accent-200 mb-2">25+</div>
+                <div className="text-4xl font-bold text-accent-200 mb-2">
+                  25+
+                </div>
                 <div className="text-primary-600">Government Universities</div>
               </div>
-              <div className="text-center animate-bounce-subtle" style={{ animationDelay: '0.2s' }}>
-                <div className="text-4xl font-bold text-accent-200 mb-2">500+</div>
+              <div
+                className="text-center animate-bounce-subtle"
+                style={{ animationDelay: "0.2s" }}
+              >
+                <div className="text-4xl font-bold text-accent-200 mb-2">
+                  500+
+                </div>
                 <div className="text-primary-600">Degree Programs</div>
               </div>
-              <div className="text-center animate-bounce-subtle" style={{ animationDelay: '0.4s' }}>
-                <div className="text-4xl font-bold text-accent-200 mb-2">10K+</div>
+              <div
+                className="text-center animate-bounce-subtle"
+                style={{ animationDelay: "0.4s" }}
+              >
+                <div className="text-4xl font-bold text-accent-200 mb-2">
+                  10K+
+                </div>
                 <div className="text-primary-600">Students Guided</div>
               </div>
             </div>
@@ -106,7 +137,8 @@ const LandingPage = () => {
               Why Choose UniRoute?
             </h2>
             <p className="text-xl text-primary-600 max-w-2xl mx-auto">
-              Comprehensive tools and guidance tailored specifically for Sri Lankan students
+              Comprehensive tools and guidance tailored specifically for Sri
+              Lankan students
             </p>
           </div>
 
@@ -115,9 +147,12 @@ const LandingPage = () => {
               <div className="bg-primary-300 w-16 h-16 rounded-full flex items-center justify-center mb-6">
                 <TrendingUp className="h-8 w-8 text-white" />
               </div>
-              <h3 className="font-display font-semibold text-2xl text-primary-400 mb-4">Z-Score Analysis</h3>
+              <h3 className="font-display font-semibold text-2xl text-primary-400 mb-4">
+                Z-Score Analysis
+              </h3>
               <p className="text-primary-600 mb-4">
-                Get detailed analysis of your Z-score and understand which university programs you're eligible for.
+                Get detailed analysis of your Z-score and understand which
+                university programs you're eligible for.
               </p>
               <div className="flex items-center text-accent-200 font-medium">
                 <span>Learn more</span>
@@ -129,9 +164,12 @@ const LandingPage = () => {
               <div className="bg-primary-300 w-16 h-16 rounded-full flex items-center justify-center mb-6">
                 <BookOpen className="h-8 w-8 text-white" />
               </div>
-              <h3 className="font-display font-semibold text-2xl text-primary-400 mb-4">Program Matching</h3>
+              <h3 className="font-display font-semibold text-2xl text-primary-400 mb-4">
+                Program Matching
+              </h3>
               <p className="text-primary-600 mb-4">
-                Find the perfect degree programs that align with your academic background and career goals.
+                Find the perfect degree programs that align with your academic
+                background and career goals.
               </p>
               <div className="flex items-center text-accent-200 font-medium">
                 <span>Explore programs</span>
@@ -143,9 +181,12 @@ const LandingPage = () => {
               <div className="bg-primary-300 w-16 h-16 rounded-full flex items-center justify-center mb-6">
                 <MapPin className="h-8 w-8 text-white" />
               </div>
-              <h3 className="font-display font-semibold text-2xl text-primary-400 mb-4">University Guide</h3>
+              <h3 className="font-display font-semibold text-2xl text-primary-400 mb-4">
+                University Guide
+              </h3>
               <p className="text-primary-600 mb-4">
-                Comprehensive information about all government universities, their facilities, and campus life.
+                Comprehensive information about all government universities,
+                their facilities, and campus life.
               </p>
               <div className="flex items-center text-accent-200 font-medium">
                 <span>View universities</span>
@@ -157,9 +198,12 @@ const LandingPage = () => {
               <div className="bg-primary-300 w-16 h-16 rounded-full flex items-center justify-center mb-6">
                 <Users className="h-8 w-8 text-white" />
               </div>
-              <h3 className="font-display font-semibold text-2xl text-primary-400 mb-4">Career Counseling</h3>
+              <h3 className="font-display font-semibold text-2xl text-primary-400 mb-4">
+                Career Counseling
+              </h3>
               <p className="text-primary-600 mb-4">
-                Get expert advice on career paths and professional development opportunities.
+                Get expert advice on career paths and professional development
+                opportunities.
               </p>
               <div className="flex items-center text-accent-200 font-medium">
                 <span>Get guidance</span>
@@ -171,9 +215,12 @@ const LandingPage = () => {
               <div className="bg-primary-300 w-16 h-16 rounded-full flex items-center justify-center mb-6">
                 <Award className="h-8 w-8 text-white" />
               </div>
-              <h3 className="font-display font-semibold text-2xl text-primary-400 mb-4">Scholarship Info</h3>
+              <h3 className="font-display font-semibold text-2xl text-primary-400 mb-4">
+                Scholarship Info
+              </h3>
               <p className="text-primary-600 mb-4">
-                Discover scholarship opportunities and financial aid options for your studies.
+                Discover scholarship opportunities and financial aid options for
+                your studies.
               </p>
               <div className="flex items-center text-accent-200 font-medium">
                 <span>Find scholarships</span>
@@ -185,9 +232,12 @@ const LandingPage = () => {
               <div className="bg-primary-300 w-16 h-16 rounded-full flex items-center justify-center mb-6">
                 <Star className="h-8 w-8 text-white" />
               </div>
-              <h3 className="font-display font-semibold text-2xl text-primary-400 mb-4">Success Stories</h3>
+              <h3 className="font-display font-semibold text-2xl text-primary-400 mb-4">
+                Success Stories
+              </h3>
               <p className="text-primary-600 mb-4">
-                Learn from successful graduates and their journey through higher education.
+                Learn from successful graduates and their journey through higher
+                education.
               </p>
               <div className="flex items-center text-accent-200 font-medium">
                 <span>Read stories</span>
@@ -215,9 +265,12 @@ const LandingPage = () => {
               <div className="bg-white w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg border border-primary-100">
                 <span className="text-2xl font-bold text-primary-400">1</span>
               </div>
-              <h3 className="font-display font-semibold text-xl text-primary-400 mb-4">Enter Your Results</h3>
+              <h3 className="font-display font-semibold text-xl text-primary-400 mb-4">
+                Enter Your Results
+              </h3>
               <p className="text-primary-600">
-                Input your O/L and A/L results, subjects, and Z-score for personalized recommendations.
+                Input your O/L and A/L results, subjects, and Z-score for
+                personalized recommendations.
               </p>
             </div>
 
@@ -225,9 +278,12 @@ const LandingPage = () => {
               <div className="bg-white w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg border border-primary-100">
                 <span className="text-2xl font-bold text-primary-400">2</span>
               </div>
-              <h3 className="font-display font-semibold text-xl text-primary-400 mb-4">Get Matched</h3>
+              <h3 className="font-display font-semibold text-xl text-primary-400 mb-4">
+                Get Matched
+              </h3>
               <p className="text-primary-600">
-                Our algorithm matches you with suitable universities and degree programs based on your profile.
+                Our algorithm matches you with suitable universities and degree
+                programs based on your profile.
               </p>
             </div>
 
@@ -235,9 +291,12 @@ const LandingPage = () => {
               <div className="bg-white w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg border border-primary-100">
                 <span className="text-2xl font-bold text-primary-400">3</span>
               </div>
-              <h3 className="font-display font-semibold text-xl text-primary-400 mb-4">Plan Your Future</h3>
+              <h3 className="font-display font-semibold text-xl text-primary-400 mb-4">
+                Plan Your Future
+              </h3>
               <p className="text-primary-600">
-                Explore career paths, scholarships, and make informed decisions about your higher education.
+                Explore career paths, scholarships, and make informed decisions
+                about your higher education.
               </p>
             </div>
           </div>
@@ -251,10 +310,11 @@ const LandingPage = () => {
             Ready to Find Your Path?
           </h2>
           <p className="text-xl text-white/90 mb-8">
-            Join thousands of students who have successfully navigated their way to higher education with UniRoute.
+            Join thousands of students who have successfully navigated their way
+            to higher education with UniRoute.
           </p>
-          <Link 
-            to="/register" 
+          <Link
+            to="/register"
             className="bg-accent-200 text-primary-600 px-8 py-4 rounded-full font-semibold text-lg hover:bg-accent-300 transition-all duration-200 hover:shadow-xl transform hover:-translate-y-1 inline-flex items-center space-x-2"
           >
             <span>Get Started Today</span>
@@ -270,10 +330,13 @@ const LandingPage = () => {
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center space-x-2 mb-4">
                 <GraduationCap className="h-8 w-8 text-accent-200" />
-                <span className="font-display font-bold text-2xl text-white">UniRoute</span>
+                <span className="font-display font-bold text-2xl text-white">
+                  UniRoute
+                </span>
               </div>
               <p className="text-white/80 mb-4 max-w-md">
-                Empowering Sri Lankan students to make informed decisions about their higher education journey.
+                Empowering Sri Lankan students to make informed decisions about
+                their higher education journey.
               </p>
               <div className="flex space-x-4">
                 <div className="w-10 h-10 bg-primary-300 rounded-full flex items-center justify-center cursor-pointer hover:bg-primary-300/80 transition-colors">
@@ -291,27 +354,84 @@ const LandingPage = () => {
             <div>
               <h3 className="font-semibold text-white mb-4">Quick Links</h3>
               <ul className="space-y-2">
-                <li><a href="#" className="text-white/80 hover:text-white transition-colors">Universities</a></li>
-                <li><a href="#" className="text-white/80 hover:text-white transition-colors">Programs</a></li>
-                <li><a href="#" className="text-white/80 hover:text-white transition-colors">Scholarships</a></li>
-                <li><a href="#" className="text-white/80 hover:text-white transition-colors">Career Guide</a></li>
+                <li>
+                  <a
+                    href="#"
+                    className="text-white/80 hover:text-white transition-colors"
+                  >
+                    Universities
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="text-white/80 hover:text-white transition-colors"
+                  >
+                    Programs
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="text-white/80 hover:text-white transition-colors"
+                  >
+                    Scholarships
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="text-white/80 hover:text-white transition-colors"
+                  >
+                    Career Guide
+                  </a>
+                </li>
               </ul>
             </div>
 
             <div>
               <h3 className="font-semibold text-white mb-4">Support</h3>
               <ul className="space-y-2">
-                <li><a href="#" className="text-white/80 hover:text-white transition-colors">Help Center</a></li>
-                <li><a href="#" className="text-white/80 hover:text-white transition-colors">Contact Us</a></li>
-                <li><a href="#" className="text-white/80 hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="text-white/80 hover:text-white transition-colors">Terms of Service</a></li>
+                <li>
+                  <a
+                    href="#"
+                    className="text-white/80 hover:text-white transition-colors"
+                  >
+                    Help Center
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="text-white/80 hover:text-white transition-colors"
+                  >
+                    Contact Us
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="text-white/80 hover:text-white transition-colors"
+                  >
+                    Privacy Policy
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="text-white/80 hover:text-white transition-colors"
+                  >
+                    Terms of Service
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
 
           <div className="border-t border-primary-300 mt-8 pt-8 text-center">
             <p className="text-white/80">
-              © 2024 UniRoute. All rights reserved. Designed for Sri Lankan students.
+              © 2024 UniRoute. All rights reserved. Designed for Sri Lankan
+              students.
             </p>
           </div>
         </div>
