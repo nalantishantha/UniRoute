@@ -1,0 +1,592 @@
+/* Base Layout */
+.portfolio-page {
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.portfolio-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.portfolio-main-content {
+  flex: 1;
+  margin-left: 250px;
+  margin-top: 70px;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.portfolio-main-content.sidebar-expanded {
+  margin-left: 250px;
+}
+
+.portfolio-main-content.sidebar-collapsed {
+  margin-left: 70px;
+}
+
+/* Hero Section */
+.portfolio-hero {
+  position: relative;
+  height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+              url('https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center center/cover no-repeat;
+  overflow: hidden;
+}
+
+.hero-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: white;
+  max-width: 800px;
+  padding: 0 2rem;
+}
+
+
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.portfolio-hero .university-name {
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  color: #ffffff;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.university-motto {
+  font-size: 1.5rem;
+  font-style: italic;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+  color: #f1f5f9;
+}
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+
+.hero-stat {
+  text-align: center;
+  color: #ffffff;
+}
+
+.hero-stat .stat-number {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #ffffff;
+}
+
+.hero-stat .stat-label {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #ffffff;
+}
+
+/* Portfolio Sections */
+.portfolio-section {
+  padding: 4rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.section-header h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 1rem;
+}
+
+.section-header p {
+  font-size: 1.1rem;
+  color: #64748b;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.portfolio-section .section-header {
+  margin-bottom: 2rem;
+}
+
+/* Overview Section */
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.overview-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.overview-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.overview-card h3 {
+  font-size: 1.1rem;
+  color: #6366f1;
+  margin-bottom: 0.5rem;
+}
+
+.overview-card p {
+  color: #374151;
+  font-weight: 500;
+}
+
+/* Achievements Section */
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.achievement-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.achievement-card:hover {
+  transform: translateY(-5px);
+}
+
+.achievement-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #f59e0b, #ef4444, #8b5cf6);
+}
+
+.achievement-year {
+  font-size: 0.9rem;
+  color: #6366f1;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.achievement-title {
+  font-size: 1.3rem;
+  color: #1e293b;
+  margin-bottom: 1rem;
+}
+
+.achievement-rank {
+  display: inline-block;
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.achievement-description {
+  color: #64748b;
+  line-height: 1.6;
+}
+
+/* Ranking Section */
+.ranking-chart {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.chart-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  background: #f8fafc;
+  padding: 1rem;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.chart-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  padding: 1rem;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.2s ease;
+}
+
+.chart-row:hover {
+  background: #f8fafc;
+}
+
+.chart-row:last-child {
+  border-bottom: none;
+}
+
+.rank-year {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.rank-world {
+  color: #6366f1;
+  font-weight: 500;
+}
+
+.rank-local {
+  color: #059669;
+  font-weight: 600;
+}
+
+.rank-score {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.rank-trend {
+  font-size: 1.2rem;
+}
+
+/* Faculties Section */
+.faculties-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+}
+
+.faculty-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease;
+}
+
+.faculty-card:hover {
+  transform: translateY(-5px);
+}
+
+.faculty-header {
+  display: flex;
+  justify-content: between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.faculty-header h3 {
+  font-size: 1.4rem;
+  color: #1e293b;
+  margin: 0;
+  flex: 1;
+}
+
+.faculty-established {
+  background: #e0f2fe;
+  color: #0277bd;
+  padding: 0.3rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.faculty-stats {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.faculty-stat {
+  text-align: center;
+}
+
+.faculty-stat .stat-number {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #6366f1;
+}
+
+.faculty-stat .stat-label {
+  font-size: 0.8rem;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.faculty-departments,
+.faculty-programs {
+  margin-bottom: 1rem;
+}
+
+.faculty-departments h4,
+.faculty-programs h4 {
+  font-size: 1rem;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.departments-list,
+.programs-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.department-tag {
+  background: #f3f4f6;
+  color: #374151;
+  padding: 0.3rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+
+.program-tag {
+  background: #ddd6fe;
+  color: #5b21b6;
+  padding: 0.3rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Programs Section */
+.programs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.program-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.program-card:hover {
+  transform: translateY(-5px);
+}
+
+.program-card h3 {
+  font-size: 1.3rem;
+  color: #1e293b;
+  margin-bottom: 1rem;
+}
+
+.program-count {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #6366f1;
+  margin-bottom: 0.5rem;
+}
+
+.program-card p {
+  color: #64748b;
+  margin-bottom: 1rem;
+}
+
+.program-duration {
+  color: #059669;
+  font-weight: 500;
+}
+
+/* Events Section */
+.events-timeline {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.event-item {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease;
+}
+
+.event-item:hover {
+  transform: translateY(-3px);
+}
+
+.event-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.event-content {
+  flex: 1;
+}
+
+.event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.event-header h3 {
+  font-size: 1.3rem;
+  color: #1e293b;
+  margin: 0;
+  flex: 1;
+}
+
+.event-type {
+  background: #e0f2fe;
+  color: #0277bd;
+  padding: 0.3rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.event-date {
+  color: #6366f1;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.event-description {
+  color: #64748b;
+  line-height: 1.6;
+}
+
+/* Facilities Section */
+.facilities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.facility-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.facility-card:hover {
+  transform: translateY(-5px);
+}
+
+.facility-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.facility-card h3 {
+  font-size: 1.2rem;
+  color: #1e293b;
+  margin-bottom: 1rem;
+}
+
+.facility-card p {
+  color: #64748b;
+  line-height: 1.6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .portfolio-main-content {
+    margin-left: 0;
+    margin-top: 70px;
+  }
+
+  .portfolio-main-content.sidebar-expanded,
+  .portfolio-main-content.sidebar-collapsed {
+    margin-left: 0;
+  }
+
+  .university-name {
+    font-size: 2.5rem;
+  }
+
+  .hero-stats {
+    gap: 2rem;
+  }
+
+  .portfolio-section {
+    padding: 2rem 1rem;
+  }
+
+  .faculties-grid,
+  .programs-grid,
+  .facilities-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-header,
+  .chart-row {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .rank-world,
+  .rank-trend {
+    display: none;
+  }
+
+  .event-item {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .event-header {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}

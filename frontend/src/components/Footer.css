@@ -1,0 +1,100 @@
+.app-footer {
+  padding: 0.5rem 1rem;
+  text-align: center;
+  margin-top: 2rem;
+  transition: margin-left 0.3s;
+  /* Add this transition for smoothness */
+}
+
+.app-footer.dark {
+  background: #1f2937;
+  color: white;
+}
+
+.app-footer.light {
+  background: #6366f1;
+  color: white;
+}
+
+.footer-content {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.footer-content h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.footer-subtitle {
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.9;
+}
+
+.newsletter {
+  display: flex;
+  gap: 0.8rem;
+  max-width: 400px;
+  margin: 0 auto 1rem auto; /* Add bottom margin for more space */
+  justify-content: center;
+}
+
+.newsletter-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 0.9rem;
+}
+
+.newsletter-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.newsletter-input:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.newsletter-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.newsletter-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .newsletter {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .newsletter-input,
+  .newsletter-btn {
+    width: 100%;
+  }
+  
+  .footer-content h3 {
+    font-size: 1.25rem;
+  }
+  
+  .app-footer {
+    padding: 2rem 1rem 1rem;
+  }
+}

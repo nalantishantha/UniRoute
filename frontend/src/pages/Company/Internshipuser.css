@@ -1,0 +1,31 @@
+/* Copy the exact same CSS content from Internship.css */
+/* Base Styles */
+.internship-page {
+  min-height: 100vh;
+  background: #f8fafc;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.internship-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Main Content - Responsive to sidebar state */
+.internship-main {
+  flex: 1;
+  margin-left: 80px; /* Default collapsed sidebar width */
+  overflow-y: auto;
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+}
+
+.internship-main.sidebar-expanded {
+  margin-left: 280px; /* Expanded sidebar width */
+}
+
+.internship-main.sidebar-collapsed {
+  margin-left: 80px; /* Collapsed sidebar width */
+}
+
+/* Add the rest of the CSS content from Internship.css here... */

@@ -11,6 +11,8 @@ import { TutorsList, TutorForm, TutorView } from '../pages/Admin/Tutors';
 import { UniversitiesList, UniversityForm, UniversityView } from '../pages/Admin/Universities';
 import { CompaniesList, CompanyForm, CompanyView } from '../pages/Admin/Companies';
 import { ProgramsList, ProgramForm, ProgramView } from '../pages/Admin/Programs';
+import { JobList, JobDetails, JobForm } from '../pages/Admin/Jobs';
+import { Reports, ReportDetails } from '../pages/Admin/Reports'
 import { AdminSettings } from '../pages/Admin';
 
 const AdminRoutes = () => {
@@ -66,6 +68,16 @@ const AdminRoutes = () => {
       <Route path="/programs/new" element={<ProgramForm />} />
       <Route path="/programs/:id" element={<ProgramView />} />
       <Route path="/programs/:id/edit" element={<ProgramForm />} />
+
+      {/* Jobs Management */}
+      <Route path="/jobs" element={<JobList />} />
+      <Route path="/jobs/create" element={<JobForm />} />
+      <Route path="/jobs/:jobId/edit" element={<JobForm />} />
+      <Route path="/jobs/:jobId/view" element={<JobDetails />} />
+
+      {/* Report Management */}
+      <Route path="/reports" element={<Reports />} />
+      <Route path="/reports/:reportId" element={<ReportDetails />} />
 
       {/* Settings */}
       <Route path="/settings" element={< AdminSettings />} />
