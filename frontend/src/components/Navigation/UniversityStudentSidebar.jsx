@@ -147,10 +147,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           isDesktop ? "relative" : "fixed top-0 left-0 z-50"
         )}
         style={{
-          '--scrollbar-width': '4px',
-          '--scrollbar-track': '#1e3a8a',
-          '--scrollbar-thumb': '#1e40af',
-          '--scrollbar-thumb-hover': '#3b82f6'
+          "--scrollbar-width": "4px",
+          "--scrollbar-track": "#1e3a8a",
+          "--scrollbar-thumb": "#1e40af",
+          "--scrollbar-thumb-hover": "#3b82f6",
         }}
       >
         <div className="flex h-full flex-col">
@@ -170,7 +170,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-white">UniRoutes</h1>
+                <h1 className="text-xl font-bold text-white">UniRoute</h1>
                 <p className="text-sm text-primary-200">Uni-Student Portal</p>
               </div>
             </motion.div>
@@ -190,8 +190,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           <nav
             className="flex-1 px-4 py-6 space-y-2 overflow-y-auto scrollbar-thin scrollbar-track-primary-800 scrollbar-thumb-primary-600 hover:scrollbar-thumb-primary-500 custom-scrollbar"
             style={{
-              scrollbarWidth: 'thin',
-              scrollbarColor: 'rgba(59, 130, 246, 0.3) transparent',
+              scrollbarWidth: "thin",
+              scrollbarColor: "rgba(59, 130, 246, 0.3) transparent",
             }}
           >
             {navigation.map((item, index) => {
