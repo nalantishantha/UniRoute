@@ -139,15 +139,22 @@ export default function Chat({ isOpen, onClose }) {
         className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-end pr-4"
         onClick={onClose}
       >
+        {/* Chat Sidebar */}
         <motion.div
-          initial={{ x: 400, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: 400, opacity: 0 }}
+          initial={{ x: "100%" }}
+          animate={{ x: 0 }}
+          exit={{ x: "100%" }}
+          transition={{
+            type: "spring",
+            damping: 25,
+            stiffness: 120,
+            duration: 0.3,
+          }}
+          className="fixed top-0 right-0  h-full w-96 max-w-[90vw] bg-white shadow-2xl z-50 border-l border-neutral-silver/30 flex flex-col "
           onClick={(e) => e.stopPropagation()}
-          className="bg-white rounded-xl shadow-2xl w-96 h-[600px] flex flex-col overflow-hidden"
         >
           {/* Chat Header */}
-          <div className="bg-gradient-to-r from-primary-500 to-primary-600 p-4 text-white">
+          <div className="bg-gradient-to-r from-primary-500 to-primary-600 p-4 text-white flex-shrink-0">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Messages</h3>
               <button
@@ -185,9 +192,9 @@ export default function Chat({ isOpen, onClose }) {
 
           {!selectedChat ? (
             /* Chat List */
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col bg-white">
               {/* Search */}
-              <div className="p-4 border-b border-neutral-silver">
+              <div className="p-4 border-b border-neutral-silver flex-shrink-0">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-grey" />
                   <input
@@ -200,8 +207,8 @@ export default function Chat({ isOpen, onClose }) {
                 </div>
               </div>
 
-              {/* Chat List */}
-              <div className="flex-1 overflow-y-auto">
+              {/* Chat List - This should take remaining space */}
+              <div className="flex-1 overflow-y-auto bg-white">
                 {filteredChats.map((chat) => (
                   <motion.div
                     key={chat.id}
@@ -258,9 +265,9 @@ export default function Chat({ isOpen, onClose }) {
             </div>
           ) : (
             /* Chat Messages */
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col bg-white">
               {/* Back Button */}
-              <div className="p-3 border-b border-neutral-silver">
+              <div className="p-3 border-b border-neutral-silver flex-shrink-0">
                 <button
                   onClick={() => setSelectedChat(null)}
                   className="text-primary-600 hover:text-primary-800 text-sm font-medium"
@@ -269,8 +276,8 @@ export default function Chat({ isOpen, onClose }) {
                 </button>
               </div>
 
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {/* Messages - This should take remaining space */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white">
                 {mockMessages.map((msg) => (
                   <div
                     key={msg.id}
@@ -300,7 +307,7 @@ export default function Chat({ isOpen, onClose }) {
               </div>
 
               {/* Message Input */}
-              <div className="p-4 border-t border-neutral-silver">
+              <div className="p-4 border-t border-neutral-silver bg-white flex-shrink-0">
                 <div className="flex items-center space-x-2">
                   <button className="p-2 text-neutral-grey hover:text-primary-600 transition-colors">
                     <Paperclip className="w-4 h-4" />

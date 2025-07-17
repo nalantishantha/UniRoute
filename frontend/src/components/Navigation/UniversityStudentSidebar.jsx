@@ -17,6 +17,8 @@ import {
   ChevronRight,
   Settings,
 } from "lucide-react";
+import { logout, getCurrentUser } from "../../utils/auth"; // ✅ Import logout function
+
 import { cn } from "../../utils/cn";
 import logo from "../../assets/logo.png";
 
@@ -106,6 +108,12 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     },
   };
 
+  const handleLogout = async () => {
+    if (window.confirm("Are you sure you want to logout?")) {
+      await logout();
+    }
+  };
+
   return (
     <>
       <style>
@@ -147,10 +155,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           isDesktop ? "relative" : "fixed top-0 left-0 z-50"
         )}
         style={{
-          '--scrollbar-width': '4px',
-          '--scrollbar-track': '#1e3a8a',
-          '--scrollbar-thumb': '#1e40af',
-          '--scrollbar-thumb-hover': '#3b82f6'
+          "--scrollbar-width": "4px",
+          "--scrollbar-track": "#1e3a8a",
+          "--scrollbar-thumb": "#1e40af",
+          "--scrollbar-thumb-hover": "#3b82f6",
         }}
       >
         <div className="flex h-full flex-col">
@@ -190,8 +198,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           <nav
             className="flex-1 px-4 py-6 space-y-2 overflow-y-auto scrollbar-thin scrollbar-track-primary-800 scrollbar-thumb-primary-600 hover:scrollbar-thumb-primary-500 custom-scrollbar"
             style={{
-              scrollbarWidth: 'thin',
-              scrollbarColor: 'rgba(59, 130, 246, 0.3) transparent',
+              scrollbarWidth: "thin",
+              scrollbarColor: "rgba(59, 130, 246, 0.3) transparent",
             }}
           >
             {navigation.map((item, index) => {
@@ -263,6 +271,9 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             </motion.button>
 
             <motion.button
+              onClick={() => {
+                handleLogout();
+              }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="w-full flex items-center px-4 py-3 text-sm font-medium text-primary-100 hover:bg-primary-700/50 hover:text-white rounded-xl transition-all duration-200 group"
