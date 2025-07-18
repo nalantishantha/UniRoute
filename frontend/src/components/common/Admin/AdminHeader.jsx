@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Menu,
   Search,
@@ -8,10 +8,16 @@ import {
   User,
   ChevronDown,
   Settings,
-  LogOut
-} from 'lucide-react';
+  LogOut,
+} from "lucide-react";
 
-const AdminHeader = ({ toggleSidebar, user, handleLogout, pageTitle, pageDescription }) => {
+const AdminHeader = ({
+  toggleSidebar,
+  user,
+  handleLogout,
+  pageTitle,
+  pageDescription,
+}) => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
 
@@ -26,9 +32,11 @@ const AdminHeader = ({ toggleSidebar, user, handleLogout, pageTitle, pageDescrip
             <Menu className="h-6 w-6 text-[#263238]" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-[#263238]">{pageTitle}</h1>
+            <h1 className="text-2xl font-bold text-neutral-black">
+              {pageTitle}
+            </h1>
             {pageDescription && (
-              <p className="text-sm text-[#717171]">{pageDescription}</p>
+              <p className="text-sm text-neutral-grey">{pageDescription}</p>
             )}
           </div>
         </div>
