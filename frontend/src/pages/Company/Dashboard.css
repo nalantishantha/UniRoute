@@ -352,6 +352,24 @@
   color: #4f46e5;
 }
 
+/* Unique styles for user dashboard view all buttons */
+.company-dashboard-user-viewall-btn {
+  color: #6366f1;
+  border: none;
+  border-radius: 7px;
+  padding: 0.6rem 1.3rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s, box-shadow 0.18s;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.08);
+  margin-left: 0.5rem;
+}
+.company-dashboard-user-viewall-btn:hover {
+  color: #0a0637;
+  box-shadow: 0 4px 16px rgba(99,102,241,0.13);
+}
+
 /* Announcement list styling */
 .recent-box ul {
   padding: 0;
@@ -706,4 +724,160 @@ body, html, .dashboard-page {
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 0 !important;
+}
+
+/* --- Unique User Modal Styles for Dashboard Page --- */
+.company-dashboard-user-current-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.company-dashboard-user-current-modal-content {
+  background: #fff;
+  border-radius: 20px;
+  max-width: 520px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+  position: relative;
+  animation: companyDashboardUserCurrentModalSlideIn 0.4s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+@keyframes companyDashboardUserCurrentModalSlideIn {
+  from { opacity: 0; transform: translateY(-30px) scale(0.9);}
+  to { opacity: 1; transform: translateY(0) scale(1);}
+}
+.company-dashboard-user-current-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 2rem 1rem 2rem;
+  margin-bottom: 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+.company-dashboard-user-current-modal-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.3;
+  flex: 1;
+  padding-right: 1.5rem;
+}
+.company-dashboard-user-current-modal-close-btn {
+  background: #f8fafc;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  color: #64748b;
+  cursor: pointer;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  font-weight: 300;
+}
+.company-dashboard-user-current-modal-close-btn:hover {
+  background: #e2e8f0;
+  color: #475569;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.company-dashboard-user-current-modal-body {
+  padding: 1rem 2rem 2rem 2rem;
+}
+.company-dashboard-user-current-modal-img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.company-dashboard-user-current-modal-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+.company-dashboard-user-current-modal-info {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border-left: 4px solid #6366f1;
+  padding: 0.85rem 1rem;
+  font-size: 1.05rem;
+  color: #475569;
+}
+.company-dashboard-user-current-modal-info strong {
+  color: #1e293b;
+  font-weight: 600;
+  min-width: 90px;
+  font-size: 0.95rem;
+}
+.company-dashboard-user-current-modal-icon {
+  font-size: 1.25rem;
+  margin-right: 0.2rem;
+}
+.company-dashboard-user-current-btn {
+  width: 100%;
+  padding: 0.7rem 0;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1.08rem;
+  cursor: pointer;
+  border: 2px solid #2684ff;
+  background: #fff;
+  color: #2684ff;
+  transition: all 0.2s;
+  margin-top: 0.5rem;
+  text-align: center;
+  box-shadow: none;
+  outline: none;
+  display: block;
+}
+.company-dashboard-user-current-btn:hover,
+.company-dashboard-user-current-btn:focus {
+  background: #f0f7ff;
+  color: #1565c0;
+  border-color: #1565c0;
+}
+@media (max-width: 600px) {
+  .company-dashboard-user-current-modal-content {
+    max-width: 95%;
+    margin: 1rem;
+  }
+  .company-dashboard-user-current-modal-header {
+    padding: 1.5rem 1.5rem 0.75rem 1.5rem;
+  }
+  .company-dashboard-user-current-modal-body {
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
+  }
+  .company-dashboard-user-current-modal-header h2 {
+    font-size: 1.25rem;
+  }
+  .company-dashboard-user-current-modal-img {
+    height: 160px;
+  }
+  .company-dashboard-user-current-modal-info {
+    font-size: 0.95rem;
+    padding: 0.6rem 0.8rem;
+  }
+  .company-dashboard-user-current-btn {
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem;
+  }
 }

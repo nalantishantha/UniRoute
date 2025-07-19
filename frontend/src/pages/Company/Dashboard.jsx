@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import CompanyUserSidebar from '../../components/Navigation/CompanyUsersidebar'; // USER sidebar
+import CompanyUserSidebar from '../../components/Navigation/CompanyUsersidebar';
 import CompanyDashboardNavbar from '../../components/Navigation/CompanyDashboardNavbar';
 import './Dashboard.css';
 
@@ -127,17 +127,32 @@ const Dashboard = () => {
     }
   ]);
 
+  const [showUserInternshipModal, setShowUserInternshipModal] = useState(false);
+  const [showUserCourseModal, setShowUserCourseModal] = useState(false);
+  const [selectedUserInternship, setSelectedUserInternship] = useState(null);
+  const [selectedUserCourse, setSelectedUserCourse] = useState(null);
+
   // Navigation functions
   const handleViewAllInternships = () => {
-    navigate('/company/internship');
+    navigate('/company/internshipuser');
   };
 
   const handleViewAllCourses = () => {
-    navigate('/company/course');
+    navigate('/company/courseuser');
   };
 
   const handleViewAllAnnouncements = () => {
-    navigate('/company/announcement');
+    navigate('/company/announcementuser');
+  };
+
+  // View Details handlers for user popups
+  const handleUserViewInternship = (internship) => {
+    setSelectedUserInternship(internship);
+    setShowUserInternshipModal(true);
+  };
+  const handleUserViewCourse = (course) => {
+    setSelectedUserCourse(course);
+    setShowUserCourseModal(true);
   };
 
   // Update time every minute
@@ -230,7 +245,10 @@ const Dashboard = () => {
         <section className="recent-uploads">
           <div className="section-header-with-button">
             <h3>Recently Uploaded Internships</h3>
-            <button className="view-all-btn" onClick={handleViewAllInternships}>
+            <button
+              className="company-dashboard-user-viewall-btn company-dashboard-user-viewall-internship-btn"
+              onClick={handleViewAllInternships}
+            >
               View All Internships →
             </button>
           </div>
@@ -243,7 +261,12 @@ const Dashboard = () => {
                   <div className="upload-meta">{internship.type} | {internship.location}</div>
                   <div className="upload-company">{internship.company}</div>
                   <div className="upload-time">Uploaded {internship.uploadedDate}</div>
-                  <button className="btn btn-outline">View Details</button>
+                  <button
+                    className="company-dashboard-user-current-btn"
+                    onClick={() => handleUserViewInternship(internship)}
+                  >
+                    View Details
+                  </button>
                 </div>
               </div>
             ))}
@@ -254,7 +277,10 @@ const Dashboard = () => {
         <section className="recent-uploads">
           <div className="section-header-with-button">
             <h3>Recently Uploaded Courses</h3>
-            <button className="view-all-btn" onClick={handleViewAllCourses}>
+            <button
+              className="company-dashboard-user-viewall-btn company-dashboard-user-viewall-course-btn"
+              onClick={handleViewAllCourses}
+            >
               View All Courses →
             </button>
           </div>
@@ -266,19 +292,27 @@ const Dashboard = () => {
                   <div className="upload-title">{course.title}</div>
                   <div className="upload-meta">{course.level} | {course.duration}</div>
                   <div className="upload-time">Uploaded {course.uploadedDate}</div>
-                  <button className="btn btn-outline">View Details</button>
+                  <button
+                    className="company-dashboard-user-current-btn"
+                    onClick={() => handleUserViewCourse(course)}
+                  >
+                    View Details
+                  </button>
                 </div>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Recent Announcements & Activity Log */}
+        {/* Recent Announcements */}
         <section className="recent-section">
           <div className="recent-box">
             <div className="recent-box-header">
               <h4>Recent Announcements</h4>
-              <button className="view-all-link-btn" onClick={handleViewAllAnnouncements}>
+              <button
+                className="company-dashboard-user-viewall-btn company-dashboard-user-viewall-announcement-btn"
+                onClick={handleViewAllAnnouncements}
+              >
                 View All Announcements →
               </button>
             </div>
@@ -360,6 +394,76 @@ const Dashboard = () => {
             </div>
           </div>
         </footer>
+
+        {/* Internship Details Modal (User) */}
+        {showUserInternshipModal && selectedUserInternship && (
+          <div className="company-dashboard-user-current-modal-overlay" onClick={() => setShowUserInternshipModal(false)}>
+            <div className="company-dashboard-user-current-modal-content" onClick={e => e.stopPropagation()}>
+              <div className="company-dashboard-user-current-modal-header">
+                <h2>{selectedUserInternship.title}</h2>
+                <button className="company-dashboard-user-current-modal-close-btn" onClick={() => setShowUserInternshipModal(false)}>×</button>
+              </div>
+              <div className="company-dashboard-user-current-modal-body">
+                <img src={selectedUserInternship.image} alt={selectedUserInternship.title} className="company-dashboard-user-current-modal-img" />
+                <div className="company-dashboard-user-current-modal-info-list">
+                  <div className="company-dashboard-user-current-modal-info">
+                    <span className="company-dashboard-user-current-modal-icon">🏢</span>
+                    <span><strong>Company:</strong></span>
+                    <span>{selectedUserInternship.company}</span>
+                  </div>
+                  <div className="company-dashboard-user-current-modal-info">
+                    <span className="company-dashboard-user-current-modal-icon">📍</span>
+                    <span><strong>Location:</strong></span>
+                    <span>{selectedUserInternship.location}</span>
+                  </div>
+                  <div className="company-dashboard-user-current-modal-info">
+                    <span className="company-dashboard-user-current-modal-icon">💼</span>
+                    <span><strong>Type:</strong></span>
+                    <span>{selectedUserInternship.type}</span>
+                  </div>
+                  <div className="company-dashboard-user-current-modal-info">
+                    <span className="company-dashboard-user-current-modal-icon">📅</span>
+                    <span><strong>Uploaded:</strong></span>
+                    <span>{selectedUserInternship.uploadedDate}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Course Details Modal (User) */}
+        {showUserCourseModal && selectedUserCourse && (
+          <div className="company-dashboard-user-current-modal-overlay" onClick={() => setShowUserCourseModal(false)}>
+            <div className="company-dashboard-user-current-modal-content" onClick={e => e.stopPropagation()}>
+              <div className="company-dashboard-user-current-modal-header">
+                <h2>{selectedUserCourse.title}</h2>
+                <button className="company-dashboard-user-current-modal-close-btn" onClick={() => setShowUserCourseModal(false)}>×</button>
+              </div>
+              <div className="company-dashboard-user-current-modal-body">
+                <img src={selectedUserCourse.image} alt={selectedUserCourse.title} className="company-dashboard-user-current-modal-img" />
+                <div className="company-dashboard-user-current-modal-info-list">
+                  <div className="company-dashboard-user-current-modal-info">
+                    <span className="company-dashboard-user-current-modal-icon">📊</span>
+                    <span><strong>Level:</strong></span>
+                    <span>{selectedUserCourse.level}</span>
+                  </div>
+                  <div className="company-dashboard-user-current-modal-info">
+                    <span className="company-dashboard-user-current-modal-icon">⏱️</span>
+                    <span><strong>Duration:</strong></span>
+                    <span>{selectedUserCourse.duration}</span>
+                  </div>
+                  <div className="company-dashboard-user-current-modal-info">
+                    <span className="company-dashboard-user-current-modal-icon">📅</span>
+                    <span><strong>Uploaded:</strong></span>
+                    <span>{selectedUserCourse.uploadedDate}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
       </main>
     </div>
   );

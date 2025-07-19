@@ -293,58 +293,57 @@ const Announcementuser = () => {
 
       {/* View Modal */}
       {showViewModal && selectedAnnouncement && (
-        <div className="modal-overlay" onClick={() => setShowViewModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
+        <div className="company-user-announcement-modal-overlay" onClick={() => setShowViewModal(false)}>
+          <div className="company-user-announcement-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="company-user-announcement-modal-header">
               <h2>View Announcement</h2>
-              <button className="modal-close" onClick={() => setShowViewModal(false)}>✕</button>
+              <button className="company-user-announcement-modal-close" onClick={() => setShowViewModal(false)}>✕</button>
             </div>
-            <div className="modal-body">
-              <img src={selectedAnnouncement.image} alt={selectedAnnouncement.title} className="modal-image" />
-              <div className="modal-info">
-                <div className="modal-title-section">
+            <div className="company-user-announcement-modal-body">
+              <img src={selectedAnnouncement.image} alt={selectedAnnouncement.title} className="company-user-announcement-modal-image" />
+              <div className="company-user-announcement-modal-info">
+                <div className="company-user-announcement-modal-title-section">
                   <h3>{selectedAnnouncement.title}</h3>
-                  <div className="modal-badges">
+                  <div className="company-user-announcement-modal-badges">
                     <span 
-                      className="status-badge" 
-                      style={{ backgroundColor: getStatusColor(selectedAnnouncement.status) }}
+                      className={`company-user-announcement-status-badge ${selectedAnnouncement.status}`}
                     >
-                      {selectedAnnouncement.status}
+                      {selectedAnnouncement.status === 'published' ? 'Published' : 'Draft'}
                     </span>
                     <span 
-                      className="priority-badge" 
+                      className="company-user-announcement-priority-badge"
                       style={{ color: getPriorityColor(selectedAnnouncement.priority) }}
                     >
-                      {selectedAnnouncement.priority} priority
+                      {selectedAnnouncement.priority.toUpperCase()} PRIORITY
                     </span>
                   </div>
                 </div>
                 
-                <div className="modal-meta">
-                  <div className="meta-item">
+                <div className="company-user-announcement-modal-meta">
+                  <div className="company-user-announcement-meta-item">
                     <strong>📅 Date:</strong> {new Date(selectedAnnouncement.date).toLocaleDateString()}
                   </div>
-                  <div className="meta-item">
+                  <div className="company-user-announcement-meta-item">
                     <strong>👤 Author:</strong> {selectedAnnouncement.author}
                   </div>
-                  <div className="meta-item">
+                  <div className="company-user-announcement-meta-item">
                     <strong>🏷️ Category:</strong> {selectedAnnouncement.category}
                   </div>
-                  <div className="meta-item">
+                  <div className="company-user-announcement-meta-item">
                     <strong>📊 Statistics:</strong> {selectedAnnouncement.views} views, {selectedAnnouncement.likes} likes
                   </div>
                 </div>
                 
-                <div className="modal-description">
+                <div className="company-user-announcement-modal-description">
                   <strong>📝 Description:</strong>
                   <p>{selectedAnnouncement.description}</p>
                 </div>
                 
-                <div className="modal-tags">
+                <div className="company-user-announcement-modal-tags">
                   <strong>🏷️ Tags:</strong>
-                  <div className="tags-container">
+                  <div className="company-user-announcement-tags-container">
                     {selectedAnnouncement.tags.map((tag, index) => (
-                      <span key={index} className="tag">{tag}</span>
+                      <span key={index} className="company-user-announcement-tag">{tag}</span>
                     ))}
                   </div>
                 </div>

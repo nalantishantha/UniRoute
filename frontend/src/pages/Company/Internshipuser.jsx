@@ -340,18 +340,22 @@ const Internshipuser = () => {
 
       {/* View Modal - Only view functionality for users */}
       {showViewModal && selectedInternship && (
-        <div className="modal-overlay" onClick={() => setShowViewModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Internship Details</h2>
-              <button className="modal-close" onClick={() => setShowViewModal(false)}>✕</button>
+        <div className="company-internship-user-modal-overlay" onClick={() => setShowViewModal(false)}>
+          <div className="company-internship-user-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="company-internship-user-modal-header">
+              <h2>View Internship</h2>
+              <button className="company-internship-user-modal-close" onClick={() => setShowViewModal(false)}>✕</button>
             </div>
-            <div className="modal-body">
-              <img src={selectedInternship.image} alt={selectedInternship.title} className="modal-image internship-modal-image" />
-              <div className="modal-info">
-                <div className="modal-title-section">
+            <div className="company-internship-user-modal-body">
+              <img
+                src={selectedInternship.image}
+                alt={selectedInternship.title}
+                className="company-internship-user-modal-image"
+              />
+              <div className="company-internship-user-modal-info">
+                <div className="company-internship-user-modal-title-section">
                   <h3>{selectedInternship.title}</h3>
-                  <div className="modal-badges">
+                  <div className="company-internship-user-modal-badges">
                     <span 
                       className="status-badge" 
                       style={{ backgroundColor: getStatusColor(selectedInternship.status) }}
@@ -367,50 +371,50 @@ const Internshipuser = () => {
                   </div>
                 </div>
                 
-                <div className="modal-meta">
-                  <div className="meta-item">
-                    <strong>👨‍💼 Coordinator:</strong> {selectedInternship.coordinator}
+                <div className="company-internship-user-modal-meta">
+                  <div className="company-internship-user-meta-item" data-info="coordinator">
+                    <strong>Coordinator:</strong> {selectedInternship.coordinator}
                   </div>
-                  <div className="meta-item">
-                    <strong>🏷️ Department:</strong> {selectedInternship.department}
+                  <div className="company-internship-user-meta-item" data-info="department">
+                    <strong>Department:</strong> {selectedInternship.department}
                   </div>
-                  <div className="meta-item">
-                    <strong>⏱️ Duration:</strong> {selectedInternship.duration}
+                  <div className="company-internship-user-meta-item" data-info="duration">
+                    <strong>Duration:</strong> {selectedInternship.duration}
                   </div>
-                  <div className="meta-item">
-                    <strong>📍 Location:</strong> {selectedInternship.location}
+                  <div className="company-internship-user-meta-item" data-info="location">
+                    <strong>Location:</strong> {selectedInternship.location}
                   </div>
-                  <div className="meta-item">
-                    <strong>💰 Stipend:</strong> ${selectedInternship.stipend}/month
+                  <div className="company-internship-user-meta-item" data-info="stipend">
+                    <strong>Stipend:</strong> ${selectedInternship.stipend}/month
                   </div>
-                  <div className="meta-item">
-                    <strong>🏢 Company:</strong> {selectedInternship.company}
+                  <div className="company-internship-user-meta-item" data-info="company">
+                    <strong>Company:</strong> {selectedInternship.company}
                   </div>
-                  <div className="meta-item">
-                    <strong>👥 Applicants:</strong> {selectedInternship.applicants} students
+                  <div className="company-internship-user-meta-item" data-info="applicants">
+                    <strong>Applicants:</strong> {selectedInternship.applicants} students
                   </div>
-                  <div className="meta-item">
-                    <strong>⭐ Rating:</strong> {selectedInternship.rating}/5.0
+                  <div className="company-internship-user-meta-item" data-info="rating">
+                    <strong>Rating:</strong> {selectedInternship.rating}/5.0
                   </div>
-                  <div className="meta-item">
-                    <strong>📅 Start Date:</strong> {new Date(selectedInternship.startDate).toLocaleDateString()}
+                  <div className="company-internship-user-meta-item" data-info="start-date">
+                    <strong>Start Date:</strong> {new Date(selectedInternship.startDate).toLocaleDateString()}
                   </div>
-                  <div className="meta-item">
-                    <strong>📅 End Date:</strong> {new Date(selectedInternship.endDate).toLocaleDateString()}
+                  <div className="company-internship-user-meta-item" data-info="end-date">
+                    <strong>End Date:</strong> {new Date(selectedInternship.endDate).toLocaleDateString()}
                   </div>
-                  <div className="meta-item">
-                    <strong>📋 Requirements:</strong> {selectedInternship.requirements}
+                  <div className="company-internship-user-meta-item" data-info="requirements">
+                    <strong>Requirements:</strong> {selectedInternship.requirements}
                   </div>
                 </div>
                 
-                <div className="modal-description">
-                  <strong>📝 Description:</strong>
+                <div className="company-internship-user-modal-description">
+                  <strong>Description:</strong>
                   <p>{selectedInternship.description}</p>
                 </div>
                 
-                <div className="modal-skills">
-                  <strong>🛠️ Skills Required:</strong>
-                  <div className="skills-container">
+                <div className="company-internship-user-modal-skills">
+                  <strong>Skills Required:</strong>
+                  <div className="company-internship-user-skills-container">
                     {selectedInternship.skills.map((skill, index) => (
                       <span key={index} className="skill">{skill}</span>
                     ))}
