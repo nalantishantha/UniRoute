@@ -1,4 +1,4 @@
-import { Dashboard,Dashboarduser,AdPublish, AcademicContent, Announcement,Announcementuser,Manageportfolio,Manageportfoliouser } from '../pages/University';
+import { Dashboard,Dashboarduser,AdPublish, AcademicContent,AcademicContentuser, Announcement,Announcementuser,Manageportfolio,Manageportfoliouser } from '../pages/University';
 
 export const universityRoutes = [
   {
@@ -16,6 +16,10 @@ export const universityRoutes = [
   {
     path: '/university/academic-content',
     element: <AcademicContent />,
+  },
+  {
+    path: '/university/academic-content-user',
+    element: <AcademicContentuser />,
   },
   {
     path: '/university/announcement',

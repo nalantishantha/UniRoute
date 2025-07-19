@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import UniSidebar from '../../components/UniSidebar';
-import UniHeader from '../../components/UniHeader';
+import UniversitySidebar from '../../components/Navigation/UniversitySidebar'; // CHANGED: Import UniversitySidebar
+import UniversityNavbar from '../../components/Navigation/UniversityNavbar';
 import Footer from '../../components/Footer';
 import './Manageportfolio.css';
 
 const Manageportfolio = () => {
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // CHANGED: Rename from isSidebarExpanded to isSidebarOpen
   const [editMode, setEditMode] = useState({});
 
   // University data - now editable
@@ -229,601 +229,596 @@ const Manageportfolio = () => {
 
   return (
     <div className="manage-portfolio-page">
-      <div className="manage-portfolio-container">
-        <UniSidebar activePage="manage-portfolio" onExpandChange={setIsSidebarExpanded} />
-        <UniHeader sidebarExpanded={isSidebarExpanded} />
+      {/* SIDEBAR AT THE VERY TOP - OUTSIDE CONTAINER */}
+      <UniversitySidebar 
+        isOpen={isSidebarOpen}
+        setIsOpen={setIsSidebarOpen}
+      />
 
-        <main className={`manage-portfolio-main-content ${isSidebarExpanded ? 'sidebar-expanded' : 'sidebar-collapsed'}`}>
-          
-          {/* Hero Section */}
-          <section className="manage-portfolio-hero">
-            <div className="manage-hero-background">
-              <div className="manage-hero-overlay"></div>
-            </div>
-            <div className="manage-hero-content">
-              <div className="manage-university-logo">🏛️</div>
-              
-              {editMode.hero ? (
-                <div className="manage-edit-form">
-                  <input
-                    type="text"
-                    value={universityInfo.name}
-                    onChange={(e) => updateUniversityInfo('name', e.target.value)}
-                    className="manage-edit-input manage-edit-title"
-                  />
-                  <input
-                    type="text"
-                    value={universityInfo.motto}
-                    onChange={(e) => updateUniversityInfo('motto', e.target.value)}
-                    className="manage-edit-input manage-edit-motto"
-                  />
-                </div>
-              ) : (
-                <>
-                  <h1 className="manage-university-name">{universityInfo.name}</h1>
-                  <p className="manage-university-motto">"{universityInfo.motto}"</p>
-                </>
-              )}
-              
-              <div className="manage-hero-stats">
-                <div className="manage-hero-stat">
-                  {editMode.hero ? (
-                    <input
-                      type="text"
-                      value={universityInfo.established}
-                      onChange={(e) => updateUniversityInfo('established', e.target.value)}
-                      className="manage-edit-input manage-edit-stat"
-                    />
-                  ) : (
-                    <span className="manage-stat-number">{universityInfo.established}</span>
-                  )}
-                  <span className="manage-stat-label">Established</span>
-                </div>
-                <div className="manage-hero-stat">
-                  {editMode.hero ? (
-                    <input
-                      type="text"
-                      value={universityInfo.students}
-                      onChange={(e) => updateUniversityInfo('students', e.target.value)}
-                      className="manage-edit-input manage-edit-stat"
-                    />
-                  ) : (
-                    <span className="manage-stat-number">{universityInfo.students}</span>
-                  )}
-                  <span className="manage-stat-label">Students</span>
-                </div>
-                <div className="manage-hero-stat">
-                  {editMode.hero ? (
-                    <input
-                      type="text"
-                      value={universityInfo.faculty}
-                      onChange={(e) => updateUniversityInfo('faculty', e.target.value)}
-                      className="manage-edit-input manage-edit-stat"
-                    />
-                  ) : (
-                    <span className="manage-stat-number">{universityInfo.faculty}</span>
-                  )}
-                  <span className="manage-stat-label">Faculty</span>
-                </div>
-              </div>
-            </div>
+      {/* NAVBAR */}
+      <UniversityNavbar 
+        onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        sidebarExpanded={isSidebarOpen}
+      />
+
+      {/* MAIN CONTENT */}
+      <main className={`manage-portfolio-main-content ${isSidebarOpen ? 'sidebar-expanded' : 'sidebar-collapsed'}`}>
+        
+        {/* Hero Section */}
+        <section className="portfolio-hero">
+          <div className="hero-background">
+            <div className="hero-overlay"></div>
+          </div>
+          <div className="hero-content">
+            {editMode.hero ? (
+              <input
+                type="text"
+                value={universityInfo.name}
+                onChange={(e) => updateUniversityInfo('name', e.target.value)}
+                className="manage-edit-input manage-edit-title"
+              />
+            ) : (
+              <h1 className="university-name">{universityInfo.name}</h1>
+            )}
             
-            <button 
-              className="manage-edit-btn manage-edit-hero-btn"
-              onClick={() => toggleEditMode('hero')}
-            >
-              {editMode.hero ? '💾 Save' : '✏️ Edit Hero'}
-            </button>
-          </section>
+            <div className="hero-stats">
+              <div className="hero-stat">
+                {editMode.hero ? (
+                  <input
+                    type="text"
+                    value={universityInfo.established}
+                    onChange={(e) => updateUniversityInfo('established', e.target.value)}
+                    className="manage-edit-input manage-edit-stat"
+                  />
+                ) : (
+                  <span className="stat-number">{universityInfo.established}</span>
+                )}
+                <span className="stat-label">Established</span>
+              </div>
+              <div className="hero-stat">
+                {editMode.hero ? (
+                  <input
+                    type="text"
+                    value={universityInfo.students}
+                    onChange={(e) => updateUniversityInfo('students', e.target.value)}
+                    className="manage-edit-input manage-edit-stat"
+                  />
+                ) : (
+                  <span className="stat-number">{universityInfo.students}</span>
+                )}
+                <span className="stat-label">Students</span>
+              </div>
+              <div className="hero-stat">
+                {editMode.hero ? (
+                  <input
+                    type="text"
+                    value={universityInfo.faculty}
+                    onChange={(e) => updateUniversityInfo('faculty', e.target.value)}
+                    className="manage-edit-input manage-edit-stat"
+                  />
+                ) : (
+                  <span className="stat-number">{universityInfo.faculty}</span>
+                )}
+                <span className="stat-label">Faculty</span>
+              </div>
+            </div>
+          </div>
+          
+          <button 
+            className="manage-edit-btn manage-edit-hero-btn"
+            onClick={() => toggleEditMode('hero')}
+          >
+            {editMode.hero ? '💾 Save' : '✏️ Edit Hero'}
+          </button>
+        </section>
 
-          {/* University Overview */}
-          <section className="manage-portfolio-section manage-overview-section">
-            <div className="manage-section-header">
-              <div className="manage-section-title-row">
-                <div>
-                  <h2>🏛️ University Overview</h2>
-                  <p>Learn about our institution's foundation and leadership</p>
-                </div>
+        {/* University Overview */}
+        <section className="manage-portfolio-section manage-overview-section">
+          <div className="manage-section-header">
+            <div className="manage-section-title-row">
+              <div>
+                <h2>🧑‍🎓 University Overview</h2>
+                <p>Learn about our institution's foundation and leadership</p>
+              </div>
+              <button 
+                className="manage-edit-btn"
+                onClick={() => toggleEditMode('overview')}
+              >
+                {editMode.overview ? '💾 Save' : '✏️ Edit'}
+              </button>
+            </div>
+          </div>
+          <div className="manage-overview-grid">
+            <div className="manage-overview-card">
+              <h3>📍 Location</h3>
+              {editMode.overview ? (
+                <input
+                  type="text"
+                  value={universityInfo.location}
+                  onChange={(e) => updateUniversityInfo('location', e.target.value)}
+                  className="manage-edit-input"
+                />
+              ) : (
+                <p>{universityInfo.location}</p>
+              )}
+            </div>
+            <div className="manage-overview-card">
+              <h3>🏫 Type</h3>
+              {editMode.overview ? (
+                <input
+                  type="text"
+                  value={universityInfo.type}
+                  onChange={(e) => updateUniversityInfo('type', e.target.value)}
+                  className="manage-edit-input"
+                />
+              ) : (
+                <p>{universityInfo.type}</p>
+              )}
+            </div>
+            <div className="manage-overview-card">
+              <h3>👨‍💼 Chancellor</h3>
+              {editMode.overview ? (
+                <input
+                  type="text"
+                  value={universityInfo.chancellor}
+                  onChange={(e) => updateUniversityInfo('chancellor', e.target.value)}
+                  className="manage-edit-input"
+                />
+              ) : (
+                <p>{universityInfo.chancellor}</p>
+              )}
+            </div>
+            <div className="manage-overview-card">
+              <h3>👨‍🎓 Vice Chancellor</h3>
+              {editMode.overview ? (
+                <input
+                  type="text"
+                  value={universityInfo.vicechancellor}
+                  onChange={(e) => updateUniversityInfo('vicechancellor', e.target.value)}
+                  className="manage-edit-input"
+                />
+              ) : (
+                <p>{universityInfo.vicechancellor}</p>
+              )}
+            </div>
+            <div className="manage-overview-card">
+              <h3>🏢 Campuses</h3>
+              {editMode.overview ? (
+                <input
+                  type="text"
+                  value={universityInfo.campuses}
+                  onChange={(e) => updateUniversityInfo('campuses', e.target.value)}
+                  className="manage-edit-input"
+                />
+              ) : (
+                <p>{universityInfo.campuses}</p>
+              )}
+            </div>
+            <div className="manage-overview-card">
+              <h3>🎯 Focus</h3>
+              <p>Research & Innovation</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Achievements Section */}
+        <section className="manage-portfolio-section manage-achievements-section">
+          <div className="manage-section-header">
+            <div className="manage-section-title-row">
+              <div>
+                <h2>🏆 Achievements & Awards</h2>
+                <p>Recognition of our excellence and commitment to quality education</p>
+              </div>
+              <div className="manage-section-controls">
                 <button 
                   className="manage-edit-btn"
-                  onClick={() => toggleEditMode('overview')}
+                  onClick={() => toggleEditMode('achievements')}
                 >
-                  {editMode.overview ? '💾 Save' : '✏️ Edit'}
+                  {editMode.achievements ? '💾 Save' : '✏️ Edit'}
                 </button>
-              </div>
-            </div>
-            <div className="manage-overview-grid">
-              <div className="manage-overview-card">
-                <h3>📍 Location</h3>
-                {editMode.overview ? (
-                  <input
-                    type="text"
-                    value={universityInfo.location}
-                    onChange={(e) => updateUniversityInfo('location', e.target.value)}
-                    className="manage-edit-input"
-                  />
-                ) : (
-                  <p>{universityInfo.location}</p>
-                )}
-              </div>
-              <div className="manage-overview-card">
-                <h3>🏫 Type</h3>
-                {editMode.overview ? (
-                  <input
-                    type="text"
-                    value={universityInfo.type}
-                    onChange={(e) => updateUniversityInfo('type', e.target.value)}
-                    className="manage-edit-input"
-                  />
-                ) : (
-                  <p>{universityInfo.type}</p>
-                )}
-              </div>
-              <div className="manage-overview-card">
-                <h3>👨‍💼 Chancellor</h3>
-                {editMode.overview ? (
-                  <input
-                    type="text"
-                    value={universityInfo.chancellor}
-                    onChange={(e) => updateUniversityInfo('chancellor', e.target.value)}
-                    className="manage-edit-input"
-                  />
-                ) : (
-                  <p>{universityInfo.chancellor}</p>
-                )}
-              </div>
-              <div className="manage-overview-card">
-                <h3>👨‍🎓 Vice Chancellor</h3>
-                {editMode.overview ? (
-                  <input
-                    type="text"
-                    value={universityInfo.vicechancellor}
-                    onChange={(e) => updateUniversityInfo('vicechancellor', e.target.value)}
-                    className="manage-edit-input"
-                  />
-                ) : (
-                  <p>{universityInfo.vicechancellor}</p>
-                )}
-              </div>
-              <div className="manage-overview-card">
-                <h3>🏢 Campuses</h3>
-                {editMode.overview ? (
-                  <input
-                    type="text"
-                    value={universityInfo.campuses}
-                    onChange={(e) => updateUniversityInfo('campuses', e.target.value)}
-                    className="manage-edit-input"
-                  />
-                ) : (
-                  <p>{universityInfo.campuses}</p>
-                )}
-              </div>
-              <div className="manage-overview-card">
-                <h3>🎯 Focus</h3>
-                <p>Research & Innovation</p>
-              </div>
-            </div>
-          </section>
-
-          {/* Achievements Section */}
-          <section className="manage-portfolio-section manage-achievements-section">
-            <div className="manage-section-header">
-              <div className="manage-section-title-row">
-                <div>
-                  <h2>🏆 Achievements & Awards</h2>
-                  <p>Recognition of our excellence and commitment to quality education</p>
-                </div>
-                <div className="manage-section-controls">
+                {editMode.achievements && (
                   <button 
-                    className="manage-edit-btn"
-                    onClick={() => toggleEditMode('achievements')}
+                    className="manage-add-btn"
+                    onClick={addAchievement}
                   >
-                    {editMode.achievements ? '💾 Save' : '✏️ Edit'}
+                    ➕ Add Achievement
                   </button>
-                  {editMode.achievements && (
-                    <button 
-                      className="manage-add-btn"
-                      onClick={addAchievement}
-                    >
-                      ➕ Add Achievement
-                    </button>
-                  )}
-                </div>
+                )}
               </div>
             </div>
-            <div className="manage-achievements-grid">
-              {achievements.map((achievement, idx) => (
-                <div key={idx} className="manage-achievement-card">
-                  {editMode.achievements && (
-                    <button 
-                      className="manage-delete-btn"
-                      onClick={() => deleteAchievement(idx)}
-                    >
-                      🗑️
-                    </button>
-                  )}
-                  
-                  {editMode.achievements ? (
-                    <div className="manage-edit-form">
-                      <input
-                        type="text"
-                        value={achievement.year}
-                        onChange={(e) => updateAchievement(idx, 'year', e.target.value)}
-                        className="manage-edit-input"
-                        placeholder="Year"
-                      />
-                      <input
-                        type="text"
-                        value={achievement.title}
-                        onChange={(e) => updateAchievement(idx, 'title', e.target.value)}
-                        className="manage-edit-input"
-                        placeholder="Title"
-                      />
-                      <input
-                        type="text"
-                        value={achievement.rank}
-                        onChange={(e) => updateAchievement(idx, 'rank', e.target.value)}
-                        className="manage-edit-input"
-                        placeholder="Rank"
-                      />
-                      <textarea
-                        value={achievement.description}
-                        onChange={(e) => updateAchievement(idx, 'description', e.target.value)}
-                        className="manage-edit-textarea"
-                        placeholder="Description"
-                      />
-                    </div>
-                  ) : (
-                    <>
-                      <div className="manage-achievement-year">{achievement.year}</div>
-                      <h3 className="manage-achievement-title">{achievement.title}</h3>
-                      <div className="manage-achievement-rank">{achievement.rank}</div>
-                      <p className="manage-achievement-description">{achievement.description}</p>
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Ranking History */}
-          <section className="manage-portfolio-section manage-ranking-section">
-            <div className="manage-section-header">
-              <div className="manage-section-title-row">
-                <div>
-                  <h2>📈 Ranking History</h2>
-                  <p>Our journey of academic excellence over the years</p>
-                </div>
-                <button 
-                  className="manage-edit-btn"
-                  onClick={() => toggleEditMode('ranking')}
-                >
-                  {editMode.ranking ? '💾 Save' : '✏️ Edit'}
-                </button>
-              </div>
-            </div>
-            <div className="manage-ranking-chart">
-              <div className="manage-chart-header">
-                <div>Year</div>
-                <div>World Rank</div>
-                <div>Local Rank</div>
-                <div>Score</div>
-                <div>Trend</div>
-              </div>
-              {rankingHistory.map((rank, idx) => (
-                <div key={idx} className="manage-chart-row">
-                  {editMode.ranking ? (
-                    <>
-                      <input
-                        type="text"
-                        value={rank.year}
-                        onChange={(e) => updateRanking(idx, 'year', e.target.value)}
-                        className="manage-edit-input manage-edit-small"
-                      />
-                      <input
-                        type="text"
-                        value={rank.worldRank}
-                        onChange={(e) => updateRanking(idx, 'worldRank', e.target.value)}
-                        className="manage-edit-input manage-edit-small"
-                      />
-                      <input
-                        type="text"
-                        value={rank.localRank}
-                        onChange={(e) => updateRanking(idx, 'localRank', e.target.value)}
-                        className="manage-edit-input manage-edit-small"
-                      />
-                      <input
-                        type="text"
-                        value={rank.score}
-                        onChange={(e) => updateRanking(idx, 'score', e.target.value)}
-                        className="manage-edit-input manage-edit-small"
-                      />
-                      <div className="manage-rank-trend">
-                        {idx < rankingHistory.length - 1 ? '📈' : '📊'}
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="manage-rank-year">{rank.year}</div>
-                      <div className="manage-rank-world">{rank.worldRank}</div>
-                      <div className="manage-rank-local">#{rank.localRank}</div>
-                      <div className="manage-rank-score">{rank.score}</div>
-                      <div className="manage-rank-trend">
-                        {idx < rankingHistory.length - 1 ? '📈' : '📊'}
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Faculties & Departments */}
-          <section className="manage-portfolio-section manage-faculties-section">
-            <div className="manage-section-header">
-              <div className="manage-section-title-row">
-                <div>
-                  <h2>🏫 Faculties & Schools</h2>
-                  <p>Comprehensive academic divisions offering diverse programs</p>
-                </div>
-                <button 
-                  className="manage-edit-btn"
-                  onClick={() => toggleEditMode('faculties')}
-                >
-                  {editMode.faculties ? '💾 Save' : '✏️ Edit'}
-                </button>
-              </div>
-            </div>
-            <div className="manage-faculties-grid">
-              {faculties.map((faculty, idx) => (
-                <div key={idx} className="manage-faculty-card">
-                  <div className="manage-faculty-header">
-                    {editMode.faculties ? (
-                      <input
-                        type="text"
-                        value={faculty.name}
-                        onChange={(e) => updateFaculty(idx, 'name', e.target.value)}
-                        className="manage-edit-input"
-                      />
-                    ) : (
-                      <h3>{faculty.name}</h3>
-                    )}
-                    <span className="manage-faculty-established">Est. {faculty.established}</span>
-                  </div>
-                  <div className="manage-faculty-stats">
-                    <div className="manage-faculty-stat">
-                      {editMode.faculties ? (
-                        <input
-                          type="text"
-                          value={faculty.students}
-                          onChange={(e) => updateFaculty(idx, 'students', e.target.value)}
-                          className="manage-edit-input manage-edit-small"
-                        />
-                      ) : (
-                        <span className="manage-faculty-stat-number">{faculty.students}</span>
-                      )}
-                      <span className="manage-faculty-stat-label">Students</span>
-                    </div>
-                    <div className="manage-faculty-stat">
-                      <span className="manage-faculty-stat-number">{faculty.departments.length}</span>
-                      <span className="manage-faculty-stat-label">Departments</span>
-                    </div>
-                  </div>
-                  <div className="manage-faculty-departments">
-                    <h4>Departments:</h4>
-                    <div className="manage-departments-list">
-                      {faculty.departments.map((dept, deptIdx) => (
-                        <span key={deptIdx} className="manage-department-tag">{dept}</span>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="manage-faculty-programs">
-                    <h4>Programs:</h4>
-                    <div className="manage-programs-list">
-                      {faculty.programs.map((program, progIdx) => (
-                        <span key={progIdx} className="manage-program-tag">{program}</span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Degree Programs */}
-          <section className="manage-portfolio-section manage-programs-section">
-            <div className="manage-section-header">
-              <div className="manage-section-title-row">
-                <div>
-                  <h2>🎓 Degree Programs</h2>
-                  <p>Comprehensive academic offerings across all levels</p>
-                </div>
-                <button 
-                  className="manage-edit-btn"
-                  onClick={() => toggleEditMode('programs')}
-                >
-                  {editMode.programs ? '💾 Save' : '✏️ Edit'}
-                </button>
-              </div>
-            </div>
-            <div className="manage-programs-grid">
-              {degreePrograms.map((program, idx) => (
-                <div key={idx} className="manage-program-card">
-                  {editMode.programs ? (
+          </div>
+          <div className="manage-achievements-grid">
+            {achievements.map((achievement, idx) => (
+              <div key={idx} className="manage-achievement-card">
+                {editMode.achievements && (
+                  <button 
+                    className="manage-delete-btn"
+                    onClick={() => deleteAchievement(idx)}
+                  >
+                    🗑️
+                  </button>
+                )}
+                
+                {editMode.achievements ? (
+                  <div className="manage-edit-form">
                     <input
                       type="text"
-                      value={program.level}
-                      onChange={(e) => setDegreePrograms(prev => {
-                        const updated = [...prev];
-                        updated[idx] = { ...updated[idx], level: e.target.value };
-                        return updated;
-                      })}
+                      value={achievement.year}
+                      onChange={(e) => updateAchievement(idx, 'year', e.target.value)}
+                      className="manage-edit-input"
+                      placeholder="Year"
+                    />
+                    <input
+                      type="text"
+                      value={achievement.title}
+                      onChange={(e) => updateAchievement(idx, 'title', e.target.value)}
+                      className="manage-edit-input"
+                      placeholder="Title"
+                    />
+                    <input
+                      type="text"
+                      value={achievement.rank}
+                      onChange={(e) => updateAchievement(idx, 'rank', e.target.value)}
+                      className="manage-edit-input"
+                      placeholder="Rank"
+                    />
+                    <textarea
+                      value={achievement.description}
+                      onChange={(e) => updateAchievement(idx, 'description', e.target.value)}
+                      className="manage-edit-textarea"
+                      placeholder="Description"
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <div className="manage-achievement-year">{achievement.year}</div>
+                    <h3 className="manage-achievement-title">{achievement.title}</h3>
+                    <div className="manage-achievement-rank">{achievement.rank}</div>
+                    <p className="manage-achievement-description">{achievement.description}</p>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Ranking History */}
+        <section className="manage-portfolio-section manage-ranking-section">
+          <div className="manage-section-header">
+            <div className="manage-section-title-row">
+              <div>
+                <h2>📈 Ranking History</h2>
+                <p>Our journey of academic excellence over the years</p>
+              </div>
+              <button 
+                className="manage-edit-btn"
+                onClick={() => toggleEditMode('ranking')}
+              >
+                {editMode.ranking ? '💾 Save' : '✏️ Edit'}
+              </button>
+            </div>
+          </div>
+          <div className="manage-ranking-chart">
+            <div className="manage-chart-header">
+              <div>Year</div>
+              <div>World Rank</div>
+              <div>Local Rank</div>
+              <div>Score</div>
+              <div>Trend</div>
+            </div>
+            {rankingHistory.map((rank, idx) => (
+              <div key={idx} className="manage-chart-row">
+                {editMode.ranking ? (
+                  <>
+                    <input
+                      type="text"
+                      value={rank.year}
+                      onChange={(e) => updateRanking(idx, 'year', e.target.value)}
+                      className="manage-edit-input manage-edit-small"
+                    />
+                    <input
+                      type="text"
+                      value={rank.worldRank}
+                      onChange={(e) => updateRanking(idx, 'worldRank', e.target.value)}
+                      className="manage-edit-input manage-edit-small"
+                    />
+                    <input
+                      type="text"
+                      value={rank.localRank}
+                      onChange={(e) => updateRanking(idx, 'localRank', e.target.value)}
+                      className="manage-edit-input manage-edit-small"
+                    />
+                    <input
+                      type="text"
+                      value={rank.score}
+                      onChange={(e) => updateRanking(idx, 'score', e.target.value)}
+                      className="manage-edit-input manage-edit-small"
+                    />
+                    <div className="manage-rank-trend">
+                      {idx < rankingHistory.length - 1 ? '📈' : '📊'}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="manage-rank-year">{rank.year}</div>
+                    <div className="manage-rank-world">{rank.worldRank}</div>
+                    <div className="manage-rank-local">#{rank.localRank}</div>
+                    <div className="manage-rank-score">{rank.score}</div>
+                    <div className="manage-rank-trend">
+                      {idx < rankingHistory.length - 1 ? '📈' : '📊'}
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Faculties & Departments */}
+        <section className="manage-portfolio-section manage-faculties-section">
+          <div className="manage-section-header">
+            <div className="manage-section-title-row">
+              <div>
+                <h2>🏫 Faculties & Schools</h2>
+                <p>Comprehensive academic divisions offering diverse programs</p>
+              </div>
+              <button 
+                className="manage-edit-btn"
+                onClick={() => toggleEditMode('faculties')}
+              >
+                {editMode.faculties ? '💾 Save' : '✏️ Edit'}
+              </button>
+            </div>
+          </div>
+          <div className="manage-faculties-grid">
+            {faculties.map((faculty, idx) => (
+              <div key={idx} className="manage-faculty-card">
+                <div className="manage-faculty-header">
+                  {editMode.faculties ? (
+                    <input
+                      type="text"
+                      value={faculty.name}
+                      onChange={(e) => updateFaculty(idx, 'name', e.target.value)}
                       className="manage-edit-input"
                     />
                   ) : (
-                    <h3>{program.level}</h3>
+                    <h3>{faculty.name}</h3>
                   )}
-                  
+                  <span className="manage-faculty-established">Est. {faculty.established}</span>
+                </div>
+                <div className="manage-faculty-stats">
+                  <div className="manage-faculty-stat">
+                    {editMode.faculties ? (
+                      <input
+                        type="text"
+                        value={faculty.students}
+                        onChange={(e) => updateFaculty(idx, 'students', e.target.value)}
+                        className="manage-edit-input manage-edit-small"
+                      />
+                    ) : (
+                      <span className="manage-faculty-stat-number">{faculty.students}</span>
+                    )}
+                    <span className="manage-faculty-stat-label">Students</span>
+                  </div>
+                  <div className="manage-faculty-stat">
+                    <span className="manage-faculty-stat-number">{faculty.departments.length}</span>
+                    <span className="manage-faculty-stat-label">Departments</span>
+                  </div>
+                </div>
+                <div className="manage-faculty-departments">
+                  <h4>Departments:</h4>
+                  <div className="manage-departments-list">
+                    {faculty.departments.map((dept, deptIdx) => (
+                      <span key={deptIdx} className="manage-department-tag">{dept}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="manage-faculty-programs">
+                  <h4>Programs:</h4>
+                  <div className="manage-programs-list">
+                    {faculty.programs.map((program, progIdx) => (
+                      <span key={progIdx} className="manage-program-tag">{program}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Degree Programs */}
+        <section className="manage-portfolio-section manage-programs-section">
+          <div className="manage-section-header">
+            <div className="manage-section-title-row">
+              <div>
+                <h2>🎓 Degree Programs</h2>
+                <p>Comprehensive academic offerings across all levels</p>
+              </div>
+              <button 
+                className="manage-edit-btn"
+                onClick={() => toggleEditMode('programs')}
+              >
+                {editMode.programs ? '💾 Save' : '✏️ Edit'}
+              </button>
+            </div>
+          </div>
+          <div className="manage-programs-grid">
+            {degreePrograms.map((program, idx) => (
+              <div key={idx} className="manage-program-card">
+                {editMode.programs ? (
+                  <input
+                    type="text"
+                    value={program.level}
+                    onChange={(e) => setDegreePrograms(prev => {
+                      const updated = [...prev];
+                      updated[idx] = { ...updated[idx], level: e.target.value };
+                      return updated;
+                    })}
+                    className="manage-edit-input"
+                  />
+                ) : (
+                  <h3>{program.level}</h3>
+                )}
+                
+                {editMode.programs ? (
+                  <input
+                    type="text"
+                    value={program.count}
+                    onChange={(e) => setDegreePrograms(prev => {
+                      const updated = [...prev];
+                      updated[idx] = { ...updated[idx], count: e.target.value };
+                      return updated;
+                    })}
+                    className="manage-edit-input manage-edit-count"
+                  />
+                ) : (
+                  <div className="manage-program-count">{program.count}</div>
+                )}
+                
+                <p>Programs Available</p>
+                <div className="manage-program-duration">
                   {editMode.programs ? (
                     <input
                       type="text"
-                      value={program.count}
+                      value={program.duration}
                       onChange={(e) => setDegreePrograms(prev => {
                         const updated = [...prev];
-                        updated[idx] = { ...updated[idx], count: e.target.value };
+                        updated[idx] = { ...updated[idx], duration: e.target.value };
                         return updated;
                       })}
-                      className="manage-edit-input manage-edit-count"
+                      className="manage-edit-input"
+                      placeholder="Duration"
                     />
                   ) : (
-                    <div className="manage-program-count">{program.count}</div>
-                  )}
-                  
-                  <p>Programs Available</p>
-                  <div className="manage-program-duration">
-                    {editMode.programs ? (
-                      <input
-                        type="text"
-                        value={program.duration}
-                        onChange={(e) => setDegreePrograms(prev => {
-                          const updated = [...prev];
-                          updated[idx] = { ...updated[idx], duration: e.target.value };
-                          return updated;
-                        })}
-                        className="manage-edit-input"
-                        placeholder="Duration"
-                      />
-                    ) : (
-                      <span>⏰ Duration: {program.duration}</span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Recent Events */}
-          <section className="manage-portfolio-section manage-events-section">
-            <div className="manage-section-header">
-              <div className="manage-section-title-row">
-                <div>
-                  <h2>📅 Recent Events & Milestones</h2>
-                  <p>Highlighting our major events and achievements</p>
-                </div>
-                <button 
-                  className="manage-edit-btn"
-                  onClick={() => toggleEditMode('events')}
-                >
-                  {editMode.events ? '💾 Save' : '✏️ Edit'}
-                </button>
-              </div>
-            </div>
-            <div className="manage-events-timeline">
-              {recentEvents.map((event, idx) => (
-                <div key={event.id} className="manage-event-item">
-                  <div className="manage-event-icon">{event.image}</div>
-                  <div className="manage-event-content">
-                    <div className="manage-event-header">
-                      {editMode.events ? (
-                        <input
-                          type="text"
-                          value={event.title}
-                          onChange={(e) => updateEvent(idx, 'title', e.target.value)}
-                          className="manage-edit-input"
-                        />
-                      ) : (
-                        <h3>{event.title}</h3>
-                      )}
-                      <span className="manage-event-type">{event.type}</span>
-                    </div>
-                    {editMode.events ? (
-                      <input
-                        type="text"
-                        value={event.date}
-                        onChange={(e) => updateEvent(idx, 'date', e.target.value)}
-                        className="manage-edit-input"
-                      />
-                    ) : (
-                      <div className="manage-event-date">{event.date}</div>
-                    )}
-                    {editMode.events ? (
-                      <textarea
-                        value={event.description}
-                        onChange={(e) => updateEvent(idx, 'description', e.target.value)}
-                        className="manage-edit-textarea"
-                      />
-                    ) : (
-                      <p className="manage-event-description">{event.description}</p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Facilities */}
-          <section className="manage-portfolio-section manage-facilities-section">
-            <div className="manage-section-header">
-              <div className="manage-section-title-row">
-                <div>
-                  <h2>🏢 Campus Facilities</h2>
-                  <p>World-class infrastructure supporting academic excellence</p>
-                </div>
-                <button 
-                  className="manage-edit-btn"
-                  onClick={() => toggleEditMode('facilities')}
-                >
-                  {editMode.facilities ? '💾 Save' : '✏️ Edit'}
-                </button>
-              </div>
-            </div>
-            <div className="manage-facilities-grid">
-              {facilities.map((facility, idx) => (
-                <div key={idx} className="manage-facility-card">
-                  <div className="manage-facility-icon">{facility.icon}</div>
-                  {editMode.facilities ? (
-                    <>
-                      <input
-                        type="text"
-                        value={facility.name}
-                        onChange={(e) => updateFacility(idx, 'name', e.target.value)}
-                        className="manage-edit-input"
-                      />
-                      <textarea
-                        value={facility.description}
-                        onChange={(e) => updateFacility(idx, 'description', e.target.value)}
-                        className="manage-edit-textarea"
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <h3>{facility.name}</h3>
-                      <p>{facility.description}</p>
-                    </>
+                    <span>⏰ Duration: {program.duration}</span>
                   )}
                 </div>
-              ))}
-            </div>
-          </section>
+              </div>
+            ))}
+          </div>
+        </section>
 
-          {/* Global Save Button */}
-          {Object.values(editMode).some(mode => mode) && (
-            <div className="manage-global-save">
-              <button className="manage-global-save-btn" onClick={saveChanges}>
-                💾 Save All Changes
+        {/* Recent Events */}
+        <section className="manage-portfolio-section manage-events-section">
+          <div className="manage-section-header">
+            <div className="manage-section-title-row">
+              <div>
+                <h2>📅 Recent Events & Milestones</h2>
+                <p>Highlighting our major events and achievements</p>
+              </div>
+              <button 
+                className="manage-edit-btn"
+                onClick={() => toggleEditMode('events')}
+              >
+                {editMode.events ? '💾 Save' : '✏️ Edit'}
               </button>
             </div>
-          )}
+          </div>
+          <div className="manage-events-timeline">
+            {recentEvents.map((event, idx) => (
+              <div key={event.id} className="manage-event-item">
+                <div className="manage-event-icon">{event.image}</div>
+                <div className="manage-event-content">
+                  <div className="manage-event-header">
+                    {editMode.events ? (
+                      <input
+                        type="text"
+                        value={event.title}
+                        onChange={(e) => updateEvent(idx, 'title', e.target.value)}
+                        className="manage-edit-input"
+                      />
+                    ) : (
+                      <h3>{event.title}</h3>
+                    )}
+                    <span className="manage-event-type">{event.type}</span>
+                  </div>
+                  {editMode.events ? (
+                    <input
+                      type="text"
+                      value={event.date}
+                      onChange={(e) => updateEvent(idx, 'date', e.target.value)}
+                      className="manage-edit-input"
+                    />
+                  ) : (
+                    <div className="manage-event-date">{event.date}</div>
+                  )}
+                  {editMode.events ? (
+                    <textarea
+                      value={event.description}
+                      onChange={(e) => updateEvent(idx, 'description', e.target.value)}
+                      className="manage-edit-textarea"
+                    />
+                  ) : (
+                    <p className="manage-event-description">{event.description}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
-        </main>
+        {/* Facilities */}
+        <section className="manage-portfolio-section manage-facilities-section">
+          <div className="manage-section-header">
+            <div className="manage-section-title-row">
+              <div>
+                <h2>🏢 Campus Facilities</h2>
+                <p>World-class infrastructure supporting academic excellence</p>
+              </div>
+              <button 
+                className="manage-edit-btn"
+                onClick={() => toggleEditMode('facilities')}
+              >
+                {editMode.facilities ? '💾 Save' : '✏️ Edit'}
+              </button>
+            </div>
+          </div>
+          <div className="manage-facilities-grid">
+            {facilities.map((facility, idx) => (
+              <div key={idx} className="manage-facility-card">
+                <div className="manage-facility-icon">{facility.icon}</div>
+                {editMode.facilities ? (
+                  <>
+                    <input
+                      type="text"
+                      value={facility.name}
+                      onChange={(e) => updateFacility(idx, 'name', e.target.value)}
+                      className="manage-edit-input"
+                    />
+                    <textarea
+                      value={facility.description}
+                      onChange={(e) => updateFacility(idx, 'description', e.target.value)}
+                      className="manage-edit-textarea"
+                    />
+                  </>
+                ) : (
+                  <>
+                    <h3>{facility.name}</h3>
+                    <p>{facility.description}</p>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
 
-        <Footer
-          title="University of Colombo"
-          subtitle="Excellence in Higher Education Since 1921"
-          theme="dark"
-          sidebarExpanded={isSidebarExpanded}
-        />
-      </div>
+        {/* Global Save Button */}
+        {Object.values(editMode).some(mode => mode) && (
+          <div className="manage-global-save">
+            <button className="manage-global-save-btn" onClick={saveChanges}>
+              💾 Save All Changes
+            </button>
+          </div>
+        )}
+
+      </main>
+
+      <Footer
+        title="University of Colombo"
+        subtitle="Excellence in Higher Education Since 1921"
+        theme="dark"
+        sidebarExpanded={isSidebarOpen}
+      />
     </div>
   );
 };

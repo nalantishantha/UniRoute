@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Sidebar from '../../components/Sidebar';
+import CompanyUserSidebar from '../../components/Navigation/CompanyUsersidebar'; // USER sidebar
+import CompanyDashboardNavbar from '../../components/Navigation/CompanyDashboardNavbar';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // REVERTED: Back to true (sidebar visible by default)
   const [currentTime, setCurrentTime] = useState(new Date());
   const navigate = useNavigate();
 
@@ -166,221 +167,200 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-page">
-      <div className="dashboard-container">
-        {/* Toggle Sidebar Component */}
-        <Sidebar 
-          activePage="dashboard" 
-          onExpandChange={setIsSidebarExpanded}
-        />
+      <CompanyUserSidebar
+        isOpen={isSidebarOpen}
+        setIsOpen={setIsSidebarOpen}
+      />
+      <CompanyDashboardNavbar
+        onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        sidebarExpanded={isSidebarOpen}
+      />
+      <main className={`dashboard-main ${isSidebarOpen ? 'sidebar-expanded' : 'sidebar-collapsed'}`}>
+        
+        {/* Company Story Section */}
+        <section className="dashboard-story">
+          <h2>Our Story</h2>
+          <p className="dashboard-story__subtitle">From humble beginnings to a global leader in technology, we've always been driven by a passion for innovation and a commitment to excellence.</p>
+          <div className="dashboard-story__details">
+            <div>
+              <h3>Pioneering the Future of Technology</h3>
+              <p>Founded in 2020, Tech Innovations began with a vision to revolutionize how businesses interact with technology. What started as a small team with big ideas has grown into a leading provider of innovative solutions, serving a diverse clientele across various industries. Our journey has been defined by continuous learning, adaptability, and an unwavering focus on customer success.</p>
+              <p>We believe that technology should empower, simplify, and inspire. Every solution we craft, every project we undertake, is guided by this philosophy. Our commitment to research and development ensures that we are always at the forefront of emerging technologies, delivering not just solutions, but future-proof advantages.</p>
+              <a href="#" className="dashboard-link">Learn More About Us →</a>
+            </div>
+            <div>
+              <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80" alt="Team" />
+            </div>
+          </div>
+        </section>
 
-        {/* Main Content with responsive class */}
-        <main className={`dashboard-main ${isSidebarExpanded ? 'sidebar-expanded' : 'sidebar-collapsed'}`}>
-          {/* Hero Section - Same style as Course page */}
-          <section className="company-dashboard-hero">
-            <div className="hero-content">
-              <div className="hero-text">
-                <div className="hero-title-with-logo">
-                  <img
-                    src="https://cdn-icons-png.flaticon.com/512/1041/1041916.png"
-                    alt="Company Logo"
-                    className="company-logo"
-                  />
-                  <h1>Inovetive Tech Dashboard</h1>
+        {/* What We Offer Section */}
+        <section className="dashboard-offer">
+          <h2>What We Offer</h2>
+          <p>Our comprehensive suite of services and products are designed to empower your business, enhance efficiency, and drive unparalleled growth.</p>
+          <div className="dashboard-offer__grid">
+            <div className="dashboard-offer__item">
+              <h4>Innovative Solutions</h4>
+              <p>We develop cutting-edge solutions that solve complex problems and drive progress.</p>
+            </div>
+            <div className="dashboard-offer__item">
+              <h4>Expert Consultation</h4>
+              <p>Our team of seasoned experts provides unparalleled insights and strategic guidance.</p>
+            </div>
+            <div className="dashboard-offer__item">
+              <h4>Reliable Support</h4>
+              <p>Dedicated support ensures seamless operation and peace of mind for our clients.</p>
+            </div>
+            <div className="dashboard-offer__item">
+              <h4>Future-Proof Technology</h4>
+              <p>Building scalable and adaptable technologies ready for tomorrow's challenges.</p>
+            </div>
+            <div className="dashboard-offer__item">
+              <h4>Custom Development</h4>
+              <p>Tailored software and hardware solutions crafted to meet unique business needs.</p>
+            </div>
+            <div className="dashboard-offer__item">
+              <h4>Global Reach</h4>
+              <p>Delivering innovative tech solutions to businesses across continents.</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Recently Uploaded Internships */}
+        <section className="recent-uploads">
+          <div className="section-header-with-button">
+            <h3>Recently Uploaded Internships</h3>
+            <button className="view-all-btn" onClick={handleViewAllInternships}>
+              View All Internships →
+            </button>
+          </div>
+          <div className="upload-grid">
+            {recentInternships.map((internship) => (
+              <div key={internship.id} className="upload-card">
+                <img src={internship.image} alt={internship.title} />
+                <div className="upload-content">
+                  <div className="upload-title">{internship.title}</div>
+                  <div className="upload-meta">{internship.type} | {internship.location}</div>
+                  <div className="upload-company">{internship.company}</div>
+                  <div className="upload-time">Uploaded {internship.uploadedDate}</div>
+                  <button className="btn btn-outline">View Details</button>
                 </div>
-                <p>Leading provider of innovative tech solutions, shaping the future of digital excellence</p>
-                <div className="hero-time-display">
-                  <div className="current-time">{formatTime(currentTime)}</div>
-                  <div className="current-date">{formatDate(currentTime)}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Recently Uploaded Courses */}
+        <section className="recent-uploads">
+          <div className="section-header-with-button">
+            <h3>Recently Uploaded Courses</h3>
+            <button className="view-all-btn" onClick={handleViewAllCourses}>
+              View All Courses →
+            </button>
+          </div>
+          <div className="upload-grid">
+            {recentCourses.map((course) => (
+              <div key={course.id} className="upload-card">
+                <img src={course.image} alt={course.title} />
+                <div className="upload-content">
+                  <div className="upload-title">{course.title}</div>
+                  <div className="upload-meta">{course.level} | {course.duration}</div>
+                  <div className="upload-time">Uploaded {course.uploadedDate}</div>
+                  <button className="btn btn-outline">View Details</button>
                 </div>
               </div>
-            </div>
-          </section>
+            ))}
+          </div>
+        </section>
 
-          {/* Company Story Section */}
-          <section className="dashboard-story">
-            <h2>Our Story</h2>
-            <p className="dashboard-story__subtitle">From humble beginnings to a global leader in technology, we've always been driven by a passion for innovation and a commitment to excellence.</p>
-            <div className="dashboard-story__details">
-              <div>
-                <h3>Pioneering the Future of Technology</h3>
-                <p>Founded in 2020, Tech Innovations began with a vision to revolutionize how businesses interact with technology. What started as a small team with big ideas has grown into a leading provider of innovative solutions, serving a diverse clientele across various industries. Our journey has been defined by continuous learning, adaptability, and an unwavering focus on customer success.</p>
-                <p>We believe that technology should empower, simplify, and inspire. Every solution we craft, every project we undertake, is guided by this philosophy. Our commitment to research and development ensures that we are always at the forefront of emerging technologies, delivering not just solutions, but future-proof advantages.</p>
-                <a href="#" className="dashboard-link">Learn More About Us →</a>
-              </div>
-              <div>
-                <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80" alt="Team" />
-              </div>
-            </div>
-          </section>
-
-          {/* What We Offer Section */}
-          <section className="dashboard-offer">
-            <h2>What We Offer</h2>
-            <p>Our comprehensive suite of services and products are designed to empower your business, enhance efficiency, and drive unparalleled growth.</p>
-            <div className="dashboard-offer__grid">
-              <div className="dashboard-offer__item">
-                <h4>Innovative Solutions</h4>
-                <p>We develop cutting-edge solutions that solve complex problems and drive progress.</p>
-              </div>
-              <div className="dashboard-offer__item">
-                <h4>Expert Consultation</h4>
-                <p>Our team of seasoned experts provides unparalleled insights and strategic guidance.</p>
-              </div>
-              <div className="dashboard-offer__item">
-                <h4>Reliable Support</h4>
-                <p>Dedicated support ensures seamless operation and peace of mind for our clients.</p>
-              </div>
-              <div className="dashboard-offer__item">
-                <h4>Future-Proof Technology</h4>
-                <p>Building scalable and adaptable technologies ready for tomorrow's challenges.</p>
-              </div>
-              <div className="dashboard-offer__item">
-                <h4>Custom Development</h4>
-                <p>Tailored software and hardware solutions crafted to meet unique business needs.</p>
-              </div>
-              <div className="dashboard-offer__item">
-                <h4>Global Reach</h4>
-                <p>Delivering innovative tech solutions to businesses across continents.</p>
-              </div>
-            </div>
-          </section>
-
-          {/* Recently Uploaded Internships */}
-          <section className="recent-uploads">
-            <div className="section-header-with-button">
-              <h3>Recently Uploaded Internships</h3>
-              <button className="view-all-btn" onClick={handleViewAllInternships}>
-                View All Internships →
+        {/* Recent Announcements & Activity Log */}
+        <section className="recent-section">
+          <div className="recent-box">
+            <div className="recent-box-header">
+              <h4>Recent Announcements</h4>
+              <button className="view-all-link-btn" onClick={handleViewAllAnnouncements}>
+                View All Announcements →
               </button>
             </div>
-            <div className="upload-grid">
-              {recentInternships.map((internship) => (
-                <div key={internship.id} className="upload-card">
-                  <img src={internship.image} alt={internship.title} />
-                  <div className="upload-content">
-                    <div className="upload-title">{internship.title}</div>
-                    <div className="upload-meta">{internship.type} | {internship.location}</div>
-                    <div className="upload-company">{internship.company}</div>
-                    <div className="upload-time">Uploaded {internship.uploadedDate}</div>
-                    <button className="btn btn-outline">View Details</button>
-                  </div>
-                </div>
+            <ul>
+              {recentAnnouncements.map((announcement) => (
+                <li key={announcement.id}>
+                  <b>{announcement.title}</b>
+                  <span>{announcement.description}</span>
+                  <div className="time-stamp">{announcement.time}</div>
+                </li>
               ))}
-            </div>
-          </section>
+            </ul>
+          </div>
+        </section>
 
-          {/* Recently Uploaded Courses */}
-          <section className="recent-uploads">
-            <div className="section-header-with-button">
-              <h3>Recently Uploaded Courses</h3>
-              <button className="view-all-btn" onClick={handleViewAllCourses}>
-                View All Courses →
-              </button>
-            </div>
-            <div className="upload-grid">
-              {recentCourses.map((course) => (
-                <div key={course.id} className="upload-card">
-                  <img src={course.image} alt={course.title} />
-                  <div className="upload-content">
-                    <div className="upload-title">{course.title}</div>
-                    <div className="upload-meta">{course.level} | {course.duration}</div>
-                    <div className="upload-time">Uploaded {course.uploadedDate}</div>
-                    <button className="btn btn-outline">View Details</button>
-                  </div>
+        {/* Team Section */}
+        <section className="dashboard-team">
+          <h2>Meet Our Visionaries</h2>
+          <p>Our team is composed of passionate innovators, dedicated problem-solvers, and industry leaders committed to pushing the boundaries of technology.</p>
+          <div className="dashboard-team__grid">
+            {teamMembers.map((member, index) => (
+              <div key={index} className="dashboard-team__member">
+                <img src={member.image} alt={member.name} />
+                <div className="dashboard-team__member-info">
+                  <h5>{member.name}</h5>
+                  <span>{member.role}</span>
                 </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Recent Announcements & Activity Log */}
-          <section className="recent-section">
-            <div className="recent-box">
-              <div className="recent-box-header">
-                <h4>Recent Announcements</h4>
-                <button className="view-all-link-btn" onClick={handleViewAllAnnouncements}>
-                  View All Announcements →
-                </button>
               </div>
-              <ul>
-                {recentAnnouncements.map((announcement) => (
-                  <li key={announcement.id}>
-                    <b>{announcement.title}</b>
-                    <span>{announcement.description}</span>
-                    <div className="time-stamp">{announcement.time}</div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
+            ))}
+          </div>
+        </section>
 
-          {/* Team Section */}
-          <section className="dashboard-team">
-            <h2>Meet Our Visionaries</h2>
-            <p>Our team is composed of passionate innovators, dedicated problem-solvers, and industry leaders committed to pushing the boundaries of technology.</p>
-            <div className="dashboard-team__grid">
-              {teamMembers.map((member, index) => (
-                <div key={index} className="dashboard-team__member">
-                  <img src={member.image} alt={member.name} />
-                  <div className="dashboard-team__member-info">
-                    <h5>{member.name}</h5>
-                    <span>{member.role}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
+        {/* Testimonials Section */}
+        <section className="dashboard-testimonials">
+          <h2>What Our Clients Say</h2>
+          <div className="dashboard-testimonials__grid">
+            {testimonials.map((testimonial, index) => (
+              <div key={index} className="dashboard-testimonial">
+                <p>"{testimonial.quote}"</p>
+                <span>
+                  {testimonial.author}<br />
+                  <small>{testimonial.role}</small>
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
 
-          {/* Testimonials Section */}
-          <section className="dashboard-testimonials">
-            <h2>What Our Clients Say</h2>
-            <div className="dashboard-testimonials__grid">
-              {testimonials.map((testimonial, index) => (
-                <div key={index} className="dashboard-testimonial">
-                  <p>"{testimonial.quote}"</p>
-                  <span>
-                    {testimonial.author}<br />
-                    <small>{testimonial.role}</small>
-                  </span>
-                </div>
-              ))}
+        {/* Contact Section */}
+        <section className="dashboard-contact">
+          <h2>Get in Touch</h2>
+          <p>We'd love to hear from you. Whether you have a question about our services, need support, or just want to chat, our team is ready.</p>
+          <div className="dashboard-contact__grid">
+            <div className="dashboard-contact__item">
+              <span className="dashboard-contact__icon">✉️</span>
+              <h5>Email Us</h5>
+              <p>info@techinnovations.com</p>
             </div>
-          </section>
+            <div className="dashboard-contact__item">
+              <span className="dashboard-contact__icon">📞</span>
+              <h5>Call Us</h5>
+              <p>+1 (555) 123-4567</p>
+            </div>
+            <div className="dashboard-contact__item">
+              <span className="dashboard-contact__icon">📍</span>
+              <h5>Visit Us</h5>
+              <p>123 Tech Drive, Innovation City, CA 90210</p>
+            </div>
+          </div>
+        </section>
 
-          {/* Contact Section */}
-          <section className="dashboard-contact">
-            <h2>Get in Touch</h2>
-            <p>We'd love to hear from you. Whether you have a question about our services, need support, or just want to chat, our team is ready.</p>
-            <div className="dashboard-contact__grid">
-              <div className="dashboard-contact__item">
-                <span className="dashboard-contact__icon">✉️</span>
-                <h5>Email Us</h5>
-                <p>info@techinnovations.com</p>
-              </div>
-              <div className="dashboard-contact__item">
-                <span className="dashboard-contact__icon">📞</span>
-                <h5>Call Us</h5>
-                <p>+1 (555) 123-4567</p>
-              </div>
-              <div className="dashboard-contact__item">
-                <span className="dashboard-contact__icon">📍</span>
-                <h5>Visit Us</h5>
-                <p>123 Tech Drive, Innovation City, CA 90210</p>
-              </div>
+        {/* Footer - Same as Course page */}
+        <footer className="dashboard-footer">
+          <div className="footer-content">
+            <h3>Stay Connected</h3>
+            <div className="newsletter">
+              <input type="email" placeholder="Your email" />
+              <button>Subscribe</button>
             </div>
-          </section>
-
-          {/* Footer - Same as Course page */}
-          <footer className="dashboard-footer">
-            <div className="footer-content">
-              <h3>Stay Connected</h3>
-              <div className="newsletter">
-                <input type="email" placeholder="Your email" />
-                <button>Subscribe</button>
-              </div>
-            </div>
-          </footer>
-        </main>
-      </div>
+          </div>
+        </footer>
+      </main>
     </div>
   );
 };

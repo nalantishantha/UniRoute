@@ -20,11 +20,11 @@
 }
 
 .announcement-main.sidebar-expanded {
-  margin-left: 280px;
+  margin-left: 288px; /* CHANGED: Updated to match CompanySidebar width */
 }
 
 .announcement-main.sidebar-collapsed {
-  margin-left: 80px;
+  margin-left: 0; /* CHANGED: Updated for new sidebar behavior */
 }
 
 /* Hero Section */
@@ -720,6 +720,29 @@
 
 .newsletter button:hover {
   background: #2563eb;
+}
+
+/* Navbar responsive styles */
+.company-dashboard-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: #fff;
+  transition: margin-left 0.3s;
+  min-width: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+
+.company-dashboard-navbar.sidebar-expanded {
+  margin-left: 288px; /* CHANGED: Updated to match sidebar width */
+  width: calc(100vw - 288px);
+}
+
+.company-dashboard-navbar.sidebar-collapsed {
+  margin-left: 0; /* CHANGED: Updated for new sidebar behavior */
+  width: 100vw;
 }
 
 /* Responsive Design */

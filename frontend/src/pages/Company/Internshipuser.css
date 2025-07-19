@@ -14,18 +14,50 @@
 /* Main Content - Responsive to sidebar state */
 .internship-main {
   flex: 1;
-  margin-left: 80px; /* Default collapsed sidebar width */
+  margin-left: 80px;
   overflow-y: auto;
   min-height: 100vh;
   transition: margin-left 0.3s ease;
 }
 
 .internship-main.sidebar-expanded {
-  margin-left: 280px; /* Expanded sidebar width */
+  margin-left: 288px; /* CHANGED: Updated to match CompanySidebar width */
 }
 
 .internship-main.sidebar-collapsed {
-  margin-left: 80px; /* Collapsed sidebar width */
+  margin-left: 0; /* CHANGED: Updated for new sidebar behavior */
+}
+
+/* Navbar responsive styles */
+.company-dashboard-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: #fff;
+  transition: margin-left 0.3s;
+  min-width: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+
+.company-dashboard-navbar.sidebar-expanded {
+  margin-left: 288px; /* CHANGED: Updated to match sidebar width */
+  width: calc(100vw - 288px);
+}
+
+.company-dashboard-navbar.sidebar-collapsed {
+  margin-left: 0; /* CHANGED: Updated for new sidebar behavior */
+  width: 100vw;
+}
+
+@media (max-width: 900px) {
+  .company-dashboard-navbar,
+  .company-dashboard-navbar.sidebar-expanded,
+  .company-dashboard-navbar.sidebar-collapsed {
+    margin-left: 0;
+    width: 100vw;
+  }
 }
 
 /* Add the rest of the CSS content from Internship.css here... */

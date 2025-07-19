@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import UniSidebar from '../../components/UniSidebar';
-import UniHeader from '../../components/UniHeader';
+import UniversitySidebar from '../../components/Navigation/UniversitySidebar'; // CHANGED: Import UniversitySidebar
+import UniversityNavbar from '../../components/Navigation/UniversityNavbar';
 import Footer from '../../components/Footer';
 import './AcademicContent.css';
 
@@ -69,7 +69,7 @@ const initialData = {
 };
 
 const AcademicContent = () => {
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // CHANGED: Rename from isSidebarExpanded to isSidebarOpen
   const [data, setData] = useState(initialData);
   const [selectedFaculty, setSelectedFaculty] = useState(null);
   const [selectedCourse, setSelectedCourse] = useState(null);
@@ -93,26 +93,33 @@ const AcademicContent = () => {
 
   // Course handlers
   const handleAddCourse = () => {
-    if (!selectedFaculty || !courseForm.name.trim()) {
+    if (!courseForm.name.trim() || !courseForm.duration.trim() || !courseForm.intake.trim()) {
       alert('Please fill in all required fields');
       return;
     }
-    
-    const newCourse = {
-      id: Date.now(),
-      ...courseForm,
-      subjects: []
-    };
-    
-    setData(prev => ({
-      ...prev,
-      faculties: prev.faculties.map(f =>
-        f.id === selectedFaculty.id
-          ? { ...f, courses: [...f.courses, newCourse] }
-          : f
-      )
-    }));
-    
+    setData(prev => {
+      const updatedFaculties = prev.faculties.map(faculty =>
+        faculty.id === selectedFaculty.id
+          ? {
+              ...faculty,
+              courses: [
+                ...faculty.courses,
+                {
+                  id: Date.now(),
+                  name: courseForm.name,
+                  duration: courseForm.duration,
+                  intake: courseForm.intake,
+                  subjects: []
+                }
+              ]
+            }
+          : faculty
+      );
+      // Update selectedFaculty to the new faculty object
+      const newFaculty = updatedFaculties.find(f => f.id === selectedFaculty.id);
+      setSelectedFaculty(newFaculty);
+      return { ...prev, faculties: updatedFaculties };
+    });
     setShowCourseModal(false);
     setCourseForm({ name: '', duration: '', intake: '' });
     alert('Course added successfully!');
@@ -374,7 +381,6 @@ const AcademicContent = () => {
   };
 
   const handleDownloadFile = (filename) => {
-    // Simulate file download
     alert(`Downloading: ${filename}\n\nIn a real application, this would trigger a file download.`);
   };
 
@@ -424,12 +430,34 @@ const AcademicContent = () => {
   };
 
   // Syllabus handlers
-  const handleOpenSyllabus = () => {
-    setTempSyllabus(selectedSubject.syllabus);
+  const handleOpenSyllabus = (subject) => {
+    // Parse syllabus string into overview and topics/subtopics if possible
+    const syllabus = subject.syllabus || '';
+    let overview = syllabus;
+    let topics = [];
+    // If the syllabus contains numbered topics, split them
+    const topicMatches = syllabus.match(/(\d+\.\s.*?)(?=\d+\.|$)/gs);
+    if (topicMatches && topicMatches.length > 0) {
+      overview = syllabus.split(topicMatches[0])[0].trim();
+      topics = topicMatches.map(t => {
+        const [title, ...subs] = t.split('\n').map(line => line.trim()).filter(Boolean);
+        return {
+          title: title.replace(/^\d+\.\s*/, ''),
+          subtopics: subs.map(s => s.replace(/^[-•]\s*/, ''))
+        };
+      });
+    }
+    setTempSyllabus({ overview, topics });
+    setSelectedSubject(subject); // Ensure the correct subject is set
     setShowSyllabusModal(true);
   };
 
   const handleSaveSyllabus = () => {
+    if (!tempSyllabus.trim()) {
+      alert('Please enter syllabus content');
+      return;
+    }
+
     setData(prev => ({
       ...prev,
       faculties: prev.faculties.map(f =>
@@ -473,290 +501,362 @@ const AcademicContent = () => {
     alert('Syllabus updated successfully!');
   };
 
+  // Course handlers - ADD this missing function
+  const handleCourseSubmit = (e) => {
+    e.preventDefault();
+    if (editingCourse) {
+      handleUpdateCourse();
+    } else {
+      handleAddCourse();
+    }
+  };
+
+  // Add these states at the top inside AcademicContent component
+  const [showCourseEditModal, setShowCourseEditModal] = useState(false);
+  const [courseEditForm, setCourseEditForm] = useState({ name: '', duration: '', intake: '' });
+  const [editingCourseId, setEditingCourseId] = useState(null);
+
+  // Handler for opening the edit modal
+  const handleOpenCourseEditModal = (course) => {
+    setEditingCourseId(course.id);
+    setCourseEditForm({
+      name: course.name,
+      duration: course.duration,
+      intake: course.intake
+    });
+    setShowCourseEditModal(true);
+  };
+
+  // Handler for saving the edited course
+  const handleSaveCourseEdit = (e) => {
+    e.preventDefault();
+    if (!courseEditForm.name.trim() || !courseEditForm.duration.trim() || !courseEditForm.intake.trim()) {
+      alert('Please fill in all required fields');
+      return;
+    }
+    setData(prev => ({
+      ...prev,
+      faculties: prev.faculties.map(f =>
+        f.id === selectedFaculty.id
+          ? {
+              ...f,
+              courses: f.courses.map(c =>
+                c.id === editingCourseId
+                  ? { ...c, ...courseEditForm }
+                  : c
+              )
+            }
+          : f
+      )
+    }));
+    // Update selectedCourse if it's the one being edited
+    if (selectedCourse && selectedCourse.id === editingCourseId) {
+      setSelectedCourse({ ...selectedCourse, ...courseEditForm });
+    }
+    setShowCourseEditModal(false);
+    setEditingCourseId(null);
+    setCourseEditForm({ name: '', duration: '', intake: '' });
+    alert('Course updated successfully!');
+  };
+
   return (
     <div className="academic-content-page">
-      <div className="academic-dashboard-container">
-        <UniSidebar activePage="academic-content" onExpandChange={setIsSidebarExpanded} />
-        <UniHeader sidebarExpanded={isSidebarExpanded} />
+      {/* SIDEBAR AT THE VERY TOP - OUTSIDE CONTAINER */}
+      <UniversitySidebar 
+        isOpen={isSidebarOpen}
+        setIsOpen={setIsSidebarOpen}
+      />
 
-        <main className={`academic-main-content ${isSidebarExpanded ? 'sidebar-expanded' : 'sidebar-collapsed'}`}>
-          
-          {/* Overview Section */}
-          <section className="academic-overview">
-            <div className="overview-header">
-              <h1>Academic Content Management</h1>
-              <p>Manage faculties, courses, subjects, and academic content across the university</p>
-            </div>
-            <div className="overview-stats">
-              <div className="stat-card">
-                <h3>{data.faculties.length}</h3>
-                <p>Faculties</p>
-              </div>
-              <div className="stat-card">
-                <h3>{data.faculties.reduce((total, f) => total + f.courses.length, 0)}</h3>
-                <p>Total Courses</p>
-              </div>
-              <div className="stat-card">
-                <h3>{data.faculties.reduce((total, f) => total + f.courses.reduce((ct, c) => ct + c.subjects.length, 0), 0)}</h3>
-                <p>Total Subjects</p>
-              </div>
-            </div>
-          </section>
+      {/* NAVBAR */}
+      <UniversityNavbar
+        onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        sidebarExpanded={isSidebarOpen}
+      />
 
-          {/* Faculties Section */}
-          <section className="faculties-section">
-            <h2>University Faculties</h2>
-            <div className="faculties-grid">
-              {data.faculties.map(faculty => (
+      {/* MAIN CONTENT */}
+      <main className={`academic-main-content ${isSidebarOpen ? 'sidebar-expanded' : 'sidebar-collapsed'}`}>
+        
+        {/* Overview Section */}
+        <section className="academic-overview">
+          <div className="overview-header">
+            <h1>Academic Content Management</h1>
+            <p>Manage faculties, courses, subjects, and academic content across the university</p>
+          </div>
+          <div className="overview-stats">
+            <div className="stat-card">
+              <h3>{data.faculties.length}</h3>
+              <p>Faculties</p>
+            </div>
+            <div className="stat-card">
+              <h3>{data.faculties.reduce((total, f) => total + f.courses.length, 0)}</h3>
+              <p>Total Courses</p>
+            </div>
+            <div className="stat-card">
+              <h3>{data.faculties.reduce((total, f) => total + f.courses.reduce((ct, c) => ct + c.subjects.length, 0), 0)}</h3>
+              <p>Total Subjects</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Faculties Section */}
+        <section className="faculties-section">
+          <h2>University Faculties</h2>
+          <div className="faculties-grid">
+            {data.faculties.map(faculty => (
+              <div 
+                key={faculty.id} 
+                className={`faculty-card ${selectedFaculty?.id === faculty.id ? 'selected' : ''}`}
+                onClick={() => {
+                  setSelectedFaculty(faculty);
+                  setSelectedCourse(null);
+                  setSelectedSubject(null);
+                }}
+              >
+                <h3>{faculty.name}</h3>
+                <p>{faculty.description}</p>
+                <div className="faculty-meta">
+                  <span>Dean: {faculty.dean}</span>
+                  <span>Est. {faculty.established}</span>
+                  <span>{faculty.courses.length} Courses</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Courses Section */}
+        {selectedFaculty && (
+          <section className="courses-section">
+            <div className="section-header">
+              <h2>Courses in {selectedFaculty.name}</h2>
+              <button 
+                className="btn btn-primary"
+                onClick={() => { 
+                  setShowCourseModal(true); 
+                  setEditingCourse(null); 
+                  setCourseForm({ name: '', duration: '', intake: '' }); 
+                }}
+              >
+                + Add Course
+              </button>
+            </div>
+            <div className="courses-list">
+              {selectedFaculty.courses.map(course => (
                 <div 
-                  key={faculty.id} 
-                  className={`faculty-card ${selectedFaculty?.id === faculty.id ? 'selected' : ''}`}
+                  key={course.id}
+                  className={`course-card ${selectedCourse?.id === course.id ? 'selected' : ''}`}
                   onClick={() => {
-                    setSelectedFaculty(faculty);
-                    setSelectedCourse(null);
+                    setSelectedCourse(course);
                     setSelectedSubject(null);
                   }}
                 >
-                  <h3>{faculty.name}</h3>
-                  <p>{faculty.description}</p>
-                  <div className="faculty-meta">
-                    <span>Dean: {faculty.dean}</span>
-                    <span>Est. {faculty.established}</span>
-                    <span>{faculty.courses.length} Courses</span>
+                  <div className="course-info">
+                    <h4>{course.name}</h4>
+                    <div className="course-meta">
+                      <span>Duration: {course.duration}</span>
+                      <span>Intake: {course.intake}</span>
+                      <span>{course.subjects.length} Subjects</span>
+                    </div>
+                  </div>
+                  <div className="course-actions">
+                    <button 
+                      className="university-academiccontent-admin-current-edit-btn"
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        handleOpenCourseEditModal(course); 
+                      }}
+                      title="Edit Course"
+                    >
+                      ✏️
+                    </button>
+                    <button 
+                      className="university-academiccontent-admin-current-delete-btn"
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        handleDeleteCourse(course.id); 
+                      }}
+                      title="Delete Course"
+                    >
+                      🗑️
+                    </button>
                   </div>
                 </div>
               ))}
+              {selectedFaculty.courses.length === 0 && (
+                <div className="empty-content">No courses available. Add a course to get started.</div>
+              )}
             </div>
           </section>
+        )}
 
-          {/* Courses Section */}
-          {selectedFaculty && (
-            <section className="courses-section">
-              <div className="section-header">
-                <h2>Courses in {selectedFaculty.name}</h2>
-                <button 
-                  className="btn btn-primary"
-                  onClick={() => { 
-                    setShowCourseModal(true); 
-                    setEditingCourse(null); 
-                    setCourseForm({ name: '', duration: '', intake: '' }); 
-                  }}
+        {/* Subjects Section - UPDATED: Remove Content button */}
+        {selectedCourse && (
+          <section className="subjects-section">
+            <div className="section-header">
+              <h2>Subjects in {selectedCourse.name}</h2>
+              <button 
+                className="btn btn-primary"
+                onClick={() => { 
+                  setShowSubjectModal(true); 
+                  setEditingSubject(null); 
+                  setSubjectForm({ name: '', code: '', credits: '', syllabus: '' }); 
+                }}
+              >
+                + Add Subject
+              </button>
+            </div>
+            <div className="subjects-list">
+              {selectedCourse.subjects.map(subject => (
+                <div 
+                  key={subject.id}
+                  className={`subject-card ${selectedSubject?.id === subject.id ? 'selected' : ''}`}
+                  onClick={() => setSelectedSubject(subject)}
                 >
-                  + Add Course
-                </button>
-              </div>
-              <div className="courses-list">
-                {selectedFaculty.courses.map(course => (
-                  <div 
-                    key={course.id}
-                    className={`course-card ${selectedCourse?.id === course.id ? 'selected' : ''}`}
-                    onClick={() => {
-                      setSelectedCourse(course);
-                      setSelectedSubject(null);
-                    }}
-                  >
-                    <div className="course-info">
-                      <h4>{course.name}</h4>
-                      <div className="course-meta">
-                        <span>Duration: {course.duration}</span>
-                        <span>Intake: {course.intake}</span>
-                        <span>{course.subjects.length} Subjects</span>
-                      </div>
-                    </div>
-                    <div className="course-actions">
-                      <button 
-                        onClick={(e) => { 
-                          e.stopPropagation(); 
-                          handleEditCourse(course); 
-                        }}
-                        title="Edit Course"
-                      >
-                        ✏️
-                      </button>
-                      <button 
-                        onClick={(e) => { 
-                          e.stopPropagation(); 
-                          handleDeleteCourse(course.id); 
-                        }}
-                        title="Delete Course"
-                      >
-                        🗑️
-                      </button>
+                  <div className="subject-info">
+                    <h4>{subject.name} ({subject.code})</h4>
+                    <p className="syllabus-preview">{subject.syllabus}</p>
+                    <div className="subject-meta">
+                      <span>Credits: {subject.credits}</span>
+                      <span>{subject.content.length} Content Files</span>
                     </div>
                   </div>
-                ))}
-                {selectedFaculty.courses.length === 0 && (
-                  <div className="empty-content">No courses available. Add a course to get started.</div>
-                )}
-              </div>
-            </section>
-          )}
-
-          {/* Subjects Section */}
-          {selectedCourse && (
-            <section className="subjects-section">
-              <div className="section-header">
-                <h2>Subjects in {selectedCourse.name}</h2>
-                <button 
-                  className="btn btn-primary"
-                  onClick={() => { 
-                    setShowSubjectModal(true); 
-                    setEditingSubject(null); 
-                    setSubjectForm({ name: '', code: '', credits: '', syllabus: '' }); 
-                  }}
-                >
-                  + Add Subject
-                </button>
-              </div>
-              <div className="subjects-list">
-                {selectedCourse.subjects.map(subject => (
-                  <div 
-                    key={subject.id}
-                    className={`subject-card ${selectedSubject?.id === subject.id ? 'selected' : ''}`}
-                    onClick={() => setSelectedSubject(subject)}
-                  >
-                    <div className="subject-info">
-                      <h4>{subject.name} ({subject.code})</h4>
-                      <p className="syllabus-preview">{subject.syllabus}</p>
-                      <div className="subject-meta">
-                        <span>Credits: {subject.credits}</span>
-                        <span>{subject.content.length} Content Files</span>
-                      </div>
-                    </div>
-                    <div className="subject-actions">
-                      <button 
-                        onClick={(e) => { 
-                          e.stopPropagation(); 
-                          handleOpenSyllabus(); 
-                        }}
-                        title="Edit Syllabus"
-                      >
-                        📝 Syllabus
-                      </button>
-                      <button 
-                        onClick={(e) => { 
-                          e.stopPropagation(); 
-                          setShowContentModal(true); 
-                        }}
-                        title="Upload Content"
-                      >
-                        📁 Content
-                      </button>
-                      <button 
-                        onClick={(e) => { 
-                          e.stopPropagation(); 
-                          handleEditSubject(subject); 
-                        }}
-                        title="Edit Subject"
-                      >
-                        ✏️
-                      </button>
-                      <button 
-                        onClick={(e) => { 
-                          e.stopPropagation(); 
-                          handleDeleteSubject(subject.id); 
-                        }}
-                        title="Delete Subject"
-                      >
-                        🗑️
-                      </button>
-                    </div>
+                  <div className="subject-actions">
+                    <button 
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        handleOpenSyllabus(subject); 
+                      }}
+                      title="Edit Syllabus"
+                    >
+                      📝 Syllabus
+                    </button>
+                    <button 
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        handleEditSubject(subject); 
+                      }}
+                      title="Edit Subject"
+                    >
+                      ✏️
+                    </button>
+                    <button 
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        handleDeleteSubject(subject.id); 
+                      }}
+                      title="Delete Subject"
+                    >
+                      🗑️
+                    </button>
                   </div>
-                ))}
-                {selectedCourse.subjects.length === 0 && (
-                  <div className="empty-content">No subjects available. Add a subject to get started.</div>
-                )}
-              </div>
-            </section>
-          )}
+                </div>
+              ))}
+              {selectedCourse.subjects.length === 0 && (
+                <div className="empty-content">No subjects available. Add a subject to get started.</div>
+              )}
+            </div>
+          </section>
+        )}
 
-          {/* Content Files Section */}
-          {selectedSubject && (
-            <section className="content-section">
-              <div className="section-header">
-                <h2>Academic Content for {selectedSubject.name}</h2>
-                <button 
-                  className="btn btn-primary" 
-                  onClick={() => setShowContentModal(true)}
-                >
-                  + Upload Content
-                </button>
-              </div>
-              <div className="content-list">
-                {selectedSubject.content.map((file, index) => (
-                  <div key={index} className="content-file">
-                    <span>📄 {file}</span>
-                    <div className="file-actions">
-                      <button 
-                        onClick={() => handleViewFile(file)}
-                        title="View File"
-                      >
-                        👁️ View
-                      </button>
-                      <button 
-                        onClick={() => handleDownloadFile(file)}
-                        title="Download File"
-                      >
-                        ⬇️ Download
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteFile(file)}
-                        title="Delete File"
-                      >
-                        🗑️ Delete
-                      </button>
-                    </div>
+        {/* Content Files Section - UPDATED: Remove View button */}
+        {selectedSubject && (
+          <section className="content-section">
+            <div className="section-header">
+              <h2>Academic Content for {selectedSubject.name}</h2>
+              <button 
+                className="btn btn-primary" 
+                onClick={() => setShowContentModal(true)}
+              >
+                + Upload Content
+              </button>
+            </div>
+            <div className="content-list">
+              {selectedSubject.content.map((file, index) => (
+                <div key={index} className="content-file">
+                  <span>📄 {file}</span>
+                  <div className="file-actions">
+                    <button 
+                      onClick={() => handleDownloadFile(file)}
+                      title="Download File"
+                    >
+                      ⬇️ Download
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteFile(file)}
+                      title="Delete File"
+                    >
+                      🗑️ Delete
+                    </button>
                   </div>
-                ))}
-                {selectedSubject.content.length === 0 && (
-                  <div className="empty-content">No content uploaded yet. Upload files to share with students.</div>
-                )}
-              </div>
-            </section>
-          )}
+                </div>
+              ))}
+              {selectedSubject.content.length === 0 && (
+                <div className="empty-content">No content uploaded yet. Upload files to share with students.</div>
+              )}
+            </div>
+          </section>
+        )}
 
-          <Footer
-            title="Academic Excellence"
-            subtitle="Empowering education through comprehensive academic content management"
-            theme="dark"
-            sidebarExpanded={isSidebarExpanded}
-          />
-        </main>
-      </div>
+        <Footer
+          title="Academic Excellence"
+          subtitle="Empowering education through comprehensive academic content management"
+          theme="dark"
+          sidebarExpanded={isSidebarOpen}
+        />
+      </main>
 
-      {/* Course Modal */}
+      {/* Course Modal - Use unique classes */}
       {showCourseModal && (
-        <div className="modal-overlay" onClick={() => setShowCourseModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <h3>{editingCourse ? 'Edit Course' : 'Add New Course'}</h3>
-            <form onSubmit={e => { 
-              e.preventDefault(); 
-              editingCourse ? handleUpdateCourse() : handleAddCourse(); 
-            }}>
-              <input
-                type="text"
-                placeholder="Course Name *"
+        <div className="university-academiccontent-admin-simple-overlay" onClick={() => setShowCourseModal(false)}>
+          <div className="university-academiccontent-admin-simple-content" onClick={e => e.stopPropagation()}>
+            <div className="university-academiccontent-admin-simple-header">
+              <h3>{editingCourse ? '✏️ Edit Course' : '➕ Add New Course'}</h3>
+              <button 
+                className="university-academiccontent-admin-simple-close"
+                onClick={() => setShowCourseModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+            
+            <form className="university-academiccontent-admin-simple-form" onSubmit={handleCourseSubmit}>
+              <input 
+                className="university-academiccontent-admin-simple-input"
+                type="text" 
+                placeholder="Course Name *" 
                 value={courseForm.name}
-                onChange={e => setCourseForm({ ...courseForm, name: e.target.value })}
-                required
+                onChange={(e) => setCourseForm({...courseForm, name: e.target.value})}
+                required 
               />
-              <input
-                type="text"
-                placeholder="Duration (e.g., 4 years) *"
+              <input 
+                className="university-academiccontent-admin-simple-input"
+                type="text" 
+                placeholder="Duration (e.g., 4 Years) *" 
                 value={courseForm.duration}
-                onChange={e => setCourseForm({ ...courseForm, duration: e.target.value })}
-                required
+                onChange={(e) => setCourseForm({...courseForm, duration: e.target.value})}
+                required 
               />
-              <input
-                type="text"
-                placeholder="Annual Intake (e.g., 100 students/year) *"
+              <input 
+                className="university-academiccontent-admin-simple-input"
+                type="text" 
+                placeholder="Intake (e.g., February, September) *" 
                 value={courseForm.intake}
-                onChange={e => setCourseForm({ ...courseForm, intake: e.target.value })}
-                required
+                onChange={(e) => setCourseForm({...courseForm, intake: e.target.value})}
+                required 
               />
-              <div className="modal-actions">
-                <button type="button" onClick={() => setShowCourseModal(false)}>Cancel</button>
-                <button type="submit" className="btn-primary">
+              
+              <div className="university-academiccontent-admin-simple-actions">
+                <button 
+                  className="university-academiccontent-admin-simple-btn"
+                  type="button" 
+                  onClick={() => setShowCourseModal(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="university-academiccontent-admin-simple-btn university-academiccontent-admin-simple_primary"
+                  type="submit"
+                >
                   {editingCourse ? 'Update Course' : 'Add Course'}
                 </button>
               </div>
@@ -767,14 +867,24 @@ const AcademicContent = () => {
 
       {/* Subject Modal */}
       {showSubjectModal && (
-        <div className="modal-overlay" onClick={() => setShowSubjectModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <h3>{editingSubject ? 'Edit Subject' : 'Add New Subject'}</h3>
-            <form onSubmit={e => { 
+        <div className="admin-modal-overlay" onClick={() => setShowSubjectModal(false)}>
+          <div className="admin-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <h3>{editingSubject ? '✏️ Edit Subject' : '➕ Add New Subject'}</h3>
+              <button 
+                className="admin-modal-close"
+                onClick={() => setShowSubjectModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+            
+            <form className="admin-modal-form" onSubmit={e => { 
               e.preventDefault(); 
               editingSubject ? handleUpdateSubject() : handleAddSubject(); 
             }}>
               <input
+                className="admin-modal-input"
                 type="text"
                 placeholder="Subject Name *"
                 value={subjectForm.name}
@@ -782,6 +892,7 @@ const AcademicContent = () => {
                 required
               />
               <input
+                className="admin-modal-input"
                 type="text"
                 placeholder="Subject Code (e.g., CS101) *"
                 value={subjectForm.code}
@@ -789,6 +900,7 @@ const AcademicContent = () => {
                 required
               />
               <input
+                className="admin-modal-input"
                 type="number"
                 placeholder="Credits *"
                 value={subjectForm.credits}
@@ -798,15 +910,25 @@ const AcademicContent = () => {
                 max="10"
               />
               <textarea
+                className="admin-modal-textarea"
                 placeholder="Syllabus Overview *"
                 value={subjectForm.syllabus}
                 onChange={e => setSubjectForm({ ...subjectForm, syllabus: e.target.value })}
                 required
                 rows="4"
               />
-              <div className="modal-actions">
-                <button type="button" onClick={() => setShowSubjectModal(false)}>Cancel</button>
-                <button type="submit" className="btn-primary">
+              <div className="admin-modal-actions">
+                <button 
+                  className="admin-modal-btn"
+                  type="button" 
+                  onClick={() => setShowSubjectModal(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="admin-modal-btn admin-btn-primary"
+                  type="submit"
+                >
                   {editingSubject ? 'Update Subject' : 'Add Subject'}
                 </button>
               </div>
@@ -815,22 +937,58 @@ const AcademicContent = () => {
         </div>
       )}
 
-      {/* Syllabus Modal */}
+      {/* Enhanced Professional Syllabus Modal - EXACTLY LIKE USER PAGE */}
       {showSyllabusModal && selectedSubject && (
-        <div className="modal-overlay" onClick={() => setShowSyllabusModal(false)}>
-          <div className="modal-content large" onClick={e => e.stopPropagation()}>
-            <h3>Edit Syllabus - {selectedSubject.name}</h3>
-            <textarea
-              className="syllabus-editor"
-              value={tempSyllabus}
-              onChange={e => setTempSyllabus(e.target.value)}
-              placeholder="Enter detailed syllabus including course objectives, learning outcomes, topics covered, assessment methods, and recommended textbooks..."
-              rows="12"
-            />
-            <div className="modal-actions">
-              <button onClick={() => setShowSyllabusModal(false)}>Cancel</button>
-              <button className="btn-primary" onClick={handleSaveSyllabus}>
-                Save Syllabus
+        <div className="university-academiccontent-admin-modal-overlay" onClick={() => setShowSyllabusModal(false)}>
+          <div className="university-academiccontent-admin-modal-content university-academiccontent-admin-modal-large" onClick={e => e.stopPropagation()}>
+            <div className="university-academiccontent-admin-modal-header">
+              <h3>📋 Syllabus - {selectedSubject.name}</h3>
+              <div className="university-academiccontent-admin-subject-code">Course Code: {selectedSubject.code} | Credits: {selectedSubject.credits}</div>
+              <button 
+                className="university-academiccontent-admin-modal-close"
+                onClick={() => setShowSyllabusModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="university-academiccontent-admin-modal-body">
+              {/* Course Overview Section */}
+              <div className="university-academiccontent-admin-section">
+                <h4>📖 Course Overview</h4>
+                <div className="university-academiccontent-admin-overview" style={{whiteSpace: 'pre-line'}}>
+                  {tempSyllabus && tempSyllabus.overview
+                    ? tempSyllabus.overview
+                    : selectedSubject.syllabus}
+                </div>
+              </div>
+
+              {/* Topics Section */}
+              {tempSyllabus && tempSyllabus.topics && tempSyllabus.topics.length > 0 && (
+                <div className="university-academiccontent-admin-section">
+                  <h4>📚 Course Topics</h4>
+                  <ol style={{paddingLeft: '1.2em'}}>
+                    {tempSyllabus.topics.map((topic, idx) => (
+                      <li key={idx} style={{marginBottom: '0.7em'}}>
+                        <strong>{topic.title}</strong>
+                        {topic.subtopics && topic.subtopics.length > 0 && (
+                          <ul style={{marginTop: '0.3em', paddingLeft: '1.2em'}}>
+                            {topic.subtopics.map((sub, i) => (
+                              <li key={i} style={{color: '#475569'}}>{sub}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+            </div>
+            <div className="university-academiccontent-admin-modal-actions">
+              <button 
+                className="university-academiccontent-admin-btn university-academiccontent-admin-btn-secondary"
+                onClick={() => setShowSyllabusModal(false)}
+              >
+                Close
               </button>
             </div>
           </div>
@@ -839,50 +997,106 @@ const AcademicContent = () => {
 
       {/* Content Upload Modal */}
       {showContentModal && (
-        <div className="modal-overlay" onClick={() => setShowContentModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <h3>Upload Academic Content</h3>
-            <form onSubmit={e => { e.preventDefault(); handleUploadContent(); }}>
+        <div className="admin-modal-overlay" onClick={() => setShowContentModal(false)}>
+          <div className="admin-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <h3>📁 Upload Academic Content</h3>
+              <button 
+                className="admin-modal-close"
+                onClick={() => setShowContentModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+            
+            <form className="admin-modal-form" onSubmit={e => { e.preventDefault(); handleUploadContent(); }}>
               <input
+                className="admin-modal-input"
                 type="text"
                 placeholder="File name (e.g., Lecture Notes Chapter 1.pdf) *"
                 value={contentFile}
                 onChange={e => setContentFile(e.target.value)}
                 required
               />
-              <div className="upload-area">
+              <div className="admin-upload-area">
                 <p>📁 Drag and drop files here or click to browse</p>
-                <p className="upload-note">Supported formats: PDF, DOC, PPT, ZIP, Video files</p>
+                <p className="admin-upload-note">Supported formats: PDF, DOC, PPT, ZIP, Video files</p>
                 <input type="file" style={{ display: 'none' }} />
               </div>
-              <div className="modal-actions">
-                <button type="button" onClick={() => setShowContentModal(false)}>Cancel</button>
-                <button type="submit" className="btn-primary">Upload Content</button>
+              <div className="admin-modal-actions">
+                <button 
+                  className="admin-modal-btn"
+                  type="button" 
+                  onClick={() => setShowContentModal(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="admin-modal-btn admin-btn-primary"
+                  type="submit"
+                >
+                  Upload Content
+                </button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* File View Modal */}
-      {showViewModal && (
-        <div className="modal-overlay" onClick={() => setShowViewModal(false)}>
-          <div className="modal-content large" onClick={e => e.stopPropagation()}>
-            <h3>📄 Viewing: {viewingFile}</h3>
-            <div className="file-preview">
-              <div className="preview-placeholder">
-                <p>📄 File Preview</p>
-                <p>Filename: {viewingFile}</p>
-                <p>In a real application, this would show the actual file content or a preview.</p>
-                <p>For PDFs, images, and documents, you would integrate viewers here.</p>
-              </div>
-            </div>
-            <div className="modal-actions">
-              <button onClick={() => setShowViewModal(false)}>Close</button>
-              <button className="btn-primary" onClick={() => handleDownloadFile(viewingFile)}>
-                ⬇️ Download
+      {/* Add the new professional edit modal for course */}
+      {showCourseEditModal && (
+        <div className="university-academiccontent-admin-current-modal-overlay" onClick={() => setShowCourseEditModal(false)}>
+          <div className="university-academiccontent-admin-current-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="university-academiccontent-admin-current-modal-header">
+              <h3>✏️ Edit Course</h3>
+              <button 
+                className="university-academiccontent-admin-current-modal-close"
+                onClick={() => setShowCourseEditModal(false)}
+              >
+                ✕
               </button>
             </div>
+            <form className="university-academiccontent-admin-current-modal-form" onSubmit={handleSaveCourseEdit}>
+              <label>Course Name</label>
+              <input 
+                className="university-academiccontent-admin-current-modal-input"
+                type="text"
+                value={courseEditForm.name}
+                onChange={e => setCourseEditForm({ ...courseEditForm, name: e.target.value })}
+                required
+              />
+              <label>Duration</label>
+              <input 
+                className="university-academiccontent-admin-current-modal-input"
+                type="text"
+                value={courseEditForm.duration}
+                onChange={e => setCourseEditForm({ ...courseEditForm, duration: e.target.value })}
+                required
+              />
+              <label>Intake</label>
+              <input 
+                className="university-academiccontent-admin-current-modal-input"
+                type="text"
+                value={courseEditForm.intake}
+                onChange={e => setCourseEditForm({ ...courseEditForm, intake: e.target.value })}
+                required
+              />
+              <div className="university-academiccontent-admin-current-modal-actions">
+                <button
+                  type="button"
+                  className="university-academiccontent-admin-current-modal-btn"
+                  onClick={() => setShowCourseEditModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="university-academiccontent-admin-current-modal-btn university-academiccontent-admin-current-modal-btn_primary"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
