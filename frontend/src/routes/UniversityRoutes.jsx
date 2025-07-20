@@ -1,4 +1,4 @@
-import { Dashboard,Dashboarduser,AdPublish, AcademicContent, Announcement,Announcementuser,Manageportfolio,Manageportfoliouser } from '../pages/University';
+import { Dashboard,Dashboarduser,AdPublish, AcademicContent,AcademicContentuser, Announcement,Announcementuser,Manageportfolio,Manageportfoliouser,Mentoruni } from '../pages/University';
 
 export const universityRoutes = [
   {
@@ -18,6 +18,10 @@ export const universityRoutes = [
     element: <AcademicContent />,
   },
   {
+    path: '/university/academic-content-user',
+    element: <AcademicContentuser />,
+  },
+  {
     path: '/university/announcement',
     element: <Announcement />,
   },
@@ -32,5 +36,9 @@ export const universityRoutes = [
   {
     path: '/university/manage-portfolio-user',
     element: <Manageportfoliouser />,
+  },
+  {
+    path: '/university/mentoruni',
+    element: <Mentoruni />,
   }
 ];

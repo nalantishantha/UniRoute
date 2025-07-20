@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import UniSidebar from '../../components/UniSidebar';
-import UniHeader from '../../components/UniHeader';
+import UniversityUserSidebar from '../../components/Navigation/UniversityUsersidebar'; // CHANGED: Import UniversityUserSidebar
+import UniversityNavbar from '../../components/Navigation/UniversityNavbar';
 import Footer from '../../components/Footer';
 import './Manageportfoliouser.css';
 
 const Manageportfoliouser = () => {
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // CHANGED: Rename from isSidebarExpanded to isSidebarOpen
 
   // University data
   const universityInfo = {
@@ -154,229 +154,239 @@ const Manageportfoliouser = () => {
 
   return (
     <div className="portfolio-page">
-      <div className="portfolio-container">
-        <UniSidebar activePage="manage-portfolio" onExpandChange={setIsSidebarExpanded} />
-        <UniHeader sidebarExpanded={isSidebarExpanded} />
+      {/* SIDEBAR AT THE VERY TOP - OUTSIDE CONTAINER */}
+      <UniversityUserSidebar 
+        isOpen={isSidebarOpen}
+        setIsOpen={setIsSidebarOpen}
+      />
 
-        <main className={`portfolio-main-content ${isSidebarExpanded ? 'sidebar-expanded' : 'sidebar-collapsed'}`}>
-          
-          {/* Hero Section */}
-          <section className="portfolio-hero">
-            <div className="hero-background">
-              <div className="hero-overlay"></div>
-            </div>
-            <div className="hero-content">
-              <h1 className="university-name">{universityInfo.name}</h1>
-              <div className="hero-stats">
-                <div className="hero-stat">
-                  <span className="stat-number">{universityInfo.established}</span>
-                  <span className="stat-label">Established</span>
-                </div>
-                <div className="hero-stat">
-                  <span className="stat-number">{universityInfo.students}</span>
-                  <span className="stat-label">Students</span>
-                </div>
-                <div className="hero-stat">
-                  <span className="stat-number">{universityInfo.faculty}</span>
-                  <span className="stat-label">Faculty</span>
-                </div>
-              </div>
-            </div>
-          </section>
+      {/* NAVBAR */}
+      <UniversityNavbar 
+        onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        sidebarExpanded={isSidebarOpen}
+      />
 
-          {/* University Overview */}
-          <section className="portfolio-section overview-section">
-            <div className="section-header">
-              <h2>🏛️ University Overview</h2>
-              <p>Learn about our institution's foundation and leadership</p>
-            </div>
-            <div className="overview-grid">
-              <div className="overview-card">
-                <h3>📍 Location</h3>
-                <p>{universityInfo.location}</p>
+      {/* MAIN CONTENT */}
+      <main className={`portfolio-main-content ${isSidebarOpen ? 'sidebar-expanded' : 'sidebar-collapsed'}`}>
+        
+        {/* Hero Section */}
+        <section className="portfolio-hero">
+          <div className="hero-background">
+            <div className="hero-overlay"></div>
+          </div>
+          <div className="hero-content">
+            <h1 className="university-name">{universityInfo.name}</h1>
+            <div className="hero-stats">
+              <div className="hero-stat">
+                <span className="stat-number">{universityInfo.established}</span>
+                <span className="stat-label">Established</span>
               </div>
-              <div className="overview-card">
-                <h3>🏫 Type</h3>
-                <p>{universityInfo.type}</p>
+              <div className="hero-stat">
+                <span className="stat-number">{universityInfo.students}</span>
+                <span className="stat-label">Students</span>
               </div>
-              <div className="overview-card">
-                <h3>👨‍💼 Chancellor</h3>
-                <p>{universityInfo.chancellor}</p>
-              </div>
-              <div className="overview-card">
-                <h3>👨‍🎓 Vice Chancellor</h3>
-                <p>{universityInfo.vicechancellor}</p>
-              </div>
-              <div className="overview-card">
-                <h3>🏢 Campuses</h3>
-                <p>{universityInfo.campuses}</p>
-              </div>
-              <div className="overview-card">
-                <h3>🎯 Focus</h3>
-                <p>Research & Innovation</p>
+              <div className="hero-stat">
+                <span className="stat-number">{universityInfo.faculty}</span>
+                <span className="stat-label">Faculty</span>
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          {/* Achievements Section */}
-          <section className="portfolio-section achievements-section">
-            <div className="section-header">
+        {/* University Overview */}
+        <section className="portfolio-section overview-section">
+          <div className="section-header">
+            <h2>🧑‍🎓 University Overview</h2>
+            <p>Learn about our institution's foundation and leadership</p>
+          </div>
+          <div className="overview-grid">
+            <div className="overview-card">
+              <h3>📍 Location</h3>
+              <p>{universityInfo.location}</p>
+            </div>
+            <div className="overview-card">
+              <h3>🏫 Type</h3>
+              <p>{universityInfo.type}</p>
+            </div>
+            <div className="overview-card">
+              <h3>👨‍💼 Chancellor</h3>
+              <p>{universityInfo.chancellor}</p>
+            </div>
+            <div className="overview-card">
+              <h3>👨‍🎓 Vice Chancellor</h3>
+              <p>{universityInfo.vicechancellor}</p>
+            </div>
+            <div className="overview-card">
+              <h3>🏢 Campuses</h3>
+              <p>{universityInfo.campuses}</p>
+            </div>
+            <div className="overview-card">
+              <h3>🎯 Focus</h3>
+              <p>Research & Innovation</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Achievements Section */}
+        <section className="portfolio-section achievements-section">
+          <div className="section-header">
+            <div className="section-title-container">
               <h2>🏆 Achievements & Awards</h2>
               <p>Recognition of our excellence and commitment to quality education</p>
             </div>
-            <div className="achievements-grid">
-              {achievements.map((achievement, idx) => (
-                <div key={idx} className="achievement-card">
-                  <div className="achievement-year">{achievement.year}</div>
-                  <h3 className="achievement-title">{achievement.title}</h3>
-                  <div className="achievement-rank">{achievement.rank}</div>
-                  <p className="achievement-description">{achievement.description}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Ranking History */}
-          <section className="portfolio-section ranking-section">
-            <div className="section-header">
-              <h2>📈 Ranking History</h2>
-              <p>Our journey of academic excellence over the years</p>
-            </div>
-            <div className="ranking-chart">
-              <div className="chart-header">
-                <div>Year</div>
-                <div>World Rank</div>
-                <div>Local Rank</div>
-                <div>Score</div>
-                <div>Trend</div>
+          </div>
+          <div className="achievements-grid">
+            {achievements.map((achievement, idx) => (
+              <div key={idx} className="achievement-card">
+                <div className="achievement-year">{achievement.year}</div>
+                <h3 className="achievement-title">{achievement.title}</h3>
+                <div className="achievement-rank">{achievement.rank}</div>
+                <p className="achievement-description">{achievement.description}</p>
               </div>
-              {rankingHistory.map((rank, idx) => (
-                <div key={idx} className="chart-row">
-                  <div className="rank-year">{rank.year}</div>
-                  <div className="rank-world">{rank.worldRank}</div>
-                  <div className="rank-local">#{rank.localRank}</div>
-                  <div className="rank-score">{rank.score}</div>
-                  <div className="rank-trend">
-                    {idx < rankingHistory.length - 1 ? '📈' : '📊'}
+            ))}
+          </div>
+        </section>
+
+        {/* Ranking History */}
+        <section className="portfolio-section ranking-section">
+          <div className="section-header">
+            <h2>📈 Ranking History</h2>
+            <p>Our journey of academic excellence over the years</p>
+          </div>
+          <div className="ranking-chart">
+            <div className="chart-header">
+              <div>Year</div>
+              <div>World Rank</div>
+              <div>Local Rank</div>
+              <div>Score</div>
+              <div>Trend</div>
+            </div>
+            {rankingHistory.map((rank, idx) => (
+              <div key={idx} className="chart-row">
+                <div className="rank-year">{rank.year}</div>
+                <div className="rank-world">{rank.worldRank}</div>
+                <div className="rank-local">#{rank.localRank}</div>
+                <div className="rank-score">{rank.score}</div>
+                <div className="rank-trend">
+                  {idx < rankingHistory.length - 1 ? '📈' : '📊'}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Faculties & Departments */}
+        <section className="portfolio-section faculties-section">
+          <div className="section-header">
+            <h2>🏫 Faculties & Schools</h2>
+            <p>Comprehensive academic divisions offering diverse programs</p>
+          </div>
+          <div className="faculties-grid">
+            {faculties.map((faculty, idx) => (
+              <div key={idx} className="faculty-card">
+                <div className="faculty-header">
+                  <h3>{faculty.name}</h3>
+                  <span className="faculty-established">Est. {faculty.established}</span>
+                </div>
+                <div className="faculty-stats">
+                  <div className="faculty-stat">
+                    <span className="stat-number">{faculty.students}</span>
+                    <span className="stat-label">Students</span>
+                  </div>
+                  <div className="faculty-stat">
+                    <span className="stat-number">{faculty.departments.length}</span>
+                    <span className="stat-label">Departments</span>
                   </div>
                 </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Faculties & Departments */}
-          <section className="portfolio-section faculties-section">
-            <div className="section-header">
-              <h2>🏫 Faculties & Schools</h2>
-              <p>Comprehensive academic divisions offering diverse programs</p>
-            </div>
-            <div className="faculties-grid">
-              {faculties.map((faculty, idx) => (
-                <div key={idx} className="faculty-card">
-                  <div className="faculty-header">
-                    <h3>{faculty.name}</h3>
-                    <span className="faculty-established">Est. {faculty.established}</span>
-                  </div>
-                  <div className="faculty-stats">
-                    <div className="faculty-stat">
-                      <span className="stat-number">{faculty.students}</span>
-                      <span className="stat-label">Students</span>
-                    </div>
-                    <div className="faculty-stat">
-                      <span className="stat-number">{faculty.departments.length}</span>
-                      <span className="stat-label">Departments</span>
-                    </div>
-                  </div>
-                  <div className="faculty-departments">
-                    <h4>Departments:</h4>
-                    <div className="departments-list">
-                      {faculty.departments.map((dept, deptIdx) => (
-                        <span key={deptIdx} className="department-tag">{dept}</span>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="faculty-programs">
-                    <h4>Programs:</h4>
-                    <div className="programs-list">
-                      {faculty.programs.map((program, progIdx) => (
-                        <span key={progIdx} className="program-tag">{program}</span>
-                      ))}
-                    </div>
+                <div className="faculty-departments">
+                  <h4>Departments:</h4>
+                  <div className="departments-list">
+                    {faculty.departments.map((dept, deptIdx) => (
+                      <span key={deptIdx} className="department-tag">{dept}</span>
+                    ))}
                   </div>
                 </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Degree Programs */}
-          <section className="portfolio-section programs-section">
-            <div className="section-header">
-              <h2>🎓 Degree Programs</h2>
-              <p>Comprehensive academic offerings across all levels</p>
-            </div>
-            <div className="programs-grid">
-              {degreePrograms.map((program, idx) => (
-                <div key={idx} className="program-card">
-                  <h3>{program.level}</h3>
-                  <div className="program-count">{program.count}</div>
-                  <p>Programs Available</p>
-                  <div className="program-duration">
-                    <span>⏰ Duration: {program.duration}</span>
+                <div className="faculty-programs">
+                  <h4>Programs:</h4>
+                  <div className="programs-list">
+                    {faculty.programs.map((program, progIdx) => (
+                      <span key={progIdx} className="program-tag">{program}</span>
+                    ))}
                   </div>
                 </div>
-              ))}
-            </div>
-          </section>
+              </div>
+            ))}
+          </div>
+        </section>
 
-          {/* Recent Events */}
-          <section className="portfolio-section events-section">
-            <div className="section-header">
-              <h2>📅 Recent Events & Milestones</h2>
-              <p>Highlighting our major events and achievements</p>
-            </div>
-            <div className="events-timeline">
-              {recentEvents.map((event, idx) => (
-                <div key={event.id} className="event-item">
-                  <div className="event-icon">{event.image}</div>
-                  <div className="event-content">
-                    <div className="event-header">
-                      <h3>{event.title}</h3>
-                      <span className="event-type">{event.type}</span>
-                    </div>
-                    <div className="event-date">{event.date}</div>
-                    <p className="event-description">{event.description}</p>
+        {/* Degree Programs */}
+        <section className="portfolio-section programs-section">
+          <div className="section-header">
+            <h2>🎓 Degree Programs</h2>
+            <p>Comprehensive academic offerings across all levels</p>
+          </div>
+          <div className="programs-grid">
+            {degreePrograms.map((program, idx) => (
+              <div key={idx} className="program-card">
+                <h3>{program.level}</h3>
+                <div className="program-count">{program.count}</div>
+                <p>Programs Available</p>
+                <div className="program-duration">
+                  <span>⏰ Duration: {program.duration}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Recent Events */}
+        <section className="portfolio-section events-section">
+          <div className="section-header">
+            <h2>📅 Recent Events & Milestones</h2>
+            <p>Highlighting our major events and achievements</p>
+          </div>
+          <div className="events-timeline">
+            {recentEvents.map((event, idx) => (
+              <div key={event.id} className="event-item">
+                <div className="event-icon">{event.image}</div>
+                <div className="event-content">
+                  <div className="event-header">
+                    <h3>{event.title}</h3>
+                    <span className="event-type">{event.type}</span>
                   </div>
+                  <div className="event-date">{event.date}</div>
+                  <p className="event-description">{event.description}</p>
                 </div>
-              ))}
-            </div>
-          </section>
+              </div>
+            ))}
+          </div>
+        </section>
 
-          {/* Facilities */}
-          <section className="portfolio-section facilities-section">
-            <div className="section-header">
-              <h2>🏢 Campus Facilities</h2>
-              <p>World-class infrastructure supporting academic excellence</p>
-            </div>
-            <div className="facilities-grid">
-              {facilities.map((facility, idx) => (
-                <div key={idx} className="facility-card">
-                  <div className="facility-icon">{facility.icon}</div>
-                  <h3>{facility.name}</h3>
-                  <p>{facility.description}</p>
-                </div>
-              ))}
-            </div>
-          </section>
+        {/* Facilities */}
+        <section className="portfolio-section facilities-section">
+          <div className="section-header">
+            <h2>🏢 Campus Facilities</h2>
+            <p>World-class infrastructure supporting academic excellence</p>
+          </div>
+          <div className="facilities-grid">
+            {facilities.map((facility, idx) => (
+              <div key={idx} className="facility-card">
+                <div className="facility-icon">{facility.icon}</div>
+                <h3>{facility.name}</h3>
+                <p>{facility.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
-        </main>
+      </main>
 
-        <Footer
-          title="University of Colombo"
-          subtitle="Excellence in Higher Education Since 1921"
-          theme="dark"
-          sidebarExpanded={isSidebarExpanded}
-        />
-      </div>
+      <Footer
+        title="University of Colombo"
+        subtitle="Excellence in Higher Education Since 1921"
+        theme="dark"
+        sidebarExpanded={isSidebarOpen}
+      />
     </div>
   );
 };

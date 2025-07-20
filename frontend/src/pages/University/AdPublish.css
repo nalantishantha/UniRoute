@@ -13,19 +13,19 @@
 /* Main Content - Responsive to sidebar state */
 .ad-publish-main {
   flex: 1;
-  margin-left: 80px;
-  overflow-y: auto;
-  background: #f8fafc;
+  margin-left: 0; /* CHANGED: Default when sidebar is closed */
   min-height: 100vh;
-  transition: margin-left 0.3s ease;
+  transition: margin-left 0.3s ease; /* CHANGED: Add smooth transition */
+  background: #f8fafc;
+  padding-top: 90px;
 }
 
 .ad-publish-main.sidebar-expanded {
-  margin-left: 280px;
+  margin-left: 288px; /* CHANGED: Updated to match UniversitySidebar width */
 }
 
 .ad-publish-main.sidebar-collapsed {
-  margin-left: 80px;
+  margin-left: 0; /* CHANGED: Content takes full width when sidebar is closed */
 }
 
 /* Hero Section */
