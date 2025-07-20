@@ -87,7 +87,7 @@ const initialData = {
                   'Anatomy & Physiology - Tortora & Derrickson'
                 ]
               },
-              content: ['Anatomy Lecture Notes.pdf', 'Lab Manual.pdf', 'Practice Questions.pdf']
+              content: ['Course Handbook.pdf', 'Mentor Notes.pdf', 'Course Details.pdf']
             },
             {
               id: 2,
@@ -146,7 +146,7 @@ const initialData = {
                   'Physiological Systems Handbook'
                 ]
               },
-              content: ['Physiology Textbook.pdf', 'Lab Experiments.zip']
+              content: ['Course Handbook.pdf', 'Mentor Notes.pdf', 'Course Details.pdf']
             }
           ]
         }
@@ -170,8 +170,63 @@ const initialData = {
               name: 'Data Structures',
               code: 'CS201',
               credits: 3,
-              syllabus: 'Arrays, linked lists, stacks, queues, trees, graphs. Implementation and analysis of fundamental data structures.',
-              content: ['DS Notes.pdf', 'Programming Examples.zip', 'Assignment Guidelines.pdf']
+              syllabus: {
+                overview: 'Fundamental data structures and their applications in computer science. Covers arrays, linked lists, stacks, queues, trees, and graphs with practical implementation and analysis.',
+                objectives: [
+                  'Understand the core concepts of data structures',
+                  'Implement and use various data structures in programming',
+                  'Analyze the efficiency of different data structures',
+                  'Apply data structures to solve computational problems'
+                ],
+                topics: [
+                  {
+                    title: 'Introduction to Data Structures',
+                    subtopics: [
+                      'Definition and classification',
+                      'Abstract Data Types (ADT)',
+                      'Complexity analysis (Big O notation)'
+                    ]
+                  },
+                  {
+                    title: 'Linear Data Structures',
+                    subtopics: [
+                      'Arrays and dynamic arrays',
+                      'Linked lists (singly, doubly, circular)',
+                      'Stacks and their applications',
+                      'Queues and their applications'
+                    ]
+                  },
+                  {
+                    title: 'Non-Linear Data Structures',
+                    subtopics: [
+                      'Trees: binary trees, BST, AVL trees',
+                      'Tree traversals',
+                      'Graphs: representation and traversal (BFS, DFS)'
+                    ]
+                  },
+                  {
+                    title: 'Applications and Advanced Topics',
+                    subtopics: [
+                      'Hash tables and hashing',
+                      'Priority queues and heaps',
+                      'Use cases in algorithms and real-world problems'
+                    ]
+                  }
+                ],
+                assessment: [
+                  'Assignments and Programming Labs (30%)',
+                  'Midterm Examination (25%)',
+                  'Final Examination (35%)',
+                  'Quizzes and Participation (10%)'
+                ],
+                references: [
+                  'Data Structures and Algorithms in Java – Goodrich, Tamassia, Goldwasser',
+                  'Algorithms, Part I & II – Sedgewick & Wayne',
+                  'Data Structures Using C – Reema Thareja',
+                  'Introduction to Algorithms – Cormen, Leiserson, Rivest, Stein'
+                ]
+              },
+              content: ['Course Handbook.pdf', 'Mentor Notes.pdf', 'Course Details.pdf']
             }
           ]
         }
@@ -200,19 +255,14 @@ const Academiccontentuser = () => {
 
   // Enhanced download function
   const handleDownloadFile = (filename) => {
-    // In a real application, this would trigger an actual download
-    // For now, we'll simulate the download process
-    
-    // Create a temporary alert to show download started
-    alert(`Download started for: ${filename}`);
-    
-    // You can replace this with actual download logic:
-    // Example: window.open(`/api/download/${filename}`, '_blank');
-    // Or: fetch(`/api/files/download/${filename}`).then(...)
-    
-    console.log(`Downloading file: ${filename}`);
-    
-    // Optional: Add download tracking or analytics here
+    // The file must exist in public/files/
+    const fileUrl = `/files/${filename}`;
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   // Syllabus view handler

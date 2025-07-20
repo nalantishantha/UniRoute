@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import UniversitySidebar from '../../components/Navigation/UniversitySidebar'; // CHANGED: Import UniversitySidebar
+import UniversitySidebar from '../../components/Navigation/UniversitySidebar';
 import UniversityNavbar from '../../components/Navigation/UniversityNavbar';
 import Footer from '../../components/Footer';
-import './AcademicContent.css';
 
-// Dummy data for faculties, courses, subjects
+// Initial data for faculties, courses, subjects
 const initialData = {
   faculties: [
     {
@@ -25,16 +24,49 @@ const initialData = {
               name: 'Anatomy',
               code: 'MED101',
               credits: 4,
-              syllabus: 'Human body structure, organ systems, histology basics. This comprehensive course covers the fundamental structures of the human body including skeletal, muscular, cardiovascular, respiratory, nervous, and endocrine systems.',
-              content: ['Anatomy Lecture Notes.pdf', 'Lab Manual.pdf', 'Practice Questions.pdf']
-            },
-            {
-              id: 2,
-              name: 'Physiology',
-              code: 'MED102',
-              credits: 4,
-              syllabus: 'Body functions, homeostasis, cardiovascular system. Study of normal body functions and mechanisms that maintain life.',
-              content: ['Physiology Textbook.pdf', 'Lab Experiments.zip']
+              syllabus: {
+                overview: 'Human body structure, organ systems, histology basics. This comprehensive course covers the fundamental structures of the human body.',
+                objectives: [
+                  'Understand basic anatomical terminology and body organization',
+                  'Identify major organ systems and their relationships',
+                  'Analyze tissue structure and cellular organization',
+                  'Apply anatomical knowledge to clinical scenarios'
+                ],
+                topics: [
+                  {
+                    title: 'Introduction to Human Anatomy',
+                    subtopics: [
+                      'Anatomical position and directional terms',
+                      'Body planes and sections',
+                      'Body cavities and membranes',
+                      'Homeostasis and feedback mechanisms'
+                    ]
+                  },
+                  {
+                    title: 'Skeletal System',
+                    subtopics: [
+                      'Bone tissue structure and composition',
+                      'Bone development and growth',
+                      'Axial skeleton anatomy',
+                      'Appendicular skeleton anatomy',
+                      'Joint classification and movement'
+                    ]
+                  }
+                ],
+                assessment: [
+                  'Midterm Examination (30%)',
+                  'Laboratory Practicals (25%)',
+                  'Final Examination (35%)',
+                  'Assignments and Quizzes (10%)'
+                ],
+                references: [
+                  'Gray\'s Anatomy for Students - Drake et al.',
+                  'Clinically Oriented Anatomy - Moore et al.',
+                  'Atlas of Human Anatomy - Netter',
+                  'Anatomy & Physiology - Tortora & Derrickson'
+                ]
+              },
+              content: ['Course Handbook.pdf', 'Mentor Notes.pdf', 'Course Details.pdf']
             }
           ]
         }
@@ -58,8 +90,30 @@ const initialData = {
               name: 'Data Structures',
               code: 'CS201',
               credits: 3,
-              syllabus: 'Arrays, linked lists, stacks, queues, trees, graphs. Implementation and analysis of fundamental data structures.',
-              content: ['DS Notes.pdf', 'Programming Examples.zip', 'Assignment Guidelines.pdf']
+              syllabus: {
+                overview: 'Fundamental data structures and their applications in computer science.',
+                objectives: [
+                  'Understand the core concepts of data structures',
+                  'Implement and use various data structures in programming'
+                ],
+                topics: [
+                  {
+                    title: 'Introduction to Data Structures',
+                    subtopics: [
+                      'Definition and classification',
+                      'Abstract Data Types (ADT)'
+                    ]
+                  }
+                ],
+                assessment: [
+                  'Assignments and Programming Labs (30%)',
+                  'Final Examination (35%)'
+                ],
+                references: [
+                  'Data Structures and Algorithms in Java – Goodrich'
+                ]
+              },
+              content: ['Course Handbook.pdf', 'Mentor Notes.pdf', 'Course Details.pdf']
             }
           ]
         }
@@ -69,552 +123,394 @@ const initialData = {
 };
 
 const AcademicContent = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // CHANGED: Rename from isSidebarExpanded to isSidebarOpen
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [data, setData] = useState(initialData);
   const [selectedFaculty, setSelectedFaculty] = useState(null);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [selectedSubject, setSelectedSubject] = useState(null);
   
   // Modal states
-  const [showCourseModal, setShowCourseModal] = useState(false);
-  const [showSubjectModal, setShowSubjectModal] = useState(false);
   const [showSyllabusModal, setShowSyllabusModal] = useState(false);
-  const [showContentModal, setShowContentModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [viewingFile, setViewingFile] = useState('');
+  const [showAddCourseModal, setShowAddCourseModal] = useState(false);
+  const [showEditCourseModal, setShowEditCourseModal] = useState(false);
+  const [showEditSubjectModal, setShowEditSubjectModal] = useState(false);
+  const [showAddSubjectModal, setShowAddSubjectModal] = useState(false);
+  const [showAddFileModal, setShowAddFileModal] = useState(false);
   
   // Form states
-  const [courseForm, setCourseForm] = useState({ name: '', duration: '', intake: '' });
-  const [subjectForm, setSubjectForm] = useState({ name: '', code: '', credits: '', syllabus: '' });
+  const [editingSyllabus, setEditingSyllabus] = useState({});
   const [editingCourse, setEditingCourse] = useState(null);
   const [editingSubject, setEditingSubject] = useState(null);
-  const [contentFile, setContentFile] = useState('');
-  const [tempSyllabus, setTempSyllabus] = useState('');
+  const [newCourse, setNewCourse] = useState({ name: '', duration: '', intake: '' });
+  const [newSubject, setNewSubject] = useState({ name: '', code: '', credits: '' });
+  const [newFileName, setNewFileName] = useState('');
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isDragOver, setIsDragOver] = useState(false);
 
-  // Course handlers
-  const handleAddCourse = () => {
-    if (!courseForm.name.trim() || !courseForm.duration.trim() || !courseForm.intake.trim()) {
-      alert('Please fill in all required fields');
-      return;
-    }
-    setData(prev => {
-      const updatedFaculties = prev.faculties.map(faculty =>
-        faculty.id === selectedFaculty.id
-          ? {
-              ...faculty,
-              courses: [
-                ...faculty.courses,
-                {
-                  id: Date.now(),
-                  name: courseForm.name,
-                  duration: courseForm.duration,
-                  intake: courseForm.intake,
-                  subjects: []
-                }
-              ]
-            }
-          : faculty
-      );
-      // Update selectedFaculty to the new faculty object
-      const newFaculty = updatedFaculties.find(f => f.id === selectedFaculty.id);
-      setSelectedFaculty(newFaculty);
-      return { ...prev, faculties: updatedFaculties };
-    });
-    setShowCourseModal(false);
-    setCourseForm({ name: '', duration: '', intake: '' });
-    alert('Course added successfully!');
-  };
-
-  const handleEditCourse = (course) => {
-    setEditingCourse(course);
-    setCourseForm({ 
-      name: course.name, 
-      duration: course.duration, 
-      intake: course.intake 
-    });
-    setShowCourseModal(true);
-  };
-
-  const handleUpdateCourse = () => {
-    if (!courseForm.name.trim()) {
-      alert('Please fill in all required fields');
-      return;
-    }
-
-    setData(prev => ({
-      ...prev,
-      faculties: prev.faculties.map(f =>
-        f.id === selectedFaculty.id
-          ? {
-              ...f,
-              courses: f.courses.map(c =>
-                c.id === editingCourse.id ? { ...c, ...courseForm } : c
-              )
-            }
-          : f
-      )
-    }));
-    
-    // Update selectedCourse if it's the one being edited
-    if (selectedCourse && selectedCourse.id === editingCourse.id) {
-      setSelectedCourse({ ...selectedCourse, ...courseForm });
-    }
-    
-    setShowCourseModal(false);
-    setEditingCourse(null);
-    setCourseForm({ name: '', duration: '', intake: '' });
-    alert('Course updated successfully!');
-  };
-
+  // Handler functions
   const handleDeleteCourse = (courseId) => {
-    if (window.confirm('Are you sure you want to delete this course? This will also delete all subjects in this course.')) {
-      setData(prev => ({
-        ...prev,
-        faculties: prev.faculties.map(f =>
-          f.id === selectedFaculty.id
-            ? { ...f, courses: f.courses.filter(c => c.id !== courseId) }
-            : f
-        )
-      }));
+    if (window.confirm('Are you sure you want to delete this course?')) {
+      const updatedData = { ...data };
+      const faculty = updatedData.faculties.find(f => f.id === selectedFaculty.id);
+      faculty.courses = faculty.courses.filter(c => c.id !== courseId);
       
-      // Clear selected course if it's the one being deleted
-      if (selectedCourse && selectedCourse.id === courseId) {
+      setData(updatedData);
+      if (selectedCourse?.id === courseId) {
         setSelectedCourse(null);
         setSelectedSubject(null);
       }
-      
-      alert('Course deleted successfully!');
     }
   };
 
-  // Subject handlers
-  const handleAddSubject = () => {
-    if (!selectedCourse || !subjectForm.name.trim() || !subjectForm.code.trim()) {
-      alert('Please fill in all required fields');
-      return;
+  const handleEditCourse = () => {
+    if (!editingCourse || !newCourse.name) return;
+    
+    const updatedData = { ...data };
+    const faculty = updatedData.faculties.find(f => f.id === selectedFaculty.id);
+    const course = faculty.courses.find(c => c.id === editingCourse.id);
+    
+    course.name = newCourse.name;
+    course.duration = newCourse.duration;
+    course.intake = newCourse.intake;
+    
+    setData(updatedData);
+    if (selectedCourse?.id === editingCourse.id) {
+      setSelectedCourse(course);
     }
-    
-    const newSubject = {
-      id: Date.now(),
-      ...subjectForm,
-      credits: parseInt(subjectForm.credits) || 0,
-      content: []
-    };
-    
-    setData(prev => ({
-      ...prev,
-      faculties: prev.faculties.map(f =>
-        f.id === selectedFaculty.id
-          ? {
-              ...f,
-              courses: f.courses.map(c =>
-                c.id === selectedCourse.id
-                  ? { ...c, subjects: [...c.subjects, newSubject] }
-                  : c
-              )
-            }
-          : f
-      )
-    }));
-    
-    // Update selectedCourse to reflect the new subject
-    setSelectedCourse(prev => ({
-      ...prev,
-      subjects: [...prev.subjects, newSubject]
-    }));
-    
-    setShowSubjectModal(false);
-    setSubjectForm({ name: '', code: '', credits: '', syllabus: '' });
-    alert('Subject added successfully!');
-  };
-
-  const handleEditSubject = (subject) => {
-    setEditingSubject(subject);
-    setSubjectForm({
-      name: subject.name,
-      code: subject.code,
-      credits: subject.credits.toString(),
-      syllabus: subject.syllabus
-    });
-    setShowSubjectModal(true);
-  };
-
-  const handleUpdateSubject = () => {
-    if (!subjectForm.name.trim() || !subjectForm.code.trim()) {
-      alert('Please fill in all required fields');
-      return;
-    }
-
-    const updatedSubject = {
-      ...editingSubject,
-      ...subjectForm,
-      credits: parseInt(subjectForm.credits) || 0
-    };
-
-    setData(prev => ({
-      ...prev,
-      faculties: prev.faculties.map(f =>
-        f.id === selectedFaculty.id
-          ? {
-              ...f,
-              courses: f.courses.map(c =>
-                c.id === selectedCourse.id
-                  ? {
-                      ...c,
-                      subjects: c.subjects.map(s =>
-                        s.id === editingSubject.id ? updatedSubject : s
-                      )
-                    }
-                  : c
-              )
-            }
-          : f
-      )
-    }));
-    
-    // Update selectedCourse and selectedSubject
-    setSelectedCourse(prev => ({
-      ...prev,
-      subjects: prev.subjects.map(s =>
-        s.id === editingSubject.id ? updatedSubject : s
-      )
-    }));
-    
-    if (selectedSubject && selectedSubject.id === editingSubject.id) {
-      setSelectedSubject(updatedSubject);
-    }
-    
-    setShowSubjectModal(false);
-    setEditingSubject(null);
-    setSubjectForm({ name: '', code: '', credits: '', syllabus: '' });
-    alert('Subject updated successfully!');
+    setNewCourse({ name: '', duration: '', intake: '' });
+    setEditingCourse(null);
+    setShowEditCourseModal(false);
   };
 
   const handleDeleteSubject = (subjectId) => {
     if (window.confirm('Are you sure you want to delete this subject?')) {
-      setData(prev => ({
-        ...prev,
-        faculties: prev.faculties.map(f =>
-          f.id === selectedFaculty.id
-            ? {
-                ...f,
-                courses: f.courses.map(c =>
-                  c.id === selectedCourse.id
-                    ? { ...c, subjects: c.subjects.filter(s => s.id !== subjectId) }
-                    : c
-                )
-              }
-            : f
-        )
-      }));
+      const updatedData = { ...data };
+      const faculty = updatedData.faculties.find(f => f.id === selectedFaculty.id);
+      const course = faculty.courses.find(c => c.id === selectedCourse.id);
+      course.subjects = course.subjects.filter(s => s.id !== subjectId);
       
-      // Update selectedCourse
-      setSelectedCourse(prev => ({
-        ...prev,
-        subjects: prev.subjects.filter(s => s.id !== subjectId)
-      }));
-      
-      // Clear selectedSubject if it's the one being deleted
-      if (selectedSubject && selectedSubject.id === subjectId) {
+      setData(updatedData);
+      if (selectedSubject?.id === subjectId) {
         setSelectedSubject(null);
       }
-      
-      alert('Subject deleted successfully!');
     }
   };
 
-  // Content handlers
-  const handleUploadContent = () => {
-    if (!contentFile.trim() || !selectedSubject) {
-      alert('Please enter a file name');
-      return;
+  const handleEditSubject = () => {
+    if (!editingSubject || !newSubject.name) return;
+    
+    const updatedData = { ...data };
+    const faculty = updatedData.faculties.find(f => f.id === selectedFaculty.id);
+    const course = faculty.courses.find(c => c.id === selectedCourse.id);
+    const subject = course.subjects.find(s => s.id === editingSubject.id);
+    
+    subject.name = newSubject.name;
+    subject.code = newSubject.code;
+    subject.credits = parseInt(newSubject.credits);
+    
+    setData(updatedData);
+    if (selectedSubject?.id === editingSubject.id) {
+      setSelectedSubject(subject);
     }
-    
-    setData(prev => ({
-      ...prev,
-      faculties: prev.faculties.map(f =>
-        f.id === selectedFaculty.id
-          ? {
-              ...f,
-              courses: f.courses.map(c =>
-                c.id === selectedCourse.id
-                  ? {
-                      ...c,
-                      subjects: c.subjects.map(s =>
-                        s.id === selectedSubject.id
-                          ? { ...s, content: [...s.content, contentFile] }
-                          : s
-                      )
-                    }
-                  : c
-              )
-            }
-          : f
-      )
-    }));
-    
-    // Update selectedSubject
-    setSelectedSubject(prev => ({
-      ...prev,
-      content: [...prev.content, contentFile]
-    }));
-    
-    // Update selectedCourse
-    setSelectedCourse(prev => ({
-      ...prev,
-      subjects: prev.subjects.map(s =>
-        s.id === selectedSubject.id
-          ? { ...s, content: [...s.content, contentFile] }
-          : s
-      )
-    }));
-    
-    setShowContentModal(false);
-    setContentFile('');
-    alert('Content uploaded successfully!');
+    setNewSubject({ name: '', code: '', credits: '' });
+    setEditingSubject(null);
+    setShowEditSubjectModal(false);
   };
 
-  // File action handlers
-  const handleViewFile = (filename) => {
-    setViewingFile(filename);
-    setShowViewModal(true);
-  };
-
-  const handleDownloadFile = (filename) => {
-    alert(`Downloading: ${filename}\n\nIn a real application, this would trigger a file download.`);
-  };
-
-  const handleDeleteFile = (filename) => {
-    if (window.confirm(`Are you sure you want to delete "${filename}"?`)) {
-      setData(prev => ({
-        ...prev,
-        faculties: prev.faculties.map(f =>
-          f.id === selectedFaculty.id
-            ? {
-                ...f,
-                courses: f.courses.map(c =>
-                  c.id === selectedCourse.id
-                    ? {
-                        ...c,
-                        subjects: c.subjects.map(s =>
-                          s.id === selectedSubject.id
-                            ? { ...s, content: s.content.filter(file => file !== filename) }
-                            : s
-                        )
-                      }
-                    : c
-                )
-              }
-            : f
-        )
-      }));
-      
-      // Update selectedSubject
-      setSelectedSubject(prev => ({
-        ...prev,
-        content: prev.content.filter(file => file !== filename)
-      }));
-      
-      // Update selectedCourse
-      setSelectedCourse(prev => ({
-        ...prev,
-        subjects: prev.subjects.map(s =>
-          s.id === selectedSubject.id
-            ? { ...s, content: s.content.filter(file => file !== filename) }
-            : s
-        )
-      }));
-      
-      alert('File deleted successfully!');
-    }
-  };
-
-  // Syllabus handlers
-  const handleOpenSyllabus = (subject) => {
-    // Parse syllabus string into overview and topics/subtopics if possible
-    const syllabus = subject.syllabus || '';
-    let overview = syllabus;
-    let topics = [];
-    // If the syllabus contains numbered topics, split them
-    const topicMatches = syllabus.match(/(\d+\.\s.*?)(?=\d+\.|$)/gs);
-    if (topicMatches && topicMatches.length > 0) {
-      overview = syllabus.split(topicMatches[0])[0].trim();
-      topics = topicMatches.map(t => {
-        const [title, ...subs] = t.split('\n').map(line => line.trim()).filter(Boolean);
-        return {
-          title: title.replace(/^\d+\.\s*/, ''),
-          subtopics: subs.map(s => s.replace(/^[-•]\s*/, ''))
-        };
-      });
-    }
-    setTempSyllabus({ overview, topics });
-    setSelectedSubject(subject); // Ensure the correct subject is set
+  const handleEditSyllabus = () => {
+    setEditingSyllabus({ ...selectedSubject.syllabus });
     setShowSyllabusModal(true);
   };
 
   const handleSaveSyllabus = () => {
-    if (!tempSyllabus.trim()) {
-      alert('Please enter syllabus content');
-      return;
-    }
-
-    setData(prev => ({
-      ...prev,
-      faculties: prev.faculties.map(f =>
-        f.id === selectedFaculty.id
-          ? {
-              ...f,
-              courses: f.courses.map(c =>
-                c.id === selectedCourse.id
-                  ? {
-                      ...c,
-                      subjects: c.subjects.map(s =>
-                        s.id === selectedSubject.id
-                          ? { ...s, syllabus: tempSyllabus }
-                          : s
-                      )
-                    }
-                  : c
-              )
-            }
-          : f
-      )
-    }));
+    const updatedData = { ...data };
+    const faculty = updatedData.faculties.find(f => f.id === selectedFaculty.id);
+    const course = faculty.courses.find(c => c.id === selectedCourse.id);
+    const subject = course.subjects.find(s => s.id === selectedSubject.id);
+    subject.syllabus = { ...editingSyllabus };
     
-    // Update selectedSubject
-    setSelectedSubject(prev => ({
-      ...prev,
-      syllabus: tempSyllabus
-    }));
-    
-    // Update selectedCourse
-    setSelectedCourse(prev => ({
-      ...prev,
-      subjects: prev.subjects.map(s =>
-        s.id === selectedSubject.id
-          ? { ...s, syllabus: tempSyllabus }
-          : s
-      )
-    }));
-    
+    setData(updatedData);
+    setSelectedSubject(subject);
     setShowSyllabusModal(false);
-    alert('Syllabus updated successfully!');
   };
 
-  // Course handlers - ADD this missing function
-  const handleCourseSubmit = (e) => {
-    e.preventDefault();
-    if (editingCourse) {
-      handleUpdateCourse();
-    } else {
-      handleAddCourse();
-    }
-  };
-
-  // Add these states at the top inside AcademicContent component
-  const [showCourseEditModal, setShowCourseEditModal] = useState(false);
-  const [courseEditForm, setCourseEditForm] = useState({ name: '', duration: '', intake: '' });
-  const [editingCourseId, setEditingCourseId] = useState(null);
-
-  // Handler for opening the edit modal
-  const handleOpenCourseEditModal = (course) => {
-    setEditingCourseId(course.id);
-    setCourseEditForm({
-      name: course.name,
-      duration: course.duration,
-      intake: course.intake
+  const handleAddCourse = () => {
+    if (!selectedFaculty || !newCourse.name) return;
+    
+    const updatedData = { ...data };
+    const faculty = updatedData.faculties.find(f => f.id === selectedFaculty.id);
+    const newId = Math.max(...faculty.courses.map(c => c.id)) + 1;
+    
+    faculty.courses.push({
+      id: newId,
+      name: newCourse.name,
+      duration: newCourse.duration,
+      intake: newCourse.intake,
+      subjects: []
     });
-    setShowCourseEditModal(true);
+    
+    setData(updatedData);
+    setNewCourse({ name: '', duration: '', intake: '' });
+    setShowAddCourseModal(false);
   };
 
-  // Handler for saving the edited course
-  const handleSaveCourseEdit = (e) => {
+  const handleAddSubject = () => {
+    if (!selectedCourse || !newSubject.name) return;
+    
+    const updatedData = { ...data };
+    const faculty = updatedData.faculties.find(f => f.id === selectedFaculty.id);
+    const course = faculty.courses.find(c => c.id === selectedCourse.id);
+    const newId = Math.max(...course.subjects.map(s => s.id), 0) + 1;
+    
+    course.subjects.push({
+      id: newId,
+      name: newSubject.name,
+      code: newSubject.code,
+      credits: parseInt(newSubject.credits),
+      syllabus: {
+        overview: '',
+        objectives: [],
+        topics: [],
+        assessment: [],
+        references: []
+      },
+      content: []
+    });
+    
+    setData(updatedData);
+    setNewSubject({ name: '', code: '', credits: '' });
+    setShowAddSubjectModal(false);
+  };
+
+  const handleAddFile = () => {
+    if (!selectedSubject || (!selectedFile && !newFileName)) return;
+    
+    const fileName = selectedFile ? selectedFile.name : newFileName;
+    
+    const updatedData = { ...data };
+    const faculty = updatedData.faculties.find(f => f.id === selectedFaculty.id);
+    const course = faculty.courses.find(c => c.id === selectedCourse.id);
+    const subject = course.subjects.find(s => s.id === selectedSubject.id);
+    
+    if (!subject.content.includes(fileName)) {
+      subject.content.push(fileName);
+    }
+    
+    // If it's a real file, you could upload it to a server here
+    if (selectedFile) {
+      // For now, we'll just add the filename to the list
+      // In a real application, you would upload the file to your server
+      console.log('File to upload:', selectedFile);
+    }
+    
+    setData(updatedData);
+    setSelectedSubject(subject);
+    setNewFileName('');
+    setSelectedFile(null);
+    setShowAddFileModal(false);
+  };
+
+  const handleFileSelect = (file) => {
+    setSelectedFile(file);
+    setNewFileName(file.name);
+  };
+
+  const handleDragOver = (e) => {
     e.preventDefault();
-    if (!courseEditForm.name.trim() || !courseEditForm.duration.trim() || !courseEditForm.intake.trim()) {
-      alert('Please fill in all required fields');
-      return;
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      handleFileSelect(files[0]);
     }
-    setData(prev => ({
-      ...prev,
-      faculties: prev.faculties.map(f =>
-        f.id === selectedFaculty.id
-          ? {
-              ...f,
-              courses: f.courses.map(c =>
-                c.id === editingCourseId
-                  ? { ...c, ...courseEditForm }
-                  : c
-              )
-            }
-          : f
-      )
-    }));
-    // Update selectedCourse if it's the one being edited
-    if (selectedCourse && selectedCourse.id === editingCourseId) {
-      setSelectedCourse({ ...selectedCourse, ...courseEditForm });
-    }
-    setShowCourseEditModal(false);
-    setEditingCourseId(null);
-    setCourseEditForm({ name: '', duration: '', intake: '' });
-    alert('Course updated successfully!');
+  };
+
+  const handleDownloadFile = (filename) => {
+    const fileUrl = `/files/${filename}`;
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
-    <div className="academic-content-page">
-      {/* SIDEBAR AT THE VERY TOP - OUTSIDE CONTAINER */}
+    <div style={{
+      minHeight: '100vh',
+      background: '#f8fafc',
+      fontFamily: "'Inter', sans-serif"
+    }}>
       <UniversitySidebar 
         isOpen={isSidebarOpen}
         setIsOpen={setIsSidebarOpen}
       />
 
-      {/* NAVBAR */}
       <UniversityNavbar
         onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
         sidebarExpanded={isSidebarOpen}
       />
 
-      {/* MAIN CONTENT */}
-      <main className={`academic-main-content ${isSidebarOpen ? 'sidebar-expanded' : 'sidebar-collapsed'}`}>
+      <main style={{
+        flex: 1,
+        marginLeft: isSidebarOpen ? '288px' : '0',
+        minHeight: '100vh',
+        transition: 'margin-left 0.3s ease',
+        background: '#f8fafc',
+        paddingTop: '90px'
+      }}>
         
         {/* Overview Section */}
-        <section className="academic-overview">
-          <div className="overview-header">
-            <h1>Academic Content Management</h1>
-            <p>Manage faculties, courses, subjects, and academic content across the university</p>
+        <section style={{
+          background: 'white',
+          margin: '2rem',
+          borderRadius: '12px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+          padding: '2rem',
+          marginBottom: '2rem'
+        }}>
+          <div style={{ marginBottom: '2rem' }}>
+            <h1 style={{
+              fontSize: '2rem',
+              fontWeight: '700',
+              color: '#1e293b',
+              marginBottom: '0.5rem'
+            }}>Academic Content Management</h1>
+            <p style={{
+              color: '#64748b',
+              fontSize: '1.1rem',
+              marginBottom: '0'
+            }}>Manage faculties, courses, subjects, and academic content across the university</p>
           </div>
-          <div className="overview-stats">
-            <div className="stat-card">
-              <h3>{data.faculties.length}</h3>
-              <p>Faculties</p>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '1.5rem'
+          }}>
+            <div style={{
+              background: '#f8fafc',
+              padding: '1.5rem',
+              borderRadius: '8px',
+              textAlign: 'center',
+              border: '1px solid #e2e8f0'
+            }}>
+              <h3 style={{
+                fontSize: '2rem',
+                fontWeight: '700',
+                color: '#6366f1',
+                marginBottom: '0.5rem'
+              }}>{data.faculties.length}</h3>
+              <p style={{
+                color: '#64748b',
+                fontWeight: '500',
+                margin: '0'
+              }}>Faculties</p>
             </div>
-            <div className="stat-card">
-              <h3>{data.faculties.reduce((total, f) => total + f.courses.length, 0)}</h3>
-              <p>Total Courses</p>
+            <div style={{
+              background: '#f8fafc',
+              padding: '1.5rem',
+              borderRadius: '8px',
+              textAlign: 'center',
+              border: '1px solid #e2e8f0'
+            }}>
+              <h3 style={{
+                fontSize: '2rem',
+                fontWeight: '700',
+                color: '#6366f1',
+                marginBottom: '0.5rem'
+              }}>{data.faculties.reduce((total, f) => total + f.courses.length, 0)}</h3>
+              <p style={{
+                color: '#64748b',
+                fontWeight: '500',
+                margin: '0'
+              }}>Total Courses</p>
             </div>
-            <div className="stat-card">
-              <h3>{data.faculties.reduce((total, f) => total + f.courses.reduce((ct, c) => ct + c.subjects.length, 0), 0)}</h3>
-              <p>Total Subjects</p>
+            <div style={{
+              background: '#f8fafc',
+              padding: '1.5rem',
+              borderRadius: '8px',
+              textAlign: 'center',
+              border: '1px solid #e2e8f0'
+            }}>
+              <h3 style={{
+                fontSize: '2rem',
+                fontWeight: '700',
+                color: '#6366f1',
+                marginBottom: '0.5rem'
+              }}>{data.faculties.reduce((total, f) => total + f.courses.reduce((ct, c) => ct + c.subjects.length, 0), 0)}</h3>
+              <p style={{
+                color: '#64748b',
+                fontWeight: '500',
+                margin: '0'
+              }}>Total Subjects</p>
             </div>
           </div>
         </section>
 
         {/* Faculties Section */}
-        <section className="faculties-section">
-          <h2>University Faculties</h2>
-          <div className="faculties-grid">
+        <section style={{
+          background: 'white',
+          margin: '2rem',
+          borderRadius: '12px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+          padding: '2rem',
+          marginBottom: '2rem'
+        }}>
+          <h2 style={{
+            fontSize: '1.5rem',
+            fontWeight: '600',
+            color: '#1e293b',
+            marginBottom: '1.5rem'
+          }}>University Faculties</h2>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+            gap: '1.5rem'
+          }}>
             {data.faculties.map(faculty => (
               <div 
-                key={faculty.id} 
-                className={`faculty-card ${selectedFaculty?.id === faculty.id ? 'selected' : ''}`}
+                key={faculty.id}
+                style={{
+                  background: selectedFaculty?.id === faculty.id ? '#eef2ff' : '#f9fafb',
+                  border: `2px solid ${selectedFaculty?.id === faculty.id ? '#6366f1' : '#e5e7eb'}`,
+                  borderRadius: '8px',
+                  padding: '1.5rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
                 onClick={() => {
                   setSelectedFaculty(faculty);
                   setSelectedCourse(null);
                   setSelectedSubject(null);
                 }}
               >
-                <h3>{faculty.name}</h3>
-                <p>{faculty.description}</p>
-                <div className="faculty-meta">
+                <h3 style={{
+                  fontSize: '1.25rem',
+                  fontWeight: '600',
+                  color: '#1e293b',
+                  marginBottom: '0.5rem'
+                }}>{faculty.name}</h3>
+                <p style={{
+                  color: '#64748b',
+                  marginBottom: '1rem',
+                  lineHeight: '1.6'
+                }}>{faculty.description}</p>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.25rem',
+                  fontSize: '0.875rem',
+                  color: '#6b7280'
+                }}>
                   <span>Dean: {faculty.dean}</span>
                   <span>Est. {faculty.established}</span>
                   <span>{faculty.courses.length} Courses</span>
@@ -626,56 +522,163 @@ const AcademicContent = () => {
 
         {/* Courses Section */}
         {selectedFaculty && (
-          <section className="courses-section">
-            <div className="section-header">
-              <h2>Courses in {selectedFaculty.name}</h2>
-              <button 
-                className="btn btn-primary"
-                onClick={() => { 
-                  setShowCourseModal(true); 
-                  setEditingCourse(null); 
-                  setCourseForm({ name: '', duration: '', intake: '' }); 
+          <section style={{
+            background: 'white',
+            margin: '2rem',
+            borderRadius: '12px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+            padding: '2rem',
+            marginBottom: '2rem'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1.5rem'
+            }}>
+              <h2 style={{
+                fontSize: '1.5rem',
+                fontWeight: '600',
+                color: '#1e293b'
+              }}>Courses in {selectedFaculty.name}</h2>
+              <button
+                onClick={() => setShowAddCourseModal(true)}
+                style={{
+                  background: 'white',
+                  border: '2px solid #2563eb',
+                  borderRadius: '8px',
+                  padding: '0.75rem 1.5rem',
+                  color: '#2563eb',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  transition: 'all 0.2s',
+                  minWidth: '140px'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.background = '#eff6ff';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.background = 'white';
                 }}
               >
-                + Add Course
+                ➕ Add Course
               </button>
             </div>
-            <div className="courses-list">
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem'
+            }}>
               {selectedFaculty.courses.map(course => (
                 <div 
                   key={course.id}
-                  className={`course-card ${selectedCourse?.id === course.id ? 'selected' : ''}`}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    background: selectedCourse?.id === course.id ? '#eef2ff' : '#f9fafb',
+                    border: `2px solid ${selectedCourse?.id === course.id ? '#6366f1' : '#e5e7eb'}`,
+                    borderRadius: '8px',
+                    padding: '1.5rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
                   onClick={() => {
                     setSelectedCourse(course);
                     setSelectedSubject(null);
                   }}
                 >
-                  <div className="course-info">
-                    <h4>{course.name}</h4>
-                    <div className="course-meta">
+                  <div>
+                    <h4 style={{
+                      fontSize: '1.1rem',
+                      fontWeight: '600',
+                      color: '#1e293b',
+                      marginBottom: '0.5rem'
+                    }}>{course.name}</h4>
+                    <div style={{
+                      display: 'flex',
+                      gap: '1rem',
+                      fontSize: '0.875rem',
+                      color: '#6b7280'
+                    }}>
                       <span>Duration: {course.duration}</span>
                       <span>Intake: {course.intake}</span>
                       <span>{course.subjects.length} Subjects</span>
                     </div>
                   </div>
-                  <div className="course-actions">
+                  <div style={{
+                    display: 'flex',
+                    gap: '0.5rem',
+                    alignItems: 'center'
+                  }}>
                     <button 
-                      className="university-academiccontent-admin-current-edit-btn"
-                      onClick={(e) => { 
-                        e.stopPropagation(); 
-                        handleOpenCourseEditModal(course); 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setNewCourse({
+                          name: course.name,
+                          duration: course.duration,
+                          intake: course.intake
+                        });
+                        setEditingCourse(course);
+                        setShowEditCourseModal(true);
                       }}
-                      title="Edit Course"
+                      style={{
+                        background: 'white',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '6px',
+                        padding: '0.5rem',
+                        color: '#374151',
+                        cursor: 'pointer',
+                        fontSize: '0.875rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '32px',
+                        height: '32px',
+                        transition: 'all 0.2s',
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+                      }}
+                      onMouseOver={(e) => {
+                        e.target.style.background = '#f9fafb';
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.style.background = 'white';
+                      }}
                     >
                       ✏️
                     </button>
                     <button 
-                      className="university-academiccontent-admin-current-delete-btn"
-                      onClick={(e) => { 
-                        e.stopPropagation(); 
-                        handleDeleteCourse(course.id); 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteCourse(course.id);
                       }}
-                      title="Delete Course"
+                      style={{
+                        background: 'white',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '6px',
+                        padding: '0.5rem',
+                        color: '#ef4444',
+                        cursor: 'pointer',
+                        fontSize: '0.875rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '32px',
+                        height: '32px',
+                        transition: 'all 0.2s',
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+                      }}
+                      onMouseOver={(e) => {
+                        e.target.style.background = '#fef2f2';
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.style.background = 'white';
+                      }}
                     >
                       🗑️
                     </button>
@@ -683,68 +686,211 @@ const AcademicContent = () => {
                 </div>
               ))}
               {selectedFaculty.courses.length === 0 && (
-                <div className="empty-content">No courses available. Add a course to get started.</div>
+                <div style={{
+                  textAlign: 'center',
+                  color: '#6b7280',
+                  padding: '3rem 2rem',
+                  fontStyle: 'italic',
+                  background: '#f9fafb',
+                  border: '2px dashed #d1d5db',
+                  borderRadius: '8px'
+                }}>No courses available.</div>
               )}
             </div>
           </section>
         )}
 
-        {/* Subjects Section - UPDATED: Remove Content button */}
+        {/* Subjects Section */}
         {selectedCourse && (
-          <section className="subjects-section">
-            <div className="section-header">
-              <h2>Subjects in {selectedCourse.name}</h2>
-              <button 
-                className="btn btn-primary"
-                onClick={() => { 
-                  setShowSubjectModal(true); 
-                  setEditingSubject(null); 
-                  setSubjectForm({ name: '', code: '', credits: '', syllabus: '' }); 
+          <section style={{
+            background: 'white',
+            margin: '2rem',
+            borderRadius: '12px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+            padding: '2rem',
+            marginBottom: '2rem'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1.5rem'
+            }}>
+              <h2 style={{
+                fontSize: '1.5rem',
+                fontWeight: '600',
+                color: '#1e293b'
+              }}>Subjects in {selectedCourse.name}</h2>
+              <button
+                onClick={() => setShowAddSubjectModal(true)}
+                style={{
+                  background: 'white',
+                  border: '2px solid #2563eb',
+                  borderRadius: '8px',
+                  padding: '0.75rem 1.5rem',
+                  color: '#2563eb',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  transition: 'all 0.2s',
+                  minWidth: '140px'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.background = '#eff6ff';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.background = 'white';
                 }}
               >
-                + Add Subject
+                ➕ Add Subject
               </button>
             </div>
-            <div className="subjects-list">
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem'
+            }}>
               {selectedCourse.subjects.map(subject => (
                 <div 
                   key={subject.id}
-                  className={`subject-card ${selectedSubject?.id === subject.id ? 'selected' : ''}`}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    background: selectedSubject?.id === subject.id ? '#eef2ff' : '#f9fafb',
+                    border: `2px solid ${selectedSubject?.id === subject.id ? '#6366f1' : '#e5e7eb'}`,
+                    borderRadius: '8px',
+                    padding: '1.5rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
                   onClick={() => setSelectedSubject(subject)}
                 >
-                  <div className="subject-info">
-                    <h4>{subject.name} ({subject.code})</h4>
-                    <p className="syllabus-preview">{subject.syllabus}</p>
-                    <div className="subject-meta">
+                  <div>
+                    <h4 style={{
+                      fontSize: '1.1rem',
+                      fontWeight: '600',
+                      color: '#1e293b',
+                      marginBottom: '0.5rem'
+                    }}>{subject.name} ({subject.code})</h4>
+                    <p style={{
+                      color: '#64748b',
+                      margin: '0.5rem 0',
+                      fontSize: '0.9rem'
+                    }}>{subject.syllabus.overview}</p>
+                    <div style={{
+                      display: 'flex',
+                      gap: '1rem',
+                      fontSize: '0.875rem',
+                      color: '#6b7280'
+                    }}>
                       <span>Credits: {subject.credits}</span>
                       <span>{subject.content.length} Content Files</span>
                     </div>
                   </div>
-                  <div className="subject-actions">
+                  <div style={{
+                    display: 'flex',
+                    gap: '0.5rem',
+                    alignItems: 'center'
+                  }}>
                     <button 
                       onClick={(e) => { 
                         e.stopPropagation(); 
-                        handleOpenSyllabus(subject); 
+                        handleEditSyllabus(); 
                       }}
-                      title="Edit Syllabus"
+                      style={{
+                        background: 'white',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '6px',
+                        padding: '0.5rem 1rem',
+                        color: '#374151',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        fontSize: '0.875rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        transition: 'all 0.2s',
+                        minWidth: '140px',
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+                      }}
+                      onMouseOver={(e) => {
+                        e.target.style.background = '#f9fafb';
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.style.background = 'white';
+                      }}
                     >
-                      📝 Syllabus
+                      📝 View Syllabus
                     </button>
                     <button 
-                      onClick={(e) => { 
-                        e.stopPropagation(); 
-                        handleEditSubject(subject); 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setNewSubject({
+                          name: subject.name,
+                          code: subject.code,
+                          credits: subject.credits.toString()
+                        });
+                        setEditingSubject(subject);
+                        setShowEditSubjectModal(true);
                       }}
-                      title="Edit Subject"
+                      style={{
+                        background: 'white',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '6px',
+                        padding: '0.5rem',
+                        color: '#374151',
+                        cursor: 'pointer',
+                        fontSize: '0.875rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '32px',
+                        height: '32px',
+                        transition: 'all 0.2s',
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+                      }}
+                      onMouseOver={(e) => {
+                        e.target.style.background = '#f9fafb';
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.style.background = 'white';
+                      }}
                     >
                       ✏️
                     </button>
                     <button 
-                      onClick={(e) => { 
-                        e.stopPropagation(); 
-                        handleDeleteSubject(subject.id); 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteSubject(subject.id);
                       }}
-                      title="Delete Subject"
+                      style={{
+                        background: 'white',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '6px',
+                        padding: '0.5rem',
+                        color: '#ef4444',
+                        cursor: 'pointer',
+                        fontSize: '0.875rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '32px',
+                        height: '32px',
+                        transition: 'all 0.2s',
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+                      }}
+                      onMouseOver={(e) => {
+                        e.target.style.background = '#fef2f2';
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.style.background = 'white';
+                      }}
                     >
                       🗑️
                     </button>
@@ -752,46 +898,130 @@ const AcademicContent = () => {
                 </div>
               ))}
               {selectedCourse.subjects.length === 0 && (
-                <div className="empty-content">No subjects available. Add a subject to get started.</div>
+                <div style={{
+                  textAlign: 'center',
+                  color: '#6b7280',
+                  padding: '3rem 2rem',
+                  fontStyle: 'italic',
+                  background: '#f9fafb',
+                  border: '2px dashed #d1d5db',
+                  borderRadius: '8px'
+                }}>No subjects available.</div>
               )}
             </div>
           </section>
         )}
 
-        {/* Content Files Section - UPDATED: Remove View button */}
+        {/* Content Files Section */}
         {selectedSubject && (
-          <section className="content-section">
-            <div className="section-header">
-              <h2>Academic Content for {selectedSubject.name}</h2>
-              <button 
-                className="btn btn-primary" 
-                onClick={() => setShowContentModal(true)}
+          <section style={{
+            background: 'white',
+            margin: '2rem',
+            borderRadius: '12px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+            padding: '2rem',
+            marginBottom: '2rem'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1.5rem'
+            }}>
+              <h2 style={{
+                fontSize: '1.5rem',
+                fontWeight: '600',
+                color: '#1e293b'
+              }}>Academic Content for {selectedSubject.name}</h2>
+              <button
+                onClick={() => setShowAddFileModal(true)}
+                style={{
+                  background: 'white',
+                  border: '2px solid #2563eb',
+                  borderRadius: '8px',
+                  padding: '0.75rem 1.5rem',
+                  color: '#2563eb',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  transition: 'all 0.2s',
+                  minWidth: '140px'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.background = '#eff6ff';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.background = 'white';
+                }}
               >
-                + Upload Content
+                ➕ Add File
               </button>
             </div>
-            <div className="content-list">
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem'
+            }}>
               {selectedSubject.content.map((file, index) => (
-                <div key={index} className="content-file">
+                <div key={index} style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  background: '#f9fafb',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  padding: '1rem'
+                }}>
                   <span>📄 {file}</span>
-                  <div className="file-actions">
+                  <div style={{
+                    display: 'flex',
+                    gap: '0.5rem'
+                  }}>
                     <button 
                       onClick={() => handleDownloadFile(file)}
-                      title="Download File"
+                      style={{
+                        background: 'white',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '6px',
+                        padding: '0.5rem 0.75rem',
+                        color: '#374151',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        fontSize: '0.8rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.25rem',
+                        transition: 'all 0.2s',
+                        minWidth: '100px',
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+                      }}
+                      onMouseOver={(e) => {
+                        e.target.style.background = '#f9fafb';
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.style.background = 'white';
+                      }}
                     >
                       ⬇️ Download
-                    </button>
-                    <button 
-                      onClick={() => handleDeleteFile(file)}
-                      title="Delete File"
-                    >
-                      🗑️ Delete
                     </button>
                   </div>
                 </div>
               ))}
               {selectedSubject.content.length === 0 && (
-                <div className="empty-content">No content uploaded yet. Upload files to share with students.</div>
+                <div style={{
+                  textAlign: 'center',
+                  color: '#6b7280',
+                  padding: '3rem 2rem',
+                  fontStyle: 'italic',
+                  background: '#f9fafb',
+                  border: '2px dashed #d1d5db',
+                  borderRadius: '8px'
+                }}>No content available.</div>
               )}
             </div>
           </section>
@@ -799,304 +1029,1049 @@ const AcademicContent = () => {
 
         <Footer
           title="Academic Excellence"
-          subtitle="Empowering education through comprehensive academic content management"
+          subtitle="Empowering education through comprehensive academic content"
           theme="dark"
           sidebarExpanded={isSidebarOpen}
         />
       </main>
 
-      {/* Course Modal - Use unique classes */}
-      {showCourseModal && (
-        <div className="university-academiccontent-admin-simple-overlay" onClick={() => setShowCourseModal(false)}>
-          <div className="university-academiccontent-admin-simple-content" onClick={e => e.stopPropagation()}>
-            <div className="university-academiccontent-admin-simple-header">
-              <h3>{editingCourse ? '✏️ Edit Course' : '➕ Add New Course'}</h3>
-              <button 
-                className="university-academiccontent-admin-simple-close"
-                onClick={() => setShowCourseModal(false)}
-              >
-                ✕
-              </button>
-            </div>
-            
-            <form className="university-academiccontent-admin-simple-form" onSubmit={handleCourseSubmit}>
-              <input 
-                className="university-academiccontent-admin-simple-input"
-                type="text" 
-                placeholder="Course Name *" 
-                value={courseForm.name}
-                onChange={(e) => setCourseForm({...courseForm, name: e.target.value})}
-                required 
-              />
-              <input 
-                className="university-academiccontent-admin-simple-input"
-                type="text" 
-                placeholder="Duration (e.g., 4 Years) *" 
-                value={courseForm.duration}
-                onChange={(e) => setCourseForm({...courseForm, duration: e.target.value})}
-                required 
-              />
-              <input 
-                className="university-academiccontent-admin-simple-input"
-                type="text" 
-                placeholder="Intake (e.g., February, September) *" 
-                value={courseForm.intake}
-                onChange={(e) => setCourseForm({...courseForm, intake: e.target.value})}
-                required 
-              />
-              
-              <div className="university-academiccontent-admin-simple-actions">
-                <button 
-                  className="university-academiccontent-admin-simple-btn"
-                  type="button" 
-                  onClick={() => setShowCourseModal(false)}
-                >
-                  Cancel
-                </button>
-                <button 
-                  className="university-academiccontent-admin-simple-btn university-academiccontent-admin-simple_primary"
-                  type="submit"
-                >
-                  {editingCourse ? 'Update Course' : 'Add Course'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Subject Modal */}
-      {showSubjectModal && (
-        <div className="admin-modal-overlay" onClick={() => setShowSubjectModal(false)}>
-          <div className="admin-modal-content" onClick={e => e.stopPropagation()}>
-            <div className="admin-modal-header">
-              <h3>{editingSubject ? '✏️ Edit Subject' : '➕ Add New Subject'}</h3>
-              <button 
-                className="admin-modal-close"
-                onClick={() => setShowSubjectModal(false)}
-              >
-                ✕
-              </button>
-            </div>
-            
-            <form className="admin-modal-form" onSubmit={e => { 
-              e.preventDefault(); 
-              editingSubject ? handleUpdateSubject() : handleAddSubject(); 
+      {/* Add Course Modal */}
+      {showAddCourseModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0, 0, 0, 0.65)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem'
+        }} onClick={() => setShowAddCourseModal(false)}>
+          <div style={{
+            background: '#fff',
+            borderRadius: '12px',
+            maxWidth: '500px',
+            width: '100%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
+            border: '1px solid #e2e8f0'
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{
+              background: '#fff',
+              color: '#1e293b',
+              padding: '1.5rem 2rem',
+              borderRadius: '12px 12px 0 0',
+              borderBottom: '1px solid #e2e8f0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
             }}>
-              <input
-                className="admin-modal-input"
-                type="text"
-                placeholder="Subject Name *"
-                value={subjectForm.name}
-                onChange={e => setSubjectForm({ ...subjectForm, name: e.target.value })}
-                required
-              />
-              <input
-                className="admin-modal-input"
-                type="text"
-                placeholder="Subject Code (e.g., CS101) *"
-                value={subjectForm.code}
-                onChange={e => setSubjectForm({ ...subjectForm, code: e.target.value })}
-                required
-              />
-              <input
-                className="admin-modal-input"
-                type="number"
-                placeholder="Credits *"
-                value={subjectForm.credits}
-                onChange={e => setSubjectForm({ ...subjectForm, credits: e.target.value })}
-                required
-                min="1"
-                max="10"
-              />
-              <textarea
-                className="admin-modal-textarea"
-                placeholder="Syllabus Overview *"
-                value={subjectForm.syllabus}
-                onChange={e => setSubjectForm({ ...subjectForm, syllabus: e.target.value })}
-                required
-                rows="4"
-              />
-              <div className="admin-modal-actions">
-                <button 
-                  className="admin-modal-btn"
-                  type="button" 
-                  onClick={() => setShowSubjectModal(false)}
-                >
-                  Cancel
-                </button>
-                <button 
-                  className="admin-modal-btn admin-btn-primary"
-                  type="submit"
-                >
-                  {editingSubject ? 'Update Subject' : 'Add Subject'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Enhanced Professional Syllabus Modal - EXACTLY LIKE USER PAGE */}
-      {showSyllabusModal && selectedSubject && (
-        <div className="university-academiccontent-admin-modal-overlay" onClick={() => setShowSyllabusModal(false)}>
-          <div className="university-academiccontent-admin-modal-content university-academiccontent-admin-modal-large" onClick={e => e.stopPropagation()}>
-            <div className="university-academiccontent-admin-modal-header">
-              <h3>📋 Syllabus - {selectedSubject.name}</h3>
-              <div className="university-academiccontent-admin-subject-code">Course Code: {selectedSubject.code} | Credits: {selectedSubject.credits}</div>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                margin: 0,
+                color: '#1e293b'
+              }}>➕ Add New Course</h3>
               <button 
-                className="university-academiccontent-admin-modal-close"
-                onClick={() => setShowSyllabusModal(false)}
-              >
-                ✕
-              </button>
-            </div>
-            <div className="university-academiccontent-admin-modal-body">
-              {/* Course Overview Section */}
-              <div className="university-academiccontent-admin-section">
-                <h4>📖 Course Overview</h4>
-                <div className="university-academiccontent-admin-overview" style={{whiteSpace: 'pre-line'}}>
-                  {tempSyllabus && tempSyllabus.overview
-                    ? tempSyllabus.overview
-                    : selectedSubject.syllabus}
-                </div>
-              </div>
-
-              {/* Topics Section */}
-              {tempSyllabus && tempSyllabus.topics && tempSyllabus.topics.length > 0 && (
-                <div className="university-academiccontent-admin-section">
-                  <h4>📚 Course Topics</h4>
-                  <ol style={{paddingLeft: '1.2em'}}>
-                    {tempSyllabus.topics.map((topic, idx) => (
-                      <li key={idx} style={{marginBottom: '0.7em'}}>
-                        <strong>{topic.title}</strong>
-                        {topic.subtopics && topic.subtopics.length > 0 && (
-                          <ul style={{marginTop: '0.3em', paddingLeft: '1.2em'}}>
-                            {topic.subtopics.map((sub, i) => (
-                              <li key={i} style={{color: '#475569'}}>{sub}</li>
-                            ))}
-                          </ul>
-                        )}
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              )}
-            </div>
-            <div className="university-academiccontent-admin-modal-actions">
-              <button 
-                className="university-academiccontent-admin-btn university-academiccontent-admin-btn-secondary"
-                onClick={() => setShowSyllabusModal(false)}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Content Upload Modal */}
-      {showContentModal && (
-        <div className="admin-modal-overlay" onClick={() => setShowContentModal(false)}>
-          <div className="admin-modal-content" onClick={e => e.stopPropagation()}>
-            <div className="admin-modal-header">
-              <h3>📁 Upload Academic Content</h3>
-              <button 
-                className="admin-modal-close"
-                onClick={() => setShowContentModal(false)}
-              >
-                ✕
-              </button>
+                onClick={() => setShowAddCourseModal(false)}
+                style={{
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '6px',
+                  color: '#64748b',
+                  fontSize: '1rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >✕</button>
             </div>
             
-            <form className="admin-modal-form" onSubmit={e => { e.preventDefault(); handleUploadContent(); }}>
-              <input
-                className="admin-modal-input"
-                type="text"
-                placeholder="File name (e.g., Lecture Notes Chapter 1.pdf) *"
-                value={contentFile}
-                onChange={e => setContentFile(e.target.value)}
-                required
-              />
-              <div className="admin-upload-area">
-                <p>📁 Drag and drop files here or click to browse</p>
-                <p className="admin-upload-note">Supported formats: PDF, DOC, PPT, ZIP, Video files</p>
-                <input type="file" style={{ display: 'none' }} />
+            <div style={{ padding: '1.5rem 2rem' }}>
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{
+                  display: 'block',
+                  marginBottom: '0.5rem',
+                  fontWeight: '500',
+                  color: '#374151'
+                }}>Course Name</label>
+                <input
+                  type="text"
+                  value={newCourse.name}
+                  onChange={(e) => setNewCourse({...newCourse, name: e.target.value})}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '0.875rem'
+                  }}
+                  placeholder="Enter course name"
+                />
               </div>
-              <div className="admin-modal-actions">
-                <button 
-                  className="admin-modal-btn"
-                  type="button" 
-                  onClick={() => setShowContentModal(false)}
-                >
-                  Cancel
-                </button>
-                <button 
-                  className="admin-modal-btn admin-btn-primary"
-                  type="submit"
-                >
-                  Upload Content
-                </button>
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{
+                  display: 'block',
+                  marginBottom: '0.5rem',
+                  fontWeight: '500',
+                  color: '#374151'
+                }}>Duration</label>
+                <input
+                  type="text"
+                  value={newCourse.duration}
+                  onChange={(e) => setNewCourse({...newCourse, duration: e.target.value})}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '0.875rem'
+                  }}
+                  placeholder="e.g., 4 years"
+                />
               </div>
-            </form>
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{
+                  display: 'block',
+                  marginBottom: '0.5rem',
+                  fontWeight: '500',
+                  color: '#374151'
+                }}>Intake</label>
+                <input
+                  type="text"
+                  value={newCourse.intake}
+                  onChange={(e) => setNewCourse({...newCourse, intake: e.target.value})}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '0.875rem'
+                  }}
+                  placeholder="e.g., 150 students/year"
+                />
+              </div>
+            </div>
+
+            <div style={{
+              padding: '1rem 2rem 1.5rem 2rem',
+              borderTop: '1px solid #e2e8f0',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '0.75rem'
+            }}>
+              <button 
+                onClick={() => setShowAddCourseModal(false)}
+                style={{
+                  background: '#f3f4f6',
+                  color: '#374151',
+                  border: '1px solid #d1d5db',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '6px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem'
+                }}
+              >Cancel</button>
+              <button 
+                onClick={handleAddCourse}
+                style={{
+                  background: '#2563eb',
+                  color: 'white',
+                  border: 'none',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '6px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem'
+                }}
+              >Add Course</button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Add the new professional edit modal for course */}
-      {showCourseEditModal && (
-        <div className="university-academiccontent-admin-current-modal-overlay" onClick={() => setShowCourseEditModal(false)}>
-          <div className="university-academiccontent-admin-current-modal-content" onClick={e => e.stopPropagation()}>
-            <div className="university-academiccontent-admin-current-modal-header">
-              <h3>✏️ Edit Course</h3>
+      {/* Edit Course Modal */}
+      {showEditCourseModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0, 0, 0, 0.65)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem'
+        }} onClick={() => setShowEditCourseModal(false)}>
+          <div style={{
+            background: '#fff',
+            borderRadius: '12px',
+            maxWidth: '500px',
+            width: '100%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
+            border: '1px solid #e2e8f0'
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{
+              background: '#fff',
+              color: '#1e293b',
+              padding: '1.5rem 2rem',
+              borderRadius: '12px 12px 0 0',
+              borderBottom: '1px solid #e2e8f0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                margin: 0,
+                color: '#1e293b'
+              }}>✏️ Edit Course</h3>
               <button 
-                className="university-academiccontent-admin-current-modal-close"
-                onClick={() => setShowCourseEditModal(false)}
-              >
-                ✕
-              </button>
+                onClick={() => setShowEditCourseModal(false)}
+                style={{
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '6px',
+                  color: '#64748b',
+                  fontSize: '1rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >✕</button>
             </div>
-            <form className="university-academiccontent-admin-current-modal-form" onSubmit={handleSaveCourseEdit}>
-              <label>Course Name</label>
-              <input 
-                className="university-academiccontent-admin-current-modal-input"
-                type="text"
-                value={courseEditForm.name}
-                onChange={e => setCourseEditForm({ ...courseEditForm, name: e.target.value })}
-                required
-              />
-              <label>Duration</label>
-              <input 
-                className="university-academiccontent-admin-current-modal-input"
-                type="text"
-                value={courseEditForm.duration}
-                onChange={e => setCourseEditForm({ ...courseEditForm, duration: e.target.value })}
-                required
-              />
-              <label>Intake</label>
-              <input 
-                className="university-academiccontent-admin-current-modal-input"
-                type="text"
-                value={courseEditForm.intake}
-                onChange={e => setCourseEditForm({ ...courseEditForm, intake: e.target.value })}
-                required
-              />
-              <div className="university-academiccontent-admin-current-modal-actions">
-                <button
-                  type="button"
-                  className="university-academiccontent-admin-current-modal-btn"
-                  onClick={() => setShowCourseEditModal(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="university-academiccontent-admin-current-modal-btn university-academiccontent-admin-current-modal-btn_primary"
-                >
-                  Save Changes
-                </button>
+            
+            <div style={{ padding: '1.5rem 2rem' }}>
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{
+                  display: 'block',
+                  marginBottom: '0.5rem',
+                  fontWeight: '500',
+                  color: '#374151'
+                }}>Course Name</label>
+                <input
+                  type="text"
+                  value={newCourse.name}
+                  onChange={(e) => setNewCourse({...newCourse, name: e.target.value})}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '0.875rem'
+                  }}
+                  placeholder="Enter course name"
+                />
               </div>
-            </form>
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{
+                  display: 'block',
+                  marginBottom: '0.5rem',
+                  fontWeight: '500',
+                  color: '#374151'
+                }}>Duration</label>
+                <input
+                  type="text"
+                  value={newCourse.duration}
+                  onChange={(e) => setNewCourse({...newCourse, duration: e.target.value})}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '0.875rem'
+                  }}
+                  placeholder="e.g., 4 years"
+                />
+              </div>
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{
+                  display: 'block',
+                  marginBottom: '0.5rem',
+                  fontWeight: '500',
+                  color: '#374151'
+                }}>Intake</label>
+                <input
+                  type="text"
+                  value={newCourse.intake}
+                  onChange={(e) => setNewCourse({...newCourse, intake: e.target.value})}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '0.875rem'
+                  }}
+                  placeholder="e.g., 150 students/year"
+                />
+              </div>
+            </div>
+
+            <div style={{
+              padding: '1rem 2rem 1.5rem 2rem',
+              borderTop: '1px solid #e2e8f0',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '0.75rem'
+            }}>
+              <button 
+                onClick={() => setShowEditCourseModal(false)}
+                style={{
+                  background: '#f3f4f6',
+                  color: '#374151',
+                  border: '1px solid #d1d5db',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '6px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem'
+                }}
+              >Cancel</button>
+              <button 
+                onClick={handleEditCourse}
+                style={{
+                  background: '#2563eb',
+                  color: 'white',
+                  border: 'none',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '6px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem'
+                }}
+              >Update Course</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Subject Modal */}
+      {showAddSubjectModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0, 0, 0, 0.65)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem'
+        }} onClick={() => setShowAddSubjectModal(false)}>
+          <div style={{
+            background: '#fff',
+            borderRadius: '12px',
+            maxWidth: '500px',
+            width: '100%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
+            border: '1px solid #e2e8f0'
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{
+              background: '#fff',
+              color: '#1e293b',
+              padding: '1.5rem 2rem',
+              borderRadius: '12px 12px 0 0',
+              borderBottom: '1px solid #e2e8f0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                margin: 0,
+                color: '#1e293b'
+              }}>➕ Add New Subject</h3>
+              <button 
+                onClick={() => setShowAddSubjectModal(false)}
+                style={{
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '6px',
+                  color: '#64748b',
+                  fontSize: '1rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >✕</button>
+            </div>
+            
+            <div style={{ padding: '1.5rem 2rem' }}>
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{
+                  display: 'block',
+                  marginBottom: '0.5rem',
+                  fontWeight: '500',
+                  color: '#374151'
+                }}>Subject Name</label>
+                <input
+                  type="text"
+                  value={newSubject.name}
+                  onChange={(e) => setNewSubject({...newSubject, name: e.target.value})}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '0.875rem'
+                  }}
+                  placeholder="Enter subject name"
+                />
+              </div>
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{
+                  display: 'block',
+                  marginBottom: '0.5rem',
+                  fontWeight: '500',
+                  color: '#374151'
+                }}>Subject Code</label>
+                <input
+                  type="text"
+                  value={newSubject.code}
+                  onChange={(e) => setNewSubject({...newSubject, code: e.target.value})}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '0.875rem'
+                  }}
+                  placeholder="e.g., CS201"
+                />
+              </div>
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{
+                  display: 'block',
+                  marginBottom: '0.5rem',
+                  fontWeight: '500',
+                  color: '#374151'
+                }}>Credits</label>
+                <input
+                  type="number"
+                  value={newSubject.credits}
+                  onChange={(e) => setNewSubject({...newSubject, credits: e.target.value})}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '0.875rem'
+                  }}
+                  placeholder="e.g., 3"
+                />
+              </div>
+            </div>
+
+            <div style={{
+              padding: '1rem 2rem 1.5rem 2rem',
+              borderTop: '1px solid #e2e8f0',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '0.75rem'
+            }}>
+              <button 
+                onClick={() => setShowAddSubjectModal(false)}
+                style={{
+                  background: '#f3f4f6',
+                  color: '#374151',
+                  border: '1px solid #d1d5db',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '6px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem'
+                }}
+              >Cancel</button>
+              <button 
+                onClick={handleAddSubject}
+                style={{
+                  background: '#2563eb',
+                  color: 'white',
+                  border: 'none',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '6px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem'
+                }}
+              >Add Subject</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Subject Modal */}
+      {showEditSubjectModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0, 0, 0, 0.65)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem'
+        }} onClick={() => setShowEditSubjectModal(false)}>
+          <div style={{
+            background: '#fff',
+            borderRadius: '12px',
+            maxWidth: '500px',
+            width: '100%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
+            border: '1px solid #e2e8f0'
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{
+              background: '#fff',
+              color: '#1e293b',
+              padding: '1.5rem 2rem',
+              borderRadius: '12px 12px 0 0',
+              borderBottom: '1px solid #e2e8f0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                margin: 0,
+                color: '#1e293b'
+              }}>✏️ Edit Subject</h3>
+              <button 
+                onClick={() => setShowEditSubjectModal(false)}
+                style={{
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '6px',
+                  color: '#64748b',
+                  fontSize: '1rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >✕</button>
+            </div>
+            
+            <div style={{ padding: '1.5rem 2rem' }}>
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{
+                  display: 'block',
+                  marginBottom: '0.5rem',
+                  fontWeight: '500',
+                  color: '#374151'
+                }}>Subject Name</label>
+                <input
+                  type="text"
+                  value={newSubject.name}
+                  onChange={(e) => setNewSubject({...newSubject, name: e.target.value})}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '0.875rem'
+                  }}
+                  placeholder="Enter subject name"
+                />
+              </div>
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{
+                  display: 'block',
+                  marginBottom: '0.5rem',
+                  fontWeight: '500',
+                  color: '#374151'
+                }}>Subject Code</label>
+                <input
+                  type="text"
+                  value={newSubject.code}
+                  onChange={(e) => setNewSubject({...newSubject, code: e.target.value})}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '0.875rem'
+                  }}
+                  placeholder="e.g., CS201"
+                />
+              </div>
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{
+                  display: 'block',
+                  marginBottom: '0.5rem',
+                  fontWeight: '500',
+                  color: '#374151'
+                }}>Credits</label>
+                <input
+                  type="number"
+                  value={newSubject.credits}
+                  onChange={(e) => setNewSubject({...newSubject, credits: e.target.value})}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '0.875rem'
+                  }}
+                  placeholder="e.g., 3"
+                />
+              </div>
+            </div>
+
+            <div style={{
+              padding: '1rem 2rem 1.5rem 2rem',
+              borderTop: '1px solid #e2e8f0',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '0.75rem'
+            }}>
+              <button 
+                onClick={() => setShowEditSubjectModal(false)}
+                style={{
+                  background: '#f3f4f6',
+                  color: '#374151',
+                  border: '1px solid #d1d5db',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '6px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem'
+                }}
+              >Cancel</button>
+              <button 
+                onClick={handleEditSubject}
+                style={{
+                  background: '#2563eb',
+                  color: 'white',
+                  border: 'none',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '6px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem'
+                }}
+              >Update Subject</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add File Modal */}
+      {showAddFileModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0, 0, 0, 0.65)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem'
+        }} onClick={() => setShowAddFileModal(false)}>
+          <div style={{
+            background: '#fff',
+            borderRadius: '12px',
+            maxWidth: '500px',
+            width: '100%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
+            border: '1px solid #e2e8f0'
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{
+              background: '#fff',
+              color: '#1e293b',
+              padding: '1.5rem 2rem',
+              borderRadius: '12px 12px 0 0',
+              borderBottom: '1px solid #e2e8f0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                margin: 0,
+                color: '#1e293b'
+              }}>➕ Add Content File</h3>
+              <button 
+                onClick={() => setShowAddFileModal(false)}
+                style={{
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '6px',
+                  color: '#64748b',
+                  fontSize: '1rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >✕</button>
+            </div>
+            
+            <div style={{ padding: '1.5rem 2rem' }}>
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{
+                  display: 'block',
+                  marginBottom: '0.5rem',
+                  fontWeight: '500',
+                  color: '#374151'
+                }}>Upload File</label>
+                
+                {/* Drag & Drop Area */}
+                <div
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  style={{
+                    border: `2px dashed ${isDragOver ? '#2563eb' : '#d1d5db'}`,
+                    borderRadius: '8px',
+                    padding: '2rem',
+                    textAlign: 'center',
+                    background: isDragOver ? '#eff6ff' : '#f9fafb',
+                    transition: 'all 0.2s',
+                    marginBottom: '1rem',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => document.getElementById('fileInput').click()}
+                >
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    <div style={{
+                      fontSize: '2rem',
+                      color: '#6b7280'
+                    }}>📁</div>
+                    <div style={{
+                      color: '#374151',
+                      fontWeight: '500',
+                      fontSize: '0.875rem'
+                    }}>
+                      {selectedFile ? selectedFile.name : 'Drop files here or click to browse'}
+                    </div>
+                    <div style={{
+                      color: '#6b7280',
+                      fontSize: '0.75rem'
+                    }}>
+                      Supports PDF, DOC, DOCX, PPT, PPTX files
+                    </div>
+                  </div>
+                </div>
+
+                {/* Hidden File Input */}
+                <input
+                  id="fileInput"
+                  type="file"
+                  accept=".pdf,.doc,.docx,.ppt,.pptx"
+                  onChange={(e) => {
+                    if (e.target.files.length > 0) {
+                      handleFileSelect(e.target.files[0]);
+                    }
+                  }}
+                  style={{ display: 'none' }}
+                />
+
+                {/* Manual File Name Input (Alternative) */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  marginBottom: '0.5rem'
+                }}>
+                  <div style={{
+                    flex: 1,
+                    height: '1px',
+                    background: '#e5e7eb'
+                  }}></div>
+                  <span style={{
+                    color: '#6b7280',
+                    fontSize: '0.75rem',
+                    fontWeight: '500'
+                  }}>OR</span>
+                  <div style={{
+                    flex: 1,
+                    height: '1px',
+                    background: '#e5e7eb'
+                  }}></div>
+                </div>
+
+                <label style={{
+                  display: 'block',
+                  marginBottom: '0.5rem',
+                  fontWeight: '500',
+                  color: '#374151',
+                  fontSize: '0.875rem'
+                }}>Enter File Name Manually</label>
+                <input
+                  type="text"
+                  value={newFileName}
+                  onChange={(e) => {
+                    setNewFileName(e.target.value);
+                    setSelectedFile(null); // Clear selected file if typing manually
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '0.875rem'
+                  }}
+                  placeholder="e.g., Lecture Notes.pdf"
+                />
+              </div>
+            </div>
+
+            <div style={{
+              padding: '1rem 2rem 1.5rem 2rem',
+              borderTop: '1px solid #e2e8f0',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '0.75rem'
+            }}>
+              <button 
+                onClick={() => setShowAddFileModal(false)}
+                style={{
+                  background: '#f3f4f6',
+                  color: '#374151',
+                  border: '1px solid #d1d5db',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '6px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem'
+                }}
+              >Cancel</button>
+              <button 
+                onClick={handleAddFile}
+                style={{
+                  background: '#2563eb',
+                  color: 'white',
+                  border: 'none',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '6px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem'
+                }}
+              >Add File</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Editable Syllabus Modal */}
+      {showSyllabusModal && selectedSubject && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0, 0, 0, 0.65)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem'
+        }} onClick={() => setShowSyllabusModal(false)}>
+          <div style={{
+            background: '#fff',
+            borderRadius: '12px',
+            maxWidth: '800px',
+            width: '100%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
+            border: '1px solid #e2e8f0'
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{
+              background: '#fff',
+              color: '#1e293b',
+              padding: '1.5rem 2rem',
+              borderRadius: '12px 12px 0 0',
+              borderBottom: '1px solid #e2e8f0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <div>
+                <h3 style={{
+                  fontSize: '1.25rem',
+                  fontWeight: '600',
+                  margin: 0,
+                  color: '#1e293b'
+                }}>📝 Edit Syllabus - {selectedSubject.name}</h3>
+                <div style={{
+                  fontSize: '0.875rem',
+                  color: '#64748b',
+                  marginTop: '0.25rem'
+                }}>Course Code: {selectedSubject.code} | Credits: {selectedSubject.credits}</div>
+              </div>
+              <button 
+                onClick={() => setShowSyllabusModal(false)}
+                style={{
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '6px',
+                  color: '#64748b',
+                  fontSize: '1rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >✕</button>
+            </div>
+
+            <div style={{
+              padding: '1.5rem 2rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1.5rem'
+            }}>
+              <div>
+                <h4 style={{
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  color: '#1e293b',
+                  marginBottom: '0.75rem'
+                }}>🎯 Learning Objectives</h4>
+                <textarea
+                  value={editingSyllabus.objectives?.join('\n') || ''}
+                  onChange={(e) => setEditingSyllabus({
+                    ...editingSyllabus, 
+                    objectives: e.target.value.split('\n').filter(obj => obj.trim() !== '')
+                  })}
+                  style={{
+                    width: '100%',
+                    minHeight: '120px',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '0.875rem',
+                    resize: 'vertical'
+                  }}
+                  placeholder="Enter learning objectives (one per line)..."
+                />
+              </div>
+
+              <div>
+                <h4 style={{
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  color: '#1e293b',
+                  marginBottom: '0.75rem'
+                }}>📊 Assessment Methods</h4>
+                <textarea
+                  value={editingSyllabus.assessment?.join('\n') || ''}
+                  onChange={(e) => setEditingSyllabus({
+                    ...editingSyllabus, 
+                    assessment: e.target.value.split('\n').filter(method => method.trim() !== '')
+                  })}
+                  style={{
+                    width: '100%',
+                    minHeight: '100px',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '0.875rem',
+                    resize: 'vertical'
+                  }}
+                  placeholder="Enter assessment methods (one per line)..."
+                />
+              </div>
+
+              <div>
+                <h4 style={{
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  color: '#1e293b',
+                  marginBottom: '0.75rem'
+                }}>📚 Recommended References</h4>
+                <textarea
+                  value={editingSyllabus.references?.join('\n') || ''}
+                  onChange={(e) => setEditingSyllabus({
+                    ...editingSyllabus, 
+                    references: e.target.value.split('\n').filter(ref => ref.trim() !== '')
+                  })}
+                  style={{
+                    width: '100%',
+                    minHeight: '120px',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '0.875rem',
+                    resize: 'vertical'
+                  }}
+                  placeholder="Enter references (one per line)..."
+                />
+              </div>
+            </div>
+
+            <div style={{
+              padding: '1rem 2rem 1.5rem 2rem',
+              borderTop: '1px solid #e2e8f0',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '0.75rem'
+            }}>
+              <button 
+                onClick={() => setShowSyllabusModal(false)}
+                style={{
+                  background: '#f3f4f6',
+                  color: '#374151',
+                  border: '1px solid #d1d5db',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '6px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem'
+                }}
+              >Cancel</button>
+              <button 
+                onClick={handleSaveSyllabus}
+                style={{
+                  background: '#2563eb',
+                  color: 'white',
+                  border: 'none',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '6px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem'
+                }}
+              >Save Changes</button>
+            </div>
           </div>
         </div>
       )}
