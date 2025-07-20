@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
@@ -41,6 +42,16 @@ const navigation = [
 
 export default function CompanyUserSidebar({ isOpen, setIsOpen }) {
   const [isDesktop, setIsDesktop] = useState(false);
+
+    const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Remove token or any auth info (customize as needed)
+    localStorage.removeItem("token");
+    // Redirect to university login page
+    navigate("/login");
+  };
+
 
   useEffect(() => {
     const checkDesktop = () => {
@@ -225,6 +236,7 @@ export default function CompanyUserSidebar({ isOpen, setIsOpen }) {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="w-full flex items-center px-4 py-3 text-sm font-medium text-primary-100 hover:bg-primary-700/50 hover:text-white rounded-xl transition-all duration-200 group"
+              onClick={handleLogout}
             >
               <LogOut className="w-5 h-5 mr-3 transition-transform group-hover:scale-110" />
               Log Out
