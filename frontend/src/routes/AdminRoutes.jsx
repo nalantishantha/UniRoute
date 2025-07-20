@@ -12,6 +12,7 @@ import { UniversitiesList, UniversityForm, UniversityView } from '../pages/Admin
 import { CompaniesList, CompanyForm, CompanyView } from '../pages/Admin/Companies';
 import { ProgramsList, ProgramForm, ProgramView } from '../pages/Admin/Programs';
 import { JobList, JobDetails, JobForm } from '../pages/Admin/Jobs';
+import { EventsList, EventView, EventForm } from '../pages/Admin/Events';
 import { Reports, ReportDetails } from '../pages/Admin/Reports'
 import { AdminSettings } from '../pages/Admin';
 import { RequestsList, RequestDetails } from '../pages/Admin/Requests';
@@ -75,6 +76,12 @@ const AdminRoutes = () => {
       <Route path="/jobs/create" element={<JobForm />} />
       <Route path="/jobs/:jobId/edit" element={<JobForm />} />
       <Route path="/jobs/:jobId/view" element={<JobDetails />} />
+
+      {/* Events Management */}
+      <Route path="/events" element={<EventsList />} />
+      <Route path="/events/new" element={<EventForm />} />
+      <Route path="/events/:id" element={<EventView />} />
+      <Route path="/events/:id/edit" element={<EventForm />} />
 
       {/* Requests Management */}
       <Route path="/requests" element={<RequestsList />} />
