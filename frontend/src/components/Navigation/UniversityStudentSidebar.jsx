@@ -178,7 +178,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-white">UniRoutes</h1>
+                <h1 className="text-xl font-bold text-white">UniRoute</h1>
                 <p className="text-sm text-primary-200">Uni-Student Portal</p>
               </div>
             </motion.div>
