@@ -5,7 +5,9 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import StudentHome from "../pages/Student/StudentHome";
 import StudentDashboard from "../pages/Student/StudentDashboard";
 import FindMentors from "../pages/Student/FindMentors";
+import MentorConnection from "../pages/Student/MentorConnection";
 import FindTutors from "../pages/Student/FindTutors";
+import TutorBooking from "../pages/Student/TutorBooking";
 import NewsFeed from "../pages/Student/NewsFeed";
 import ProfilePage from "../pages/Student/ProfilePage";
 import SettingsPage from "../pages/Student/SettingsPage";
@@ -38,7 +40,9 @@ const StudentRoutes = () => {
 
       {/* Support Services */}
       <Route path="/mentors" element={<FindMentors />} />
+      <Route path="/mentor-connection" element={<MentorConnection />} />
       <Route path="/tutors" element={<FindTutors />} />
+      <Route path="/tutor-booking" element={<TutorBooking />} />
       <Route path="/career-counseling" element={<CareerCounseling />} />
 
       {/* Information & Resources */}

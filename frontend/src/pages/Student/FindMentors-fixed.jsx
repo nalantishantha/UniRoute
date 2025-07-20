@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import StudentNavigation from "../../components/Navigation/StudentNavigation";
+import StudentNavigation from "../../components/StudentNavigation";
 import {
   Search,
   Star,
@@ -17,93 +17,93 @@ const FindMentors = () => {
   const mentors = [
     {
       id: 1,
-      name: "Kasun Bandara",
-      title: "3rd Year Computer Science Student",
-      company: "University of Colombo",
+      name: "Dr. Saman Perera",
+      title: "Senior Software Engineer",
+      company: "Google",
       university: "University of Colombo",
-      expertise: "Computer Science & Engineering",
-      location: "Colombo, Sri Lanka",
-      experience: "3 years",
+      expertise: "Machine Learning & AI",
+      location: "California, USA",
+      experience: "8 years",
       rating: 4.9,
-      reviews: 45,
-      students: 12,
+      reviews: 234,
+      students: 45,
       image: "https://images.pexels.com/photos/5212345/pexels-photo-5212345.jpeg?auto=compress&cs=tinysrgb&w=80&h=80&fit=crop",
-      description: "Helps A/L students understand CS program requirements and shares real university experience insights.",
+      description: "Passionate about helping students break into tech with a focus on machine learning and artificial intelligence.",
     },
     {
       id: 2,
-      name: "Nimesha Silva",
-      title: "4th Year Business Management Student",
-      company: "University of Peradeniya",
+      name: "Ms. Kamani Silva",
+      title: "Product Manager",
+      company: "Microsoft",
       university: "University of Peradeniya",
-      expertise: "Business & Management",
-      location: "Kandy, Sri Lanka",
-      experience: "4 years",
+      expertise: "Product Strategy & Management",
+      location: "Seattle, USA",
+      experience: "6 years",
       rating: 4.8,
-      reviews: 38,
-      students: 15,
+      reviews: 189,
+      students: 32,
       image: "https://images.pexels.com/photos/5212346/pexels-photo-5212346.jpeg?auto=compress&cs=tinysrgb&w=80&h=80&fit=crop",
-      description: "Guides students in business program selection and shares practical university life experiences.",
+      description: "Expert in product development lifecycle with experience in launching successful tech products.",
     },
     {
       id: 3,
-      name: "Dineth Fernando",
-      title: "Final Year Engineering Student",
-      company: "University of Moratuwa",
+      name: "Mr. Ruwan Fernando",
+      title: "Investment Banker",
+      company: "Goldman Sachs",
       university: "University of Moratuwa",
-      expertise: "Mechanical Engineering",
-      location: "Moratuwa, Sri Lanka",
-      experience: "4 years",
+      expertise: "Finance & Investment Banking",
+      location: "New York, USA",
+      experience: "10 years",
       rating: 4.7,
-      reviews: 29,
-      students: 8,
+      reviews: 156,
+      students: 28,
       image: "https://images.pexels.com/photos/5212347/pexels-photo-5212347.jpeg?auto=compress&cs=tinysrgb&w=80&h=80&fit=crop",
-      description: "Specializes in helping students understand engineering program requirements and career paths.",
+      description: "Helping students navigate the complex world of finance and investment banking careers.",
     },
     {
       id: 4,
-      name: "Sachini Rajapakse",
-      title: "3rd Year Information Technology Student",
-      company: "SLIIT",
+      name: "Dr. Niluka Rajapakse",
+      title: "Startup Founder & CEO",
+      company: "TechStart Lanka",
       university: "SLIIT",
-      expertise: "Information Technology",
-      location: "Malabe, Sri Lanka",
-      experience: "3 years",
+      expertise: "Entrepreneurship & Startups",
+      location: "Colombo, Sri Lanka",
+      experience: "12 years",
       rating: 4.9,
-      reviews: 52,
-      students: 18,
+      reviews: 201,
+      students: 38,
       image: "https://images.pexels.com/photos/5212348/pexels-photo-5212348.jpeg?auto=compress&cs=tinysrgb&w=80&h=80&fit=crop",
-      description: "Mentors students on IT program choices and shares insights about private university education.",
+      description: "Serial entrepreneur with multiple successful startups in fintech and edtech sectors.",
     },
     {
       id: 5,
-      name: "Amali Jayasinghe",
-      title: "4th Year Statistics Student",
-      company: "University of Sri Jayewardenepura",
+      name: "Dr. Priya Jayasinghe",
+      title: "Data Science Lead",
+      company: "Amazon",
       university: "University of Sri Jayewardenepura",
-      expertise: "Statistics & Data Science",
-      location: "Nugegoda, Sri Lanka",
-      experience: "4 years",
+      expertise: "Data Science & Analytics",
+      location: "London, UK",
+      experience: "7 years",
       rating: 4.8,
-      reviews: 34,
-      students: 10,
+      reviews: 167,
+      students: 21,
       image: "https://images.pexels.com/photos/5212349/pexels-photo-5212349.jpeg?auto=compress&cs=tinysrgb&w=80&h=80&fit=crop",
-      description: "Guides students in selecting statistics and data science programs with real university insights.",
+      description: "Data science expert helping students understand the power of data-driven decision making.",
     },
     {
       id: 6,
-      name: "Tharindu Rathnayake",
-      title: "3rd Year Media & Design Student",
-      company: "NSBM Green University",
+      name: "Mr. Tharaka Rathnayake",
+      title: "UX Design Director",
+      company: "Adobe",
       university: "NSBM Green University",
-      expertise: "Media & Creative Design",
-      location: "Homagama, Sri Lanka",
-      experience: "3 years",
+      expertise: "UX/UI Design & Research",
+      location: "San Francisco, USA",
+      experience: "9 years",
       rating: 4.9,
-      reviews: 41,
-      students: 14,
+      reviews: 143,
+      students: 27,
       image: "https://images.pexels.com/photos/5212350/pexels-photo-5212350.jpeg?auto=compress&cs=tinysrgb&w=80&h=80&fit=crop",
-      description: "Helps students choose design and creative programs based on current industry trends and university experience.",
+      description: "Award-winning UX designer passionate about creating meaningful digital experiences.",
     },
   ];
 
@@ -120,10 +120,11 @@ const FindMentors = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-8">
           <h1 className="font-display font-bold text-5xl text-primary-400 mb-4">
-            Connect with University Student Mentors
+            Find Mentors
           </h1>
           <p className="text-xl text-primary-300 max-w-2xl mx-auto">
-            Get guidance from current university students who can share their real experiences and help you choose the right programs after your A/L results
+            Connect with experienced professionals and university graduates who
+            can guide your career path
           </p>
         </div>
 
@@ -133,7 +134,7 @@ const FindMentors = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-300" />
             <input
               type="text"
-              placeholder="Search mentors by field, university, or program expertise..."
+              placeholder="Search for mentors by name, field, or university..."
               className="w-full pl-10 pr-4 py-3 border border-accent-100 rounded-xl focus:ring-2 focus:ring-primary-200 focus:border-primary-300 transition-all"
             />
           </div>
@@ -147,7 +148,7 @@ const FindMentors = () => {
               className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             >
               {/* Mentor Header */}
-              <div className="relative h-32 bg-gradient-to-r from-primary-400 to-accent-400">
+              <div className="relative h-24 bg-gradient-to-r from-primary-400 to-accent-400">
                 <div className="absolute inset-0 bg-black/10"></div>
                 
                 {/* Rating Badge */}
@@ -168,37 +169,33 @@ const FindMentors = () => {
                     {mentor.experience}
                   </span>
                 </div>
+              
 
+              <div className="p-4">
                 {/* Mentor Info */}
-                <div className="absolute bottom-3 left-3 right-3">
-                  <div className="flex items-end justify-between">
-                    <div className="flex items-center space-x-3">
-                      <img
-                        src={mentor.image}
-                        alt={mentor.name}
-                        className="w-12 h-12 rounded-full object-cover border-2 border-white/30"
-                      />
-                      <div className="flex-1">
-                        <h3 className="font-display font-semibold text-lg text-white leading-tight">
-                          {mentor.name}
-                        </h3>
-                        <p className="text-white/90 text-sm mb-1">{mentor.title}</p>
-                        <div className="flex items-center space-x-1 mb-1">
-                          <Briefcase className="h-3 w-3 text-white/80" />
-                          <span className="text-xs text-white/80">{mentor.company}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <GraduationCap className="h-3 w-3 text-white/80" />
-                          <span className="text-xs text-white/80">{mentor.university}</span>
-                        </div>
-                      </div>
+                <div className="flex items-start space-x-3 mb-4">
+                  <img
+                    src={mentor.image}
+                    alt={mentor.name}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-accent-200"
+                  />
+                  <div className="flex-1">
+                    <h3 className="font-display font-semibold text-lg text-primary-400 leading-tight">
+                      {mentor.name}
+                    </h3>
+                    <p className="text-primary-300 text-sm mb-1">{mentor.title}</p>
+                    <div className="flex items-center space-x-1 mb-1">
+                      <Briefcase className="h-3 w-3 text-accent-400" />
+                      <span className="text-xs text-primary-300">{mentor.company}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <GraduationCap className="h-3 w-3 text-accent-400" />
+                      <span className="text-xs text-primary-300">{mentor.university}</span>
                     </div>
                   </div>
                 </div>
               </div>
-
-              <div className="p-4">
-
+        
                 {/* Expertise */}
                 <div className="mb-4">
                   <div className="bg-gradient-to-r from-blue-100 to-primary-50 rounded-lg p-3">
