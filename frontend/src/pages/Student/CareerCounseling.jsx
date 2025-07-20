@@ -177,24 +177,22 @@ const CareerCounseling = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-primary-100 to-white">
+    <div className="min-h-screen bg-gradient-to-r from-blue-200 to-primary-100">
       {/* Navigation */}
       <StudentNavigation />
 
-      {/* Header */}
-      <div className="bg-gradient-to-r from-primary-400 to-accent-400 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="font-display font-bold text-5xl mb-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page Title and Description */}
+        <div className="text-center mb-8">
+          <h1 className="font-display font-bold text-5xl text-primary-400 mb-6">
             Career Counseling
           </h1>
-          <p className="text-xl opacity-90 max-w-3xl mx-auto">
+          <p className="text-xl text-primary-300 max-w-3xl mx-auto">
             Get personalized guidance from experienced career counselors to make
             informed decisions about your education and future career path.
           </p>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Services Overview */}
         <div className="mb-12">
           <h2 className="font-display font-semibold text-3xl text-primary-400 mb-8 text-center">
@@ -251,75 +249,108 @@ const CareerCounseling = () => {
             {counselors.map((counselor) => (
               <div
                 key={counselor.id}
-                className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden"
+                className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
               >
-                <div className="p-6">
-                  <div className="flex items-start space-x-4 mb-4">
-                    <div className="w-20 h-20 bg-gradient-to-br from-primary-200 to-accent-200 rounded-full flex items-center justify-center">
-                      <User className="h-10 w-10 text-primary-400" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-display font-semibold text-xl text-primary-400 mb-1">
-                        {counselor.name}
-                      </h3>
-                      <p className="text-primary-300 mb-2">{counselor.title}</p>
-                      <div className="flex items-center space-x-4 text-sm">
-                        <div className="flex items-center space-x-1">
-                          <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                          <span className="font-medium">
-                            {counselor.rating}
-                          </span>
-                          <span className="text-primary-300">
-                            ({counselor.reviews} reviews)
-                          </span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Award className="h-4 w-4 text-accent-400" />
-                          <span className="text-primary-300">
-                            {counselor.experience}
-                          </span>
-                        </div>
+                {/* Counselor Header */}
+                <div className="relative h-40 bg-gradient-to-r from-primary-400 to-accent-400">
+                  <div className="absolute inset-0 bg-black/10"></div>
+                  
+                  {/* Rating Badge */}
+                  <div className="absolute top-4 right-4">
+                    <div className="bg-white/20 backdrop-blur-md rounded-lg px-3 py-2 border border-white/30">
+                      <div className="flex items-center space-x-1">
+                        <Star className="h-4 w-4 text-yellow-300 fill-current" />
+                        <span className="text-white font-semibold text-sm">
+                          {counselor.rating}
+                        </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-accent-50 rounded-lg p-4 mb-4">
-                    <h4 className="font-medium text-primary-400 mb-2">
-                      Specialization
-                    </h4>
-                    <p className="text-primary-300 text-sm">
-                      {counselor.specialization}
+                  {/* Experience Badge */}
+                  <div className="absolute top-4 left-4">
+                    <span className="bg-green-500/20 text-green-100 border border-green-300/30 px-3 py-1 rounded-full text-xs font-semibold">
+                      {counselor.experience} Experience
+                    </span>
+                  </div>
+
+                  {/* Counselor Info */}
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <div className="flex items-end justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30">
+                          <User className="h-8 w-8 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-display font-bold text-xl text-white mb-1 leading-tight">
+                            {counselor.name}
+                          </h3>
+                          <p className="text-white/90 text-sm mb-1">{counselor.title}</p>
+                          <div className="flex items-center space-x-2 text-white/80 text-xs">
+                            <span>{counselor.reviews} reviews</span>
+                            <span>•</span>
+                            <span>{counselor.successStories}+ success stories</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  {/* Specialization */}
+                  <div className="mb-6">
+                    <div className="bg-gradient-to-r from-blue-100 to-primary-50 rounded-lg p-4">
+                      <h4 className="font-semibold text-primary-400 mb-2 flex items-center space-x-2">
+                        <Award className="h-4 w-4" />
+                        <span>Specialization</span>
+                      </h4>
+                      <p className="text-primary-300 text-sm leading-relaxed">
+                        {counselor.specialization}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div className="mb-6">
+                    <p className="text-primary-300 leading-relaxed text-sm">
+                      {counselor.about}
                     </p>
                   </div>
 
-                  <p className="text-primary-300 mb-4">{counselor.about}</p>
-
-                  <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
-                    <div>
-                      <div className="text-primary-300 mb-1">
-                        Success Stories
+                  {/* Key Statistics */}
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="bg-gradient-to-br from-green-200 to-green-300 rounded-lg p-3 text-center border border-green-200 shadow-md">
+                      <div className="flex items-center justify-center w-10 h-10 bg-white rounded-lg mx-auto mb-2 shadow-sm">
+                        <Users className="h-5 w-5 text-green-600" />
                       </div>
-                      <div className="font-semibold text-primary-400">
-                        {counselor.successStories}+ students
+                      <div className="text-xs text-green-700 mb-1 font-medium">Success Stories</div>
+                      <div className="font-bold text-green-700 text-lg">
+                        {counselor.successStories}+
                       </div>
                     </div>
-                    <div>
-                      <div className="text-primary-300 mb-1">Hourly Rate</div>
-                      <div className="font-semibold text-primary-400">
+                    <div className="bg-gradient-to-br from-blue-200 to-blue-300 rounded-lg p-3 text-center border border-blue-200 shadow-md">
+                      <div className="flex items-center justify-center w-10 h-10 bg-white rounded-lg mx-auto mb-2 shadow-sm">
+                        <Target className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div className="text-xs text-blue-700 mb-1 font-medium">Hourly Rate</div>
+                      <div className="font-bold text-blue-700 text-sm">
                         {counselor.hourlyRate}
                       </div>
                     </div>
                   </div>
 
-                  <div className="mb-4">
-                    <h4 className="font-medium text-primary-400 mb-2">
-                      Expertise Areas
+                  {/* Expertise Areas */}
+                  <div className="mb-6">
+                    <h4 className="font-semibold text-primary-400 mb-3 flex items-center space-x-2">
+                      <BookOpen className="h-5 w-5" />
+                      <span>Expertise Areas</span>
                     </h4>
                     <div className="flex flex-wrap gap-2">
                       {counselor.expertise.map((skill, index) => (
                         <span
                           key={index}
-                          className="bg-accent-100 text-primary-400 px-2 py-1 rounded text-xs"
+                          className="bg-gradient-to-r from-accent-400 to-accent-400 text-primary-400 px-3 py-1.5 rounded-full text-sm font-medium border border-accent-200 hover:shadow-sm transition-shadow"
                         >
                           {skill}
                         </span>
@@ -327,16 +358,52 @@ const CareerCounseling = () => {
                     </div>
                   </div>
 
-                  <div className="flex space-x-3">
-                    <button
-                      onClick={() => setSelectedCounselor(counselor)}
-                      className="flex-1 bg-primary-400 text-white py-2 px-4 rounded-lg hover:bg-primary-600 transition-colors"
-                    >
-                      Book Session
-                    </button>
-                    <button className="bg-accent-100 text-primary-400 py-2 px-4 rounded-lg hover:bg-accent-200 transition-colors">
-                      View Profile
-                    </button>
+                  {/* Additional Info */}
+                  <div className="bg-gradient-to-r from-blue-100 to-primary-50 rounded-lg p-4 mb-6">
+                    <div className="grid grid-cols-1 gap-3 text-sm">
+                      <div>
+                        <div className="flex items-center space-x-2 text-primary-300 mb-1">
+                          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                          <span className="font-medium">Education</span>
+                        </div>
+                        <div className="text-primary-400 font-semibold pl-4 text-xs">
+                          {counselor.education}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex items-center space-x-2 text-primary-300 mb-1">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                          <span className="font-medium">Languages</span>
+                        </div>
+                        <div className="text-primary-400 font-semibold pl-4 text-xs">
+                          {counselor.languages.join(", ")}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex items-center space-x-2 text-primary-300 mb-1">
+                          <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                          <span className="font-medium">Availability</span>
+                        </div>
+                        <div className="text-primary-400 font-semibold pl-4 text-xs">
+                          {counselor.availability}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="border-t border-accent-100 pt-4">
+                    <div className="flex space-x-3">
+                      <button className="flex-1 bg-accent-100 text-primary-400 px-4 py-3 rounded-lg hover:bg-accent-200 transition-all duration-200 font-medium text-sm hover:shadow-md">
+                        View Profile
+                      </button>
+                      <button
+                        onClick={() => setSelectedCounselor(counselor)}
+                        className="flex-1 bg-primary-400 text-white px-4 py-3 rounded-lg hover:bg-primary-600 transition-all duration-200 font-medium text-sm hover:shadow-lg"
+                      >
+                        Book Session
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

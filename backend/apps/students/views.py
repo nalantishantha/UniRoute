@@ -17,3 +17,4 @@ def students_list(request):
         })
     
     return JsonResponse({'students': data, 'count': len(data)})
+

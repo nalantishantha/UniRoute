@@ -1,5 +1,11 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import uocImage from "../../assets/uoc.jpg"; // University of Colombo
+import peradeniyaImage from "../../assets/uop.jpg"; // University of Peradeniya - you can replace with actual image
+import moratuwaImage from "../../assets/uom.jpg"; // University of Moratuwa - you can replace with actual image
+import jayewardenepuraImage from "../../assets/uosj.jpg"; // University of Sri Jayewardenepura - you can replace with actual image
+import sliitImage from "../../assets/SLIIT.jpg"; // SLIIT - you can replace with actual image
+import nsbmImage from "../../assets/NSBM.jpg"; // NSBM - you can replace with actual image
 import StudentNavigation from "../../components/Navigation/StudentNavigation";
 import {
   GraduationCap,
@@ -42,7 +48,7 @@ const UniversityGuide = () => {
       website: "https://www.cmb.ac.lk",
       phone: "+94 11 2581835",
       email: "info@cmb.ac.lk",
-      image: "/api/placeholder/400/250",
+      backgroundImage: uocImage,
       programs: [
         "Medicine",
         "Engineering",
@@ -81,7 +87,7 @@ const UniversityGuide = () => {
       website: "https://www.pdn.ac.lk",
       phone: "+94 81 2392751",
       email: "info@pdn.ac.lk",
-      image: "/api/placeholder/400/250",
+      backgroundImage: peradeniyaImage,
       programs: [
         "Medicine",
         "Engineering",
@@ -120,7 +126,7 @@ const UniversityGuide = () => {
       website: "https://www.mrt.ac.lk",
       phone: "+94 11 2640051",
       email: "info@mrt.ac.lk",
-      image: "/api/placeholder/400/250",
+      backgroundImage: moratuwaImage,
       programs: [
         "Engineering",
         "Architecture",
@@ -156,7 +162,7 @@ const UniversityGuide = () => {
       website: "https://www.sjp.ac.lk",
       phone: "+94 11 2802026",
       email: "info@sjp.ac.lk",
-      image: "/api/placeholder/400/250",
+      backgroundImage: jayewardenepuraImage,
       programs: [
         "Management Studies",
         "Applied Sciences",
@@ -193,7 +199,7 @@ const UniversityGuide = () => {
       website: "https://www.sliit.lk",
       phone: "+94 11 2413500",
       email: "info@sliit.lk",
-      image: "/api/placeholder/400/250",
+      backgroundImage: sliitImage,
       programs: ["Computing", "Engineering", "Business", "Humanities"],
       facilities: [
         "Modern Campus",
@@ -224,7 +230,7 @@ const UniversityGuide = () => {
       website: "https://www.nsbm.ac.lk",
       phone: "+94 11 5445000",
       email: "info@nsbm.ac.lk",
-      image: "/api/placeholder/400/250",
+      backgroundImage: nsbmImage,
       programs: ["Business", "Computing", "Engineering", "Sciences"],
       facilities: [
         "Green Campus",
@@ -261,25 +267,23 @@ const UniversityGuide = () => {
     );
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-primary-100 to-white">
+    <div className="min-h-screen bg-gradient-to-r from-blue-200 to-blue-100">
       {/* Navigation */}
       <StudentNavigation />
 
-      {/* Header */}
-      <div className="bg-gradient-to-r from-primary-400 to-accent-400 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="font-display font-bold text-5xl mb-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page Title and Description */}
+        <div className="text-center mb-8">
+          <h1 className="font-display font-bold text-5xl text-primary-400 mb-6">
             University Guide
           </h1>
-          <p className="text-xl opacity-90 max-w-3xl mx-auto">
+          <p className="text-xl text-primary-300 max-w-3xl mx-auto">
             Explore Sri Lanka's top universities and find the perfect
             institution for your higher education journey. Compare programs,
             facilities, and opportunities.
           </p>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Search and Filters */}
         <div className="bg-white rounded-2xl shadow-lg p-6 border border-accent-100 mb-8">
           <div className="flex flex-col md:flex-row gap-4">
@@ -316,23 +320,65 @@ const UniversityGuide = () => {
           {filteredUniversities.map((university) => (
             <div
               key={university.id}
-              className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden"
+              className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             >
               {/* University Header */}
-              <div className="relative h-48 bg-gradient-to-r from-primary-400 to-accent-400">
-                <div className="absolute inset-0 bg-black/20"></div>
+              <div className="relative h-56 bg-gradient-to-l from-primary-700 to-accent-900"
+                style={{
+                      backgroundImage: `linear-gradient(to left, rgba(91, 138, 214, 0.3), rgba(165, 105, 221, 0.3)), url(${university.backgroundImage})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat'
+                    }}
+              >
+                <div className="absolute inset-0 bg-black/10"></div>
+                
+                {/* University Type Badge */}
+                <div className="absolute top-4 left-4">
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    university.type === 'National' 
+                      ? 'bg-green-500/20 text-green-100 border border-green-300/30' 
+                      : 'bg-blue-500/20 text-blue-100 border border-blue-300/30'
+                  }`}>
+                    {university.type} University
+                  </span>
+                </div>
+
+                {/* Ranking Badge */}
+                <div className="absolute top-4 right-4">
+                  <div className="bg-white/20 backdrop-blur-md rounded-lg px-3 py-2 border border-white/30">
+                    <div className="flex items-center space-x-1">
+                      <Award className="h-4 w-4 text-yellow-300" />
+                      <span className="text-white font-semibold text-sm">
+                        #{university.ranking}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* University Info */}
                 <div className="absolute bottom-4 left-4 right-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-display font-bold text-2xl text-white mb-1">
+                  <div className="flex items-end justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-display font-bold text-2xl text-white mb-2 leading-tight">
                         {university.name}
                       </h3>
-                      <div className="flex items-center space-x-2 text-white/90">
+                      <div className="flex items-center space-x-2 text-white/90 mb-1">
                         <MapPin className="h-4 w-4" />
-                        <span>{university.location}</span>
+                        <span className="text-sm">{university.location}</span>
+                      </div>
+                      <div className="flex items-center space-x-4 text-white/80 text-xs">
+                        <div className="flex items-center space-x-1">
+                          <Calendar className="h-3 w-3" />
+                          <span>Est. {university.established}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Users className="h-3 w-3" />
+                          <span>{university.studentCount}</span>
+                        </div>
                       </div>
                     </div>
-                    <div className="bg-white/20 backdrop-blur-md rounded-lg px-3 py-2">
+                    <div className="bg-white/20 backdrop-blur-md rounded-lg px-3 py-2 border border-white/30">
                       <div className="flex items-center space-x-1">
                         <Star className="h-4 w-4 text-yellow-300 fill-current" />
                         <span className="text-white font-semibold">
@@ -345,98 +391,143 @@ const UniversityGuide = () => {
               </div>
 
               <div className="p-6">
-                <p className="text-primary-300 mb-4">
-                  {university.description}
-                </p>
+                {/* Description */}
+                <div className="mb-6">
+                  <p className="text-primary-300 leading-relaxed text-sm">
+                    {university.description}
+                  </p>
+                </div>
 
-                {/* University Stats */}
+                {/* Key Statistics */}
                 <div className="grid grid-cols-3 gap-4 mb-6">
-                  <div className="text-center">
-                    <div className="flex items-center justify-center w-12 h-12 bg-accent-100 rounded-lg mx-auto mb-2">
-                      <Calendar className="h-6 w-6 text-primary-400" />
+                  <div className="bg-gradient-to-br from-purple-200 to-purple-300 rounded-lg p-3 text-center border border-purple-200 shadow-md">
+                    <div className="flex items-center justify-center w-10 h-10 bg-white rounded-lg mx-auto mb-2 shadow-sm">
+                      <Building className="h-5 w-5 text-purple-600" />
                     </div>
-                    <div className="text-sm text-primary-300">Established</div>
-                    <div className="font-semibold text-primary-400">
-                      {university.established}
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center w-12 h-12 bg-accent-100 rounded-lg mx-auto mb-2">
-                      <Users className="h-6 w-6 text-primary-400" />
-                    </div>
-                    <div className="text-sm text-primary-300">Students</div>
-                    <div className="font-semibold text-primary-400">
-                      {university.studentCount}
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center w-12 h-12 bg-accent-100 rounded-lg mx-auto mb-2">
-                      <Building className="h-6 w-6 text-primary-400" />
-                    </div>
-                    <div className="text-sm text-primary-300">Faculties</div>
-                    <div className="font-semibold text-primary-400">
+                    <div className="text-xs text-purple-700 mb-1 font-medium">Faculties</div>
+                    <div className="font-bold text-purple-700 text-lg">
                       {university.faculties}
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-br from-blue-200 to-blue-300 rounded-lg p-3 text-center border border-blue-200 shadow-md">
+                    <div className="flex items-center justify-center w-10 h-10 bg-white rounded-lg mx-auto mb-2 shadow-sm">
+                      <BookOpen className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div className="text-xs text-blue-700 mb-1 font-medium">Programs</div>
+                    <div className="font-bold text-blue-700 text-lg">
+                      {university.programs.length}+
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-br from-green-200 to-green-300 rounded-lg p-3 text-center border border-green-200 shadow-md">
+                    <div className="flex items-center justify-center w-10 h-10 bg-white rounded-lg mx-auto mb-2 shadow-sm">
+                      <TrendingUp className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div className="text-xs text-green-700 mb-1 font-medium">Ranking</div>
+                    <div className="font-bold text-green-700 text-lg">
+                      #{university.ranking}
                     </div>
                   </div>
                 </div>
 
-                {/* Programs */}
+                {/* Programs Section */}
                 <div className="mb-6">
-                  <h4 className="font-medium text-primary-400 mb-3 flex items-center space-x-2">
+                  <h4 className="font-semibold text-primary-400 mb-3 flex items-center space-x-2">
                     <BookOpen className="h-5 w-5" />
-                    <span>Programs Offered</span>
+                    <span>Popular Programs</span>
                   </h4>
                   <div className="flex flex-wrap gap-2">
-                    {university.programs.map((program, index) => (
+                    {university.programs.slice(0, 4).map((program, index) => (
                       <span
                         key={index}
-                        className="bg-accent-100 text-primary-400 px-3 py-1 rounded-full text-sm"
+                        className="bg-gradient-to-r from-accent-400 to-accent-400 text-primary-400 px-3 py-1.5 rounded-full text-sm font-medium border border-accent-200 hover:shadow-sm transition-shadow"
                       >
                         {program}
                       </span>
                     ))}
+                    {university.programs.length > 4 && (
+                      <span className="text-primary-300 text-sm px-3 py-1.5">
+                        +{university.programs.length - 4} more
+                      </span>
+                    )}
                   </div>
                 </div>
 
-                {/* Key Info */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-sm">
-                  <div>
-                    <div className="text-primary-300 mb-1">Tuition Fee</div>
-                    <div className="font-medium text-primary-400">
-                      {university.tuitionFee}
-                    </div>
+                {/* Facilities Section */}
+                <div className="mb-6">
+                  <h4 className="font-semibold text-primary-400 mb-3 flex items-center space-x-2">
+                    <Building className="h-5 w-5" />
+                    <span>Key Facilities</span>
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    {university.facilities.slice(0, 4).map((facility, index) => (
+                      <div key={index} className="flex items-center space-x-2 text-primary-300">
+                        <div className="w-1.5 h-1.5 bg-accent-400 rounded-full"></div>
+                        <span>{facility}</span>
+                      </div>
+                    ))}
                   </div>
-                  <div>
-                    <div className="text-primary-300 mb-1">Application</div>
-                    <div className="font-medium text-primary-400">
-                      {university.applicationDeadline}
+                </div>
+
+                {/* Financial & Application Info */}
+                <div className="bg-gradient-to-r from-blue-100 to-primary-50 rounded-lg p-4 mb-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <div className="flex items-center space-x-2 text-primary-300 mb-1">
+                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                        <span className="font-medium">Tuition Fee</span>
+                      </div>
+                      <div className="font-semibold text-primary-400 pl-4">
+                        {university.tuitionFee}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex items-center space-x-2 text-primary-300 mb-1">
+                        <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                        <span className="font-medium">Application</span>
+                      </div>
+                      <div className="font-semibold text-primary-400 pl-4">
+                        {university.applicationDeadline}
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Contact and Actions */}
-                <div className="flex items-center justify-between pt-4 border-t border-accent-100">
+                {/* Contact & Actions */}
+                <div className="border-t border-accent-100 pt-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex space-x-4">
+                      <a
+                        href={university.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center space-x-2 text-primary-300 hover:text-primary-400 transition-colors group"
+                      >
+                        <div className="p-1.5 bg-accent-100 rounded-lg group-hover:bg-accent-200 transition-colors">
+                          <Globe className="h-4 w-4" />
+                        </div>
+                        <span className="text-sm font-medium">Website</span>
+                      </a>
+                      <button className="flex items-center space-x-2 text-primary-300 hover:text-primary-400 transition-colors group">
+                        <div className="p-1.5 bg-accent-100 rounded-lg group-hover:bg-accent-200 transition-colors">
+                          <Phone className="h-4 w-4" />
+                        </div>
+                        <span className="text-sm font-medium">Contact</span>
+                      </button>
+                      <button className="flex items-center space-x-2 text-primary-300 hover:text-primary-400 transition-colors group">
+                        <div className="p-1.5 bg-accent-100 rounded-lg group-hover:bg-accent-200 transition-colors">
+                          <Mail className="h-4 w-4" />
+                        </div>
+                        <span className="text-sm font-medium">Email</span>
+                      </button>
+                    </div>
+                  </div>
+                  
                   <div className="flex space-x-3">
-                    <a
-                      href={university.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center space-x-1 text-primary-300 hover:text-primary-400 transition-colors"
-                    >
-                      <Globe className="h-4 w-4" />
-                      <span>Website</span>
-                    </a>
-                    <div className="flex items-center space-x-1 text-primary-300">
-                      <Phone className="h-4 w-4" />
-                      <span>Contact</span>
-                    </div>
-                  </div>
-                  <div className="flex space-x-2">
-                    <button className="bg-accent-100 text-primary-400 px-4 py-2 rounded-lg hover:bg-accent-200 transition-colors">
-                      Compare
+                    <button className="flex-1 bg-accent-100 text-primary-400 px-4 py-3 rounded-lg hover:bg-accent-200 transition-all duration-200 font-medium text-sm hover:shadow-md">
+                      Compare Universities
                     </button>
-                    <button className="bg-primary-400 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors">
-                      Learn More
+                    <button className="flex-1 bg-blue-400 from-primary-400 to-accent-400 text-white px-4 py-3 rounded-lg hover:from-primary-600 hover:to-accent-600 transition-all duration-200 font-medium text-sm hover:shadow-lg">
+                      View Details
                     </button>
                   </div>
                 </div>

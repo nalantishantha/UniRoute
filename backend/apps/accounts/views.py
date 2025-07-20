@@ -181,7 +181,7 @@ def login_user(request):
                             student = Students.objects.get(user=user)
                             additional_info = {
                                 'student_id': student.student_id,
-                                'student_stage': student.student_stage,
+                                #'student_stage': student.student_stage,
                                 'school': student.school
                             }
                         except Students.DoesNotExist:

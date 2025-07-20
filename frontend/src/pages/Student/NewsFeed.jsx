@@ -65,14 +65,14 @@ const NewsFeed = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-200 to-blue-100">
       {/* Navigation */}
       <StudentNavigation />
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-8">
-          <h1 className="font-display font-bold text-4xl text-primary-400 mb-4">
+          <h1 className="font-display font-bold text-5xl text-primary-400 mb-4">
             News & Updates
           </h1>
           <p className="text-xl text-primary-300">
