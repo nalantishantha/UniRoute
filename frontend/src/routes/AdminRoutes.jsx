@@ -14,6 +14,7 @@ import { ProgramsList, ProgramForm, ProgramView } from '../pages/Admin/Programs'
 import { JobList, JobDetails, JobForm } from '../pages/Admin/Jobs';
 import { Reports, ReportDetails } from '../pages/Admin/Reports'
 import { AdminSettings } from '../pages/Admin';
+import { RequestsList, RequestDetails } from '../pages/Admin/Requests';
 
 const AdminRoutes = () => {
   return (
@@ -74,6 +75,10 @@ const AdminRoutes = () => {
       <Route path="/jobs/create" element={<JobForm />} />
       <Route path="/jobs/:jobId/edit" element={<JobForm />} />
       <Route path="/jobs/:jobId/view" element={<JobDetails />} />
+
+      {/* Requests Management */}
+      <Route path="/requests" element={<RequestsList />} />
+      <Route path="/requests/advertisement/:requestId" element={<RequestDetails />} />
 
       {/* Report Management */}
       <Route path="/reports" element={<Reports />} />

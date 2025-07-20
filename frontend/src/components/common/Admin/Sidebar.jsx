@@ -17,6 +17,7 @@ import {
   FileText,
   Briefcase,
   Calendar,
+  Inbox,
 } from "lucide-react";
 import logo from "../../../assets/logo.png";
 
@@ -93,16 +94,16 @@ const AdminSidebar = ({ isSidebarOpen, toggleSidebar, user, handleLogout }) => {
       category: "content",
     },
     {
-      name: "Analytics",
-      path: "/admin/analytics",
-      icon: BarChart3,
-      category: "analytics",
+      name: "Requests",
+      path: "/admin/requests",
+      icon: Inbox,
+      category: "Requests",
     },
     {
       name: "Reports",
       path: "/admin/reports",
       icon: FileText,
-      category: "analytics",
+      category: "Requests",
     },
     {
       name: "Settings",
@@ -116,7 +117,7 @@ const AdminSidebar = ({ isSidebarOpen, toggleSidebar, user, handleLogout }) => {
     main: { label: "Main", items: [] },
     users: { label: "User Management", items: [] },
     content: { label: "Content Management", items: [] },
-    analytics: { label: "Analytics & Reports", items: [] },
+    Requests: { label: "Requests & Reports", items: [] },
     system: { label: "System", items: [] },
   };
 
