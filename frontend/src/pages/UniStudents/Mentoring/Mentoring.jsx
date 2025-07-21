@@ -138,8 +138,32 @@ export default function Mentoring() {
   const [activeTab, setActiveTab] = useState("requests");
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [requests, setRequests] = useState(mentoringRequests);
+  const [sessions, setSessions] = useState(upcomingSessions);
 
-  const filteredRequests = mentoringRequests.filter((request) => {
+  // Modal states
+  const [showAcceptModal, setShowAcceptModal] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [selectedSession, setSelectedSession] = useState(null);
+  const [scheduleDate, setScheduleDate] = useState("");
+  const [scheduleTime, setScheduleTime] = useState("");
+  const [rejectReason, setRejectReason] = useState("");
+
+  // Calculate dynamic stats
+  const dynamicStats = {
+    totalRequests: requests.length,
+    pendingRequests: requests.filter((req) => req.status === "pending").length,
+    acceptedSessions: requests.filter((req) => req.status === "accepted")
+      .length,
+    completedSessions: stats.completedSessions, // Keep static for now
+    averageRating: stats.averageRating, // Keep static for now
+    responseRate: stats.responseRate, // Keep static for now
+  };
+
+  const filteredRequests = requests.filter((request) => {
     const matchesSearch =
       request.student.toLowerCase().includes(searchTerm.toLowerCase()) ||
       request.topic.toLowerCase().includes(searchTerm.toLowerCase());
@@ -167,13 +191,165 @@ export default function Mentoring() {
   };
 
   const handleAcceptRequest = (requestId) => {
-    // Handle accept logic
-    console.log("Accept request:", requestId);
+    const requestToAccept = requests.find((req) => req.id === requestId);
+    if (!requestToAccept) return;
+    
+    setSelectedRequest(requestToAccept);
+    setShowAcceptModal(true);
   };
 
   const handleRejectRequest = (requestId) => {
-    // Handle reject logic
-    console.log("Reject request:", requestId);
+    const requestToReject = requests.find((req) => req.id === requestId);
+    if (!requestToReject) return;
+    
+    setSelectedRequest(requestToReject);
+    setShowRejectModal(true);
+  };
+
+  const confirmAcceptRequest = () => {
+    if (!selectedRequest || !scheduleDate || !scheduleTime) return;
+
+    // Update the request status to accepted
+    setRequests((prevRequests) =>
+      prevRequests.map((req) =>
+        req.id === selectedRequest.id
+          ? {
+              ...req,
+              status: "accepted",
+              scheduledDate: scheduleDate,
+              scheduledTime: scheduleTime,
+              location:
+                req.sessionType === "physical"
+                  ? "Campus Library, Room TBD"
+                  : undefined,
+            }
+          : req
+      )
+    );
+
+    // Create a new session entry for upcoming sessions
+    const newSession = {
+      id: Date.now(), // Generate unique ID
+      student: selectedRequest.student,
+      topic: selectedRequest.topic,
+      date: scheduleDate,
+      time: scheduleTime,
+      duration: "1 hour",
+      type: selectedRequest.sessionType,
+      location:
+        selectedRequest.sessionType === "physical"
+          ? "Campus Library, Room TBD"
+          : undefined,
+      meetingLink:
+        selectedRequest.sessionType === "online"
+          ? "https://zoom.us/j/to-be-generated"
+          : undefined,
+      status: "confirmed",
+      avatar: selectedRequest.avatar,
+    };
+
+    // Add to upcoming sessions
+    setSessions((prevSessions) => [...prevSessions, newSession]);
+
+    // Reset modal state
+    setShowAcceptModal(false);
+    setSelectedRequest(null);
+    setScheduleDate("");
+    setScheduleTime("");
+
+    console.log("Request accepted and session scheduled:", selectedRequest.id);
+  };
+
+  const confirmRejectRequest = () => {
+    if (!selectedRequest || !rejectReason.trim()) return;
+
+    // Update the request status to rejected
+    setRequests((prevRequests) =>
+      prevRequests.map((req) =>
+        req.id === selectedRequest.id 
+          ? { ...req, status: "rejected", rejectReason: rejectReason }
+          : req
+      )
+    );
+
+    // Reset modal state
+    setShowRejectModal(false);
+    setSelectedRequest(null);
+    setRejectReason("");
+
+    console.log("Request rejected:", selectedRequest.id, "Reason:", rejectReason);
+  };
+
+  const handleCancelSession = (sessionId) => {
+    const sessionToCancel = sessions.find((session) => session.id === sessionId);
+    if (!sessionToCancel) return;
+    
+    setSelectedSession(sessionToCancel);
+    setShowCancelModal(true);
+  };
+
+  const confirmCancelSession = () => {
+    if (!selectedSession) return;
+
+    // Remove session from upcoming sessions
+    setSessions((prevSessions) => 
+      prevSessions.filter((session) => session.id !== selectedSession.id)
+    );
+
+    // Update corresponding request status back to pending if it exists
+    setRequests((prevRequests) =>
+      prevRequests.map((req) =>
+        req.student === selectedSession.student && req.topic === selectedSession.topic
+          ? { ...req, status: "pending", scheduledDate: undefined, scheduledTime: undefined }
+          : req
+      )
+    );
+
+    // Reset modal state
+    setShowCancelModal(false);
+    setSelectedSession(null);
+
+    console.log("Session cancelled:", selectedSession.id);
+  };
+
+  const handleRescheduleSession = (sessionId) => {
+    const sessionToReschedule = sessions.find((session) => session.id === sessionId);
+    if (!sessionToReschedule) return;
+    
+    setSelectedSession(sessionToReschedule);
+    setScheduleDate(sessionToReschedule.date);
+    setScheduleTime(sessionToReschedule.time);
+    setShowRescheduleModal(true);
+  };
+
+  const confirmRescheduleSession = () => {
+    if (!selectedSession || !scheduleDate || !scheduleTime) return;
+
+    // Update session with new date and time
+    setSessions((prevSessions) =>
+      prevSessions.map((session) =>
+        session.id === selectedSession.id
+          ? { ...session, date: scheduleDate, time: scheduleTime }
+          : session
+      )
+    );
+
+    // Update corresponding request if it exists
+    setRequests((prevRequests) =>
+      prevRequests.map((req) =>
+        req.student === selectedSession.student && req.topic === selectedSession.topic
+          ? { ...req, scheduledDate: scheduleDate, scheduledTime: scheduleTime }
+          : req
+      )
+    );
+
+    // Reset modal state
+    setShowRescheduleModal(false);
+    setSelectedSession(null);
+    setScheduleDate("");
+    setScheduleTime("");
+
+    console.log("Session rescheduled:", selectedSession.id);
   };
 
   return (
@@ -192,10 +368,10 @@ export default function Mentoring() {
                   Total Requests
                 </p>
                 <p className="text-2xl font-bold text-neutral-black mt-2">
-                  {stats.totalRequests}
+                  {dynamicStats.totalRequests}
                 </p>
                 <p className="text-sm text-neutral-grey mt-1">
-                  {stats.pendingRequests} pending
+                  {dynamicStats.pendingRequests} pending
                 </p>
               </div>
               <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
@@ -213,7 +389,7 @@ export default function Mentoring() {
                   Accepted Sessions
                 </p>
                 <p className="text-2xl font-bold text-neutral-black mt-2">
-                  {stats.acceptedSessions}
+                  {dynamicStats.acceptedSessions}
                 </p>
                 <p className="text-sm text-success mt-1">This month</p>
               </div>
@@ -232,7 +408,7 @@ export default function Mentoring() {
                   Completed Sessions
                 </p>
                 <p className="text-2xl font-bold text-neutral-black mt-2">
-                  {stats.completedSessions}
+                  {dynamicStats.completedSessions}
                 </p>
                 <p className="text-sm text-neutral-grey mt-1">All time</p>
               </div>
@@ -252,7 +428,7 @@ export default function Mentoring() {
                 </p>
                 <div className="flex items-center space-x-2 mt-2">
                   <p className="text-2xl font-bold text-neutral-black">
-                    {stats.averageRating}
+                    {dynamicStats.averageRating}
                   </p>
                   <Star className="w-5 h-5 text-warning fill-current" />
                 </div>
@@ -463,14 +639,10 @@ export default function Mentoring() {
                                         Session Scheduled
                                       </p>
                                       <p className="text-sm text-neutral-grey">
-                                        {request.scheduledDate} at{" "}
+                                        {request.scheduledDate} at {request.scheduledTime || "TBD"} - {" "}
                                         {request.location || "Online meeting"}
                                       </p>
                                     </div>
-                                    <Button size="sm" variant="outline">
-                                      <Calendar className="w-4 h-4 mr-1" />
-                                      View Details
-                                    </Button>
                                   </div>
                                 </div>
                               )}
@@ -492,7 +664,7 @@ export default function Mentoring() {
               className="space-y-6"
             >
               <div className="space-y-4">
-                {upcomingSessions.map((session, index) => (
+                {sessions.map((session, index) => (
                   <motion.div
                     key={session.id}
                     initial={{ opacity: 0, y: 20 }}
@@ -572,10 +744,16 @@ export default function Mentoring() {
                                   size="sm"
                                   variant="ghost"
                                   className="text-error hover:bg-error/10"
+                                  onClick={() => handleCancelSession(session.id)}
                                 >
                                   Cancel Session
                                 </Button>
-                                <Button size="sm">Reschedule</Button>
+                                <Button 
+                                  size="sm"
+                                  onClick={() => handleRescheduleSession(session.id)}
+                                >
+                                  Reschedule
+                                </Button>
                               </div>
                             </div>
                           </div>
@@ -586,7 +764,7 @@ export default function Mentoring() {
                 ))}
               </div>
 
-              {upcomingSessions.length === 0 && (
+              {sessions.length === 0 && (
                 <Card>
                   <CardContent className="p-12 text-center">
                     <Calendar className="w-12 h-12 text-neutral-light-grey mx-auto mb-4" />
@@ -603,6 +781,240 @@ export default function Mentoring() {
           )}
         </CardContent>
       </Card>
+
+      {/* Accept Request Modal */}
+      {showAcceptModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-neutral-black mb-4">
+              Schedule Session with {selectedRequest?.student}
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-neutral-grey mb-2">
+                  Date
+                </label>
+                <input
+                  type="date"
+                  value={scheduleDate}
+                  onChange={(e) => setScheduleDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full px-3 py-2 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-grey mb-2">
+                  Time
+                </label>
+                <input
+                  type="time"
+                  value={scheduleTime}
+                  onChange={(e) => setScheduleTime(e.target.value)}
+                  className="w-full px-3 py-2 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                />
+              </div>
+              <div className="bg-primary-50 p-3 rounded-lg">
+                <p className="text-sm text-primary-700">
+                  <strong>Topic:</strong> {selectedRequest?.topic}
+                </p>
+                <p className="text-sm text-primary-700">
+                  <strong>Type:</strong> {selectedRequest?.sessionType === 'online' ? 'Online Session' : 'Physical Meeting'}
+                </p>
+                <p className="text-sm text-primary-700">
+                  <strong>Preferred Time:</strong> {selectedRequest?.preferredTime}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3 mt-6">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setShowAcceptModal(false);
+                  setSelectedRequest(null);
+                  setScheduleDate("");
+                  setScheduleTime("");
+                }}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmAcceptRequest}
+                disabled={!scheduleDate || !scheduleTime}
+                className="flex-1"
+              >
+                Confirm Schedule
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reject Request Modal */}
+      {showRejectModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-neutral-black mb-4">
+              Decline Request from {selectedRequest?.student}
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-neutral-grey mb-2">
+                  Reason for declining
+                </label>
+                <textarea
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  placeholder="Please provide a reason for declining this mentoring request..."
+                  rows={4}
+                  className="w-full px-3 py-2 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400 resize-none"
+                />
+              </div>
+              <div className="bg-error/10 p-3 rounded-lg">
+                <p className="text-sm text-error">
+                  <strong>Topic:</strong> {selectedRequest?.topic}
+                </p>
+                <p className="text-sm text-error">
+                  <strong>Urgency:</strong> {selectedRequest?.urgency}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3 mt-6">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setShowRejectModal(false);
+                  setSelectedRequest(null);
+                  setRejectReason("");
+                }}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmRejectRequest}
+                disabled={!rejectReason.trim()}
+                variant="ghost"
+                className="flex-1 text-error hover:bg-error/10"
+              >
+                Confirm Decline
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Session Modal */}
+      {showCancelModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-neutral-black mb-4">
+              Cancel Session
+            </h3>
+            <p className="text-neutral-grey mb-6">
+              Are you sure you want to cancel this session with <strong>{selectedSession?.student}</strong>?
+            </p>
+            <div className="bg-warning/10 p-3 rounded-lg mb-6">
+              <p className="text-sm text-yellow-700">
+                <strong>Session:</strong> {selectedSession?.topic}
+              </p>
+              <p className="text-sm text-yellow-700">
+                <strong>Scheduled:</strong> {selectedSession?.date} at {selectedSession?.time}
+              </p>
+              <p className="text-sm text-yellow-700">
+                <strong>Type:</strong> {selectedSession?.type === 'online' ? 'Online Session' : 'Physical Meeting'}
+              </p>
+            </div>
+            <div className="flex items-center space-x-3">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setShowCancelModal(false);
+                  setSelectedSession(null);
+                }}
+                className="flex-1"
+              >
+                Keep Session
+              </Button>
+              <Button
+                onClick={confirmCancelSession}
+                variant="ghost"
+                className="flex-1 text-error hover:bg-error/10"
+              >
+                Yes, Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reschedule Session Modal */}
+      {showRescheduleModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-neutral-black mb-4">
+              Reschedule Session with {selectedSession?.student}
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-neutral-grey mb-2">
+                  New Date
+                </label>
+                <input
+                  type="date"
+                  value={scheduleDate}
+                  onChange={(e) => setScheduleDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full px-3 py-2 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-grey mb-2">
+                  New Time
+                </label>
+                <input
+                  type="time"
+                  value={scheduleTime}
+                  onChange={(e) => setScheduleTime(e.target.value)}
+                  className="w-full px-3 py-2 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                />
+              </div>
+              <div className="bg-neutral-100 p-3 rounded-lg">
+                <p className="text-sm text-neutral-700">
+                  <strong>Current Schedule:</strong> {selectedSession?.date} at {selectedSession?.time}
+                </p>
+                <p className="text-sm text-neutral-700">
+                  <strong>Topic:</strong> {selectedSession?.topic}
+                </p>
+                <p className="text-sm text-neutral-700">
+                  <strong>Type:</strong> {selectedSession?.type === 'online' ? 'Online Session' : 'Physical Meeting'}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3 mt-6">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setShowRescheduleModal(false);
+                  setSelectedSession(null);
+                  setScheduleDate("");
+                  setScheduleTime("");
+                }}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmRescheduleSession}
+                disabled={!scheduleDate || !scheduleTime}
+                className="flex-1"
+              >
+                Reschedule
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }
