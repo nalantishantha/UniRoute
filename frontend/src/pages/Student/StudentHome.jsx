@@ -484,7 +484,7 @@ const StudentHome = () => {
 
           <div className="border-t border-neutral-dark-grey mt-8 pt-8 text-center">
             <p className="text-neutral-light-grey">
-              © 2024 UniRoute. All rights reserved. Designed for Sri Lankan
+              © 2025 UniRoute. All rights reserved. Designed for Sri Lankan
               students.
             </p>
           </div>
