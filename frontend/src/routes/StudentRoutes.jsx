@@ -16,6 +16,8 @@ import ZScoreAnalysis from "../pages/Student/ZScoreAnalysis";
 import ProgramMatching from "../pages/Student/ProgramMatching";
 import UniversityGuide from "../pages/Student/UniversityGuide";
 import CareerCounseling from "../pages/Student/CareerCounseling";
+import BookCounselingService from "../pages/Student/BookCounselingService";
+import BookCounselorSession from "../pages/Student/BookCounselorSession";
 import ScholarshipInfo from "../pages/Student/ScholarshipInfo";
 import SuccessStories from "../pages/Student/SuccessStories";
 
@@ -44,6 +46,9 @@ const StudentRoutes = () => {
       <Route path="/tutors" element={<FindTutors />} />
       <Route path="/tutor-booking" element={<TutorBooking />} />
       <Route path="/career-counseling" element={<CareerCounseling />} />
+      <Route path="/counseling" element={<CareerCounseling />} />
+      <Route path="/book-counseling-service/:serviceId" element={<BookCounselingService />} />
+      <Route path="/book-counselor-session/:counselorId" element={<BookCounselorSession />} />
 
       {/* Information & Resources */}
       <Route path="/news" element={<NewsFeed />} />

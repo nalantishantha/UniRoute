@@ -106,7 +106,7 @@ const FindMentors = () => {
                     className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
                   >
                     {/* Mentor Header */}
-                    <div className="relative h-32 bg-gradient-to-r from-primary-400 to-accent-400">
+                    <div className="relative h-32 bg-gradient from-blue-400 to-accent-400">
                       <div className="absolute inset-0 bg-black/10"></div>
 
                       {/* Rating Badge */}

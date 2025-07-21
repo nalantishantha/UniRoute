@@ -23,8 +23,6 @@ import {
 } from "lucide-react";
 
 const CareerCounseling = () => {
-  const [selectedCounselor, setSelectedCounselor] = useState(null);
-  const [bookingType, setBookingType] = useState("video");
 
   const counselors = [
     {
@@ -184,10 +182,10 @@ const CareerCounseling = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Title and Description */}
         <div className="text-center mb-8">
-          <h1 className="font-display font-bold text-5xl text-primary-400 mb-6">
+          <h1 className="font-display font-bold text-5xl text-blue-900 mb-6">
             Career Counseling
           </h1>
-          <p className="text-xl text-primary-300 max-w-3xl mx-auto">
+          <p className="text-xl text-blue-800 max-w-3xl mx-auto">
             Get personalized guidance from experienced career counselors to make
             informed decisions about your education and future career path.
           </p>
@@ -195,7 +193,7 @@ const CareerCounseling = () => {
 
         {/* Services Overview */}
         <div className="mb-12">
-          <h2 className="font-display font-semibold text-3xl text-primary-400 mb-8 text-center">
+          <h2 className="font-display font-semibold text-3xl text-blue-900 mb-8 text-center">
             Our Counseling Services
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -205,12 +203,12 @@ const CareerCounseling = () => {
                 className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
               >
                 {/* Service Header */}
-                <div className="relative h-20 bg-gradient-to-r from-blue-300 to-blue-400">
-                  <div className="absolute inset-0 bg-black/5"></div>
+                <div className="relative h-20 bg-gradient-to-r from-blue-500 to-primary-500">
+                  <div className="absolute inset-0 bg-black/20"></div>
                   
                   {/* Service Icon */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30">
+                    <div className="w-12 h-12 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center border-2 border-white/50 shadow-lg">
                       {index === 0 && <User className="h-6 w-6 text-white" />}
                       {index === 1 && <GraduationCap className="h-6 w-6 text-white" />}
                       {index === 2 && <MessageCircle className="h-6 w-6 text-white" />}
@@ -220,7 +218,7 @@ const CareerCounseling = () => {
 
                   {/* Price Badge */}
                   <div className="absolute top-2 right-2">
-                    <span className="bg-white/20 text-white border border-white/30 px-2 py-1 rounded-full text-xs font-semibold">
+                    <span className="bg-white/25 text-white border border-white/40 px-2 py-1 rounded-full text-xs font-semibold drop-shadow-sm">
                       {service.price}
                     </span>
                   </div>
@@ -229,10 +227,10 @@ const CareerCounseling = () => {
                 <div className="p-6">
                   {/* Service Title */}
                   <div className="mb-4">
-                    <h3 className="font-display font-semibold text-xl text-primary-400 mb-2">
+                    <h3 className="font-display font-semibold text-xl text-blue-900 mb-2">
                       {service.title}
                     </h3>
-                    <p className="text-primary-300 text-sm leading-relaxed">
+                    <p className="text-blue-800 text-sm leading-relaxed">
                       {service.description}
                     </p>
                   </div>
@@ -240,7 +238,7 @@ const CareerCounseling = () => {
                   {/* Duration Info */}
                   <div className="mb-4">
                     <div className="bg-gradient-to-r from-blue-100 to-primary-50 rounded-lg p-3">
-                      <div className="flex items-center space-x-2 text-primary-400">
+                      <div className="flex items-center space-x-2 text-blue-900">
                         <Clock className="h-4 w-4" />
                         <span className="text-sm font-medium">Duration: {service.duration}</span>
                       </div>
@@ -249,7 +247,7 @@ const CareerCounseling = () => {
 
                   {/* Features */}
                   <div className="mb-6">
-                    <h4 className="font-medium text-primary-400 mb-3 flex items-center space-x-2">
+                    <h4 className="font-medium text-blue-900 mb-3 flex items-center space-x-2">
                       <CheckCircle className="h-4 w-4" />
                       <span>What's Included</span>
                     </h4>
@@ -260,7 +258,7 @@ const CareerCounseling = () => {
                           className="flex items-center space-x-2"
                         >
                           <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
-                          <span className="text-xs text-primary-300">
+                          <span className="text-xs text-blue-800">
                             {feature}
                           </span>
                         </div>
@@ -270,9 +268,12 @@ const CareerCounseling = () => {
 
                   {/* Action Button */}
                   <div className="border-t border-accent-100 pt-4">
-                    <button className="w-full bg-primary-400 text-white px-4 py-3 rounded-lg hover:bg-primary-600 transition-all duration-200 font-medium text-sm hover:shadow-lg">
+                    <Link
+                      to={`/student/book-counseling-service/${index + 1}`}
+                      className="block w-full bg-primary-400 text-white px-4 py-3 rounded-lg hover:bg-primary-600 transition-all duration-200 font-medium text-sm hover:shadow-lg text-center"
+                    >
                       Book This Service
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -282,7 +283,7 @@ const CareerCounseling = () => {
 
         {/* Counselors Section */}
         <div className="mb-12">
-          <h2 className="font-display font-semibold text-3xl text-primary-400 mb-8 text-center">
+          <h2 className="font-display font-semibold text-3xl text-blue-900 mb-8 text-center">
             Meet Our Expert Counselors
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -292,15 +293,15 @@ const CareerCounseling = () => {
                 className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
               >
                 {/* Counselor Header */}
-                <div className="relative h-32 bg-gradient-to-r from-blue-300 to-blue-400">
-                  <div className="absolute inset-0 bg-black/10"></div>
+                <div className="relative h-32 bg-gradient-to-r from-blue-500 to-primary-500">
+                  <div className="absolute inset-0 bg-black/20"></div>
                   
                   {/* Rating Badge */}
-                  <div className="absolute top-3 right-3">
-                    <div className="bg-white/20 backdrop-blur-md rounded-lg px-2 py-1 border border-white/30">
+                  <div className="absolute top-2 right-2">
+                    <div className="bg-white/25 backdrop-blur-md rounded-lg px-2 py-1 border border-white/40">
                       <div className="flex items-center space-x-1">
                         <Star className="h-3 w-3 text-yellow-300 fill-current" />
-                        <span className="text-white font-semibold text-xs">
+                        <span className="text-white font-semibold text-xs drop-shadow-sm">
                           {counselor.rating}
                         </span>
                       </div>
@@ -308,8 +309,8 @@ const CareerCounseling = () => {
                   </div>
 
                   {/* Experience Badge */}
-                  <div className="absolute top-3 left-3">
-                    <span className="bg-green-500/20 text-green-100 border border-green-300/30 px-2 py-1 rounded-full text-xs font-semibold">
+                  <div className="absolute top-2 left-2">
+                    <span className="bg-green-500/25 text-green-100 border border-green-300/40 px-2 py-1 rounded-full text-xs font-semibold drop-shadow-sm">
                       {counselor.experience}
                     </span>
                   </div>
@@ -318,15 +319,15 @@ const CareerCounseling = () => {
                   <div className="absolute bottom-3 left-3 right-3">
                     <div className="flex items-end justify-between">
                       <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30">
+                        <div className="w-12 h-12 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center border-2 border-white/50 shadow-lg">
                           <User className="h-6 w-6 text-white" />
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-display font-bold text-lg text-white mb-1 leading-tight">
+                          <h3 className="font-display font-bold text-lg text-white leading-tight drop-shadow-md">
                             {counselor.name}
                           </h3>
-                          <p className="text-white/90 text-xs mb-1">{counselor.title}</p>
-                          <div className="flex items-center space-x-2 text-white/80 text-xs">
+                          <p className="text-white/95 text-sm mb-2 font-semibold drop-shadow-sm">{counselor.title}</p>
+                          <div className="flex items-center space-x-2 text-white/90 text-xs drop-shadow-sm">
                             <span>{counselor.reviews} reviews</span>
                             <span>•</span>
                             <span>{counselor.successStories}+ stories</span>
@@ -341,11 +342,11 @@ const CareerCounseling = () => {
                   {/* Specialization */}
                   <div className="mb-4">
                     <div className="bg-gradient-to-r from-blue-100 to-primary-50 rounded-lg p-3">
-                      <h4 className="font-semibold text-primary-400 mb-1 flex items-center space-x-2">
+                      <h4 className="font-semibold text-blue-900 mb-1 flex items-center space-x-2">
                         <Award className="h-3 w-3" />
                         <span className="text-sm">Specialization</span>
                       </h4>
-                      <p className="text-primary-300 text-xs leading-relaxed">
+                      <p className="text-blue-800 text-xs leading-relaxed">
                         {counselor.specialization}
                       </p>
                     </div>
@@ -353,7 +354,7 @@ const CareerCounseling = () => {
 
                   {/* Description */}
                   <div className="mb-4">
-                    <p className="text-primary-300 leading-relaxed text-xs">
+                    <p className="text-blue-800 leading-relaxed text-xs">
                       {counselor.about.substring(0, 120)}...
                     </p>
                   </div>
@@ -382,7 +383,7 @@ const CareerCounseling = () => {
 
                   {/* Expertise Areas */}
                   <div className="mb-4">
-                    <h4 className="font-semibold text-primary-400 mb-2 flex items-center space-x-2">
+                    <h4 className="font-semibold text-blue-900 mb-2 flex items-center space-x-2">
                       <BookOpen className="h-3 w-3" />
                       <span className="text-sm">Expertise</span>
                     </h4>
@@ -390,13 +391,13 @@ const CareerCounseling = () => {
                       {counselor.expertise.slice(0, 3).map((skill, index) => (
                         <span
                           key={index}
-                          className="bg-gradient-to-r from-accent-400 to-accent-400 text-primary-400 px-2 py-1 rounded-full text-xs font-medium border border-accent-200"
+                          className="bg-gradient-to-r from-accent-400 to-accent-400 text-blue-900 px-2 py-1 rounded-full text-xs font-medium border border-accent-200"
                         >
                           {skill}
                         </span>
                       ))}
                       {counselor.expertise.length > 3 && (
-                        <span className="text-primary-300 text-xs px-2 py-1">
+                        <span className="text-blue-800 text-xs px-2 py-1">
                           +{counselor.expertise.length - 3}
                         </span>
                       )}
@@ -409,12 +410,12 @@ const CareerCounseling = () => {
                       <button className="flex-1 bg-accent-100 text-primary-400 px-3 py-2 rounded-lg hover:bg-accent-200 transition-all duration-200 font-medium text-xs hover:shadow-md">
                         View Profile
                       </button>
-                      <button
-                        onClick={() => setSelectedCounselor(counselor)}
-                        className="flex-1 bg-primary-400 text-white px-3 py-2 rounded-lg hover:bg-primary-600 transition-all duration-200 font-medium text-xs hover:shadow-lg"
+                      <Link
+                        to={`/student/book-counselor-session/${counselor.id}`}
+                        className="flex-1 bg-primary-400 text-white px-3 py-2 rounded-lg hover:bg-primary-600 transition-all duration-200 font-medium text-xs hover:shadow-lg text-center"
                       >
                         Book Session
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -423,162 +424,44 @@ const CareerCounseling = () => {
           </div>
         </div>
 
-        {/* Booking Modal */}
-        {selectedCounselor && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="font-display font-semibold text-2xl text-primary-400">
-                    Book Session with {selectedCounselor.name}
-                  </h3>
-                  <button
-                    onClick={() => setSelectedCounselor(null)}
-                    className="text-primary-300 hover:text-primary-400"
-                  >
-                    ×
-                  </button>
-                </div>
-
-                <div className="space-y-6">
-                  {/* Session Type */}
-                  <div>
-                    <label className="block text-primary-400 font-medium mb-3">
-                      Session Type
-                    </label>
-                    <div className="grid grid-cols-3 gap-3">
-                      {[
-                        { id: "video", label: "Video Call", icon: Video },
-                        { id: "phone", label: "Phone Call", icon: Phone },
-                        { id: "chat", label: "Text Chat", icon: MessageCircle },
-                      ].map((type) => {
-                        const IconComponent = type.icon;
-                        return (
-                          <button
-                            key={type.id}
-                            onClick={() => setBookingType(type.id)}
-                            className={`flex flex-col items-center p-4 rounded-lg border-2 transition-colors ${
-                              bookingType === type.id
-                                ? "border-primary-400 bg-primary-50"
-                                : "border-accent-100 hover:border-accent-200"
-                            }`}
-                          >
-                            <IconComponent className="h-6 w-6 text-primary-400 mb-2" />
-                            <span className="text-sm text-primary-400">
-                              {type.label}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Date & Time */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-primary-400 font-medium mb-2">
-                        Preferred Date
-                      </label>
-                      <input
-                        type="date"
-                        className="w-full px-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-primary-400 font-medium mb-2">
-                        Preferred Time
-                      </label>
-                      <select className="w-full px-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400">
-                        <option>9:00 AM</option>
-                        <option>10:00 AM</option>
-                        <option>11:00 AM</option>
-                        <option>2:00 PM</option>
-                        <option>3:00 PM</option>
-                        <option>4:00 PM</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Session Duration */}
-                  <div>
-                    <label className="block text-primary-400 font-medium mb-2">
-                      Session Duration
-                    </label>
-                    <select className="w-full px-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400">
-                      <option>30 minutes - Rs. 1,500</option>
-                      <option>60 minutes - Rs. 2,500</option>
-                      <option>90 minutes - Rs. 3,500</option>
-                    </select>
-                  </div>
-
-                  {/* Topics of Discussion */}
-                  <div>
-                    <label className="block text-primary-400 font-medium mb-2">
-                      What would you like to discuss?
-                    </label>
-                    <textarea
-                      rows={3}
-                      placeholder="Brief description of topics you'd like to cover in the session..."
-                      className="w-full px-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
-                    />
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex space-x-4">
-                    <button
-                      onClick={() => setSelectedCounselor(null)}
-                      className="flex-1 border border-accent-100 text-primary-400 py-3 rounded-lg hover:bg-accent-50 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button className="flex-1 bg-primary-400 text-white py-3 rounded-lg hover:bg-primary-600 transition-colors">
-                      Confirm Booking
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Why Choose Our Counseling */}
         <div className="bg-white rounded-2xl shadow-lg p-8 border border-accent-100">
-          <h2 className="font-display font-semibold text-3xl text-primary-400 mb-8 text-center">
+          <h2 className="font-display font-semibold text-3xl text-blue-900 mb-8 text-center">
             Why Choose Our Career Counseling?
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-primary-400 to-accent-400 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-primary-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Users className="h-8 w-8 text-white" />
               </div>
-              <h3 className="font-display font-semibold text-xl text-primary-400 mb-3">
+              <h3 className="font-display font-semibold text-xl text-blue-900 mb-3">
                 Expert Counselors
               </h3>
-              <p className="text-primary-300">
+              <p className="text-blue-800">
                 Experienced professionals with deep industry knowledge and
                 proven track records.
               </p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-primary-400 to-accent-400 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-primary-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Target className="h-8 w-8 text-white" />
               </div>
-              <h3 className="font-display font-semibold text-xl text-primary-400 mb-3">
+              <h3 className="font-display font-semibold text-xl text-blue-900 mb-3">
                 Personalized Guidance
               </h3>
-              <p className="text-primary-300">
+              <p className="text-blue-800">
                 Tailored advice based on your unique interests, skills, and
                 career aspirations.
               </p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-primary-400 to-accent-400 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-primary-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <TrendingUp className="h-8 w-8 text-white" />
               </div>
-              <h3 className="font-display font-semibold text-xl text-primary-400 mb-3">
+              <h3 className="font-display font-semibold text-xl text-blue-900 mb-3">
                 Proven Success
               </h3>
-              <p className="text-primary-300">
+              <p className="text-blue-800">
                 High success rates with students achieving their educational and
                 career goals.
               </p>

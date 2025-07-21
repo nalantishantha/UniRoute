@@ -127,10 +127,10 @@ const FindTutors = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-8">
-          <h1 className="font-display font-bold text-5xl text-primary-400 mb-4">
+          <h1 className="font-display font-bold text-5xl text-blue-900 mb-4">
             Find Subject Tutors
           </h1>
-          <p className="text-xl text-primary-300 max-w-2xl mx-auto">
+          <p className="text-xl text-blue-800 max-w-2xl mx-auto">
             Get expert help with your A/L subjects from qualified tutors and subject specialists
           </p>
         </div>
@@ -138,11 +138,11 @@ const FindTutors = () => {
         {/* Search Section */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-accent-100">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-300" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-800" />
             <input
               type="text"
               placeholder="Search tutors by subject, name, or location..."
-              className="w-full pl-10 pr-4 py-3 border border-accent-100 rounded-xl focus:ring-2 focus:ring-primary-200 focus:border-primary-300 transition-all"
+              className="w-full pl-10 pr-4 py-3 border border-accent-100 rounded-xl focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all"
             />
           </div>
         </div>
@@ -155,15 +155,15 @@ const FindTutors = () => {
               className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             >
               {/* Tutor Header */}
-              <div className="relative h-32 bg-gradient-to-r from-primary-400 to-accent-400">
-                <div className="absolute inset-0 bg-black/10"></div>
+              <div className="relative h-32 bg-gradient-to-r from-blue-500 to-primary-500">
+                <div className="absolute inset-0 bg-black/20"></div>
                 
                 {/* Rating Badge */}
                 <div className="absolute top-2 right-2">
-                  <div className="bg-white/20 backdrop-blur-md rounded-lg px-2 py-1 border border-white/30">
+                  <div className="bg-white/25 backdrop-blur-md rounded-lg px-2 py-1 border border-white/40">
                     <div className="flex items-center space-x-1">
                       <Star className="h-3 w-3 text-yellow-300 fill-current" />
-                      <span className="text-white font-semibold text-xs">
+                      <span className="text-white font-semibold text-xs drop-shadow-sm">
                         {tutor.rating}
                       </span>
                     </div>
@@ -172,7 +172,7 @@ const FindTutors = () => {
 
                 {/* Experience Badge */}
                 <div className="absolute top-2 left-2">
-                  <span className="bg-green-500/20 text-green-100 border border-green-300/30 px-2 py-1 rounded-full text-xs font-semibold">
+                  <span className="bg-green-500/25 text-green-100 border border-green-300/40 px-2 py-1 rounded-full text-xs font-semibold drop-shadow-sm">
                     {tutor.experience}
                   </span>
                 </div>
@@ -184,20 +184,20 @@ const FindTutors = () => {
                       <img
                         src={tutor.image}
                         alt={tutor.name}
-                        className="w-12 h-12 rounded-full object-cover border-2 border-white/30"
+                        className="w-12 h-12 rounded-full object-cover border-2 border-white/50 shadow-lg"
                       />
                       <div className="flex-1">
-                        <h3 className="font-display font-semibold text-lg text-white leading-tight">
+                        <h3 className="font-display font-bold text-lg text-white leading-tight drop-shadow-md">
                           {tutor.name}
                         </h3>
-                        <p className="text-white/90 text-sm mb-1">{tutor.title}</p>
+                        <p className="text-white/95 text-sm mb-2 font-semibold drop-shadow-sm">{tutor.title}</p>
                         <div className="flex items-center space-x-1 mb-1">
-                          <Briefcase className="h-3 w-3 text-white/80" />
-                          <span className="text-xs text-white/80">{tutor.company}</span>
+                          <Briefcase className="h-3 w-3 text-white/90" />
+                          <span className="text-xs text-white/90 drop-shadow-sm">{tutor.company}</span>
                         </div>
                         <div className="flex items-center space-x-1">
-                          <GraduationCap className="h-3 w-3 text-white/80" />
-                          <span className="text-xs text-white/80">{tutor.university}</span>
+                          <GraduationCap className="h-3 w-3 text-white/90" />
+                          <span className="text-xs text-white/90 drop-shadow-sm">{tutor.university}</span>
                         </div>
                       </div>
                     </div>
@@ -209,13 +209,13 @@ const FindTutors = () => {
                 {/* Subject Expertise */}
                 <div className="mb-4">
                   <div className="bg-gradient-to-r from-blue-100 to-primary-50 rounded-lg p-3">
-                    <h4 className="font-semibold text-primary-400 text-sm mb-1">Subject Expertise</h4>
-                    <p className="text-primary-300 text-xs">{tutor.expertise}</p>
+                    <h4 className="font-semibold text-blue-800 text-sm mb-1">Subject Expertise</h4>
+                    <p className="text-blue-900 text-2xs font-bold">{tutor.expertise}</p>
                   </div>
                 </div>
 
                 {/* Description */}
-                <p className="text-primary-300 text-xs mb-4 leading-relaxed">
+                <p className="text-blue-900 text-2xs font-semibold mb-4 leading-relaxed">
                   {tutor.description}
                 </p>
 
@@ -223,24 +223,24 @@ const FindTutors = () => {
                 <div className="flex items-center justify-between mb-4 text-xs">
                   <div className="flex items-center space-x-3">
                     <div className="flex items-center space-x-1">
-                      <Users className="h-3 w-3 text-primary-300" />
-                      <span className="text-primary-300">{tutor.students} students</span>
+                      <Users className="h-3 w-3 text-primary-700" />
+                      <span className="text-primary-700">{tutor.students} students</span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <Star className="h-3 w-3 text-accent-400" />
-                      <span className="text-primary-300">({tutor.reviews} reviews)</span>
+                      <span className="text-primary-700">({tutor.reviews} reviews)</span>
                     </div>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <DollarSign className="h-3 w-3 text-primary-300" />
-                    <span className="text-primary-400 font-semibold text-xs">{tutor.hourlyRate}/hr</span>
+      
+                    <span className="text-primary-900 font-semibold text-xs">{tutor.hourlyRate}/hr</span>
                   </div>
                 </div>
 
                 {/* Location */}
                 <div className="flex items-center space-x-1 mb-4">
-                  <MapPin className="h-3 w-3 text-primary-300" />
-                  <span className="text-primary-300 text-xs">{tutor.location}</span>
+                  <MapPin className="h-3 w-3 text-primary-700" />
+                  <span className="text-primary-700 text-xs">{tutor.location}</span>
                 </div>
 
                 {/* Book Session Button */}
@@ -260,7 +260,7 @@ const FindTutors = () => {
 
         {/* Load More */}
         <div className="text-center mt-8">
-          <button className="bg-accent-200 text-primary-400 px-8 py-3 rounded-xl font-semibold hover:bg-accent-300 transition-colors">
+          <button className="bg-accent-200 text-blue-900 px-8 py-3 rounded-xl font-semibold hover:bg-accent-300 transition-colors">
             Load More Tutors
           </button>
         </div>
