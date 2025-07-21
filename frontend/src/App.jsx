@@ -53,7 +53,7 @@ function App() {
         {companyRoutes.map((route, idx) => (
           <Route key={idx} path={route.path} element={route.element} />
         ))}
-        <Route path="/company/dashboard" element={<Dashboard />} />
+        <Route path="/company/dashboard-edit" element={<Dashboard />} />
         <Route path="/company/course" element={<Courses />} />
         <Route path="/company/internship" element={<Internships />} />
         <Route path="/company/ad-publish" element={<AdPublish />} />

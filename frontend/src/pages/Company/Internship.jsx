@@ -1,153 +1,164 @@
-import React, { useState } from 'react';
-import CompanySidebar from '../../components/Navigation/CompanySidebar'; // CHANGED: Import CompanySidebar
+import React, { useState, useEffect } from 'react';
+import CompanySidebar from '../../components/Navigation/CompanySidebar';
 import CompanyDashboardNavbar from '../../components/Navigation/CompanyDashboardNavbar';
 import './Internship.css';
 
 const Internship = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // CHANGED: Rename from isSidebarExpanded to isSidebarOpen
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedInternship, setSelectedInternship] = useState(null);
-  const [editFormData, setEditFormData] = useState({});
+  const [internships, setInternships] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState({ type: '', text: '' });
   const [selectedDepartment, setSelectedDepartment] = useState('All');
-  const [selectedDuration, setSelectedDuration] = useState('All');
+  const [selectedStatus, setSelectedStatus] = useState('All');
 
-  // Sample internships data
-  const [internships, setInternships] = useState([
-    {
-      id: 1,
-      title: 'Software Engineering Internship',
-      description: 'Join our engineering team to develop cutting-edge software solutions. Work on real projects, learn modern technologies, and gain hands-on experience in software development.',
-      department: 'Technology',
-      duration: '12 weeks',
-      location: 'San Francisco, CA',
-      type: 'Full-time',
-      stipend: 2500,
-      company: 'TechCorp',
-      coordinator: 'Dr. James Wilson',
-      requirements: 'Basic Programming Knowledge, Git',
-      status: 'active',
-      applicants: 87,
-      rating: 4.8,
-      image: 'https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?auto=format&fit=crop&w=400&q=80',
-      skills: ['Python', 'JavaScript', 'React', 'Node.js'],
-      startDate: '2024-06-01',
-      endDate: '2024-08-24'
-    },
-    {
-      id: 2,
-      title: 'Digital Marketing Internship',
-      description: 'Learn digital marketing strategies including social media marketing, content creation, SEO optimization, and campaign management in our dynamic marketing team.',
-      department: 'Marketing',
-      duration: '10 weeks',
-      location: 'New York, NY',
-      type: 'Full-time',
-      stipend: 2000,
-      company: 'MarketingPro',
-      coordinator: 'Sarah Miller',
-      requirements: 'Communication Skills, Basic Analytics',
-      status: 'active',
-      applicants: 64,
-      rating: 4.6,
-      image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=400&q=80',
-      skills: ['Social Media', 'SEO', 'Content Marketing', 'Analytics'],
-      startDate: '2024-05-15',
-      endDate: '2024-07-24'
-    },
-    {
-      id: 3,
-      title: 'Data Science Internship',
-      description: 'Work with our data science team to analyze large datasets, build predictive models, and create data visualizations that drive business decisions.',
-      department: 'Technology',
-      duration: '16 weeks',
-      location: 'Seattle, WA',
-      type: 'Full-time',
-      stipend: 3000,
-      company: 'DataTech Solutions',
-      coordinator: 'Alex Chen',
-      requirements: 'Statistics, Python, SQL',
-      status: 'active',
-      applicants: 95,
-      rating: 4.9,
-      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=400&q=80',
-      skills: ['Python', 'Machine Learning', 'SQL'],
-      startDate: '2024-06-10',
-      endDate: '2024-09-30'
-    },
-    {
-      id: 4,
-      title: 'UX/UI Design Internship',
-      description: 'Join our design team to create user-centered designs, conduct user research, create wireframes, and develop prototypes for web and mobile applications.',
-      department: 'Design',
-      duration: '14 weeks',
-      location: 'Los Angeles, CA',
-      type: 'Full-time',
-      stipend: 2200,
-      company: 'DesignStudio',
-      coordinator: 'Emily Rodriguez',
-      requirements: 'Design Portfolio, Figma Knowledge',
-      status: 'draft',
-      applicants: 0,
-      rating: 0,
-      image: 'https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&w=400&q=80',
-      skills: ['Figma', 'User Research', 'Design Systems'],
-      startDate: '2024-07-01',
-      endDate: '2024-10-05'
-    },
-    {
-      id: 5,
-      title: 'Business Development Internship',
-      description: 'Support our business development team in market research, client acquisition, partnership development, and strategic planning initiatives.',
-      department: 'Business',
-      duration: '8 weeks',
-      location: 'Chicago, IL',
-      type: 'Full-time',
-      stipend: 1800,
-      company: 'BizGrow Inc',
-      coordinator: 'Michael Davis',
-      requirements: 'Business Fundamentals, Communication',
-      status: 'active',
-      applicants: 52,
-      rating: 4.5,
-      image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=400&q=80',
-      skills: ['Market Research', 'Sales', 'Strategy', 'Communication'],
-      startDate: '2024-06-15',
-      endDate: '2024-08-10'
-    },
-    {
-      id: 6,
-      title: 'Product Management Internship',
-      description: 'Learn product management fundamentals by working on product roadmaps, conducting user interviews, analyzing metrics, and collaborating with cross-functional teams.',
-      department: 'Technology',
-      duration: '12 weeks',
-      location: 'Austin, TX',
-      type: 'Full-time',
-      stipend: 2800,
-      company: 'ProductTech',
-      coordinator: 'Jennifer Kim',
-      requirements: 'Analytical Skills, Project Management',
-      status: 'active',
-      applicants: 73,
-      rating: 4.7,
-      image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=400&q=80',
-      skills: ['Product Strategy', 'Analytics', 'User Research', 'Agile'],
-      startDate: '2024-06-01',
-      endDate: '2024-08-24'
+  // Form data for creating/editing internships - ADDED IMAGE_URL FIELD
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    location: '',
+    stipend: '',
+    start_date: '',
+    end_date: '',
+    application_deadline: '',
+    contact_email: '',
+    contact_phone: '',
+    image_url: '' // NEW FIELD
+  });
+
+  // Sample data with consistent structure
+  const [mockInternships] = useState([]);
+
+  const departments = ['All', 'Technology', 'Marketing', 'Design', 'Business'];
+  const statuses = ['All', 'active', 'draft', 'completed'];
+
+  // Get company ID from localStorage
+  const getCompanyId = () => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    return user.company_id || 1;
+  };
+
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Create new internship
+  const handleCreateInternship = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/companies/company-internships/create/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          company_id: getCompanyId(),
+          ...formData
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setMessage({ type: 'success', text: 'Internship created successfully!' });
+        setShowAddModal(false);
+        setFormData({
+          title: '',
+          description: '',
+          location: '',
+          stipend: '',
+          start_date: '',
+          end_date: '',
+          application_deadline: '',
+          contact_email: '',
+          contact_phone: '',
+          image_url: '' // RESET IMAGE URL
+        });
+        fetchInternships();
+      } else {
+        setMessage({ type: 'error', text: result.message || 'Error creating internship' });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Network error. Please try again.' });
+      console.error('Error creating internship:', error);
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
 
-  const departments = ['All Department', 'Technology', 'Marketing', 'Design', 'Business'];
-  const durations = ['All Durations ', '8 weeks', '10 weeks', '12 weeks', '14 weeks', '16 weeks'];
+  // Fetch internships for this company
+  const fetchInternships = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/companies/company-internships/?company_id=${getCompanyId()}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      console.log('API Response:', result);
+      
+      if (result.success && result.internships) {
+        // Map the API data to match your frontend structure
+        const mappedInternships = result.internships.map(internship => ({
+          internship_id: internship.internship_id,
+          title: internship.title,
+          description: internship.description || '',
+          location: internship.location || '',
+          stipend: internship.stipend || '',
+          start_date: internship.start_date,
+          end_date: internship.end_date,
+          application_deadline: internship.application_deadline,
+          contact_email: internship.contact_email || '',
+          contact_phone: internship.contact_phone || '',
+          company_name: internship.company_name,
+          company_id: internship.company_id,
+          created_at: internship.created_at,
+          // Add default values for frontend-specific fields
+          department: internship.department || 'Technology',
+          type: internship.internship_type || 'Full-time',
+          status: internship.status || 'active',
+          applicants: internship.applicants || 0,
+          rating: internship.rating || 4.5,
+          image: internship.image_url || 'https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?auto=format&fit=crop&w=400&q=80',
+          skills: internship.skills || []
+        }));
+        
+        setInternships(mappedInternships);
+      } else {
+        console.error('API returned error:', result.message);
+        setMessage({ type: 'error', text: result.message || 'Failed to fetch internships' });
+        setInternships([]);
+      }
+    } catch (error) {
+      console.error('Error fetching internships:', error);
+      setMessage({ type: 'error', text: 'Failed to connect to server. Please check your connection.' });
+      setInternships([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // Filter internships
   const filteredInternships = internships.filter(internship => {
     const matchesSearch = internship.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          internship.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         internship.company.toLowerCase().includes(searchTerm.toLowerCase());
+                         (internship.company_name && internship.company_name.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesDepartment = selectedDepartment === 'All' || internship.department === selectedDepartment;
-    const matchesDuration = selectedDuration === 'All' || internship.duration === selectedDuration;
-    return matchesSearch && matchesDepartment && matchesDuration;
+    const matchesStatus = selectedStatus === 'All' || internship.status === selectedStatus;
+    return matchesSearch && matchesDepartment && matchesStatus;
   });
 
   // Handle View Modal
@@ -159,81 +170,99 @@ const Internship = () => {
   // Handle Edit Modal
   const handleEdit = (internship) => {
     setSelectedInternship(internship);
-    setEditFormData({
-      ...internship,
-      skills: internship.skills.join(', ')
+    setFormData({
+      title: internship.title,
+      description: internship.description,
+      location: internship.location,
+      stipend: internship.stipend,
+      start_date: internship.start_date,
+      end_date: internship.end_date,
+      application_deadline: internship.application_deadline,
+      contact_email: internship.contact_email || '',
+      contact_phone: internship.contact_phone || '',
+      image_url: internship.image || '' // LOAD IMAGE URL FOR EDITING
     });
     setShowEditModal(true);
   };
 
-  // Handle Add New Internship
-  const handleAddNew = () => {
-    setEditFormData({
-      id: Date.now(),
-      title: '',
-      description: '',
-      department: 'Technology',
-      duration: '12 weeks',
-      location: '',
-      type: 'Full-time',
-      stipend: 0,
-      company: '',
-      coordinator: '',
-      requirements: '',
-      status: 'draft',
-      applicants: 0,
-      rating: 0,
-      image: 'https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?auto=format&fit=crop&w=400&q=80',
-      skills: '',
-      startDate: '',
-      endDate: ''
-    });
-    setShowAddModal(true);
-  };
-
   // Handle Delete
-  const handleDelete = (id) => {
+  const handleDelete = async (internshipId) => {
     if (window.confirm('Are you sure you want to delete this internship?')) {
-      setInternships(internships.filter(internship => internship.id !== id));
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/companies/company-internships/${internshipId}/delete/`, {
+          method: 'DELETE'
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          setInternships(prev => prev.filter(i => i.internship_id !== internshipId));
+          setMessage({ type: 'success', text: 'Internship deleted successfully!' });
+        } else {
+          setMessage({ type: 'error', text: result.message || 'Error deleting internship' });
+        }
+      } catch (error) {
+        setMessage({ type: 'error', text: 'Network error. Please try again.' });
+        console.error('Error deleting internship:', error);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
-  // Handle Save Edit
-  const handleSaveEdit = (e) => {
+  // Handle Update Internship
+  const handleUpdateInternship = async (e) => {
     e.preventDefault();
-    const updatedInternship = {
-      ...editFormData,
-      skills: editFormData.skills.split(',').map(skill => skill.trim()),
-      stipend: parseFloat(editFormData.stipend)
-    };
-    
-    setInternships(internships.map(internship => 
-      internship.id === selectedInternship.id ? updatedInternship : internship
-    ));
-    setShowEditModal(false);
-    setSelectedInternship(null);
-  };
+    setLoading(true);
 
-  // Handle Add New Save
-  const handleAddSave = (e) => {
-    e.preventDefault();
-    const newInternship = {
-      ...editFormData,
-      skills: editFormData.skills.split(',').map(skill => skill.trim()),
-      stipend: parseFloat(editFormData.stipend)
-    };
-    
-    setInternships([...internships, newInternship]);
-    setShowAddModal(false);
-  };
+    try {
+      const response = await fetch(`/api/companies/company-internships/${selectedInternship.internship_id}/update/`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
 
-  // Handle Input Change
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setEditFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+      const result = await response.json();
+
+      if (result.success) {
+        setMessage({ type: 'success', text: 'Internship updated successfully!' });
+        setShowEditModal(false);
+        
+        // Update the internship in the local state
+        setInternships(prev => prev.map(internship => 
+          internship.internship_id === selectedInternship.internship_id 
+            ? {
+                ...internship,
+                ...formData,
+                image: formData.image_url || internship.image
+              }
+            : internship
+        ));
+        
+        setFormData({
+          title: '',
+          description: '',
+          location: '',
+          stipend: '',
+          start_date: '',
+          end_date: '',
+          application_deadline: '',
+          contact_email: '',
+          contact_phone: '',
+          image_url: ''
+        });
+      } else {
+        setMessage({ type: 'error', text: result.message || 'Error updating internship' });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Network error. Please try again.' });
+      console.error('Error updating internship:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Get status color
@@ -256,9 +285,13 @@ const Internship = () => {
     }
   };
 
+  useEffect(() => {
+    fetchInternships();
+  }, []);
+
   return (
     <div className="internship-page">
-      {/* SIDEBAR AT THE VERY TOP - OUTSIDE CONTAINER */}
+      {/* SIDEBAR */}
       <CompanySidebar 
         isOpen={isSidebarOpen}
         setIsOpen={setIsSidebarOpen}
@@ -272,12 +305,23 @@ const Internship = () => {
 
       {/* MAIN CONTENT */}
       <main className={`internship-main ${isSidebarOpen ? 'sidebar-expanded' : 'sidebar-collapsed'}`}>
+        {/* Success/Error Message */}
+        {message.text && (
+          <div className={`mb-4 p-4 rounded-lg ${
+            message.type === 'success' 
+              ? 'bg-green-50 text-green-800 border border-green-200' 
+              : 'bg-red-50 text-red-800 border border-red-200'
+          }`}>
+            {message.text}
+          </div>
+        )}
+
         {/* Search and Filter Section */}
         <section className="internship-search">
           <div className="search-container">
             <input
               type="text"
-              placeholder="Search internships, companies, or skills..."
+              placeholder="Search internships, locations, or descriptions..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
@@ -291,17 +335,21 @@ const Internship = () => {
               className="filter-select"
             >
               {departments.map(department => (
-                <option key={department} value={department}>{department}</option>
+                <option key={department} value={department}>
+                  {department === 'All' ? 'All Departments' : department}
+                </option>
               ))}
             </select>
             
             <select 
-              value={selectedDuration} 
-              onChange={(e) => setSelectedDuration(e.target.value)}
+              value={selectedStatus} 
+              onChange={(e) => setSelectedStatus(e.target.value)}
               className="filter-select"
             >
-              {durations.map(duration => (
-                <option key={duration} value={duration}>{duration}</option>
+              {statuses.map(status => (
+                <option key={status} value={status}>
+                  {status === 'All' ? 'All Status' : status.charAt(0).toUpperCase() + status.slice(1)}
+                </option>
               ))}
             </select>
           </div>
@@ -310,26 +358,29 @@ const Internship = () => {
         {/* Internships Section Header */}
         <section className="internships">
           <div className="internships-header">
-            <h2>All Internships</h2>
-            <button className="btn-add-new" onClick={handleAddNew}>
-              + New Internship
+            <h2>Manage Internships</h2>
+            <button 
+              onClick={() => setShowAddModal(true)}
+              className="btn-add"
+            >
+              + Add New Internship
             </button>
-          </div> {/* ADD THIS CLOSING TAG - it was missing */}
+          </div>
           
-          {/* Internships Grid */}
+          {/* Internships Grid - MODIFIED CARD STRUCTURE */}
           <div className="internships-grid">
             {filteredInternships.map((internship) => (
-              <div key={internship.id} className="internship-card">
-                <button 
-                  className="company-internship-card-delete-btn" // CHANGED CLASS NAME
-                  onClick={() => handleDelete(internship.id)}
-                  title="Delete Internship"
-                >
-                  ✕
-                </button>
+              <div key={internship.internship_id} className="internship-card">
                 
                 <div className="card-image-container">
-                  <img src={internship.image} alt={internship.title} className="card-image" />
+                  <img 
+                    src={internship.image} 
+                    alt={internship.title} 
+                    className="card-image"
+                    onError={(e) => {
+                      e.target.src = 'https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?auto=format&fit=crop&w=400&q=80';
+                    }}
+                  />
                   <div className="card-overlay">
                     <span className="card-category">{internship.department}</span>
                     <div className="card-stats">
@@ -359,26 +410,38 @@ const Internship = () => {
                   </div>
                   
                   <div className="card-details">
-                    <span>⏱️ {internship.duration}</span>
                     <span>📍 {internship.location}</span>
-                    <span>💰 ${internship.stipend}/month</span>
+                    <span>💰 {internship.stipend}</span>
+                    <span>📅 {new Date(internship.start_date).toLocaleDateString()}</span>
                   </div>
                   
                   <div className="card-instructor">
-                    <span>👨‍💼 {internship.coordinator}</span>
+                    <span>📞 {internship.contact_email}</span>
                   </div>
                   
                   <p className="card-description">{internship.description}</p>
                   
                   <div className="card-skills">
-                    {internship.skills.map((skill, index) => (
+                    {internship.skills && internship.skills.map((skill, index) => (
                       <span key={index} className="skill">{skill}</span>
                     ))}
                   </div>
                   
+                  {/* MODIFIED CARD ACTIONS - MOVED DELETE TO BOTTOM */}
                   <div className="card-actions">
-                    <button className="btn-view" onClick={() => handleView(internship)}>View</button>
-                    <button className="btn-edit" onClick={() => handleEdit(internship)}>Edit</button>
+                    <div className="action-buttons-top">
+                      <button className="btn-view" onClick={() => handleView(internship)}>View</button>
+                      <button className="btn-edit" onClick={() => handleEdit(internship)}>Edit</button>
+                    </div>
+                    <div className="action-buttons-bottom">
+                      <button 
+                        className="btn-delete-full" 
+                        onClick={() => handleDelete(internship.internship_id)}
+                        title="Delete Internship"
+                      >
+                        🗑️ Delete Internship
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -389,62 +452,210 @@ const Internship = () => {
         {/* Internship Statistics */}
         <section className="internship-stats">
           <div className="stats-content">
-            <h2>Internship Statistics</h2>
+            <h2>Company Internship Statistics</h2>
             <div className="stats-grid">
               <div className="stat-item">
                 <div className="stat-icon">💼</div>
-                <div className="stat-value">{internships.length}</div>
+                <div className="stat-value">{filteredInternships.length}</div>
                 <div className="stat-label">Total Internships</div>
               </div>
               <div className="stat-item">
                 <div className="stat-icon">✅</div>
-                <div className="stat-value">{internships.filter(i => i.status === 'active').length}</div>
-                <div className="stat-label">Active Positions</div>
+                <div className="stat-value">{filteredInternships.filter(i => i.status === 'active').length}</div>
+                <div className="stat-label">Active Internships</div>
               </div>
               <div className="stat-item">
                 <div className="stat-icon">👥</div>
-                <div className="stat-value">{internships.reduce((sum, i) => sum + i.applicants, 0)}</div>
-                <div className="stat-label">Total Applicants</div>
+                <div className="stat-value">{filteredInternships.reduce((sum, i) => sum + (i.applicants || 0), 0)}</div>
+                <div className="stat-label">Total Applications</div>
               </div>
               <div className="stat-item">
-                <div className="stat-icon">💰</div>
-                <div className="stat-value">${internships.reduce((sum, i) => sum + i.stipend, 0).toLocaleString()}</div>
-                <div className="stat-label">Monthly Stipends</div>
+                <div className="stat-icon">⭐</div>
+                <div className="stat-value">{(filteredInternships.reduce((sum, i) => sum + (i.rating || 0), 0) / filteredInternships.length || 0).toFixed(1)}</div>
+                <div className="stat-label">Average Rating</div>
               </div>
             </div>
           </div>
         </section>
+      </main>
 
-        {/* Footer */}
-        <footer className="internship-footer">
-          <div className="footer-content">
-            <h3>Stay Connected</h3>
-            <div className="newsletter">
-              <input type="email" placeholder="Your email" />
-              <button>Subscribe</button>
+      {/* Add Internship Modal - ADDED IMAGE URL FIELD */}
+      {showAddModal && (
+        <div className="company-internship-user-modal-overlay" onClick={() => setShowAddModal(false)}>
+          <div className="company-internship-user-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="company-internship-user-modal-header">
+              <h2>Create New Internship</h2>
+              <button className="company-internship-user-modal-close" onClick={() => setShowAddModal(false)}>✕</button>
+            </div>
+            <div className="company-internship-user-modal-body">
+              <form onSubmit={handleCreateInternship} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Title *</label>
+                    <input
+                      type="text"
+                      name="title"
+                      value={formData.title}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="e.g., Software Development Intern"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                    <input
+                      type="text"
+                      name="location"
+                      value={formData.location}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="e.g., New York, NY or Remote"
+                    />
+                  </div>
+                </div>
+
+                {/* NEW IMAGE URL FIELD */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Image URL</label>
+                  <input
+                    type="url"
+                    name="image_url"
+                    value={formData.image_url}
+                    onChange={handleInputChange}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="https://example.com/image.jpg"
+                  />
+                  <small className="text-gray-500">Optional: Add an image URL to display on the internship card</small>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    rows="3"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Describe the internship role and responsibilities"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Start Date *</label>
+                    <input
+                      type="date"
+                      name="start_date"
+                      value={formData.start_date}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">End Date *</label>
+                    <input
+                      type="date"
+                      name="end_date"
+                      value={formData.end_date}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Application Deadline *</label>
+                    <input
+                      type="date"
+                      name="application_deadline"
+                      value={formData.application_deadline}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Stipend</label>
+                    <input
+                      type="text"
+                      name="stipend"
+                      value={formData.stipend}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="e.g., $15/hour or $2000/month"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Contact Email</label>
+                    <input
+                      type="email"
+                      name="contact_email"
+                      value={formData.contact_email}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="hr@company.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Contact Phone</label>
+                    <input
+                      type="tel"
+                      name="contact_phone"
+                      value={formData.contact_phone}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="+1 (555) 123-4567"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddModal(false)}
+                    className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {loading ? 'Creating...' : 'Create Internship'}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
-        </footer>
-      </main>
+        </div>
+      )}
 
       {/* View Modal */}
       {showViewModal && selectedInternship && (
-        <div className="company-internship-admin-modal-overlay" onClick={() => setShowViewModal(false)}>
-          <div className="company-internship-admin-modal-content" onClick={e => e.stopPropagation()}>
-            <div className="company-internship-admin-modal-header">
-              <h2>View Internship</h2>
-              <button className="company-internship-admin-modal-close" onClick={() => setShowViewModal(false)}>✕</button>
+        <div className="company-internship-user-modal-overlay" onClick={() => setShowViewModal(false)}>
+          <div className="company-internship-user-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="company-internship-user-modal-header">
+              <h2>View Internship Details</h2>
+              <button className="company-internship-user-modal-close" onClick={() => setShowViewModal(false)}>✕</button>
             </div>
-            <div className="company-internship-admin-modal-body">
+            <div className="company-internship-user-modal-body">
               <img
                 src={selectedInternship.image}
                 alt={selectedInternship.title}
-                className="company-internship-admin-modal-image"
+                className="company-internship-user-modal-image"
+                onError={(e) => {
+                  e.target.src = 'https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?auto=format&fit=crop&w=400&q=80';
+                }}
               />
-              <div className="company-internship-admin-modal-info">
-                <div className="company-internship-admin-modal-title-section">
+              <div className="company-internship-user-modal-info">
+                <div className="company-internship-user-modal-title-section">
                   <h3>{selectedInternship.title}</h3>
-                  <div className="company-internship-admin-modal-badges">
+                  <div className="company-internship-user-modal-badges">
                     <span 
                       className="status-badge" 
                       style={{ backgroundColor: getStatusColor(selectedInternship.status) }}
@@ -460,463 +671,129 @@ const Internship = () => {
                   </div>
                 </div>
                 
-                <div className="company-internship-admin-modal-meta">
-                  <div className="company-internship-admin-meta-item" data-info="coordinator">
-                    <strong>Coordinator:</strong> {selectedInternship.coordinator}
-                  </div>
-                  <div className="company-internship-admin-meta-item" data-info="department">
-                    <strong>Department:</strong> {selectedInternship.department}
-                  </div>
-                  <div className="company-internship-admin-meta-item" data-info="duration">
-                    <strong>Duration:</strong> {selectedInternship.duration}
-                  </div>
-                  <div className="company-internship-admin-meta-item" data-info="location">
+                <div className="company-internship-user-modal-meta">
+                  <div className="company-internship-user-meta-item">
                     <strong>Location:</strong> {selectedInternship.location}
                   </div>
-                  <div className="company-internship-admin-meta-item" data-info="stipend">
-                    <strong>Stipend:</strong> ${selectedInternship.stipend}/month
+                  <div className="company-internship-user-meta-item">
+                    <strong>Stipend:</strong> {selectedInternship.stipend}
                   </div>
-                  <div className="company-internship-admin-meta-item" data-info="company">
-                    <strong>Company:</strong> {selectedInternship.company}
+                  <div className="company-internship-user-meta-item">
+                    <strong>Start Date:</strong> {new Date(selectedInternship.start_date).toLocaleDateString()}
                   </div>
-                  <div className="company-internship-admin-meta-item" data-info="applicants">
+                  <div className="company-internship-user-meta-item">
+                    <strong>End Date:</strong> {new Date(selectedInternship.end_date).toLocaleDateString()}
+                  </div>
+                  <div className="company-internship-user-meta-item">
+                    <strong>Application Deadline:</strong> {new Date(selectedInternship.application_deadline).toLocaleDateString()}
+                  </div>
+                  <div className="company-internship-user-meta-item">
+                    <strong>Contact Email:</strong> {selectedInternship.contact_email}
+                  </div>
+                  <div className="company-internship-user-meta-item">
+                    <strong>Contact Phone:</strong> {selectedInternship.contact_phone}
+                  </div>
+                  <div className="company-internship-user-meta-item">
                     <strong>Applicants:</strong> {selectedInternship.applicants} students
                   </div>
-                  <div className="company-internship-admin-meta-item" data-info="rating">
+                  <div className="company-internship-user-meta-item">
                     <strong>Rating:</strong> {selectedInternship.rating}/5.0
-                  </div>
-                  <div className="company-internship-admin-meta-item" data-info="start-date">
-                    <strong>Start Date:</strong> {new Date(selectedInternship.startDate).toLocaleDateString()}
-                  </div>
-                  <div className="company-internship-admin-meta-item" data-info="end-date">
-                    <strong>End Date:</strong> {new Date(selectedInternship.endDate).toLocaleDateString()}
                   </div>
                 </div>
                 
-                <div className="company-internship-admin-modal-description">
+                <div className="company-internship-user-modal-description">
                   <strong>Description:</strong>
                   <p>{selectedInternship.description}</p>
                 </div>
                 
-                <div className="company-internship-admin-modal-skills">
-                  <strong>Skills Required:</strong>
-                  <div className="company-internship-admin-skills-container">
-                    {selectedInternship.skills.map((skill, index) => (
-                      <span key={index} className="skill">{skill}</span>
-                    ))}
+                {selectedInternship.skills && (
+                  <div className="company-internship-user-modal-skills">
+                    <strong>Skills Required:</strong>
+                    <div className="company-internship-user-skills-container">
+                      {selectedInternship.skills.map((skill, index) => (
+                        <span key={index} className="skill">{skill}</span>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Edit Modal */}
+      {/* Edit Modal - ADDED IMAGE URL FIELD */}
       {showEditModal && selectedInternship && (
-        <div className="company-internship-admin-modal-overlay" onClick={() => setShowEditModal(false)}>
-          <div className="company-internship-admin-modal-content" onClick={e => e.stopPropagation()}>
-            <div className="company-internship-admin-modal-header">
-              <button className="company-internship-admin-modal-close" onClick={() => setShowEditModal(false)}>✕</button>
+        <div className="company-internship-user-modal-overlay" onClick={() => setShowEditModal(false)}>
+          <div className="company-internship-user-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="company-internship-user-modal-header">
+              <h2>Edit Internship</h2>
+              <button className="company-internship-user-modal-close" onClick={() => setShowEditModal(false)}>✕</button>
             </div>
-            <div className="company-internship-admin-modal-body">
-              <form onSubmit={handleSaveEdit}>
-                <div className="company-internship-admin-form-group">
-                  <label>Internship Title</label>
-                  <input
-                    type="text"
-                    name="title"
-                    value={editFormData.title}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                
-                <div className="company-internship-admin-form-row">
-                  <div className="company-internship-admin-form-group">
-                    <label>Department</label>
-                    <select
-                      name="department"
-                      value={editFormData.department}
+            <div className="company-internship-user-modal-body">
+              <form onSubmit={handleUpdateInternship} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Title *</label>
+                    <input
+                      type="text"
+                      name="title"
+                      value={formData.title}
                       onChange={handleInputChange}
                       required
-                    >
-                      {departments.filter(dept => dept !== 'All').map(department => (
-                        <option key={department} value={department}>{department}</option>
-                      ))}
-                    </select>
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
                   </div>
-                  <div className="company-internship-admin-form-group">
-                    <label>Duration</label>
-                    <select
-                      name="duration"
-                      value={editFormData.duration}
-                      onChange={handleInputChange}
-                      required
-                    >
-                      {durations.filter(dur => dur !== 'All').map(duration => (
-                        <option key={duration} value={duration}>{duration}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                
-                <div className="company-internship-admin-form-row">
-                  <div className="company-internship-admin-form-group">
-                    <label>Location</label>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
                     <input
                       type="text"
                       name="location"
-                      value={editFormData.location}
+                      value={formData.location}
                       onChange={handleInputChange}
-                      placeholder="e.g., San Francisco, CA"
-                      required
-                    />
-                  </div>
-                  <div className="company-internship-admin-form-group">
-                    <label>Type</label>
-                    <select
-                      name="type"
-                      value={editFormData.type}
-                      onChange={handleInputChange}
-                      required
-                    >
-                      <option value="Full-time">Full-time</option>
-                      <option value="Part-time">Part-time</option>
-                      <option value="Remote">Remote</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <div className="company-internship-admin-form-row">
-                  <div className="company-internship-admin-form-group">
-                    <label>Monthly Stipend ($)</label>
-                    <input
-                      type="number"
-                      name="stipend"
-                      value={editFormData.stipend}
-                      onChange={handleInputChange}
-                      min="0"
-                      step="100"
-                      required
-                    />
-                  </div>
-                  <div className="company-internship-admin-form-group">
-                    <label>Status</label>
-                    <select
-                      name="status"
-                      value={editFormData.status}
-                      onChange={handleInputChange}
-                      required
-                    >
-                      <option value="draft">Draft</option>
-                      <option value="active">Active</option>
-                      <option value="completed">Completed</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <div className="company-internship-admin-form-group">
-                  <label>Company</label>
-                  <input
-                    type="text"
-                    name="company"
-                    value={editFormData.company}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                
-                <div className="company-internship-admin-form-group">
-                  <label>Coordinator</label>
-                  <input
-                    type="text"
-                    name="coordinator"
-                    value={editFormData.coordinator}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                
-                <div className="company-internship-admin-form-group">
-                  <label>Requirements</label>
-                  <input
-                    type="text"
-                    name="requirements"
-                    value={editFormData.requirements}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Basic Programming, Communication Skills"
-                  />
-                </div>
-                
-                <div className="company-internship-admin-form-row">
-                  <div className="company-internship-admin-form-group">
-                    <label>Start Date</label>
-                    <input
-                      type="date"
-                      name="startDate"
-                      value={editFormData.startDate}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                  <div className="company-internship-admin-form-group">
-                    <label>End Date</label>
-                    <input
-                      type="date"
-                      name="endDate"
-                      value={editFormData.endDate}
-                      onChange={handleInputChange}
-                      required
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
-                
-                <div className="company-internship-admin-form-group">
-                  <label>Description</label>
-                  <textarea
-                    name="description"
-                    value={editFormData.description}
-                    onChange={handleInputChange}
-                    rows="4"
-                    required
-                  />
-                </div>
-                
-                <div className="company-internship-admin-form-group">
-                  <label>Skills Required (comma-separated)</label>
-                  <input
-                    type="text"
-                    name="skills"
-                    value={editFormData.skills}
-                    onChange={handleInputChange}
-                    placeholder="Python, JavaScript, React, Node.js"
-                    required
-                  />
-                </div>
-                
-                <div className="company-internship-admin-form-group">
-                  <label>Image URL</label>
-                  <input
-                    type="url"
-                    name="image"
-                    value={editFormData.image}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                
-                <div className="company-internship-admin-form-actions">
-                  <button type="button" className="btn-cancel" onClick={() => setShowEditModal(false)}>
-                    Cancel
-                  </button>
-                  <button type="submit" className="btn-save">Save Changes</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* Add New Modal */}
-      {showAddModal && (
-        <div className="company-internship-admin-modal-overlay" onClick={() => setShowAddModal(false)}>
-          <div className="company-internship-admin-modal-content" onClick={e => e.stopPropagation()}>
-            <div className="company-internship-admin-modal-header">
-              <button className="company-internship-admin-modal-close" onClick={() => setShowAddModal(false)}>✕</button>
-            </div>
-            <div className="company-internship-admin-modal-body">
-              <form onSubmit={handleAddSave}>
-                <div className="company-internship-admin-form-group">
-                  <label>Internship Title</label>
-                  <input
-                    type="text"
-                    name="title"
-                    value={editFormData.title}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                
-                <div className="company-internship-admin-form-row">
-                  <div className="company-internship-admin-form-group">
-                    <label>Department</label>
-                    <select
-                      name="department"
-                      value={editFormData.department}
-                      onChange={handleInputChange}
-                      required
-                    >
-                      {departments.filter(dept => dept !== 'All').map(department => (
-                        <option key={department} value={department}>{department}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="company-internship-admin-form-group">
-                    <label>Duration</label>
-                    <select
-                      name="duration"
-                      value={editFormData.duration}
-                      onChange={handleInputChange}
-                      required
-                    >
-                      {durations.filter(dur => dur !== 'All').map(duration => (
-                        <option key={duration} value={duration}>{duration}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                
-                <div className="company-internship-admin-form-row">
-                  <div className="company-internship-admin-form-group">
-                    <label>Location</label>
-                    <input
-                      type="text"
-                      name="location"
-                      value={editFormData.location}
-                      onChange={handleInputChange}
-                      placeholder="e.g., San Francisco, CA"
-                      required
-                    />
-                  </div>
-                  <div className="company-internship-admin-form-group">
-                    <label>Type</label>
-                    <select
-                      name="type"
-                      value={editFormData.type}
-                      onChange={handleInputChange}
-                      required
-                    >
-                      <option value="Full-time">Full-time</option>
-                      <option value="Part-time">Part-time</option>
-                      <option value="Remote">Remote</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <div className="company-internship-admin-form-row">
-                  <div className="company-internship-admin-form-group">
-                    <label>Monthly Stipend ($)</label>
-                    <input
-                      type="number"
-                      name="stipend"
-                      value={editFormData.stipend}
-                      onChange={handleInputChange}
-                      min="0"
-                      step="100"
-                      required
-                    />
-                  </div>
-                  <div className="company-internship-admin-form-group">
-                    <label>Status</label>
-                    <select
-                      name="status"
-                      value={editFormData.status}
-                      onChange={handleInputChange}
-                      required
-                    >
-                      <option value="draft">Draft</option>
-                      <option value="active">Active</option>
-                      <option value="completed">Completed</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <div className="company-internship-admin-form-group">
-                  <label>Company</label>
-                  <input
-                    type="text"
-                    name="company"
-                    value={editFormData.company}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                
-                <div className="company-internship-admin-form-group">
-                  <label>Coordinator</label>
-                  <input
-                    type="text"
-                    name="coordinator"
-                    value={editFormData.coordinator}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                
-                <div className="company-internship-admin-form-group">
-                  <label>Requirements</label>
-                  <input
-                    type="text"
-                    name="requirements"
-                    value={editFormData.requirements}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Basic Programming, Communication Skills"
-                  />
-                </div>
-                
-                <div className="company-internship-admin-form-row">
-                  <div className="company-internship-admin-form-group">
-                    <label>Start Date</label>
-                    <input
-                      type="date"
-                      name="startDate"
-                      value={editFormData.startDate}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                  <div className="company-internship-admin-form-group">
-                    <label>End Date</label>
-                    <input
-                      type="date"
-                      name="endDate"
-                      value={editFormData.endDate}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                </div>
-                
-                <div className="company-internship-admin-form-group">
-                  <label>Description</label>
-                  <textarea
-                    name="description"
-                    value={editFormData.description}
-                    onChange={handleInputChange}
-                    rows="4"
-                    required
-                  />
-                </div>
-                
-                <div className="company-internship-admin-form-group">
-                  <label>Skills Required (comma-separated)</label>
-                  <input
-                    type="text"
-                    name="skills"
-                    value={editFormData.skills}
-                    onChange={handleInputChange}
-                    placeholder="Python, JavaScript, React, Node.js"
-                    required
-                  />
-                </div>
-                
-                <div className="company-internship-admin-form-group">
-                  <label>Image URL</label>
+                {/* IMAGE URL FIELD IN EDIT FORM */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Image URL</label>
                   <input
                     type="url"
-                    name="image"
-                    value={editFormData.image}
+                    name="image_url"
+                    value={formData.image_url}
                     onChange={handleInputChange}
-                    required
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="https://example.com/image.jpg"
                   />
                 </div>
-                
-                <div className="company-internship-admin-form-actions">
-                  <button type="button" className="btn-cancel" onClick={() => setShowAddModal(false)}>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    rows="3"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowEditModal(false)}
+                    className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  >
                     Cancel
                   </button>
-                  <button type="submit" className="btn-save">Add Internship</button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                  >
+                    Update Internship
+                  </button>
                 </div>
               </form>
             </div>

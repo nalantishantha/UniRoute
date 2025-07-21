@@ -74,7 +74,7 @@ const LoginPage = () => {
               navigate('/university/dashboard');
               break;
               case 'company':
-              navigate('/company/dashboard');
+              navigate('/company/dashboard-edit');
               break;
             default:
               navigate('/student/home');

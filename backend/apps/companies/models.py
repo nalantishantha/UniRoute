@@ -42,6 +42,7 @@ class InternshipOpportunities(models.Model):
     application_deadline = models.DateField(blank=True, null=True)
     contact_email = models.CharField(max_length=100, blank=True, null=True)
     contact_phone = models.CharField(max_length=50, blank=True, null=True)
+    image_url = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
