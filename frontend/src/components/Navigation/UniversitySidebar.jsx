@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   FolderOpen,
@@ -15,7 +16,7 @@ import {
 } from "lucide-react";
 import { cn } from "../../utils/cn";
 import logo from "../../assets/logo.png";
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from "react-router-dom";
 
 const navigation = [
   {
@@ -48,7 +49,6 @@ const navigation = [
     href: "/university/mentoruni",
     icon: Users,
   },
-  
 ];
 
 export default function UniversitySidebar({ isOpen, setIsOpen }) {
