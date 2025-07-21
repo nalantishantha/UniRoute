@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router-dom";
+import { MessageSquare } from "lucide-react";
+import { useChatContext } from "../../context/ChatContext";
+
 import {
   Menu,
   Bell,
@@ -93,6 +96,8 @@ export default function TopNavigation({ onMenuClick }) {
     }
   };
 
+  const { toggleChat } = useChatContext();
+
   return (
     <motion.header
       initial={{ y: -20, opacity: 0 }}
@@ -142,12 +147,12 @@ export default function TopNavigation({ onMenuClick }) {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => setShowChat(true)}
-            className="relative p-3 rounded-xl hover:bg-neutral-silver/70 transition-all duration-200 group hover:shadow-sm"
+            onClick={toggleChat}
+            className="relative p-2 text-primary-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors duration-200"
           >
-            <MessageCircle className="w-5 h-5 text-neutral-dark-grey group-hover:text-primary-600" />
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary-500 rounded-full flex items-center justify-center shadow-sm">
-              <span className="text-xs text-white font-bold">3</span>
+            <MessageSquare className="h-5 w-5" />
+            <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+              2
             </span>
           </motion.button>
 
