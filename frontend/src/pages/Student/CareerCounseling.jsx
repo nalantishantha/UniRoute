@@ -23,8 +23,6 @@ import {
 } from "lucide-react";
 
 const CareerCounseling = () => {
-  const [selectedCounselor, setSelectedCounselor] = useState(null);
-  const [bookingType, setBookingType] = useState("video");
 
   const counselors = [
     {
@@ -270,9 +268,12 @@ const CareerCounseling = () => {
 
                   {/* Action Button */}
                   <div className="border-t border-accent-100 pt-4">
-                    <button className="w-full bg-primary-400 text-white px-4 py-3 rounded-lg hover:bg-primary-600 transition-all duration-200 font-medium text-sm hover:shadow-lg">
+                    <Link
+                      to={`/student/book-counseling-service/${index + 1}`}
+                      className="block w-full bg-primary-400 text-white px-4 py-3 rounded-lg hover:bg-primary-600 transition-all duration-200 font-medium text-sm hover:shadow-lg text-center"
+                    >
                       Book This Service
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -409,12 +410,12 @@ const CareerCounseling = () => {
                       <button className="flex-1 bg-accent-100 text-primary-400 px-3 py-2 rounded-lg hover:bg-accent-200 transition-all duration-200 font-medium text-xs hover:shadow-md">
                         View Profile
                       </button>
-                      <button
-                        onClick={() => setSelectedCounselor(counselor)}
-                        className="flex-1 bg-primary-400 text-white px-3 py-2 rounded-lg hover:bg-primary-600 transition-all duration-200 font-medium text-xs hover:shadow-lg"
+                      <Link
+                        to={`/student/book-counselor-session/${counselor.id}`}
+                        className="flex-1 bg-primary-400 text-white px-3 py-2 rounded-lg hover:bg-primary-600 transition-all duration-200 font-medium text-xs hover:shadow-lg text-center"
                       >
                         Book Session
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -423,162 +424,44 @@ const CareerCounseling = () => {
           </div>
         </div>
 
-        {/* Booking Modal */}
-        {selectedCounselor && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="font-display font-semibold text-2xl text-primary-400">
-                    Book Session with {selectedCounselor.name}
-                  </h3>
-                  <button
-                    onClick={() => setSelectedCounselor(null)}
-                    className="text-primary-300 hover:text-primary-400"
-                  >
-                    ×
-                  </button>
-                </div>
-
-                <div className="space-y-6">
-                  {/* Session Type */}
-                  <div>
-                    <label className="block text-primary-400 font-medium mb-3">
-                      Session Type
-                    </label>
-                    <div className="grid grid-cols-3 gap-3">
-                      {[
-                        { id: "video", label: "Video Call", icon: Video },
-                        { id: "phone", label: "Phone Call", icon: Phone },
-                        { id: "chat", label: "Text Chat", icon: MessageCircle },
-                      ].map((type) => {
-                        const IconComponent = type.icon;
-                        return (
-                          <button
-                            key={type.id}
-                            onClick={() => setBookingType(type.id)}
-                            className={`flex flex-col items-center p-4 rounded-lg border-2 transition-colors ${
-                              bookingType === type.id
-                                ? "border-primary-400 bg-primary-50"
-                                : "border-accent-100 hover:border-accent-200"
-                            }`}
-                          >
-                            <IconComponent className="h-6 w-6 text-primary-400 mb-2" />
-                            <span className="text-sm text-primary-400">
-                              {type.label}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Date & Time */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-primary-400 font-medium mb-2">
-                        Preferred Date
-                      </label>
-                      <input
-                        type="date"
-                        className="w-full px-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-primary-400 font-medium mb-2">
-                        Preferred Time
-                      </label>
-                      <select className="w-full px-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400">
-                        <option>9:00 AM</option>
-                        <option>10:00 AM</option>
-                        <option>11:00 AM</option>
-                        <option>2:00 PM</option>
-                        <option>3:00 PM</option>
-                        <option>4:00 PM</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Session Duration */}
-                  <div>
-                    <label className="block text-primary-400 font-medium mb-2">
-                      Session Duration
-                    </label>
-                    <select className="w-full px-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400">
-                      <option>30 minutes - Rs. 1,500</option>
-                      <option>60 minutes - Rs. 2,500</option>
-                      <option>90 minutes - Rs. 3,500</option>
-                    </select>
-                  </div>
-
-                  {/* Topics of Discussion */}
-                  <div>
-                    <label className="block text-primary-400 font-medium mb-2">
-                      What would you like to discuss?
-                    </label>
-                    <textarea
-                      rows={3}
-                      placeholder="Brief description of topics you'd like to cover in the session..."
-                      className="w-full px-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
-                    />
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex space-x-4">
-                    <button
-                      onClick={() => setSelectedCounselor(null)}
-                      className="flex-1 border border-accent-100 text-primary-400 py-3 rounded-lg hover:bg-accent-50 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button className="flex-1 bg-primary-400 text-white py-3 rounded-lg hover:bg-primary-600 transition-colors">
-                      Confirm Booking
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Why Choose Our Counseling */}
         <div className="bg-white rounded-2xl shadow-lg p-8 border border-accent-100">
-          <h2 className="font-display font-semibold text-3xl text-primary-400 mb-8 text-center">
+          <h2 className="font-display font-semibold text-3xl text-blue-900 mb-8 text-center">
             Why Choose Our Career Counseling?
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-primary-400 to-accent-400 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-primary-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Users className="h-8 w-8 text-white" />
               </div>
-              <h3 className="font-display font-semibold text-xl text-primary-400 mb-3">
+              <h3 className="font-display font-semibold text-xl text-blue-900 mb-3">
                 Expert Counselors
               </h3>
-              <p className="text-primary-300">
+              <p className="text-blue-800">
                 Experienced professionals with deep industry knowledge and
                 proven track records.
               </p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-primary-400 to-accent-400 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-primary-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Target className="h-8 w-8 text-white" />
               </div>
-              <h3 className="font-display font-semibold text-xl text-primary-400 mb-3">
+              <h3 className="font-display font-semibold text-xl text-blue-900 mb-3">
                 Personalized Guidance
               </h3>
-              <p className="text-primary-300">
+              <p className="text-blue-800">
                 Tailored advice based on your unique interests, skills, and
                 career aspirations.
               </p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-primary-400 to-accent-400 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-primary-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <TrendingUp className="h-8 w-8 text-white" />
               </div>
-              <h3 className="font-display font-semibold text-xl text-primary-400 mb-3">
+              <h3 className="font-display font-semibold text-xl text-blue-900 mb-3">
                 Proven Success
               </h3>
-              <p className="text-primary-300">
+              <p className="text-blue-800">
                 High success rates with students achieving their educational and
                 career goals.
               </p>
