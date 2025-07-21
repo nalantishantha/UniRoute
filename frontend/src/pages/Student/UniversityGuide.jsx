@@ -1,5 +1,12 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import uocImage from "../../assets/uoc.jpg"; // University of Colombo
+import peradeniyaImage from "../../assets/uop.jpg"; // University of Peradeniya - you can replace with actual image
+import moratuwaImage from "../../assets/uom.jpg"; // University of Moratuwa - you can replace with actual image
+import jayewardenepuraImage from "../../assets/uosj.jpg"; // University of Sri Jayewardenepura - you can replace with actual image
+import sliitImage from "../../assets/SLIIT.jpg"; // SLIIT - you can replace with actual image
+import nsbmImage from "../../assets/NSBM.jpg"; // NSBM - you can replace with actual image
+import StudentNavigation from "../../components/Navigation/StudentNavigation";
 import {
   GraduationCap,
   ArrowLeft,
@@ -41,7 +48,7 @@ const UniversityGuide = () => {
       website: "https://www.cmb.ac.lk",
       phone: "+94 11 2581835",
       email: "info@cmb.ac.lk",
-      image: "/api/placeholder/400/250",
+      backgroundImage: uocImage,
       programs: [
         "Medicine",
         "Engineering",
@@ -80,7 +87,7 @@ const UniversityGuide = () => {
       website: "https://www.pdn.ac.lk",
       phone: "+94 81 2392751",
       email: "info@pdn.ac.lk",
-      image: "/api/placeholder/400/250",
+      backgroundImage: peradeniyaImage,
       programs: [
         "Medicine",
         "Engineering",
@@ -119,7 +126,7 @@ const UniversityGuide = () => {
       website: "https://www.mrt.ac.lk",
       phone: "+94 11 2640051",
       email: "info@mrt.ac.lk",
-      image: "/api/placeholder/400/250",
+      backgroundImage: moratuwaImage,
       programs: [
         "Engineering",
         "Architecture",
@@ -155,7 +162,7 @@ const UniversityGuide = () => {
       website: "https://www.sjp.ac.lk",
       phone: "+94 11 2802026",
       email: "info@sjp.ac.lk",
-      image: "/api/placeholder/400/250",
+      backgroundImage: jayewardenepuraImage,
       programs: [
         "Management Studies",
         "Applied Sciences",
@@ -192,7 +199,7 @@ const UniversityGuide = () => {
       website: "https://www.sliit.lk",
       phone: "+94 11 2413500",
       email: "info@sliit.lk",
-      image: "/api/placeholder/400/250",
+      backgroundImage: sliitImage,
       programs: ["Computing", "Engineering", "Business", "Humanities"],
       facilities: [
         "Modern Campus",
@@ -223,7 +230,7 @@ const UniversityGuide = () => {
       website: "https://www.nsbm.ac.lk",
       phone: "+94 11 5445000",
       email: "info@nsbm.ac.lk",
-      image: "/api/placeholder/400/250",
+      backgroundImage: nsbmImage,
       programs: ["Business", "Computing", "Engineering", "Sciences"],
       facilities: [
         "Green Campus",
@@ -260,116 +267,34 @@ const UniversityGuide = () => {
     );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50">
+    <div className="min-h-screen bg-gradient-to-r from-blue-200 to-blue-100">
       {/* Navigation */}
-      <nav className="bg-white/90 backdrop-blur-md border-b border-accent-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link to="/student/home" className="flex items-center space-x-2">
-              <GraduationCap className="h-8 w-8 text-primary-400" />
-              <span className="font-display font-bold text-2xl text-primary-400">
-                UniRoute
-              </span>
-            </Link>
+      <StudentNavigation />
 
-            <div className="hidden md:flex items-center space-x-8">
-              <Link
-                to="/student/mentors"
-                className="text-primary-300 hover:text-primary-400 transition-colors duration-200"
-              >
-                Mentors
-              </Link>
-              <Link
-                to="/student/tutors"
-                className="text-primary-300 hover:text-primary-400 transition-colors duration-200"
-              >
-                Tutors
-              </Link>
-              <Link
-                to="/student/news"
-                className="text-primary-300 hover:text-primary-400 transition-colors duration-200"
-              >
-                News
-              </Link>
-              <Link
-                to="/student/career-counseling"
-                className="text-primary-300 hover:text-primary-400 transition-colors duration-200"
-              >
-                Counseling
-              </Link>
-            </div>
-
-            <div className="hidden md:flex items-center space-x-4">
-              <button className="text-primary-300 hover:text-primary-400 transition-colors relative">
-                <Bell className="h-6 w-6" />
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  3
-                </span>
-              </button>
-              <Link
-                to="/student/profile"
-                className="text-primary-300 hover:text-primary-400 transition-colors"
-              >
-                <User className="h-6 w-6" />
-              </Link>
-              <Link
-                to="/student/settings"
-                className="text-primary-300 hover:text-primary-400 transition-colors"
-              >
-                <Settings className="h-6 w-6" />
-              </Link>
-              <Link
-                to="/student/dashboard"
-                className="bg-accent-200 text-primary-400 px-6 py-2 rounded-full font-medium hover:bg-accent-300 transition-all duration-200 hover:shadow-lg"
-              >
-                My Dashboard
-              </Link>
-              <Link
-                to="/"
-                className="text-primary-300 hover:text-primary-400 transition-colors"
-              >
-                <LogOut className="h-6 w-6" />
-              </Link>
-            </div>
-
-            <div className="md:hidden">
-              <Link
-                to="/student/dashboard"
-                className="bg-accent-200 text-primary-400 px-4 py-2 rounded-full text-sm font-medium"
-              >
-                Dashboard
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Header */}
-      <div className="bg-gradient-to-r from-primary-400 to-accent-400 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="font-display font-bold text-5xl mb-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page Title and Description */}
+        <div className="text-center mb-8">
+          <h1 className="font-display font-bold text-5xl text-blue-900 mb-6">
             University Guide
           </h1>
-          <p className="text-xl opacity-90 max-w-3xl mx-auto">
+          <p className="text-xl text-blue-800 max-w-3xl mx-auto">
             Explore Sri Lanka's top universities and find the perfect
             institution for your higher education journey. Compare programs,
             facilities, and opportunities.
           </p>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Search and Filters */}
         <div className="bg-white rounded-2xl shadow-lg p-6 border border-accent-100 mb-8">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-300" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-800" />
               <input
                 type="text"
                 placeholder="Search universities, locations, or programs..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
+                className="w-full pl-12 pr-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
               />
             </div>
             <div className="flex space-x-3">
@@ -379,8 +304,8 @@ const UniversityGuide = () => {
                   onClick={() => setSelectedType(type.id)}
                   className={`px-4 py-3 rounded-lg font-medium transition-colors ${
                     selectedType === type.id
-                      ? "bg-primary-400 text-white"
-                      : "bg-accent-50 text-primary-400 hover:bg-accent-100"
+                      ? "bg-blue-600 text-white"
+                      : "bg-accent-50 text-blue-900 hover:bg-accent-100"
                   }`}
                 >
                   {type.name}
@@ -395,23 +320,65 @@ const UniversityGuide = () => {
           {filteredUniversities.map((university) => (
             <div
               key={university.id}
-              className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden"
+              className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             >
               {/* University Header */}
-              <div className="relative h-48 bg-gradient-to-r from-primary-400 to-accent-400">
-                <div className="absolute inset-0 bg-black/20"></div>
+              <div className="relative h-56 bg-gradient-to-l from-primary-700 to-accent-900"
+                style={{
+                      backgroundImage: `linear-gradient(to left, rgba(91, 138, 214, 0.3), rgba(165, 105, 221, 0.3)), url(${university.backgroundImage})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat'
+                    }}
+              >
+                <div className="absolute inset-0 bg-black/10"></div>
+                
+                {/* University Type Badge */}
+                <div className="absolute top-4 left-4">
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    university.type === 'National' 
+                      ? 'bg-green-500/20 text-green-100 border border-green-300/30' 
+                      : 'bg-blue-500/20 text-blue-100 border border-blue-300/30'
+                  }`}>
+                    {university.type} University
+                  </span>
+                </div>
+
+                {/* Ranking Badge */}
+                <div className="absolute top-4 right-4">
+                  <div className="bg-white/20 backdrop-blur-md rounded-lg px-3 py-2 border border-white/30">
+                    <div className="flex items-center space-x-1">
+                      <Award className="h-4 w-4 text-yellow-300" />
+                      <span className="text-white font-semibold text-sm">
+                        #{university.ranking}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* University Info */}
                 <div className="absolute bottom-4 left-4 right-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-display font-bold text-2xl text-white mb-1">
+                  <div className="flex items-end justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-display font-bold text-2xl text-white mb-2 leading-tight">
                         {university.name}
                       </h3>
-                      <div className="flex items-center space-x-2 text-white/90">
+                      <div className="flex items-center space-x-2 text-white/90 mb-1">
                         <MapPin className="h-4 w-4" />
-                        <span>{university.location}</span>
+                        <span className="text-sm">{university.location}</span>
+                      </div>
+                      <div className="flex items-center space-x-4 text-white/80 text-xs">
+                        <div className="flex items-center space-x-1">
+                          <Calendar className="h-3 w-3" />
+                          <span>Est. {university.established}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Users className="h-3 w-3" />
+                          <span>{university.studentCount}</span>
+                        </div>
                       </div>
                     </div>
-                    <div className="bg-white/20 backdrop-blur-md rounded-lg px-3 py-2">
+                    <div className="bg-white/20 backdrop-blur-md rounded-lg px-3 py-2 border border-white/30">
                       <div className="flex items-center space-x-1">
                         <Star className="h-4 w-4 text-yellow-300 fill-current" />
                         <span className="text-white font-semibold">
@@ -424,98 +391,143 @@ const UniversityGuide = () => {
               </div>
 
               <div className="p-6">
-                <p className="text-primary-300 mb-4">
-                  {university.description}
-                </p>
+                {/* Description */}
+                <div className="mb-6">
+                  <p className="text-blue-900 text-2lg leading-relaxed text-sm">
+                    {university.description}
+                  </p>
+                </div>
 
-                {/* University Stats */}
+                {/* Key Statistics */}
                 <div className="grid grid-cols-3 gap-4 mb-6">
-                  <div className="text-center">
-                    <div className="flex items-center justify-center w-12 h-12 bg-accent-100 rounded-lg mx-auto mb-2">
-                      <Calendar className="h-6 w-6 text-primary-400" />
+                  <div className="bg-gradient-to-br from-purple-200 to-purple-300 rounded-lg p-3 text-center border border-purple-200 shadow-md">
+                    <div className="flex items-center justify-center w-10 h-10 bg-white rounded-lg mx-auto mb-2 shadow-sm">
+                      <Building className="h-5 w-5 text-purple-600" />
                     </div>
-                    <div className="text-sm text-primary-300">Established</div>
-                    <div className="font-semibold text-primary-400">
-                      {university.established}
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center w-12 h-12 bg-accent-100 rounded-lg mx-auto mb-2">
-                      <Users className="h-6 w-6 text-primary-400" />
-                    </div>
-                    <div className="text-sm text-primary-300">Students</div>
-                    <div className="font-semibold text-primary-400">
-                      {university.studentCount}
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center w-12 h-12 bg-accent-100 rounded-lg mx-auto mb-2">
-                      <Building className="h-6 w-6 text-primary-400" />
-                    </div>
-                    <div className="text-sm text-primary-300">Faculties</div>
-                    <div className="font-semibold text-primary-400">
+                    <div className="text-xs text-purple-700 mb-1 font-medium">Faculties</div>
+                    <div className="font-bold text-purple-700 text-lg">
                       {university.faculties}
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-br from-blue-200 to-blue-300 rounded-lg p-3 text-center border border-blue-200 shadow-md">
+                    <div className="flex items-center justify-center w-10 h-10 bg-white rounded-lg mx-auto mb-2 shadow-sm">
+                      <BookOpen className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div className="text-xs text-blue-700 mb-1 font-medium">Programs</div>
+                    <div className="font-bold text-blue-700 text-lg">
+                      {university.programs.length}+
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-br from-green-200 to-green-300 rounded-lg p-3 text-center border border-green-200 shadow-md">
+                    <div className="flex items-center justify-center w-10 h-10 bg-white rounded-lg mx-auto mb-2 shadow-sm">
+                      <TrendingUp className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div className="text-xs text-green-700 mb-1 font-medium">Ranking</div>
+                    <div className="font-bold text-green-700 text-lg">
+                      #{university.ranking}
                     </div>
                   </div>
                 </div>
 
-                {/* Programs */}
+                {/* Programs Section */}
                 <div className="mb-6">
-                  <h4 className="font-medium text-primary-400 mb-3 flex items-center space-x-2">
+                  <h4 className="font-semibold text-blue-900 mb-3 flex items-center space-x-2">
                     <BookOpen className="h-5 w-5" />
-                    <span>Programs Offered</span>
+                    <span>Popular Programs</span>
                   </h4>
                   <div className="flex flex-wrap gap-2">
-                    {university.programs.map((program, index) => (
+                    {university.programs.slice(0, 4).map((program, index) => (
                       <span
                         key={index}
-                        className="bg-accent-100 text-primary-400 px-3 py-1 rounded-full text-sm"
+                        className="bg-gradient-to-r from-accent-400 to-accent-400 text-blue-900 px-3 py-1.5 rounded-full text-sm font-medium border border-accent-200 hover:shadow-sm transition-shadow"
                       >
                         {program}
                       </span>
                     ))}
+                    {university.programs.length > 4 && (
+                      <span className="text-blue-800 text-sm px-3 py-1.5">
+                        +{university.programs.length - 4} more
+                      </span>
+                    )}
                   </div>
                 </div>
 
-                {/* Key Info */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-sm">
-                  <div>
-                    <div className="text-primary-300 mb-1">Tuition Fee</div>
-                    <div className="font-medium text-primary-400">
-                      {university.tuitionFee}
-                    </div>
+                {/* Facilities Section */}
+                <div className="mb-6">
+                  <h4 className="font-semibold text-blue-900 mb-3 flex items-center space-x-2">
+                    <Building className="h-5 w-5" />
+                    <span>Key Facilities</span>
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    {university.facilities.slice(0, 4).map((facility, index) => (
+                      <div key={index} className="flex items-center space-x-2 text-blue-800">
+                        <div className="w-1.5 h-1.5 bg-accent-400 rounded-full"></div>
+                        <span>{facility}</span>
+                      </div>
+                    ))}
                   </div>
-                  <div>
-                    <div className="text-primary-300 mb-1">Application</div>
-                    <div className="font-medium text-primary-400">
-                      {university.applicationDeadline}
+                </div>
+
+                {/* Financial & Application Info */}
+                <div className="bg-gradient-to-r from-blue-100 to-primary-50 rounded-lg p-4 mb-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <div className="flex items-center space-x-2 text-blue-800 mb-1">
+                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                        <span className="font-medium">Tuition Fee</span>
+                      </div>
+                      <div className="font-semibold text-blue-900 pl-4">
+                        {university.tuitionFee}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex items-center space-x-2 text-blue-800 mb-1">
+                        <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                        <span className="font-medium">Application</span>
+                      </div>
+                      <div className="font-semibold text-blue-900 pl-4">
+                        {university.applicationDeadline}
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Contact and Actions */}
-                <div className="flex items-center justify-between pt-4 border-t border-accent-100">
+                {/* Contact & Actions */}
+                <div className="border-t border-accent-100 pt-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex space-x-4">
+                      <a
+                        href={university.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center space-x-2 text-primary-300 hover:text-primary-400 transition-colors group"
+                      >
+                        <div className="p-1.5 bg-accent-100 rounded-lg group-hover:bg-accent-200 transition-colors">
+                          <Globe className="h-4 w-4" />
+                        </div>
+                        <span className="text-sm font-medium">Website</span>
+                      </a>
+                      <button className="flex items-center space-x-2 text-primary-300 hover:text-primary-400 transition-colors group">
+                        <div className="p-1.5 bg-accent-100 rounded-lg group-hover:bg-accent-200 transition-colors">
+                          <Phone className="h-4 w-4" />
+                        </div>
+                        <span className="text-sm font-medium">Contact</span>
+                      </button>
+                      <button className="flex items-center space-x-2 text-primary-300 hover:text-primary-400 transition-colors group">
+                        <div className="p-1.5 bg-accent-100 rounded-lg group-hover:bg-accent-200 transition-colors">
+                          <Mail className="h-4 w-4" />
+                        </div>
+                        <span className="text-sm font-medium">Email</span>
+                      </button>
+                    </div>
+                  </div>
+                  
                   <div className="flex space-x-3">
-                    <a
-                      href={university.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center space-x-1 text-primary-300 hover:text-primary-400 transition-colors"
-                    >
-                      <Globe className="h-4 w-4" />
-                      <span>Website</span>
-                    </a>
-                    <div className="flex items-center space-x-1 text-primary-300">
-                      <Phone className="h-4 w-4" />
-                      <span>Contact</span>
-                    </div>
-                  </div>
-                  <div className="flex space-x-2">
-                    <button className="bg-accent-100 text-primary-400 px-4 py-2 rounded-lg hover:bg-accent-200 transition-colors">
-                      Compare
+                    <button className="flex-1 bg-accent-100 text-primary-400 px-4 py-3 rounded-lg hover:bg-accent-200 transition-all duration-200 font-medium text-sm hover:shadow-md">
+                      Compare Universities
                     </button>
-                    <button className="bg-primary-400 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors">
-                      Learn More
+                    <button className="flex-1 bg-blue-400 from-primary-400 to-accent-400 text-white px-4 py-3 rounded-lg hover:from-primary-600 hover:to-accent-600 transition-all duration-200 font-medium text-sm hover:shadow-lg">
+                      View Details
                     </button>
                   </div>
                 </div>
@@ -526,11 +538,11 @@ const UniversityGuide = () => {
 
         {filteredUniversities.length === 0 && (
           <div className="text-center py-12">
-            <Building className="h-16 w-16 text-primary-200 mx-auto mb-4" />
-            <h3 className="font-display font-semibold text-2xl text-primary-400 mb-2">
+            <Building className="h-16 w-16 text-blue-300 mx-auto mb-4" />
+            <h3 className="font-display font-semibold text-2xl text-blue-900 mb-2">
               No Universities Found
             </h3>
-            <p className="text-primary-300">
+            <p className="text-blue-800">
               Try adjusting your search criteria or filters.
             </p>
           </div>
@@ -538,31 +550,31 @@ const UniversityGuide = () => {
 
         {/* Quick Stats */}
         <div className="mt-12 bg-white rounded-2xl shadow-lg p-6 border border-accent-100">
-          <h2 className="font-display font-semibold text-2xl text-primary-400 mb-6 text-center">
+          <h2 className="font-display font-semibold text-2xl text-blue-900 mb-6 text-center">
             Sri Lankan Higher Education at a Glance
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary-400 mb-2">17</div>
-              <div className="text-primary-300">National Universities</div>
+              <div className="text-3xl font-bold text-blue-900 mb-2">17</div>
+              <div className="text-blue-800">National Universities</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary-400 mb-2">
+              <div className="text-3xl font-bold text-blue-900 mb-2">
                 20+
               </div>
-              <div className="text-primary-300">Private Universities</div>
+              <div className="text-blue-800">Private Universities</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary-400 mb-2">
+              <div className="text-3xl font-bold text-blue-900 mb-2">
                 120,000+
               </div>
-              <div className="text-primary-300">University Students</div>
+              <div className="text-blue-800">University Students</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary-400 mb-2">
+              <div className="text-3xl font-bold text-blue-900 mb-2">
                 500+
               </div>
-              <div className="text-primary-300">Degree Programs</div>
+              <div className="text-blue-800">Degree Programs</div>
             </div>
           </div>
         </div>

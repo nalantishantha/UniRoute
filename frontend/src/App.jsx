@@ -1,6 +1,8 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LandingPage from "./components/LandingPage";
+import AboutUs from "./components/AboutUs";
+import ContactUs from "./components/ContactUs";
 import LoginPage from "./components/LoginPage";
 import RoleSelectionPage from "./components/RoleSelectionPage";
 import StudentRegisterPage from "./components/StudentRegisterPage";
@@ -31,6 +33,8 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="/contact" element={<ContactUs />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RoleSelectionPage />} />
         <Route path="/register/student" element={<StudentRegisterPage />} />
