@@ -639,117 +639,116 @@ const AdPublish = () => {
 
       {/* Payment Modal */}
       {showPaymentModal && (
-        <div className="modal-overlay" onClick={() => setShowPaymentModal(false)}>
-          <div className="modal-content payment-modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
+        <div className="company-adpublish-admin-modal-overlay" onClick={() => setShowPaymentModal(false)}>
+          <div className="company-adpublish-admin-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="company-adpublish-admin-modal-header">
               <h2>💳 Complete Payment</h2>
-              <button className="modal-close" onClick={() => setShowPaymentModal(false)}>✕</button>
+              <button className="company-adpublish-admin-modal-close" onClick={() => setShowPaymentModal(false)}>✕</button>
             </div>
-            <div className="modal-body">
-              <div className="payment-summary">
+            <div className="company-adpublish-admin-modal-body">
+              <div className="company-adpublish-admin-payment-summary">
                 <h3>Order Summary</h3>
-                <div className="summary-item">
-                  <span>Ad Campaign: {adData.title}</span>
-                  <span>${subtotal}</span>
+                <div className="company-adpublish-admin-summary-item">
+                  <span>Ad Campaign: ${subtotal}</span>
                 </div>
-                <div className="summary-item">
+                <div className="company-adpublish-admin-summary-item">
                   <span>Tax (10%)</span>
                   <span>${tax.toFixed(2)}</span>
                 </div>
-                <div className="summary-item total">
+                <div className="company-adpublish-admin-summary-total">
                   <span>Total</span>
                   <span>${total.toFixed(2)}</span>
                 </div>
               </div>
 
-              <form onSubmit={handlePayment} className="payment-form">
+              <form onSubmit={handlePayment} className="company-adpublish-admin-payment-form">
                 <h3>Payment Information</h3>
                 
-                <div className="payment-methods">
-                  <div className="payment-option">
-                    <label className="payment-label">
+                <div className="company-adpublish-admin-payment-methods">
+                  <div className="company-adpublish-admin-payment-option">
+                    <label className="company-adpublish-admin-payment-label">
                       <input
                         type="radio"
                         name="paymentMethod"
                         value="credit-card"
                         checked={paymentData.paymentMethod === 'credit-card'}
                         onChange={handlePaymentChange}
-                        className="form-radio"
+                        className="company-adpublish-admin-form-radio"
                       />
                       💳 Credit/Debit Card
-                      <div className="card-icons">
-                        <span className="card-icon">💳</span>
-                        <span className="card-icon">💳</span>
+                      <div className="company-adpublish-admin-card-icons">
+                        <span className="company-adpublish-admin-card-icon">💳</span>
+                        <span className="company-adpublish-admin-card-icon">💳</span>
                       </div>
                     </label>
                   </div>
                   
-                  <div className="payment-option">
-                    <label className="payment-label">
+                  <div className="company-adpublish-admin-payment-option">
+                    <label className="company-adpublish-admin-payment-label">
                       <input
                         type="radio"
                         name="paymentMethod"
                         value="paypal"
                         checked={paymentData.paymentMethod === 'paypal'}
                         onChange={handlePaymentChange}
-                        className="form-radio"
+                        className="company-adpublish-admin-form-radio"
                       />
                       🅿️ PayPal
-                      <span className="paypal-icon">🅿️</span>
+                      <span className="company-adpublish-admin-paypal-icon">🅿️</span>
                     </label>
                   </div>
                 </div>
 
                 {paymentData.paymentMethod === 'credit-card' && (
-                  <div className="credit-card-form">
-                    <div className="form-group">
+                  <div className="company-adpublish-admin-credit-card-form">
+                    <div className="company-adpublish-admin-form-group">
                       <label>Card Number</label>
                       <input
                         type="text"
                         name="cardNumber"
                         value={paymentData.cardNumber}
                         onChange={handlePaymentChange}
-                        className="form-input"
+                        className="company-adpublish-admin-form-input"
                         placeholder="1234 5678 9012 3456"
                         required
                       />
                     </div>
                     
-                    <div className="card-details-row">
-                      <div className="form-group">
+                    <div className="company-adpublish-admin-card-details-row">
+                      <div className="company-adpublish-admin-form-group">
                         <label>Expiry Date</label>
                         <input
                           type="text"
                           name="expiryDate"
                           value={paymentData.expiryDate}
                           onChange={handlePaymentChange}
-                          className="form-input"
+                          className="company-adpublish-admin-form-input"
                           placeholder="MM/YY"
                           required
                         />
                       </div>
-                      <div className="form-group">
+                      <div className="company-adpublish-admin-form-group">
                         <label>CVV</label>
                         <input
                           type="text"
                           name="cvv"
                           value={paymentData.cvv}
                           onChange={handlePaymentChange}
-                          className="form-input"
+                          className="company-adpublish-admin-form-input"
                           placeholder="123"
                           required
                         />
                       </div>
                     </div>
                     
-                    <div className="form-group">
+                    <div className="company-adpublish-admin-form-group">
                       <label>Cardholder Name</label>
                       <input
                         type="text"
                         name="cardName"
                         value={paymentData.cardName}
                         onChange={handlePaymentChange}
-                        className="form-input"
+                        className="company-adpublish-admin-form-input"
                         placeholder="John Doe"
                         required
                       />
@@ -757,24 +756,24 @@ const AdPublish = () => {
                   </div>
                 )}
 
-                <div className="form-group">
+                <div className="company-adpublish-admin-form-group">
                   <label>Email Address</label>
                   <input
                     type="email"
                     name="email"
                     value={paymentData.email}
                     onChange={handlePaymentChange}
-                    className="form-input"
+                    className="company-adpublish-admin-form-input"
                     placeholder="john@company.com"
                     required
                   />
                 </div>
 
-                <div className="form-actions">
-                  <button type="button" className="btn-cancel" onClick={() => setShowPaymentModal(false)}>
+                <div className="company-adpublish-admin-form-actions">
+                  <button type="button" className="company-adpublish-admin-btn-cancel" onClick={() => setShowPaymentModal(false)}>
                     Cancel
                   </button>
-                  <button type="submit" className="btn-pay-now">
+                  <button type="submit" className="company-adpublish-admin-btn-pay-now">
                     Pay ${total.toFixed(2)}
                   </button>
                 </div>

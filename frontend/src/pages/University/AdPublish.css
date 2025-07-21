@@ -1073,3 +1073,296 @@
     font-size: 0.8rem;
   }
 }
+
+/* Enhanced Payment Modal Styles - From Company AdPublish */
+.company-adpublish-admin-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.company-adpublish-admin-modal-content {
+  background: #fff;
+  border-radius: 20px;
+  max-width: 550px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+  position: relative;
+  animation: companyAdPublishAdminModalSlideIn 0.4s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.company-adpublish-admin-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 2rem 1rem 2rem;
+  margin-bottom: 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.company-adpublish-admin-modal-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.3;
+  flex: 1;
+  padding-right: 1.5rem;
+}
+
+.company-adpublish-admin-modal-close {
+  background: #f8fafc;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  color: #64748b;
+  cursor: pointer;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  font-weight: 300;
+}
+
+.company-adpublish-admin-modal-close:hover {
+  background: #e2e8f0;
+  color: #475569;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.company-adpublish-admin-modal-body {
+  padding: 1rem 2rem 2rem 2rem;
+}
+
+.company-adpublish-admin-payment-summary {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid #e2e8f0;
+}
+
+.company-adpublish-admin-payment-summary h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 1rem 0;
+}
+
+.company-adpublish-admin-summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.95rem;
+}
+
+.company-adpublish-admin-summary-item:last-child {
+  border-bottom: none;
+}
+
+.company-adpublish-admin-summary-total {
+  border-top: 2px solid #d1d5db;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #1e293b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.company-adpublish-admin-payment-form h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 1.5rem 0;
+}
+
+.company-adpublish-admin-payment-methods {
+  margin-bottom: 1.5rem;
+}
+
+.company-adpublish-admin-payment-option {
+  margin-bottom: 1rem;
+}
+
+.company-adpublish-admin-payment-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+  font-weight: 600;
+  color: #374151;
+}
+
+.company-adpublish-admin-payment-label:hover {
+  border-color: #3b82f6;
+  background: #f0f7ff;
+}
+
+.company-adpublish-admin-form-radio:checked + * {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.company-adpublish-admin-form-radio {
+  width: 20px;
+  height: 20px;
+  margin-right: 0.75rem;
+  accent-color: #3b82f6;
+}
+
+.company-adpublish-admin-card-icons,
+.company-adpublish-admin-paypal-icon {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.company-adpublish-admin-card-icon {
+  font-size: 1.2rem;
+}
+
+.company-adpublish-admin-credit-card-form {
+  margin-bottom: 1.5rem;
+}
+
+.company-adpublish-admin-form-group {
+  margin-bottom: 1.25rem;
+}
+
+.company-adpublish-admin-form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.company-adpublish-admin-form-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  background: white;
+}
+
+.company-adpublish-admin-form-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.company-adpublish-admin-card-details-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.company-adpublish-admin-card-details-row .company-adpublish-admin-form-group {
+  flex: 1;
+}
+
+.company-adpublish-admin-form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.company-adpublish-admin-btn-cancel {
+  background: #f3f4f6;
+  color: #374151;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.company-adpublish-admin-btn-cancel:hover {
+  background: #e5e7eb;
+  transform: translateY(-1px);
+}
+
+.company-adpublish-admin-btn-pay-now {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.company-adpublish-admin-btn-pay-now:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* Modal Animation */
+@keyframes companyAdPublishAdminModalSlideIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(-30px) scale(0.9);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsive modal */
+@media (max-width: 600px) {
+  .company-adpublish-admin-modal-content {
+    max-width: 95%;
+    margin: 1rem;
+  }
+  
+  .company-adpublish-admin-modal-header {
+    padding: 1.5rem 1.5rem 0.75rem 1.5rem;
+  }
+  
+  .company-adpublish-admin-modal-body {
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
+  }
+  
+  .company-adpublish-admin-card-details-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .company-adpublish-admin-form-actions {
+    flex-direction: column;
+  }
+}
