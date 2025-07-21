@@ -2,54 +2,60 @@ import React, { useState } from 'react';
 import UniversitySidebar from '../../components/Navigation/UniversitySidebar';
 import UniversityNavbar from '../../components/Navigation/UniversityNavbar';
 import Footer from '../../components/Footer';
+import { number } from 'framer-motion';
 
 // Mock data for mentor requests
 const initialMentorRequests = [
   {
     id: 1,
     name: ' Sarah Amarasingha',
-    email: 'sarah.johnson@email.com',
+    email: 'ucsccmb22000@gmail.com',
     phone: '070-3144967',
-    specialization: 'Computer Science & AI',
-    experience: '8 years',
-    education: 'PhD in Computer Science, MIT',
-    currentPosition: 'Senior Software Engineer at Google',
+    education: 'Undergraduate Computer Science, MIT',
+    Recommendation : 'Pro Sandun Rangana of university colombo',
     bio: 'Experienced software engineer with expertise in machine learning and artificial intelligence.',
     skills: ['Python', 'Machine Learning', 'React', 'Node.js', 'AI/ML','Marketing'],
     profileImage: '/api/placeholder/100/100',
     requestDate: '2024-01-15',
+    specialization: 'Computer Science & AI',
+    Year: '4th year',
+    Registrationnumber: '22000771',
     status: 'pending'
+
   },
   {
-    id: 2,
-    name: 'Rasindu Wijesinghe',
-    email: 'rasindu.wijesinghe@university.edu',
-    phone: '070-5689028',
-    specialization: 'Business Administration',
-    experience: '12 years',
-    education: 'MBA from Harvard Business School',
-    currentPosition: 'Associate Professor at Stanford University',
-    bio: 'Business strategy expert with extensive experience in startup mentoring and entrepreneurship.',
-    skills: ['Business Strategy', 'Entrepreneurship', 'Finance', 'Leadership', 'Patient Care'],
-    profileImage: '/api/placeholder/100/100',
-    requestDate: '2024-01-16',
-    status: 'pending'
+    "id": 2,
+    "name": "Nimal Perera",
+    "email": "ucscmb21001@cmb.ac.lk",
+    "phone": "071-2345678",
+    "education": "Undergraduate in Computer Science, University of Colombo",
+    "Recommendation": "Prof. Kamal Gunawardena of University of Colombo",
+    "bio": "Passionate about AI and software development with experience in university research projects.",
+    "skills": ["Python", "Java", "Machine Learning", "Web Development", "Database Management"],
+    "profileImage": "/api/placeholder/100/100",
+    "requestDate": "2024-02-10",
+    "specialization": "Artificial Intelligence",
+    "Year": "3rd year",
+    "Registrationnumber": '22000761',
+    "status": "approved"
   },
   {
-    id: 3,
-    name: 'Dasun Rangana',
-    email: 'dasun.rangana@hospital.com',
-    phone: '070-5689028',
-    specialization: 'Medicine & Healthcare',
-    experience: '15 years',
-    education: 'MD from Johns Hopkins University',
-    currentPosition: 'Chief of Cardiology at City Hospital',
-    bio: 'Experienced cardiologist dedicated to training the next generation of medical professionals.',
-    skills: ['Cardiology', 'Medical Research', 'Patient Care', 'Medical Education', 'Surgery'],
-    profileImage: '/api/placeholder/100/100',
-    requestDate: '2024-01-17',
-    status: 'pending'
-  }
+    "id": 3,
+    "name": "Samanthi Silva",
+    "email": "ucscmb21045@cmb.ac.lk",
+    "phone": "072-3456789",
+    "education": "Undergraduate in Information Systems, University of Colombo",
+    "Recommendation": "Dr. Priyantha Fernando of University of Colombo",
+    "bio": "Interested in data science and business analytics, with hands-on experience in Python and SQL.",
+    "skills": ["Python", "SQL", "Data Analysis", "Statistics", "UI/UX Design"],
+    "profileImage": "/api/placeholder/100/100",
+    "requestDate": "2024-01-25",
+    "specialization": "Data Science",
+    "Year": "2nd year",
+    "Registrationnumber": '22000761',
+    "status": "pending"
+    
+  },
 ];
 
 // Mock data for active mentors
@@ -306,10 +312,11 @@ const Mentoruni = () => {
                       marginBottom: '1rem',
                       fontSize: '0.875rem'
                     }}>
-                      <div><strong>Experience:</strong> {mentor.experience}</div>
-                      <div><strong>Email:</strong> {mentor.email}</div>
+                      <div><strong>Registration number:</strong> {mentor.Registrationnumber}</div>
+                      <div><strong>Year:</strong> {mentor.Year}</div>
                       <div style={{ gridColumn: '1 / -1' }}><strong>Education:</strong> {mentor.education}</div>
-                      <div style={{ gridColumn: '1 / -1' }}><strong>Position:</strong> {mentor.currentPosition}</div>
+                      <div></div>
+                      <div style={{ gridColumn: '1 / -1' }}><strong>Email:</strong> {mentor.email}</div>
                     </div>
 
                     {/* Bio */}
