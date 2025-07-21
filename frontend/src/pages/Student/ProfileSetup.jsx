@@ -75,10 +75,10 @@ const ProfileSetup = () => {
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-8">
-          <h1 className="font-display font-bold text-4xl text-primary-400 mb-4">
+          <h1 className="font-display font-bold text-4xl text-blue-900 mb-4">
             Complete Your Profile
           </h1>
-          <p className="text-xl text-primary-300">
+          <p className="text-xl text-blue-800">
             Help us personalize your UniRoute experience
           </p>
         </div>
@@ -86,7 +86,7 @@ const ProfileSetup = () => {
         <form className="space-y-8">
           {/* Profile Photo */}
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-accent-100">
-            <h3 className="font-display font-semibold text-2xl text-primary-400 mb-6 flex items-center space-x-2">
+            <h3 className="font-display font-semibold text-2xl text-blue-900 mb-6 flex items-center space-x-2">
               <Camera className="h-6 w-6" />
               <span>Profile Photo</span>
             </h3>
@@ -102,7 +102,7 @@ const ProfileSetup = () => {
                 >
                   Upload Photo
                 </button>
-                <p className="text-primary-300 text-sm mt-2">
+                <p className="text-blue-800 text-sm mt-2">
                   JPG, PNG or GIF (max 5MB)
                 </p>
               </div>
@@ -111,14 +111,14 @@ const ProfileSetup = () => {
 
           {/* Personal Information */}
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-accent-100">
-            <h3 className="font-display font-semibold text-2xl text-primary-400 mb-6 flex items-center space-x-2">
+            <h3 className="font-display font-semibold text-2xl text-blue-900 mb-6 flex items-center space-x-2">
               <User className="h-6 w-6" />
               <span>Personal Information</span>
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-primary-400 font-medium mb-2">
+                <label className="block text-blue-900 font-medium mb-2">
                   First Name
                 </label>
                 <input

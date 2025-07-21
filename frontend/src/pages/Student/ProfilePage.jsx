@@ -41,10 +41,10 @@ const ProfilePage = () => {
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-8">
-          <h1 className="font-display font-bold text-4xl text-primary-400 mb-4">
+          <h1 className="font-display font-bold text-4xl text-blue-900 mb-4">
             My Profile
           </h1>
-          <p className="text-xl text-primary-300">
+          <p className="text-xl text-blue-800">
             Manage your personal information and academic details
           </p>
         </div>
@@ -67,28 +67,28 @@ const ProfilePage = () => {
               <h2 className="font-display font-bold text-3xl text-primary-400 mb-2">
                 {studentData.name}
               </h2>
-              <p className="text-primary-300 text-lg mb-4">
+              <p className="text-blue-800 text-lg mb-4">
                 {studentData.alStream} Student
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center space-x-2">
-                  <Mail className="h-5 w-5 text-primary-300" />
-                  <span className="text-primary-300">{studentData.email}</span>
+                  <Mail className="h-5 w-5 text-blue-800" />
+                  <span className="text-blue-800">{studentData.email}</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Phone className="h-5 w-5 text-primary-300" />
-                  <span className="text-primary-300">{studentData.phone}</span>
+                  <Phone className="h-5 w-5 text-blue-800" />
+                  <span className="text-blue-800">{studentData.phone}</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <MapPin className="h-5 w-5 text-primary-300" />
-                  <span className="text-primary-300">
+                  <MapPin className="h-5 w-5 text-blue-800" />
+                  <span className="text-blue-800">
                     {studentData.district} District
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Calendar className="h-5 w-5 text-primary-300" />
-                  <span className="text-primary-300">
+                  <Calendar className="h-5 w-5 text-blue-800" />
+                  <span className="text-blue-800">
                     A/L {studentData.alYear}
                   </span>
                 </div>
@@ -123,32 +123,32 @@ const ProfilePage = () => {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-primary-300 mb-1">
+                <label className="block text-sm font-medium text-blue-800 mb-1">
                   School
                 </label>
-                <p className="text-primary-400 font-medium">
+                <p className="text-blue-900 font-medium">
                   {studentData.school}
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-primary-300 mb-1">
+                <label className="block text-sm font-medium text-blue-800 mb-1">
                   A/L Stream
                 </label>
-                <p className="text-primary-400 font-medium">
+                <p className="text-blue-900 font-medium">
                   {studentData.alStream}
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-primary-300 mb-1">
+                <label className="block text-sm font-medium text-blue-800 mb-1">
                   A/L Subjects
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {studentData.subjects.map((subject, index) => (
                     <span
                       key={index}
-                      className="bg-accent-100 text-primary-400 px-3 py-1 rounded-full text-sm"
+                      className="bg-accent-100 text-blue-900 px-3 py-1 rounded-full text-sm"
                     >
                       {subject}
                     </span>
@@ -157,11 +157,11 @@ const ProfilePage = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-primary-300 mb-1">
+                <label className="block text-sm font-medium text-blue-800 mb-1">
                   Z-Score
                 </label>
                 <div className="flex items-center space-x-2">
-                  <span className="text-2xl font-bold text-primary-400">
+                  <span className="text-2xl font-bold text-blue-900">
                     {studentData.zScore}
                   </span>
                   <Award className="h-5 w-5 text-accent-300" />
@@ -172,21 +172,21 @@ const ProfilePage = () => {
 
           {/* Career Interests */}
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-accent-100">
-            <h3 className="font-display font-semibold text-2xl text-primary-400 mb-6 flex items-center space-x-2">
+            <h3 className="font-display font-semibold text-2xl text-blue-900 mb-6 flex items-center space-x-2">
               <Award className="h-6 w-6" />
               <span>Career Interests</span>
             </h3>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-primary-300 mb-1">
+                <label className="block text-sm font-medium text-blue-800 mb-1">
                   Fields of Interest
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {studentData.interests.map((interest, index) => (
                     <span
                       key={index}
-                      className="bg-primary-100 text-primary-400 px-3 py-1 rounded-full text-sm"
+                      className="bg-primary-100 text-blue-900 px-3 py-1 rounded-full text-sm"
                     >
                       {interest}
                     </span>
@@ -195,17 +195,17 @@ const ProfilePage = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-primary-300 mb-2">
+                <label className="block text-sm font-medium text-blue-800 mb-2">
                   Career Goals
                 </label>
-                <p className="text-primary-400">
+                <p className="text-blue-900">
                   Aspiring to become a software engineer specializing in
                   artificial intelligence and machine learning applications.
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-primary-300 mb-2">
+                <label className="block text-sm font-medium text-blue-800 mb-2">
                   Preferred Universities
                 </label>
                 <div className="space-y-2">

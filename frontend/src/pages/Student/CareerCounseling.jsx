@@ -184,10 +184,10 @@ const CareerCounseling = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Title and Description */}
         <div className="text-center mb-8">
-          <h1 className="font-display font-bold text-5xl text-primary-400 mb-6">
+          <h1 className="font-display font-bold text-5xl text-blue-900 mb-6">
             Career Counseling
           </h1>
-          <p className="text-xl text-primary-300 max-w-3xl mx-auto">
+          <p className="text-xl text-blue-800 max-w-3xl mx-auto">
             Get personalized guidance from experienced career counselors to make
             informed decisions about your education and future career path.
           </p>
@@ -195,7 +195,7 @@ const CareerCounseling = () => {
 
         {/* Services Overview */}
         <div className="mb-12">
-          <h2 className="font-display font-semibold text-3xl text-primary-400 mb-8 text-center">
+          <h2 className="font-display font-semibold text-3xl text-blue-900 mb-8 text-center">
             Our Counseling Services
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -229,10 +229,10 @@ const CareerCounseling = () => {
                 <div className="p-6">
                   {/* Service Title */}
                   <div className="mb-4">
-                    <h3 className="font-display font-semibold text-xl text-primary-400 mb-2">
+                    <h3 className="font-display font-semibold text-xl text-blue-900 mb-2">
                       {service.title}
                     </h3>
-                    <p className="text-primary-300 text-sm leading-relaxed">
+                    <p className="text-blue-800 text-sm leading-relaxed">
                       {service.description}
                     </p>
                   </div>
@@ -240,7 +240,7 @@ const CareerCounseling = () => {
                   {/* Duration Info */}
                   <div className="mb-4">
                     <div className="bg-gradient-to-r from-blue-100 to-primary-50 rounded-lg p-3">
-                      <div className="flex items-center space-x-2 text-primary-400">
+                      <div className="flex items-center space-x-2 text-blue-900">
                         <Clock className="h-4 w-4" />
                         <span className="text-sm font-medium">Duration: {service.duration}</span>
                       </div>
@@ -249,7 +249,7 @@ const CareerCounseling = () => {
 
                   {/* Features */}
                   <div className="mb-6">
-                    <h4 className="font-medium text-primary-400 mb-3 flex items-center space-x-2">
+                    <h4 className="font-medium text-blue-900 mb-3 flex items-center space-x-2">
                       <CheckCircle className="h-4 w-4" />
                       <span>What's Included</span>
                     </h4>
@@ -260,7 +260,7 @@ const CareerCounseling = () => {
                           className="flex items-center space-x-2"
                         >
                           <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
-                          <span className="text-xs text-primary-300">
+                          <span className="text-xs text-blue-800">
                             {feature}
                           </span>
                         </div>
@@ -282,7 +282,7 @@ const CareerCounseling = () => {
 
         {/* Counselors Section */}
         <div className="mb-12">
-          <h2 className="font-display font-semibold text-3xl text-primary-400 mb-8 text-center">
+          <h2 className="font-display font-semibold text-3xl text-blue-900 mb-8 text-center">
             Meet Our Expert Counselors
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -341,11 +341,11 @@ const CareerCounseling = () => {
                   {/* Specialization */}
                   <div className="mb-4">
                     <div className="bg-gradient-to-r from-blue-100 to-primary-50 rounded-lg p-3">
-                      <h4 className="font-semibold text-primary-400 mb-1 flex items-center space-x-2">
+                      <h4 className="font-semibold text-blue-900 mb-1 flex items-center space-x-2">
                         <Award className="h-3 w-3" />
                         <span className="text-sm">Specialization</span>
                       </h4>
-                      <p className="text-primary-300 text-xs leading-relaxed">
+                      <p className="text-blue-800 text-xs leading-relaxed">
                         {counselor.specialization}
                       </p>
                     </div>
@@ -353,7 +353,7 @@ const CareerCounseling = () => {
 
                   {/* Description */}
                   <div className="mb-4">
-                    <p className="text-primary-300 leading-relaxed text-xs">
+                    <p className="text-blue-800 leading-relaxed text-xs">
                       {counselor.about.substring(0, 120)}...
                     </p>
                   </div>
@@ -382,7 +382,7 @@ const CareerCounseling = () => {
 
                   {/* Expertise Areas */}
                   <div className="mb-4">
-                    <h4 className="font-semibold text-primary-400 mb-2 flex items-center space-x-2">
+                    <h4 className="font-semibold text-blue-900 mb-2 flex items-center space-x-2">
                       <BookOpen className="h-3 w-3" />
                       <span className="text-sm">Expertise</span>
                     </h4>
@@ -390,13 +390,13 @@ const CareerCounseling = () => {
                       {counselor.expertise.slice(0, 3).map((skill, index) => (
                         <span
                           key={index}
-                          className="bg-gradient-to-r from-accent-400 to-accent-400 text-primary-400 px-2 py-1 rounded-full text-xs font-medium border border-accent-200"
+                          className="bg-gradient-to-r from-accent-400 to-accent-400 text-blue-900 px-2 py-1 rounded-full text-xs font-medium border border-accent-200"
                         >
                           {skill}
                         </span>
                       ))}
                       {counselor.expertise.length > 3 && (
-                        <span className="text-primary-300 text-xs px-2 py-1">
+                        <span className="text-blue-800 text-xs px-2 py-1">
                           +{counselor.expertise.length - 3}
                         </span>
                       )}
