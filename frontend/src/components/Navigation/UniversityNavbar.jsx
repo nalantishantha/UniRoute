@@ -106,67 +106,23 @@ export default function UniversityNavbar({ sidebarExpanded, onMenuClick }) {
             </p>
           </div>
         </div>
-
-        <div className="flex items-center space-x-4">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowCalendar(true)}
-            className="p-3 rounded-xl hover:bg-neutral-silver/70 transition-all duration-200 group hover:shadow-sm"
-          >
-            <Calendar className="w-5 h-5 text-neutral-dark-grey group-hover:text-primary-600" />
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowChat(true)}
-            className="relative p-3 rounded-xl hover:bg-neutral-silver/70 transition-all duration-200 group hover:shadow-sm"
-          >
-            <MessageCircle className="w-5 h-5 text-neutral-dark-grey group-hover:text-primary-600" />
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary-500 rounded-full flex items-center justify-center shadow-sm">
-              <span className="text-xs text-white font-bold">3</span>
-            </span>
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="relative p-3 rounded-xl hover:bg-neutral-silver/70 transition-all duration-200 group hover:shadow-sm"
-          >
-            <Bell className="w-5 h-5 text-neutral-dark-grey group-hover:text-primary-600" />
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-error rounded-full flex items-center justify-center shadow-sm">
-              <span className="w-2 h-2 bg-white rounded-full"></span>
-            </span>
-          </motion.button>
-
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="flex items-center space-x-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-primary-50 hover:to-primary-100 transition-all duration-200 cursor-pointer group border border-transparent hover:border-primary-200 hover:shadow-sm"
-          >
-            <div className="w-9 h-9 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center shadow-sm">
-              <User className="w-5 h-5 text-white" />
-            </div>
-            <div className="hidden sm:block">
-              <p className="text-sm font-semi-bold text-neutral-black group-hover:text-primary-700">
-                Alex Johnson
-              </p>
-              <p className="text-xs text-neutral-grey font-medium">
-                Uni Admin
-              </p>
-            </div>
-          </motion.div>
-        </div>
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          className="flex items-center space-x-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-primary-50 hover:to-primary-100 transition-all duration-200 cursor-pointer group border border-transparent hover:border-primary-200 hover:shadow-sm"
+        >
+          <div className="w-9 h-9 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center shadow-sm">
+            <User className="w-5 h-5 text-white" />
+          </div>
+          <div className="hidden sm:block">
+            <p className="text-sm font-semi-bold text-neutral-black group-hover:text-primary-700">
+              Alex Johnson
+            </p>
+            <p className="text-xs text-neutral-grey font-medium">
+              Uni Admin
+            </p>
+          </div>
+        </motion.div>
       </div>
-
-      {/* Chat Component */}
-      <Chat isOpen={showChat} onClose={() => setShowChat(false)} />
-
-      {/* Compact Calendar Component */}
-      <CompactCalendar
-        isOpen={showCalendar}
-        onClose={() => setShowCalendar(false)}
-      />
     </motion.header>
   );
 }
