@@ -45,18 +45,18 @@ const LandingPage = () => {
               >
                 Features
               </a>
-              <a
-                href="#about"
+              <Link
+                to="/about"
                 className="text-white/90 hover:text-primary-100 transition-colors duration-200 font-medium"
               >
                 About
-              </a>
-              <a
-                href="#contact"
+              </Link>
+              <Link
+                to="/contact"
                 className="text-white/90 hover:text-primary-100 transition-colors duration-200 font-medium"
               >
                 Contact
-              </a>
+              </Link>
               <Link
                 to="/login"
                 className="border-2 border-white text-white px-6 py-2 rounded-lg font-medium hover:bg-white hover:text-primary-800 transition-colors duration-200"
@@ -650,20 +650,20 @@ const LandingPage = () => {
               </h3>
               <ul className="space-y-2">
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    to="/universities"
                     className="text-neutral-light-grey hover:text-white transition-colors text-sm"
                   >
                     Universities
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    to="/about"
                     className="text-neutral-light-grey hover:text-white transition-colors text-sm"
                   >
-                    Programs
-                  </a>
+                    About Us
+                  </Link>
                 </li>
                 <li>
                   <a
@@ -698,12 +698,12 @@ const LandingPage = () => {
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    to="/contact"
                     className="text-neutral-light-grey hover:text-white transition-colors text-sm"
                   >
                     Contact Us
-                  </a>
+                  </Link>
                 </li>
                 <li>
                   <a
