@@ -202,13 +202,13 @@ const FindMentors = () => {
                 {/* Expertise */}
                 <div className="mb-4">
                   <div className="bg-gradient-to-r from-blue-100 to-blue-50 rounded-lg p-3 border border-blue-200/50">
-                    <h4 className="font-semibold text-blue-900 text-sm mb-1">Expertise</h4>
-                    <p className="text-blue-800 text-xs font-medium">{mentor.expertise}</p>
+                    <h4 className="font-semibold text-blue-800 text-sm mb-1">Expertise</h4>
+                    <p className="text-blue-900 text-2xs font-bold">{mentor.expertise}</p>
                   </div>
                 </div>
 
                 {/* Description */}
-                <p className="text-blue-800 text-xs mb-4 leading-relaxed">
+                <p className="text-blue-900 text-2xs font-semibold mb-4 leading-relaxed">
                   {mentor.description}
                 </p>
 
