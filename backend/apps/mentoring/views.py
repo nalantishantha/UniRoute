@@ -1,7 +1,10 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.db.models import Q
-from .models import Mentors
+from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
+import json
+from .models import Mentors, MentoringSessions, MentoringSessionEnrollments
 from apps.accounts.models import UserDetails
 from apps.universities.models import Universities
 from apps.university_programs.models import DegreePrograms, DegreeProgramDurations
@@ -78,3 +81,99 @@ def mentors_list(request):
             'message': 'Error fetching mentors',
             'error': str(e)
         }, status=500)
+
+@csrf_exempt
+def create_mentoring_session(request):
+    """
+    Create a new mentoring session
+    """
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            # Extract data from request
+            mentor_id = data.get('mentor_id')
+            topic = data.get('topic')
+            scheduled_at = data.get('scheduled_at')
+            duration_minutes = data.get('duration_minutes')
+            status = data.get('status', 'scheduled')
+            
+            # Validate required fields
+            if not all([mentor_id, topic, scheduled_at, duration_minutes]):
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Missing required fields'
+                }, status=400)
+            
+            # Check if mentor exists
+            try:
+                mentor = Mentors.objects.get(mentor_id=mentor_id)
+            except Mentors.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Mentor not found'
+                }, status=404)
+            
+            # Create the mentoring session
+            session = MentoringSessions.objects.create(
+                mentor=mentor,
+                topic=topic,
+                scheduled_at=scheduled_at,
+                duration_minutes=duration_minutes,
+                status=status,
+                created_at=timezone.now()
+            )
+            
+            # For now, we'll create a session enrollment with a default student_id
+            # In a real application, you would get the student_id from the authenticated user
+            try:
+                # Create session enrollment (using a placeholder student_id for now)
+                # You should replace this with the actual logged-in student's ID
+                from apps.students.models import Students
+                
+                # For demo purposes, we'll try to get the first student or create a placeholder
+                try:
+                    # This is just for testing - you should get the actual logged-in student
+                    student = Students.objects.first()
+                    if student:
+                        MentoringSessionEnrollments.objects.create(
+                            session=session,
+                            student=student,
+                            enrolled_at=timezone.now()
+                        )
+                except Exception as e:
+                    # If no students exist, just create the session without enrollment for now
+                    pass
+            except Exception as e:
+                # Continue even if enrollment creation fails
+                pass
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Mentoring session created successfully',
+                'session': {
+                    'session_id': session.session_id,
+                    'mentor_id': mentor_id,
+                    'topic': topic,
+                    'scheduled_at': scheduled_at,
+                    'duration_minutes': duration_minutes,
+                    'status': status
+                }
+            })
+            
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'success': False,
+                'message': 'Invalid JSON data'
+            }, status=400)
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': 'Error creating session',
+                'error': str(e)
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only POST method allowed'
+    }, status=405)
