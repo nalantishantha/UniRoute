@@ -92,10 +92,10 @@ const MentorConnection = () => {
           <div className="max-w-2xl mx-auto text-center">
             <div className="bg-white rounded-2xl shadow-lg p-8 border border-accent-100">
               <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-              <h2 className="font-display font-bold text-3xl text-primary-400 mb-4">
+              <h2 className="font-display font-bold text-3xl text-blue-900 mb-4">
                 Connection Request Sent!
               </h2>
-              <p className="text-primary-300 mb-6">
+              <p className="text-blue-800 mb-6">
                 Your university program guidance request has been sent to {mentor.name}. They will review your A/L background and career interests, then get back to you within 24-48 hours with personalized advice.
               </p>
               <div className="bg-gradient-to-r from-blue-100 to-primary-50 rounded-lg p-4 mb-6">
@@ -150,15 +150,15 @@ const MentorConnection = () => {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden sticky top-8">
               {/* Mentor Header */}
-              <div className="relative h-32 bg-gradient-to-r from-primary-400 to-accent-400">
-                <div className="absolute inset-0 bg-black/10"></div>
+              <div className="relative h-32 bg-gradient-to-r from-blue-500 to-primary-500">
+                <div className="absolute inset-0 bg-black/20"></div>
                 
                 {/* Rating Badge */}
                 <div className="absolute top-3 right-3">
-                  <div className="bg-white/20 backdrop-blur-md rounded-lg px-2 py-1 border border-white/30">
+                  <div className="bg-white/25 backdrop-blur-md rounded-lg px-2 py-1 border border-white/40">
                     <div className="flex items-center space-x-1">
-                      <Star className="h-3 w-3 text-yellow-300 fill-current" />
-                      <span className="text-white font-semibold text-xs">
+                      <Star className="h-3 w-3 text-yellow-300 fill-current drop-shadow-sm" />
+                      <span className="text-white font-semibold text-xs drop-shadow-sm">
                         {mentor.rating}
                       </span>
                     </div>
@@ -167,7 +167,7 @@ const MentorConnection = () => {
 
                 {/* Experience Badge */}
                 <div className="absolute top-3 left-3">
-                  <span className="bg-green-500/20 text-green-100 border border-green-300/30 px-2 py-1 rounded-full text-xs font-semibold">
+                  <span className="bg-green-500/25 text-green-100 border border-green-300/40 px-2 py-1 rounded-full text-xs font-semibold backdrop-blur-sm drop-shadow-sm">
                     {mentor.experience}
                   </span>
                 </div>
@@ -175,14 +175,14 @@ const MentorConnection = () => {
                 {/* Mentor Info */}
                 <div className="absolute bottom-3 left-3 right-3">
                   <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30">
-                      <User className="h-6 w-6 text-white" />
+                    <div className="w-12 h-12 bg-white/25 backdrop-blur-md rounded-full flex items-center justify-center border border-white/40 shadow-lg">
+                      <User className="h-6 w-6 text-white drop-shadow-sm" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-display font-bold text-lg text-white leading-tight">
+                      <h3 className="font-display font-bold text-lg text-white leading-tight drop-shadow-md">
                         {mentor.name}
                       </h3>
-                      <p className="text-white/90 text-xs">{mentor.title}</p>
+                      <p className="text-white/95 text-xs drop-shadow-sm">{mentor.title}</p>
                     </div>
                   </div>
                 </div>
@@ -191,12 +191,12 @@ const MentorConnection = () => {
               <div className="p-4">
                 {/* Specialization */}
                 <div className="mb-4">
-                  <div className="bg-gradient-to-r from-blue-100 to-primary-50 rounded-lg p-3">
-                    <h4 className="font-semibold text-primary-400 mb-1 flex items-center space-x-2">
+                  <div className="bg-gradient-to-r from-blue-100 to-blue-50 rounded-lg p-3 border border-blue-200/50">
+                    <h4 className="font-semibold text-blue-900 mb-1 flex items-center space-x-2">
                       <Award className="h-3 w-3" />
                       <span className="text-sm">Expertise</span>
                     </h4>
-                    <p className="text-primary-300 text-xs leading-relaxed">
+                    <p className="text-blue-800 text-xs leading-relaxed font-medium">
                       {mentor.expertise}
                     </p>
                   </div>
@@ -232,10 +232,10 @@ const MentorConnection = () => {
             <div className="bg-white rounded-2xl shadow-lg border border-accent-100">
               <div className="p-6">
                 <div className="mb-6">
-                  <h1 className="font-display font-bold text-3xl text-primary-400 mb-2">
+                  <h1 className="font-display font-bold text-3xl text-blue-900 mb-2">
                     Connect with {mentor.name}
                   </h1>
-                  <p className="text-primary-300">
+                  <p className="text-blue-800">
                     Get personalized guidance for your university program selection after A/L results. 
                     Share your academic background and career interests to receive tailored advice.
                   </p>
@@ -243,14 +243,14 @@ const MentorConnection = () => {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Personal Information */}
-                  <div className="bg-gradient-to-r from-blue-100 to-primary-50 rounded-lg p-4">
-                    <h3 className="font-semibold text-primary-400 mb-4 flex items-center space-x-2">
+                  <div className="bg-gradient-to-r from-blue-100 to-blue-50 rounded-lg p-4 border border-blue-200/50">
+                    <h3 className="font-semibold text-blue-900 mb-4 flex items-center space-x-2">
                       <User className="h-4 w-4" />
                       <span>Personal Information</span>
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-primary-400 font-medium mb-2">
+                        <label className="block text-blue-900 font-medium mb-2">
                           Full Name *
                         </label>
                         <input
@@ -259,12 +259,12 @@ const MentorConnection = () => {
                           value={formData.studentName}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
+                          className="w-full px-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           placeholder="Enter your full name"
                         />
                       </div>
                       <div>
-                        <label className="block text-primary-400 font-medium mb-2">
+                        <label className="block text-blue-900 font-medium mb-2">
                           Email Address *
                         </label>
                         <input
@@ -273,7 +273,7 @@ const MentorConnection = () => {
                           value={formData.email}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
+                          className="w-full px-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           placeholder="your.email@example.com"
                         />
                       </div>
