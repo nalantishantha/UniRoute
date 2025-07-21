@@ -901,3 +901,175 @@
     margin-left: 0;
   }
 }
+
+/* Enhanced Media Upload Styles - From Company AdPublish */
+.company-adpublish-media-upload-container {
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 1.5rem;
+  background: #fafafa;
+  transition: all 0.3s ease;
+}
+
+.company-adpublish-media-upload-container:hover {
+  border-color: #3b82f6;
+  background: #f0f7ff;
+}
+
+.company-adpublish-media-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.company-adpublish-image-upload-area,
+.company-adpublish-video-upload-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Image Preview Styles */
+.company-adpublish-image-preview,
+.company-adpublish-default-image {
+  position: relative;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  overflow: hidden;
+  max-width: 300px;
+  width: 100%;
+}
+
+.company-adpublish-image-preview img,
+.company-adpublish-default-image img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+/* Video Preview Styles */
+.company-adpublish-video-preview {
+  position: relative;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  overflow: hidden;
+  max-width: 300px;
+  width: 100%;
+}
+
+.company-adpublish-preview-video {
+  width: 100%;
+  max-height: 220px;
+  border-radius: 8px;
+}
+
+.company-adpublish-default-video {
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  max-width: 300px;
+  width: 100%;
+}
+
+.company-adpublish-video-placeholder {
+  padding: 32px 0;
+  text-align: center;
+  color: #6b7280;
+  background: #e0e7ff;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.company-adpublish-video-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.company-adpublish-video-placeholder p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* File Input and Upload Button */
+.company-adpublish-file-input {
+  display: none;
+}
+
+.company-adpublish-upload-btn {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  display: inline-block;
+  transition: all 0.3s ease;
+  border: none;
+  font-size: 0.9rem;
+}
+
+.company-adpublish-upload-btn:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+
+/* Remove Media Button */
+.company-adpublish-remove-media-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: transparent;
+  color: #ef4444;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 1.3rem;
+  font-weight: normal;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  transition: none;
+}
+
+.company-adpublish-remove-media-btn:hover {
+  background: transparent;
+  color: #b91c1c;
+  box-shadow: none;
+}
+
+/* Responsive Media Upload */
+@media (max-width: 768px) {
+  .company-adpublish-media-upload-container {
+    flex-direction: column;
+    gap: 2rem;
+  }
+  
+  .company-adpublish-image-upload-area,
+  .company-adpublish-video-upload-area {
+    flex: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .company-adpublish-media-upload-container {
+    padding: 1rem;
+  }
+  
+  .company-adpublish-media-title {
+    font-size: 0.9rem;
+  }
+  
+  .company-adpublish-upload-btn {
+    padding: 0.6rem 1.5rem;
+    font-size: 0.8rem;
+  }
+}

@@ -39,6 +39,10 @@ const AdPublish = () => {
     billingAddress: ''
   });
 
+  // Video upload state
+  const [videoFile, setVideoFile] = useState(null);
+  const [videoPreview, setVideoPreview] = useState('');
+
   const categories = ['Technology', 'Education', 'Healthcare', 'Finance', 'Marketing', 'Business', 'Other'];
   const audiences = ['All Students', 'Undergraduate', 'Graduate', 'Faculty', 'Alumni'];
   const adTypes = [
@@ -192,41 +196,93 @@ const AdPublish = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>Advertisement Image</label>
-                  <div className="image-upload-container">
-                    {adData.imageUrl ? (
-                      <div className="image-preview">
-                        <img src={adData.imageUrl} alt="Ad preview" />
-                        <button 
-                          type="button" 
-                          className="remove-image-btn"
-                          onClick={() => setAdData(prev => ({ ...prev, imageUrl: '' }))}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="default-image">
-                        <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80" alt="Default ad" />
-                      </div>
-                    )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="file-input"
-                      id="image-upload"
-                      onChange={(e) => {
-                        // In real implementation, upload file and get URL
-                        const file = e.target.files[0];
-                        if (file) {
-                          const imageUrl = URL.createObjectURL(file);
-                          setAdData(prev => ({ ...prev, imageUrl }));
-                        }
-                      }}
-                    />
-                    <label htmlFor="image-upload" className="upload-btn">
-                      Choose Image
-                    </label>
+                  <label style={{ fontWeight: 700, marginBottom: 8, display: 'block' }}>
+                    <span role="img" aria-label="media">🖼️</span> Advertisement Media
+                  </label>
+                  <div className="company-adpublish-media-upload-container" style={{ display: 'flex', gap: 24 }}>
+                    {/* Image Upload */}
+                    <div className="company-adpublish-image-upload-area" style={{ flex: 1 }}>
+                      <h4 className="company-adpublish-media-title" style={{ marginBottom: 16 }}>
+                        <span role="img" aria-label="upload-image">📸</span> Upload Image
+                      </h4>
+                      {adData.imageUrl ? (
+                        <div className="company-adpublish-image-preview">
+                          <img src={adData.imageUrl} alt="Ad preview" />
+                          <button
+                            type="button"
+                            className="company-adpublish-remove-media-btn"
+                            onClick={() => setAdData(prev => ({ ...prev, imageUrl: '' }))}
+                          >×</button>
+                        </div>
+                      ) : (
+                        <div className="company-adpublish-default-image">
+                          <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80" alt="Default ad" />
+                        </div>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="company-adpublish-file-input"
+                        id="university-image-upload"
+                        onChange={e => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setAdData(prev => ({ ...prev, imageUrl: reader.result }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <label htmlFor="university-image-upload" className="company-adpublish-upload-btn">
+                        Choose Image
+                      </label>
+                    </div>
+                    {/* Video Upload */}
+                    <div className="company-adpublish-video-upload-area" style={{ flex: 1 }}>
+                      <h4 className="company-adpublish-media-title" style={{ marginBottom: 16 }}>
+                        <span role="img" aria-label="upload-video">🎥</span> Upload Video
+                      </h4>
+                      {videoPreview ? (
+                        <div className="company-adpublish-video-preview">
+                          <video src={videoPreview} controls className="company-adpublish-preview-video" style={{ width: '100%', maxHeight: 220, borderRadius: 8 }} />
+                          <button
+                            type="button"
+                            className="company-adpublish-remove-media-btn"
+                            onClick={() => {
+                              setVideoPreview('');
+                              setVideoFile(null);
+                            }}
+                          >×</button>
+                        </div>
+                      ) : (
+                        <div className="company-adpublish-default-video company-adpublish-video-placeholder" style={{ padding: '32px 0', textAlign: 'center', color: '#6b7280', background: '#e0e7ff', borderRadius: 8, marginBottom: 16 }}>
+                          <span className="company-adpublish-video-icon" style={{ fontSize: 48, display: 'block', marginBottom: 8 }}>🎥</span>
+                          <p style={{ margin: 0 }}>No video selected</p>
+                        </div>
+                      )}
+                      <input
+                        type="file"
+                        accept="video/*"
+                        className="company-adpublish-file-input"
+                        id="university-video-upload"
+                        onChange={e => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            setVideoFile(file);
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setVideoPreview(reader.result);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <label htmlFor="university-video-upload" className="company-adpublish-upload-btn">
+                        Choose Video
+                      </label>
+                    </div>
                   </div>
                 </div>
 
