@@ -8,6 +8,8 @@ import json
 
 from apps.accounts.models import Users, UserDetails, UserTypes
 from apps.companies.models import Companies, InternshipOpportunities
+from apps.advertisements.models import AdBookings, Advertisements, AdSpaces
+from apps.universities.models import Universities
 from .models import Report, ReportCategory, ReportAction
 from django.contrib.auth.hashers import check_password, make_password
 
@@ -904,3 +906,129 @@ def get_internship_statistics(request):
             }, status=500)
     
     return JsonResponse({'success': False, 'message': 'Only GET method allowed'}, status=405)
+
+@csrf_exempt
+def get_advertisement_requests(request):
+    """Get all advertisement booking requests"""
+    if request.method == 'GET':
+        try:
+            # Get all advertisement bookings with related data
+            bookings = AdBookings.objects.select_related(
+                'ad__university',
+                'ad__company',
+                'ad__tutor',
+                'space'
+            ).all().order_by('-created_at')
+            
+            requests_data = []
+            for booking in bookings:
+                # Determine the requester type and name
+                university_name = ""
+                if booking.ad.university:
+                    university_name = booking.ad.university.name
+                elif booking.ad.company:
+                    university_name = booking.ad.company.name  # Company name
+                elif booking.ad.tutor:
+                    university_name = f"Tutor: {booking.ad.tutor.name}"  # Tutor name
+                
+                request_data = {
+                    'booking_id': booking.booking_id,
+                    'title': booking.ad.title,
+                    'university_name': university_name,
+                    'space_name': booking.space.name,
+                    'start_date': booking.start_date.strftime('%Y-%m-%d') if booking.start_date else '',
+                    'end_date': booking.end_date.strftime('%Y-%m-%d') if booking.end_date else '',
+                    'total_price': str(booking.total_price),
+                    'status': booking.status or 'pending',
+                    'image_url': booking.ad.image_url or '',
+                    'target_url': booking.ad.target_url or '',
+                    'created_at': booking.created_at.isoformat() if booking.created_at else ''
+                }
+                requests_data.append(request_data)
+            
+            return JsonResponse({
+                'success': True,
+                'requests': requests_data,
+                'total_count': len(requests_data)
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Failed to fetch advertisement requests: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({'success': False, 'message': 'Only GET method allowed'}, status=405)
+
+@csrf_exempt
+def approve_advertisement_request(request, booking_id):
+    """Approve an advertisement booking request"""
+    if request.method == 'POST':
+        try:
+            with transaction.atomic():
+                # Get the booking
+                booking = AdBookings.objects.get(booking_id=booking_id)
+                
+                # Update status to approved
+                booking.status = 'Confirmed'
+                booking.save()
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Advertisement request approved successfully',
+                    'booking_id': booking_id,
+                    'new_status': 'Confirmed'
+                })
+                
+        except AdBookings.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'Advertisement request not found'
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Failed to approve request: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({'success': False, 'message': 'Only POST method allowed'}, status=405)
+
+@csrf_exempt
+def reject_advertisement_request(request, booking_id):
+    """Reject an advertisement booking request"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body) if request.body else {}
+            reason = data.get('reason', '')
+            
+            with transaction.atomic():
+                # Get the booking
+                booking = AdBookings.objects.get(booking_id=booking_id)
+                
+                # Update status to rejected
+                booking.status = 'Rejected'
+                booking.save()
+                
+                # You could also save the rejection reason if you have a field for it
+                # For now, we'll just return success
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Advertisement request rejected successfully',
+                    'booking_id': booking_id,
+                    'new_status': 'Rejected',
+                    'reason': reason
+                })
+                
+        except AdBookings.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'Advertisement request not found'
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Failed to reject request: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({'success': False, 'message': 'Only POST method allowed'}, status=405)

@@ -16,6 +16,7 @@ import { EventsList, EventView, EventForm } from '../pages/Admin/Events';
 import { Reports, ReportDetails } from '../pages/Admin/Reports'
 import { AdminSettings } from '../pages/Admin';
 import { RequestsList, RequestDetails } from '../pages/Admin/Requests';
+import AdvertisementRequests from '../pages/Admin/Requests/AdvertisementRequests';
 
 const AdminRoutes = () => {
   return (
@@ -85,6 +86,7 @@ const AdminRoutes = () => {
 
       {/* Requests Management */}
       <Route path="/requests" element={<RequestsList />} />
+      <Route path="/requests/advertisements" element={<AdvertisementRequests />} />
       <Route path="/requests/advertisement/:requestId" element={<RequestDetails />} />
 
       {/* Report Management */}

@@ -15,6 +15,7 @@ class AdSpaces(models.Model):
 
 class Advertisements(models.Model):
     ad_id = models.AutoField(primary_key=True)
+    university = models.ForeignKey('universities.Universities', models.DO_NOTHING, blank=True, null=True)
     company = models.ForeignKey('companies.Companies', models.DO_NOTHING, blank=True, null=True)
     tutor = models.ForeignKey('tutoring.Tutors', models.DO_NOTHING, blank=True, null=True)
     title = models.CharField(max_length=255)

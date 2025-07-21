@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import UniversitySidebar from '../../components/Navigation/UniversitySidebar'; // CHANGED: Import UniversitySidebar
+import UniversitySidebar from '../../components/Navigation/UniversitySidebar';
 import UniversityNavbar from '../../components/Navigation/UniversityNavbar';
 import Footer from '../../components/Footer';
 import './AdPublish.css';
 
 const AdPublish = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // CHANGED: Rename from isSidebarExpanded to isSidebarOpen
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [adSpaces, setAdSpaces] = useState([]);
-  const [universityBookings, setUniversityBookings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [availabilityCheck, setAvailabilityCheck] = useState(null);
@@ -56,17 +55,17 @@ const AdPublish = () => {
         setMessage({ type: 'error', text: result.message || 'Failed to fetch ad spaces' });
       }
     } catch (error) {
-      console.error('Error fetching ad spaces:', error);
       setMessage({ type: 'error', text: 'Network error. Please try again.' });
+      console.error('Error fetching ad spaces:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Check availability
+  // Check availability for selected dates and space
   const checkAvailability = async () => {
     if (!adData.space_id || !adData.start_date || !adData.end_date) {
-      setMessage({ type: 'error', text: 'Please select space and dates first' });
+      setMessage({ type: 'error', text: 'Please select ad space and date range' });
       return;
     }
 
@@ -89,9 +88,9 @@ const AdPublish = () => {
       if (result.success) {
         setAvailabilityCheck(result);
         if (result.available) {
-          setMessage({ type: 'success', text: result.message });
+          setMessage({ type: 'success', text: `Available! Total cost: $${result.total_price} for ${result.days} days` });
         } else {
-          setMessage({ type: 'error', text: result.message });
+          setMessage({ type: 'error', text: 'Selected dates are not available for this ad space' });
         }
       } else {
         setMessage({ type: 'error', text: result.message || 'Error checking availability' });
@@ -129,8 +128,7 @@ const AdPublish = () => {
       
       if (result.success) {
         setMessage({ type: 'success', text: 'Advertisement booking submitted successfully! Pending admin approval.' });
-        // Refresh university bookings to show the new request
-        fetchUniversityBookings();
+        setCurrentStep(3); // Move to confirmation step
         // Reset form
         setAdData({
           title: '',
@@ -142,7 +140,6 @@ const AdPublish = () => {
           end_date: '',
           agreeTerms: false
         });
-        setCurrentStep(1);
         setAvailabilityCheck(null);
       } else {
         setMessage({ type: 'error', text: result.message || 'Error submitting advertisement booking' });
@@ -155,26 +152,8 @@ const AdPublish = () => {
     }
   };
 
-  // Fetch university bookings
-  const fetchUniversityBookings = async () => {
-    try {
-      const universityId = getUniversityId();
-      const response = await fetch(`/api/advertisements/bookings/university/${universityId}/`);
-      const result = await response.json();
-      
-      if (result.success) {
-        setUniversityBookings(result.bookings || []);
-      } else {
-        console.error('Failed to fetch university bookings:', result.message);
-      }
-    } catch (error) {
-      console.error('Error fetching university bookings:', error);
-    }
-  };
-
   useEffect(() => {
     fetchAdSpaces();
-    fetchUniversityBookings();
   }, []);
 
   const handleInputChange = (e) => {
@@ -186,10 +165,10 @@ const AdPublish = () => {
   };
 
   const handlePaymentChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setPaymentData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: value
     }));
   };
 
@@ -201,74 +180,17 @@ const AdPublish = () => {
     if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
-  const calculateTotalDays = () => {
-    if (!adData.start_date || !adData.end_date) return 0;
-    const start = new Date(adData.start_date);
-    const end = new Date(adData.end_date);
-    return Math.max(0, Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1);
-  };
-
-  const calculateTotalPrice = () => {
-    if (!availabilityCheck || !availabilityCheck.space) return 0;
-    const days = calculateTotalDays();
-    const pricePerDay = parseFloat(availabilityCheck.space.price_per_day || 0);
-    return days * pricePerDay;
-  };
-
-  // Helper function to calculate remaining days for an ad
-  const calculateRemainingDays = (endDate) => {
-    const today = new Date();
-    const end = new Date(endDate);
-    const diffTime = end - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return Math.max(0, diffDays);
-  };
-
-  // Helper function to format status display
-  const getStatusDisplay = (status) => {
-    const statusMap = {
-      'Pending': { text: 'Pending', class: 'pending' },
-      'Confirmed': { text: 'Active', class: 'active' },
-      'Rejected': { text: 'Rejected', class: 'rejected' },
-      'Completed': { text: 'Completed', class: 'completed' }
-    };
-    return statusMap[status] || { text: status, class: 'unknown' };
-  };
-
-  // Helper function to get ad meta information
-  const getAdMeta = (booking) => {
-    const statusDisplay = getStatusDisplay(booking.status);
-    if (booking.status === 'Confirmed') {
-      const remainingDays = calculateRemainingDays(booking.end_date);
-      return remainingDays > 0 ? `${remainingDays} days left` : 'Completed';
-    } else if (booking.status === 'Pending') {
-      return 'Under review';
-    } else if (booking.status === 'Rejected') {
-      return 'Rejected by admin';
-    } else {
-      return 'Completed';
-    }
-  };
-
   const calculateTotal = () => {
-    const totalPrice = calculateTotalPrice();
-    const tax = totalPrice * 0.1; // 10% tax
-    return { subtotal: totalPrice, tax, total: totalPrice + tax };
+    const selectedAdType = adTypes.find(type => type.id === adData.adType);
+    const basePrice = selectedAdType ? selectedAdType.price : 0;
+    const duration = parseInt(adData.duration) || 1;
+    const subtotal = basePrice * duration;
+    const tax = subtotal * 0.1; // 10% tax
+    return { subtotal, tax, total: subtotal + tax };
   };
 
   const handlePublish = () => {
-    // Check if we have availability data and required fields
-    if (!availabilityCheck || !availabilityCheck.available) {
-      setMessage({ type: 'error', text: 'Please check availability first' });
-      return;
-    }
-    
-    if (!adData.title || !adData.space_id || !adData.image_url || !adData.start_date || !adData.end_date) {
-      setMessage({ type: 'error', text: 'Please fill in all required fields' });
-      return;
-    }
-    
-    submitAdvertisementBooking();
+    setShowPaymentModal(true);
   };
 
   const handlePayment = (e) => {
@@ -278,6 +200,8 @@ const AdPublish = () => {
     setShowPaymentModal(false);
     // Reset form or redirect
   };
+
+  const { subtotal, tax, total } = calculateTotal();
 
   return (
     <div className="ad-publish-page">
@@ -356,65 +280,14 @@ const AdPublish = () => {
                       </option>
                     ))}
                   </select>
-                </div>
-
-                <div className="form-group">
-                  <label>Advertisement Image URL *</label>
-                  <input
-                    type="url"
-                    name="image_url"
-                    value={adData.image_url}
-                    onChange={handleInputChange}
-                    className="form-input"
-                    placeholder="https://example.com/your-ad-image.jpg"
-                    required
-                  />
-                  {adData.image_url && (
-                    <div className="image-preview">
-                      <img src={adData.image_url} alt="Ad preview" style={{maxWidth: '300px', marginTop: '10px'}} 
-                           onError={(e) => e.target.style.display = 'none'} />
+                  {adSpaces.length > 0 && adData.space_id && (
+                    <div className="space-description">
+                      {adSpaces.find(s => s.space_id == adData.space_id)?.description}
                     </div>
                   )}
                 </div>
 
-                <div className="form-group">
-                  <label>Target URL (optional)</label>
-                  <input
-                    type="url"
-                    name="target_url"
-                    value={adData.target_url}
-                    onChange={handleInputChange}
-                    className="form-input"
-                    placeholder="https://your-website.com (where users will go when they click)"
-                  />
-                </div>
-
-                <div className="navigation-buttons">
-                  <button 
-                    type="button" 
-                    onClick={nextStep} 
-                    className="btn btn-primary"
-                    disabled={!adData.title || !adData.space_id || !adData.image_url}
-                  >
-                    Next: Schedule & Budget →
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Step 2: Schedule & Budget */}
-            {currentStep === 2 && (
-              <div className="form-section">
-                <h2>📅 Schedule & Budget</h2>
-                <p className="section-description">Choose your advertisement dates and review the pricing</p>
-
-                {message.text && (
-                  <div className={`message ${message.type}`}>
-                    {message.text}
-                  </div>
-                )}
-
-                <div className="date-range-container">
+                <div className="form-row">
                   <div className="form-group">
                     <label>Start Date *</label>
                     <input
@@ -441,60 +314,269 @@ const AdPublish = () => {
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <button 
-                    type="button" 
-                    onClick={checkAvailability}
-                    className="btn btn-secondary"
-                    disabled={!adData.space_id || !adData.start_date || !adData.end_date || loading}
-                  >
-                    {loading ? 'Checking...' : 'Check Availability & Get Price'}
-                  </button>
-                </div>
-
-                {availabilityCheck && (
-                  <div className={`availability-result ${availabilityCheck.available ? 'available' : 'unavailable'}`}>
-                    <h4>
-                      {availabilityCheck.available ? '✅ Available' : '❌ Not Available'}
-                    </h4>
-                    <p>{availabilityCheck.message}</p>
-                    
-                    {availabilityCheck.available && (
-                      <div className="budget-summary">
-                        <h4>💰 Cost Breakdown</h4>
-                        <div className="cost-item">
-                          <span>Space: {availabilityCheck.space?.name}</span>
-                          <span>${availabilityCheck.space?.price_per_day}/day</span>
-                        </div>
-                        <div className="cost-item">
-                          <span>Duration: {calculateTotalDays()} days</span>
-                          <span>${calculateTotalPrice()}</span>
-                        </div>
-                        <div className="cost-item">
-                          <span>Tax (10%)</span>
-                          <span>${(calculateTotalPrice() * 0.1).toFixed(2)}</span>
-                        </div>
-                        <div className="cost-item total">
-                          <span>Total</span>
-                          <span>${(calculateTotalPrice() * 1.1).toFixed(2)}</span>
-                        </div>
-                      </div>
-                    )}
+                {adData.space_id && adData.start_date && adData.end_date && (
+                  <div className="availability-check">
+                    <button 
+                      type="button" 
+                      onClick={checkAvailability}
+                      className="check-btn"
+                      disabled={loading}
+                    >
+                      {loading ? 'Checking...' : 'Check Availability & Price'}
+                    </button>
                   </div>
                 )}
 
-                <div className="navigation-buttons">
-                  <button type="button" className="btn btn-secondary" onClick={prevStep}>
-                    ← Back
-                  </button>
+                {availabilityCheck && availabilityCheck.available && (
+                  <div className="pricing-info">
+                    <h3>Pricing Details</h3>
+                    <div className="pricing-row">
+                      <span>Duration:</span>
+                      <span>{availabilityCheck.days} days</span>
+                    </div>
+                    <div className="pricing-row">
+                      <span>Price per day:</span>
+                      <span>${availabilityCheck.price_per_day}</span>
+                    </div>
+                    <div className="pricing-row total">
+                      <span>Total Cost:</span>
+                      <span>${availabilityCheck.total_price}</span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="form-group">
+                  <label>Advertisement Image URL *</label>
+                  <input
+                    type="url"
+                    name="image_url"
+                    value={adData.image_url}
+                    onChange={handleInputChange}
+                    className="form-input"
+                    placeholder="https://example.com/your-ad-image.jpg"
+                    required
+                  />
+                  {adData.image_url && (
+                    <div className="image-preview">
+                      <img src={adData.image_url} alt="Ad preview" style={{maxWidth: '200px', marginTop: '10px'}} />
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label>Target URL (Where users go when they click)</label>
+                  <input
+                    type="url"
+                    name="target_url"
+                    value={adData.target_url}
+                    onChange={handleInputChange}
+                    className="form-input"
+                    placeholder="https://your-university-website.com"
+                  />
+                </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Contact Email *</label>
+                  <input
+                    type="email"
+                    name="contactEmail"
+                    value={adData.contactEmail}
+                    onChange={handleInputChange}
+                    className="form-input"
+                    placeholder="contact@company.com"
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Step 2: Review & Submit */}
+            {currentStep === 2 && (
+              <div className="form-section">
+                <h2>📋 Review Your Advertisement</h2>
+                <p className="section-description">Review your advertisement details before submitting for approval</p>
+
+                {message.text && (
+                  <div className={`message ${message.type}`}>
+                    {message.text}
+                  </div>
+                )}
+
+                <div className="review-section">
+                  <div className="review-item">
+                    <strong>Title:</strong> {adData.title}
+                  </div>
+                  <div className="review-item">
+                    <strong>Advertisement Space:</strong> {adSpaces.find(s => s.space_id == adData.space_id)?.name}
+                  </div>
+                  <div className="review-item">
+                    <strong>Duration:</strong> {adData.start_date} to {adData.end_date}
+                  </div>
+                  {availabilityCheck && (
+                    <div className="review-item">
+                      <strong>Total Cost:</strong> ${availabilityCheck.total_price}
+                    </div>
+                  )}
+                  <div className="review-item">
+                    <strong>Image URL:</strong> {adData.image_url}
+                  </div>
+                  {adData.target_url && (
+                    <div className="review-item">
+                      <strong>Target URL:</strong> {adData.target_url}
+                    </div>
+                  )}
+                </div>
+
+                {adData.image_url && (
+                  <div className="preview-section">
+                    <h3>Advertisement Preview</h3>
+                    <div className="ad-preview">
+                      <img src={adData.image_url} alt="Advertisement preview" />
+                    </div>
+                  </div>
+                )}
+
+                <div className="form-group">
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      name="agreeTerms"
+                      checked={adData.agreeTerms}
+                      onChange={handleInputChange}
+                      required
+                    />
+                    I agree to the terms and conditions for advertisement publishing
+                  </label>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Confirmation */}
+            {currentStep === 3 && (
+              <div className="form-section">
+                <h2>✅ Advertisement Submitted Successfully!</h2>
+                <p className="section-description">Your advertisement has been submitted for admin approval.</p>
+                
+                <div className="success-message">
+                  <div className="success-icon">🎉</div>
+                  <h3>Thank you for your submission!</h3>
+                  <p>Your advertisement request is now pending approval from our administrators. You will be notified once your advertisement has been reviewed.</p>
+                  
+                  <div className="next-steps">
+                    <h4>What happens next?</h4>
+                    <ul>
+                      <li>Our team will review your advertisement within 24-48 hours</li>
+                      <li>You will receive an email notification about the approval status</li>
+                      <li>Once approved, your advertisement will be live on the specified dates</li>
+                      <li>You can track your advertisement status in your dashboard</li>
+                    </ul>
+                  </div>
+                  
                   <button 
-                    type="button" 
-                    onClick={nextStep} 
-                    className="btn btn-primary"
-                    disabled={!availabilityCheck || !availabilityCheck.available}
+                    className="btn-primary"
+                    onClick={() => {
+                      setCurrentStep(1);
+                      setMessage({ type: '', text: '' });
+                    }}
                   >
-                    Next: Review & Publish →
+                    Submit Another Advertisement
                   </button>
+                </div>
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Target Audience *</label>
+                  <select
+                    name="targetAudience"
+                    value={adData.targetAudience}
+                    onChange={handleInputChange}
+                    className="form-select"
+                    required
+                  >
+                    {audiences.map(audience => (
+                      <option key={audience} value={audience}>{audience}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Campaign Duration (days) *</label>
+                  <select
+                    name="duration"
+                    value={adData.duration}
+                    onChange={handleInputChange}
+                    className="form-select"
+                    required
+                  >
+                    <option value="1">1 Day</option>
+                    <option value="3">3 Days</option>
+                    <option value="7">1 Week</option>
+                    <option value="14">2 Weeks</option>
+                    <option value="30">1 Month</option>
+                    <option value="90">3 Months</option>
+                  </select>
+                </div>
+
+                <div className="date-range-container">
+                  <div className="form-group">
+                    <label>Start Date *</label>
+                    <input
+                      type="date"
+                      name="startDate"
+                      value={adData.startDate}
+                      onChange={handleInputChange}
+                      className="form-input"
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>End Date *</label>
+                    <input
+                      type="date"
+                      name="endDate"
+                      value={adData.endDate}
+                      onChange={handleInputChange}
+                      className="form-input"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Keywords (comma-separated)</label>
+                  <input
+                    type="text"
+                    name="keywords"
+                    value={adData.keywords}
+                    onChange={handleInputChange}
+                    className="form-input"
+                    placeholder="programming, technology, internship"
+                  />
+                </div>
+
+                <div className="budget-summary">
+                  <h4>💰 Cost Breakdown</h4>
+                  <div className="cost-item">
+                    <span>Ad Type: {adTypes.find(t => t.id === adData.adType)?.name}</span>
+                    <span>${adTypes.find(t => t.id === adData.adType)?.price}/day</span>
+                  </div>
+                  <div className="cost-item">
+                    <span>Duration: {adData.duration} days</span>
+                    <span>${subtotal}</span>
+                  </div>
+                  <div className="cost-item">
+                    <span>Tax (10%)</span>
+                    <span>${tax.toFixed(2)}</span>
+                  </div>
+                  <div className="cost-item total">
+                    <span>Total</span>
+                    <span>${total.toFixed(2)}</span>
+                  </div>
                 </div>
               </div>
             )}
@@ -512,29 +594,29 @@ const AdPublish = () => {
                       <strong>Title:</strong> {adData.title}
                     </div>
                     <div className="review-item">
-                      <strong>Advertisement Space:</strong> {availabilityCheck?.space?.name}
+                      <strong>Company:</strong> {adData.company}
                     </div>
                     <div className="review-item">
-                      <strong>Image URL:</strong> {adData.image_url}
+                      <strong>Category:</strong> {adData.category}
                     </div>
                     <div className="review-item">
-                      <strong>Target URL:</strong> {adData.target_url || 'None'}
+                      <strong>Description:</strong> {adData.description}
                     </div>
                   </div>
 
                   <div className="review-group">
-                    <h4>📅 Campaign Schedule</h4>
+                    <h4>🎯 Campaign Details</h4>
                     <div className="review-item">
-                      <strong>Start Date:</strong> {adData.start_date}
+                      <strong>Ad Type:</strong> {adTypes.find(t => t.id === adData.adType)?.name}
                     </div>
                     <div className="review-item">
-                      <strong>End Date:</strong> {adData.end_date}
+                      <strong>Target Audience:</strong> {adData.targetAudience}
                     </div>
                     <div className="review-item">
-                      <strong>Duration:</strong> {calculateTotalDays()} days
+                      <strong>Duration:</strong> {adData.duration} days
                     </div>
                     <div className="review-item">
-                      <strong>Price per Day:</strong> ${availabilityCheck?.space?.price_per_day}
+                      <strong>Start Date:</strong> {adData.startDate}
                     </div>
                   </div>
 
@@ -542,16 +624,16 @@ const AdPublish = () => {
                     <h4>💰 Payment Summary</h4>
                     <div className="final-cost-breakdown">
                       <div className="cost-item">
-                        <span>Subtotal ({calculateTotalDays()} days)</span>
-                        <span>${calculateTotalPrice()}</span>
+                        <span>Subtotal</span>
+                        <span>${subtotal}</span>
                       </div>
                       <div className="cost-item">
                         <span>Tax (10%)</span>
-                        <span>${(calculateTotalPrice() * 0.1).toFixed(2)}</span>
+                        <span>${tax.toFixed(2)}</span>
                       </div>
                       <div className="cost-item total">
                         <span>Total Amount</span>
-                        <span>${(calculateTotalPrice() * 1.1).toFixed(2)}</span>
+                        <span>${total.toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
@@ -655,56 +737,32 @@ const AdPublish = () => {
             {/* Active Ads */}
             <div className="active-ads-card">
               <h3>📢 Your Active Ads</h3>
-              <p>Recently requested campaigns</p>
+              <p>Currently running campaigns</p>
               
               <div className="ad-list">
-                {universityBookings.length === 0 ? (
-                  <div className="no-ads">
-                    <p>No advertisement requests yet.</p>
-                    <p>Create your first ad campaign!</p>
+                <div className="ad-item">
+                  <div className="ad-status active">Active</div>
+                  <div className="ad-details">
+                    <strong>Summer Internship Program</strong>
+                    <div className="ad-meta">
+                      <span>5 days left</span>
+                      <span>1.2K views</span>
+                    </div>
                   </div>
-                ) : (
-                  universityBookings.slice(0, 5).map((booking) => {
-                    const statusDisplay = getStatusDisplay(booking.status);
-                    return (
-                      <div key={booking.booking_id} className="ad-item">
-                        <div className={`ad-status ${statusDisplay.class}`}>
-                          {statusDisplay.text}
-                        </div>
-                        <div className="ad-details">
-                          <strong>{booking.title}</strong>
-                          <div className="ad-meta">
-                            <span>{getAdMeta(booking)}</span>
-                            <span>${booking.total_price}</span>
-                          </div>
-                          <div className="ad-space-info">
-                            <small>{booking.space_name} • {booking.start_date} to {booking.end_date}</small>
-                          </div>
-                        </div>
-                        <button 
-                          className="view-btn"
-                          onClick={() => {
-                            // Could implement view details functionality
-                            alert(`Booking ID: ${booking.booking_id}\nStatus: ${booking.status}\nTotal: $${booking.total_price}`);
-                          }}
-                        >
-                          View
-                        </button>
-                      </div>
-                    );
-                  })
-                )}
+                  <button className="view-btn">View</button>
+                </div>
                 
-                {universityBookings.length > 5 && (
-                  <div className="see-more">
-                    <button className="btn-link" onClick={() => {
-                      // Could implement view all functionality
-                      alert(`You have ${universityBookings.length} total advertisement requests`);
-                    }}>
-                      See all {universityBookings.length} requests →
-                    </button>
+                <div className="ad-item">
+                  <div className="ad-status pending">Pending</div>
+                  <div className="ad-details">
+                    <strong>Tech Bootcamp 2024</strong>
+                    <div className="ad-meta">
+                      <span>Under review</span>
+                      <span>0 views</span>
+                    </div>
                   </div>
-                )}
+                  <button className="view-btn">View</button>
+                </div>
               </div>
             </div>
           </div>
@@ -735,15 +793,15 @@ const AdPublish = () => {
                 <h3>Order Summary</h3>
                 <div className="summary-item">
                   <span>Ad Campaign: {adData.title}</span>
-                  <span>${calculateTotalPrice()}</span>
+                  <span>${subtotal}</span>
                 </div>
                 <div className="summary-item">
                   <span>Tax (10%)</span>
-                  <span>${(calculateTotalPrice() * 0.1).toFixed(2)}</span>
+                  <span>${tax.toFixed(2)}</span>
                 </div>
                 <div className="summary-item total">
                   <span>Total</span>
-                  <span>${(calculateTotalPrice() * 1.1).toFixed(2)}</span>
+                  <span>${total.toFixed(2)}</span>
                 </div>
               </div>
 
@@ -860,7 +918,7 @@ const AdPublish = () => {
                     Cancel
                   </button>
                   <button type="submit" className="btn-pay-now">
-                    Pay ${(calculateTotalPrice() * 1.1).toFixed(2)}
+                    Pay ${total.toFixed(2)}
                   </button>
                 </div>
               </form>

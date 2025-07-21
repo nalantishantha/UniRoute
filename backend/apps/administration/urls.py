@@ -21,4 +21,9 @@ urlpatterns = [
     path('internships/<int:internship_id>/delete/', views.delete_internship, name='delete_internship'),
     path('internships/companies/', views.get_companies_for_internships, name='get_companies_for_internships'),
     path('internships/statistics/', views.get_internship_statistics, name='get_internship_statistics'),
+    
+    # Advertisement requests
+    path('advertisement-requests/', views.get_advertisement_requests, name='get_advertisement_requests'),
+    path('advertisement-requests/<int:booking_id>/approve/', views.approve_advertisement_request, name='approve_advertisement_request'),
+    path('advertisement-requests/<int:booking_id>/reject/', views.reject_advertisement_request, name='reject_advertisement_request'),
 ]
