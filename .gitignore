@@ -34,3 +34,5 @@ build/
 # misc
 .DS_Store
 *.log
+
+backend/backend_core/__init__.py

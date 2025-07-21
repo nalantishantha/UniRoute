@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Users,
@@ -28,6 +29,7 @@ import {
   CardDescription,
 } from "../../../components/ui/Card";
 import Button from "../../../components/ui/Button";
+import { useChatContext } from "../../../context/ChatContext";
 
 const mentoringRequests = [
   {
@@ -131,6 +133,8 @@ const statusColors = {
 };
 
 export default function Mentoring() {
+  const navigate = useNavigate();
+  const { openChat } = useChatContext();
   const [activeTab, setActiveTab] = useState("requests");
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -143,6 +147,24 @@ export default function Mentoring() {
       filterStatus === "all" || request.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
+
+  const handleViewProfile = (studentId, studentName) => {
+    // Changed from studentNAme to studentName
+    navigate(`student-profile/${studentId}`, {
+      // Also simplified the path
+      state: { studentName },
+    });
+  };
+
+  const handleMessage = (studentId, studentName) => {
+    // Navigate to chat page with specific student
+    openChat({
+      id: studentId,
+      name: studentName,
+      avatar: "",
+      online: true,
+    });
+  };
 
   const handleAcceptRequest = (requestId) => {
     // Handle accept logic
@@ -383,11 +405,26 @@ export default function Mentoring() {
                             {request.status === "pending" && (
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-2">
-                                  <Button size="sm" variant="outline">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() =>
+                                      handleMessage(request.id, request.student)
+                                    }
+                                  >
                                     <MessageSquare className="w-4 h-4 mr-1" />
                                     Message
                                   </Button>
-                                  <Button size="sm" variant="outline">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() =>
+                                      handleViewProfile(
+                                        request.id,
+                                        request.student
+                                      )
+                                    }
+                                  >
                                     <Eye className="w-4 h-4 mr-1" />
                                     View Profile
                                   </Button>
@@ -512,7 +549,13 @@ export default function Mentoring() {
 
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-2">
-                                <Button size="sm" variant="outline">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() =>
+                                    handleMessage(session.id, session.student)
+                                  }
+                                >
                                   <MessageSquare className="w-4 h-4 mr-1" />
                                   Message
                                 </Button>

@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./UniversityStudentSidebar";
 import TopNavigation from "./UniversityStudentNavbar";
+import ChatSidebar from "../UniStudents/Chat";
+import { useChatContext } from "../../context/ChatContext";
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -18,6 +20,8 @@ export default function Layout() {
     return () => window.removeEventListener("resize", checkDesktop);
   }, []);
 
+  const { isChatOpen, selectedUser, closeChat } = useChatContext();
+
   return (
     <div className="flex h-screen bg-gradient-to-br from-neutral-silver to-neutral-light-grey">
       <Sidebar isOpen={isDesktop || sidebarOpen} setIsOpen={setSidebarOpen} />
@@ -31,6 +35,11 @@ export default function Layout() {
           </div>
         </main>
       </div>
+      <ChatSidebar
+        isOpen={isChatOpen}
+        onClose={closeChat}
+        selectedUser={selectedUser}
+      />
     </div>
   );
 }

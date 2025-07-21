@@ -1,1 +1,4 @@
-# This file marks backend_core as a Python package.
+import pymysql
+
+pymysql.install_as_MySQLdb()
+
