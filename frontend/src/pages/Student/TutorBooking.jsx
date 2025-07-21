@@ -19,6 +19,7 @@ import {
   Video,
   DollarSign,
   MapPin,
+  Users,
 } from "lucide-react";
 
 const TutorBooking = () => {
@@ -154,71 +155,88 @@ const TutorBooking = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Tutor Info Card */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-lg border border-accent-100 sticky top-8">
-              <div className="p-6">
-                <div className="text-center mb-6">
-                  <img
-                    src={tutor.image}
-                    alt={tutor.name}
-                    className="w-20 h-20 rounded-full object-cover mx-auto mb-4 border-4 border-accent-200"
-                  />
-                  <h2 className="font-display font-bold text-2xl text-primary-400 mb-1">
-                    {tutor.name}
-                  </h2>
-                  <p className="text-primary-300 text-sm mb-2">{tutor.title}</p>
-                  <div className="flex items-center justify-center space-x-1 mb-2">
-                    <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                    <span className="text-primary-400 font-semibold">{tutor.rating}</span>
-                    <span className="text-primary-300 text-sm">({tutor.reviews} reviews)</span>
-                  </div>
-                  <div className="flex items-center justify-center space-x-1 mb-4">
-                    <DollarSign className="h-4 w-4 text-green-600" />
-                    <span className="text-green-600 font-semibold">{tutor.hourlyRate}/hour</span>
+            <div className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden sticky top-8">
+              {/* Tutor Header with Gradient */}
+              <div className="relative h-32 bg-gradient-to-r from-primary-400 to-accent-400">
+                <div className="absolute inset-0 bg-black/10"></div>
+                
+                {/* Rating Badge */}
+                <div className="absolute top-2 right-2">
+                  <div className="bg-white/20 backdrop-blur-md rounded-lg px-2 py-1 border border-white/30">
+                    <div className="flex items-center space-x-1">
+                      <Star className="h-3 w-3 text-yellow-300 fill-current" />
+                      <span className="text-white font-semibold text-xs">
+                        {tutor.rating}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                {/* Subject Expertise */}
-                <div className="mb-4">
-                  <div className="flex items-center space-x-2 text-primary-300 mb-1">
-                    <BookOpen className="h-3 w-3" />
-                    <span className="text-xs font-medium">Subject Expertise</span>
-                  </div>
-                  <p className="text-primary-400 font-semibold text-sm pl-5">
-                    {tutor.expertise}
-                  </p>
+                {/* Experience Badge */}
+                <div className="absolute top-2 left-2">
+                  <span className="bg-green-500/20 text-green-100 border border-green-300/30 px-2 py-1 rounded-full text-xs font-semibold">
+                    {tutor.experience}
+                  </span>
                 </div>
 
-                {/* University */}
-                <div className="mb-4">
-                  <div className="flex items-center space-x-2 text-primary-300 mb-1">
-                    <Award className="h-3 w-3" />
-                    <span className="text-xs font-medium">Education</span>
+                {/* Tutor Info */}
+                <div className="absolute bottom-3 left-3 right-3">
+                  <div className="flex items-end justify-between">
+                    <div className="flex items-center space-x-3">
+                      <img
+                        src={tutor.image}
+                        alt={tutor.name}
+                        className="w-12 h-12 rounded-full object-cover border-2 border-white/30"
+                      />
+                      <div className="flex-1">
+                        <h3 className="font-display font-semibold text-2lg text-white leading-tight">
+                          {tutor.name}
+                        </h3>
+                        <p className="text-white/90 text-sm mb-1">{tutor.title}</p>
+                        <div className="flex items-center space-x-1 mb-1">
+                          <Award className="h-3 w-3 text-white/80" />
+                          <span className="text-xs text-white/80">{tutor.university}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <MapPin className="h-3 w-3 text-white/80" />
+                          <span className="text-xs text-white/80">{tutor.location}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-white font-bold text-lg">{tutor.hourlyRate}</p>
+                      <p className="text-white/80 text-xs">per hour</p>
+                    </div>
                   </div>
-                  <p className="text-primary-400 font-semibold text-sm pl-5">
-                    {tutor.university}
-                  </p>
+                </div>
+              </div>
+
+              <div className="p-4">
+                {/* Expertise */}
+                <div className="mb-4">
+                  <div className="bg-gradient-to-r from-blue-100 to-primary-50 rounded-lg p-3">
+                    <h4 className="font-semibold text-primary-400 text-sm mb-1">Expertise</h4>
+                    <p className="text-primary-300 text-8xs font-bold">{tutor.expertise}</p>
+                  </div>
                 </div>
 
-                {/* Location */}
-                <div className="mb-4">
-                  <div className="flex items-center space-x-2 text-primary-300 mb-1">
-                    <MapPin className="h-3 w-3" />
-                    <span className="text-xs font-medium">Location</span>
-                  </div>
-                  <p className="text-primary-400 font-semibold text-sm pl-5">
-                    {tutor.location}
-                  </p>
-                </div>
+                {/* Description */}
+                <p className="text-primary-300 text-5xs mb-4 leading-relaxed">
+                  {tutor.description}
+                </p>
 
-                {/* Experience */}
-                <div className="mb-4">
-                  <div className="flex items-center space-x-2 text-primary-300 mb-1">
-                    <Target className="h-3 w-3" />
-                    <span className="text-xs font-medium">Experience</span>
+                {/* Stats */}
+                <div className="flex items-center justify-between mb-4 text-xs">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-1">
+                      <Users className="h-3 w-3 text-primary-300" />
+                      <span className="text-primary-300">{tutor.students} students</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Star className="h-3 w-3 text-accent-400" />
+                      <span className="text-primary-300">({tutor.reviews} reviews)</span>
+                    </div>
                   </div>
-                  <p className="text-primary-400 font-semibold text-sm pl-5">
-                    {tutor.experience} teaching
-                  </p>
                 </div>
               </div>
             </div>
@@ -239,74 +257,7 @@ const TutorBooking = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Personal Information */}
-                  <div className="bg-gradient-to-r from-blue-100 to-primary-50 rounded-lg p-4">
-                    <h3 className="font-semibold text-primary-400 mb-4 flex items-center space-x-2">
-                      <User className="h-4 w-4" />
-                      <span>Personal Information</span>
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-primary-400 font-medium mb-2">
-                          Full Name *
-                        </label>
-                        <input
-                          type="text"
-                          name="studentName"
-                          value={formData.studentName}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
-                          placeholder="Enter your full name"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-primary-400 font-medium mb-2">
-                          Email Address *
-                        </label>
-                        <input
-                          type="email"
-                          name="email"
-                          value={formData.email}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
-                          placeholder="your.email@example.com"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-primary-400 font-medium mb-2">
-                          Phone Number
-                        </label>
-                        <input
-                          type="tel"
-                          name="phone"
-                          value={formData.phone}
-                          onChange={handleInputChange}
-                          className="w-full px-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
-                          placeholder="+94 XX XXX XXXX"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-primary-400 font-medium mb-2">
-                          Current Grade *
-                        </label>
-                        <select
-                          name="currentGrade"
-                          value={formData.currentGrade}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
-                        >
-                          <option value="">Select your grade</option>
-                          <option value="Grade 12">Grade 12 (A/L)</option>
-                          <option value="Grade 13">Grade 13 (A/L)</option>
-                          <option value="A/L Completed">A/L Completed</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
+                  
                   {/* Academic Information */}
                   <div className="bg-gradient-to-r from-green-100 to-green-50 rounded-lg p-4">
                     <h3 className="font-semibold text-primary-400 mb-4 flex items-center space-x-2">

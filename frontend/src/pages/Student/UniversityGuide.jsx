@@ -393,7 +393,7 @@ const UniversityGuide = () => {
               <div className="p-6">
                 {/* Description */}
                 <div className="mb-6">
-                  <p className="text-primary-300 leading-relaxed text-sm">
+                  <p className="text-primary-400 text-2lg leading-relaxed text-sm">
                     {university.description}
                   </p>
                 </div>

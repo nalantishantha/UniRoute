@@ -155,15 +155,15 @@ const FindTutors = () => {
               className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             >
               {/* Tutor Header */}
-              <div className="relative h-32 bg-gradient-to-r from-primary-400 to-accent-400">
-                <div className="absolute inset-0 bg-black/10"></div>
+              <div className="relative h-32 bg-gradient-to-r from-blue-500 to-primary-500">
+                <div className="absolute inset-0 bg-black/20"></div>
                 
                 {/* Rating Badge */}
                 <div className="absolute top-2 right-2">
-                  <div className="bg-white/20 backdrop-blur-md rounded-lg px-2 py-1 border border-white/30">
+                  <div className="bg-white/25 backdrop-blur-md rounded-lg px-2 py-1 border border-white/40">
                     <div className="flex items-center space-x-1">
                       <Star className="h-3 w-3 text-yellow-300 fill-current" />
-                      <span className="text-white font-semibold text-xs">
+                      <span className="text-white font-semibold text-xs drop-shadow-sm">
                         {tutor.rating}
                       </span>
                     </div>
@@ -172,7 +172,7 @@ const FindTutors = () => {
 
                 {/* Experience Badge */}
                 <div className="absolute top-2 left-2">
-                  <span className="bg-green-500/20 text-green-100 border border-green-300/30 px-2 py-1 rounded-full text-xs font-semibold">
+                  <span className="bg-green-500/25 text-green-100 border border-green-300/40 px-2 py-1 rounded-full text-xs font-semibold drop-shadow-sm">
                     {tutor.experience}
                   </span>
                 </div>
@@ -184,20 +184,20 @@ const FindTutors = () => {
                       <img
                         src={tutor.image}
                         alt={tutor.name}
-                        className="w-12 h-12 rounded-full object-cover border-2 border-white/30"
+                        className="w-12 h-12 rounded-full object-cover border-2 border-white/50 shadow-lg"
                       />
                       <div className="flex-1">
-                        <h3 className="font-display font-semibold text-lg text-white leading-tight">
+                        <h3 className="font-display font-bold text-lg text-white leading-tight drop-shadow-md">
                           {tutor.name}
                         </h3>
-                        <p className="text-white/90 text-sm mb-1">{tutor.title}</p>
+                        <p className="text-white/95 text-sm mb-2 font-semibold drop-shadow-sm">{tutor.title}</p>
                         <div className="flex items-center space-x-1 mb-1">
-                          <Briefcase className="h-3 w-3 text-white/80" />
-                          <span className="text-xs text-white/80">{tutor.company}</span>
+                          <Briefcase className="h-3 w-3 text-white/90" />
+                          <span className="text-xs text-white/90 drop-shadow-sm">{tutor.company}</span>
                         </div>
                         <div className="flex items-center space-x-1">
-                          <GraduationCap className="h-3 w-3 text-white/80" />
-                          <span className="text-xs text-white/80">{tutor.university}</span>
+                          <GraduationCap className="h-3 w-3 text-white/90" />
+                          <span className="text-xs text-white/90 drop-shadow-sm">{tutor.university}</span>
                         </div>
                       </div>
                     </div>

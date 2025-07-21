@@ -205,12 +205,12 @@ const CareerCounseling = () => {
                 className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
               >
                 {/* Service Header */}
-                <div className="relative h-20 bg-gradient-to-r from-blue-300 to-blue-400">
-                  <div className="absolute inset-0 bg-black/5"></div>
+                <div className="relative h-20 bg-gradient-to-r from-blue-500 to-primary-500">
+                  <div className="absolute inset-0 bg-black/20"></div>
                   
                   {/* Service Icon */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30">
+                    <div className="w-12 h-12 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center border-2 border-white/50 shadow-lg">
                       {index === 0 && <User className="h-6 w-6 text-white" />}
                       {index === 1 && <GraduationCap className="h-6 w-6 text-white" />}
                       {index === 2 && <MessageCircle className="h-6 w-6 text-white" />}
@@ -220,7 +220,7 @@ const CareerCounseling = () => {
 
                   {/* Price Badge */}
                   <div className="absolute top-2 right-2">
-                    <span className="bg-white/20 text-white border border-white/30 px-2 py-1 rounded-full text-xs font-semibold">
+                    <span className="bg-white/25 text-white border border-white/40 px-2 py-1 rounded-full text-xs font-semibold drop-shadow-sm">
                       {service.price}
                     </span>
                   </div>
@@ -292,15 +292,15 @@ const CareerCounseling = () => {
                 className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
               >
                 {/* Counselor Header */}
-                <div className="relative h-32 bg-gradient-to-r from-blue-300 to-blue-400">
-                  <div className="absolute inset-0 bg-black/10"></div>
+                <div className="relative h-32 bg-gradient-to-r from-blue-500 to-primary-500">
+                  <div className="absolute inset-0 bg-black/20"></div>
                   
                   {/* Rating Badge */}
-                  <div className="absolute top-3 right-3">
-                    <div className="bg-white/20 backdrop-blur-md rounded-lg px-2 py-1 border border-white/30">
+                  <div className="absolute top-2 right-2">
+                    <div className="bg-white/25 backdrop-blur-md rounded-lg px-2 py-1 border border-white/40">
                       <div className="flex items-center space-x-1">
                         <Star className="h-3 w-3 text-yellow-300 fill-current" />
-                        <span className="text-white font-semibold text-xs">
+                        <span className="text-white font-semibold text-xs drop-shadow-sm">
                           {counselor.rating}
                         </span>
                       </div>
@@ -308,8 +308,8 @@ const CareerCounseling = () => {
                   </div>
 
                   {/* Experience Badge */}
-                  <div className="absolute top-3 left-3">
-                    <span className="bg-green-500/20 text-green-100 border border-green-300/30 px-2 py-1 rounded-full text-xs font-semibold">
+                  <div className="absolute top-2 left-2">
+                    <span className="bg-green-500/25 text-green-100 border border-green-300/40 px-2 py-1 rounded-full text-xs font-semibold drop-shadow-sm">
                       {counselor.experience}
                     </span>
                   </div>
@@ -318,15 +318,15 @@ const CareerCounseling = () => {
                   <div className="absolute bottom-3 left-3 right-3">
                     <div className="flex items-end justify-between">
                       <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30">
+                        <div className="w-12 h-12 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center border-2 border-white/50 shadow-lg">
                           <User className="h-6 w-6 text-white" />
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-display font-bold text-lg text-white mb-1 leading-tight">
+                          <h3 className="font-display font-bold text-lg text-white leading-tight drop-shadow-md">
                             {counselor.name}
                           </h3>
-                          <p className="text-white/90 text-xs mb-1">{counselor.title}</p>
-                          <div className="flex items-center space-x-2 text-white/80 text-xs">
+                          <p className="text-white/95 text-sm mb-2 font-semibold drop-shadow-sm">{counselor.title}</p>
+                          <div className="flex items-center space-x-2 text-white/90 text-xs drop-shadow-sm">
                             <span>{counselor.reviews} reviews</span>
                             <span>•</span>
                             <span>{counselor.successStories}+ stories</span>
