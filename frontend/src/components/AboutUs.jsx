@@ -98,7 +98,7 @@ const AboutUs = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative py-20 lg:py-32 bg-gradient-to-br from-primary-600 to-primary-800">
+      <section className="relative py-16 lg:py-24 bg-gradient-to-br from-primary-600 to-primary-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="inline-flex items-center bg-white/15 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20 mb-6 shadow-lg">
@@ -107,33 +107,31 @@ const AboutUs = () => {
               </span>
             </div>
 
-            <h1 className="font-display font-bold text-5xl md:text-7xl text-white mb-6 leading-tight">
+            <h1 className="font-display font-bold text-4xl md:text-6xl text-white mb-6 leading-tight">
               About{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-warning to-primary-200">
                 UniRoute
               </span>
             </h1>
 
-            <p className="text-xl md:text-2xl text-primary-100/80 max-w-4xl mx-auto mb-8 leading-relaxed">
-              We're dedicated to making higher education accessible and
-              understandable for every Sri Lankan student through innovative
-              technology and personalized guidance.
+            <p className="text-xl text-primary-100/80 max-w-3xl mx-auto mb-8 leading-relaxed">
+              Making higher education accessible and understandable for every Sri Lankan student through innovative technology and personalized guidance.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Mission & Vision Section */}
-      <section className="py-20 bg-white">
+      {/* Mission & Stats Combined Section */}
+      <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
             <div>
               <div className="inline-flex items-center bg-primary-100 px-4 py-2 rounded-full border border-primary-200 mb-6">
                 <Target className="h-4 w-4 text-primary-600 mr-2" />
                 <span className="text-primary-600 font-medium">Our Mission</span>
               </div>
 
-              <h2 className="font-display font-bold text-4xl md:text-5xl text-primary-800 mb-6">
+              <h2 className="font-display font-bold text-3xl md:text-4xl text-primary-800 mb-6">
                 Bridging Dreams with{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-warning">
                   Reality
@@ -141,189 +139,103 @@ const AboutUs = () => {
               </h2>
 
               <p className="text-lg text-neutral-dark-grey leading-relaxed mb-6">
-                UniRoute was born from the understanding that navigating Sri
-                Lanka's higher education system can be overwhelming. We believe
-                every student deserves clear, personalized guidance to make
-                informed decisions about their future.
+                UniRoute combines cutting-edge technology with deep understanding of the Sri Lankan education landscape to provide students with the tools, insights, and support they need to succeed.
               </p>
 
-              <p className="text-lg text-neutral-dark-grey leading-relaxed">
-                Our platform combines cutting-edge technology with deep
-                understanding of the Sri Lankan education landscape to provide
-                students with the tools, insights, and support they need to
-                succeed.
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-br from-primary-600 to-primary-800 rounded-3xl p-8 text-white">
-              <div className="space-y-6">
-                <div className="flex items-center space-x-4">
-                  <div className="bg-white/20 p-3 rounded-xl">
-                    <Heart className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-xl">Student-Centered</h3>
-                    <p className="text-primary-100">
-                      Every feature designed with students' needs in mind
-                    </p>
-                  </div>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <CheckCircle className="h-5 w-5 text-primary-600 flex-shrink-0" />
+                  <span className="text-neutral-dark-grey">Student-centered design and approach</span>
                 </div>
-
-                <div className="flex items-center space-x-4">
-                  <div className="bg-white/20 p-3 rounded-xl">
-                    <Shield className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-xl">Trusted & Reliable</h3>
-                    <p className="text-primary-100">
-                      Accurate data and proven methodologies
-                    </p>
-                  </div>
+                <div className="flex items-center space-x-3">
+                  <CheckCircle className="h-5 w-5 text-primary-600 flex-shrink-0" />
+                  <span className="text-neutral-dark-grey">Trusted and reliable information</span>
                 </div>
-
-                <div className="flex items-center space-x-4">
-                  <div className="bg-white/20 p-3 rounded-xl">
-                    <Lightbulb className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-xl">Innovation First</h3>
-                    <p className="text-primary-100">
-                      Using technology to solve real educational challenges
-                    </p>
-                  </div>
+                <div className="flex items-center space-x-3">
+                  <CheckCircle className="h-5 w-5 text-primary-600 flex-shrink-0" />
+                  <span className="text-neutral-dark-grey">Innovation-driven solutions</span>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Our Story Section */}
-      <section className="py-20 bg-gradient-to-r from-primary-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center bg-warning/20 px-4 py-2 rounded-full border border-warning mb-6">
-              <BookOpen className="h-4 w-4 text-warning mr-2" />
-              <span className="text-warning font-medium">Our Journey</span>
-            </div>
-
-            <h2 className="font-display font-bold text-4xl md:text-5xl text-primary-800 mb-6">
-              How We Started
-            </h2>
-            <p className="text-xl text-neutral-dark-grey max-w-3xl mx-auto">
-              Founded by a team of educators, technologists, and former students
-              who experienced the challenges of university selection firsthand.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-2xl shadow-lg border border-primary-100 hover:shadow-xl transition-all duration-300">
-              <div className="bg-gradient-to-br from-primary-600 to-primary-800 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
-                <Users className="h-8 w-8 text-white" />
+            <div className="grid grid-cols-1 gap-6">
+              <div className="bg-gradient-to-br from-primary-600 to-primary-800 p-6 rounded-2xl text-white text-center">
+                <div className="text-3xl font-bold mb-2">10,000+</div>
+                <p className="text-primary-100">Students Guided</p>
               </div>
-              <h3 className="font-display font-bold text-2xl text-primary-800 mb-4">
-                10,000+
-              </h3>
-              <p className="text-neutral-dark-grey">
-                Students guided to their dream universities through our platform
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-lg border border-primary-100 hover:shadow-xl transition-all duration-300">
-              <div className="bg-gradient-to-br from-primary-600 to-primary-800 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
-                <GraduationCap className="h-8 w-8 text-white" />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white border-2 border-primary-200 p-4 rounded-xl text-center">
+                  <div className="text-2xl font-bold text-primary-800 mb-1">25+</div>
+                  <p className="text-sm text-neutral-dark-grey">Universities</p>
+                </div>
+                <div className="bg-white border-2 border-primary-200 p-4 rounded-xl text-center">
+                  <div className="text-2xl font-bold text-primary-800 mb-1">98%</div>
+                  <p className="text-sm text-neutral-dark-grey">Success Rate</p>
+                </div>
               </div>
-              <h3 className="font-display font-bold text-2xl text-primary-800 mb-4">
-                25+
-              </h3>
-              <p className="text-neutral-dark-grey">
-                Universities and higher education institutions partnered with us
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-lg border border-primary-100 hover:shadow-xl transition-all duration-300">
-              <div className="bg-gradient-to-br from-primary-600 to-primary-800 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
-                <Award className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="font-display font-bold text-2xl text-primary-800 mb-4">
-                98%
-              </h3>
-              <p className="text-neutral-dark-grey">
-                Success rate in matching students with suitable programs
-              </p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Values Section */}
-      <section className="py-20 bg-primary-700">
+      <section className="py-16 bg-gradient-to-r from-primary-600 to-primary-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center bg-warning/40 px-4 py-2 rounded-full border border-warning mb-6">
-              <Star className="h-4 w-4 text-warning mr-2" />
-              <span className="text-warning font-medium">Core Values</span>
-            </div>
-
-            <h2 className="font-display font-bold text-4xl md:text-5xl text-white mb-6">
+          <div className="text-center mb-12">
+            <h2 className="font-display font-bold text-3xl md:text-4xl text-white mb-4">
               What We Stand For
             </h2>
-            <p className="text-xl text-primary-100/80 max-w-3xl mx-auto">
-              Our values guide everything we do, from product development to
-              student support.
+            <p className="text-lg text-primary-100/80 max-w-2xl mx-auto">
+              Our core values guide everything we do.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="bg-white/10 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Globe className="h-10 w-10 text-warning" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="text-center bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+              <div className="bg-warning/20 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Globe className="h-8 w-8 text-warning" />
               </div>
-              <h3 className="font-display font-bold text-xl text-white mb-4">
+              <h3 className="font-display font-bold text-lg text-white mb-2">
                 Accessibility
               </h3>
-              <p className="text-primary-100/70">
-                Making quality education guidance available to students from all
-                backgrounds.
+              <p className="text-primary-100/70 text-sm">
+                Quality education guidance for all backgrounds
               </p>
             </div>
 
-            <div className="text-center">
-              <div className="bg-white/10 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Shield className="h-10 w-10 text-warning" />
+            <div className="text-center bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+              <div className="bg-warning/20 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Shield className="h-8 w-8 text-warning" />
               </div>
-              <h3 className="font-display font-bold text-xl text-white mb-4">
+              <h3 className="font-display font-bold text-lg text-white mb-2">
                 Integrity
               </h3>
-              <p className="text-primary-100/70">
-                Providing honest, transparent, and unbiased information to help
-                students make informed decisions.
+              <p className="text-primary-100/70 text-sm">
+                Honest, transparent, and unbiased information
               </p>
             </div>
 
-            <div className="text-center">
-              <div className="bg-white/10 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Lightbulb className="h-10 w-10 text-warning" />
+            <div className="text-center bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+              <div className="bg-warning/20 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Lightbulb className="h-8 w-8 text-warning" />
               </div>
-              <h3 className="font-display font-bold text-xl text-white mb-4">
+              <h3 className="font-display font-bold text-lg text-white mb-2">
                 Innovation
               </h3>
-              <p className="text-primary-100/70">
-                Continuously improving our platform with the latest technology
-                and educational insights.
+              <p className="text-primary-100/70 text-sm">
+                Latest technology and educational insights
               </p>
             </div>
 
-            <div className="text-center">
-              <div className="bg-white/10 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Heart className="h-10 w-10 text-warning" />
+            <div className="text-center bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+              <div className="bg-warning/20 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Heart className="h-8 w-8 text-warning" />
               </div>
-              <h3 className="font-display font-bold text-xl text-white mb-4">
+              <h3 className="font-display font-bold text-lg text-white mb-2">
                 Empathy
               </h3>
-              <p className="text-primary-100/70">
-                Understanding and addressing the unique challenges faced by Sri
-                Lankan students.
+              <p className="text-primary-100/70 text-sm">
+                Understanding unique student challenges
               </p>
             </div>
           </div>
@@ -331,26 +243,25 @@ const AboutUs = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-primary-600 to-primary-800">
+      <section className="py-16 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="font-display font-bold text-4xl md:text-5xl text-white mb-6">
+          <h2 className="font-display font-bold text-3xl md:text-4xl text-primary-800 mb-4">
             Ready to Start Your Journey?
           </h2>
-          <p className="text-xl text-primary-100/80 mb-8">
-            Join thousands of students who have found their path to success with
-            UniRoute.
+          <p className="text-lg text-neutral-dark-grey mb-8">
+            Join thousands of students who have found their path to success with UniRoute.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/register"
-              className="group bg-warning text-primary-800 px-8 py-4 rounded-xl font-bold text-lg hover:bg-white transition-colors duration-200 flex items-center justify-center shadow-lg hover:shadow-xl"
+              className="group bg-gradient-to-r from-primary-600 to-primary-800 text-white px-8 py-3 rounded-xl font-bold hover:from-primary-700 hover:to-primary-900 transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl"
             >
               Get Started Today
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />
             </Link>
             <Link
               to="/contact"
-              className="group border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white hover:text-primary-800 transition-colors duration-200 flex items-center justify-center"
+              className="group border-2 border-primary-600 text-primary-600 px-8 py-3 rounded-xl font-bold hover:bg-primary-600 hover:text-white transition-colors duration-200 flex items-center justify-center"
             >
               Contact Us
               <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />

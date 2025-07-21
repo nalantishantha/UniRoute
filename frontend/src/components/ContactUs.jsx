@@ -132,7 +132,7 @@ const ContactUs = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative py-20 lg:py-32 bg-gradient-to-br from-primary-600 to-primary-800">
+      <section className="relative py-16 lg:py-24 bg-gradient-to-br from-primary-600 to-primary-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="inline-flex items-center bg-white/15 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20 mb-6 shadow-lg">
@@ -141,158 +141,143 @@ const ContactUs = () => {
               </span>
             </div>
 
-            <h1 className="font-display font-bold text-5xl md:text-7xl text-white mb-6 leading-tight">
+            <h1 className="font-display font-bold text-4xl md:text-6xl text-white mb-6 leading-tight">
               Get In{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-warning to-primary-200">
                 Touch
               </span>
             </h1>
 
-            <p className="text-xl md:text-2xl text-primary-100/80 max-w-4xl mx-auto mb-8 leading-relaxed">
-              Have questions about your university journey? Need personalized
-              guidance? Our team is ready to support you every step of the way.
+            <p className="text-xl text-primary-100/80 max-w-3xl mx-auto mb-8 leading-relaxed">
+              Have questions about your university journey? Our team is ready to support you every step of the way.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Contact Methods Section */}
-      <section className="py-20 bg-white">
+      {/* Contact Methods & Form Combined Section */}
+      <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center bg-primary-100 px-4 py-2 rounded-full border border-primary-200 mb-6">
-              <MessageSquare className="h-4 w-4 text-primary-600 mr-2" />
-              <span className="text-primary-600 font-medium">Connect With Us</span>
-            </div>
-
-            <h2 className="font-display font-bold text-4xl md:text-5xl text-primary-800 mb-6">
-              Multiple Ways to{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-warning">
-                Reach Us
-              </span>
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-gradient-to-br from-primary-50 to-white p-8 rounded-2xl border border-primary-200 hover:shadow-lg transition-all duration-300 text-center">
-              <div className="bg-gradient-to-br from-primary-600 to-primary-800 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Phone className="h-8 w-8 text-white" />
+          {/* Contact Methods */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+            <div className="bg-gradient-to-br from-primary-50 to-white p-6 rounded-2xl border border-primary-200 hover:shadow-lg transition-all duration-300 text-center">
+              <div className="bg-gradient-to-br from-primary-600 to-primary-800 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <Phone className="h-6 w-6 text-white" />
               </div>
-              <h3 className="font-display font-bold text-2xl text-primary-800 mb-4">
+              <h3 className="font-display font-bold text-xl text-primary-800 mb-2">
                 Call Us
               </h3>
-              <p className="text-neutral-dark-grey mb-4">
-                Speak directly with our education consultants
-              </p>
-              <p className="font-bold text-primary-600 text-lg">
-                +94 77 123 4567
-              </p>
-              <p className="text-sm text-neutral-dark-grey mt-2">
-                Mon-Fri: 9:00 AM - 6:00 PM
-              </p>
+              <p className="font-bold text-primary-600">+94 77 123 4567</p>
+              <p className="text-sm text-neutral-dark-grey">Mon-Fri: 9:00 AM - 6:00 PM</p>
             </div>
 
-            <div className="bg-gradient-to-br from-primary-50 to-white p-8 rounded-2xl border border-primary-200 hover:shadow-lg transition-all duration-300 text-center">
-              <div className="bg-gradient-to-br from-primary-600 to-primary-800 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Mail className="h-8 w-8 text-white" />
+            <div className="bg-gradient-to-br from-primary-50 to-white p-6 rounded-2xl border border-primary-200 hover:shadow-lg transition-all duration-300 text-center">
+              <div className="bg-gradient-to-br from-primary-600 to-primary-800 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <Mail className="h-6 w-6 text-white" />
               </div>
-              <h3 className="font-display font-bold text-2xl text-primary-800 mb-4">
+              <h3 className="font-display font-bold text-xl text-primary-800 mb-2">
                 Email Us
               </h3>
-              <p className="text-neutral-dark-grey mb-4">
-                Send us your questions and we'll respond within 24 hours
-              </p>
-              <p className="font-bold text-primary-600 text-lg">
-                support@uniroute.lk
-              </p>
-              <p className="text-sm text-neutral-dark-grey mt-2">
-                24/7 Email Support
-              </p>
+              <p className="font-bold text-primary-600">support@uniroute.lk</p>
+              <p className="text-sm text-neutral-dark-grey">24/7 Email Support</p>
             </div>
 
-            <div className="bg-gradient-to-br from-primary-50 to-white p-8 rounded-2xl border border-primary-200 hover:shadow-lg transition-all duration-300 text-center">
-              <div className="bg-gradient-to-br from-primary-600 to-primary-800 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <MapPin className="h-8 w-8 text-white" />
+            <div className="bg-gradient-to-br from-primary-50 to-white p-6 rounded-2xl border border-primary-200 hover:shadow-lg transition-all duration-300 text-center">
+              <div className="bg-gradient-to-br from-primary-600 to-primary-800 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <MapPin className="h-6 w-6 text-white" />
               </div>
-              <h3 className="font-display font-bold text-2xl text-primary-800 mb-4">
+              <h3 className="font-display font-bold text-xl text-primary-800 mb-2">
                 Visit Us
               </h3>
-              <p className="text-neutral-dark-grey mb-4">
-                Meet our team at our office in Colombo
-              </p>
-              <p className="font-bold text-primary-600 text-lg">
-                123 Galle Road
-              </p>
-              <p className="text-sm text-neutral-dark-grey mt-2">
-                Colombo 03, Sri Lanka
-              </p>
+              <p className="font-bold text-primary-600">123 Galle Road</p>
+              <p className="text-sm text-neutral-dark-grey">Colombo 03, Sri Lanka</p>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Contact Form Section */}
-      <section className="py-20 bg-gradient-to-r from-primary-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+          {/* Contact Form */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             <div>
               <div className="inline-flex items-center bg-warning/20 px-4 py-2 rounded-full border border-warning mb-6">
                 <Send className="h-4 w-4 text-warning mr-2" />
                 <span className="text-warning font-medium">Send Message</span>
               </div>
 
-              <h2 className="font-display font-bold text-4xl md:text-5xl text-primary-800 mb-6">
+              <h2 className="font-display font-bold text-3xl md:text-4xl text-primary-800 mb-6">
                 Let's Start a{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-warning">
                   Conversation
                 </span>
               </h2>
 
-              <p className="text-lg text-neutral-dark-grey leading-relaxed mb-8">
-                Whether you're a student seeking guidance, a parent with
-                questions, or an institution looking to partner with us, we'd
-                love to hear from you.
+              <p className="text-lg text-neutral-dark-grey leading-relaxed mb-6">
+                Whether you're a student seeking guidance or an institution looking to partner with us, we'd love to hear from you.
               </p>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div className="flex items-center space-x-3">
                   <CheckCircle className="h-5 w-5 text-primary-600 flex-shrink-0" />
-                  <span className="text-neutral-dark-grey">
-                    Quick response within 24 hours
-                  </span>
+                  <span className="text-neutral-dark-grey">Quick response within 24 hours</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <CheckCircle className="h-5 w-5 text-primary-600 flex-shrink-0" />
-                  <span className="text-neutral-dark-grey">
-                    Personalized guidance from experts
-                  </span>
+                  <span className="text-neutral-dark-grey">Personalized guidance from experts</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <CheckCircle className="h-5 w-5 text-primary-600 flex-shrink-0" />
-                  <span className="text-neutral-dark-grey">
-                    Free consultation for students
-                  </span>
+                  <span className="text-neutral-dark-grey">Free consultation for students</span>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-3xl shadow-2xl p-8 border border-primary-100">
+            <div className="bg-white rounded-2xl shadow-xl p-8 border border-primary-100">
               {isSubmitted ? (
-                <div className="text-center py-12">
-                  <div className="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <CheckCircle className="h-10 w-10 text-green-600" />
+                <div className="text-center py-8">
+                  <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="h-8 w-8 text-green-600" />
                   </div>
-                  <h3 className="font-display font-bold text-2xl text-primary-800 mb-4">
+                  <h3 className="font-display font-bold text-xl text-primary-800 mb-2">
                     Message Sent Successfully!
                   </h3>
                   <p className="text-neutral-dark-grey">
-                    Thank you for reaching out. We'll get back to you within 24 hours.
+                    We'll get back to you within 24 hours.
                   </p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-primary-800 font-medium mb-1">
+                        Full Name *
+                      </label>
+                      <input
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-4 py-3 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                        placeholder="Your full name"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-primary-800 font-medium mb-1">
+                        Email Address *
+                      </label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-4 py-3 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                        placeholder="your.email@example.com"
+                      />
+                    </div>
+                  </div>
+
                   <div>
-                    <label className="block text-primary-800 font-medium mb-2">
+                    <label className="block text-primary-800 font-medium mb-1">
                       I am a... *
                     </label>
                     <select
@@ -311,40 +296,8 @@ const ContactUs = () => {
                     </select>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-primary-800 font-medium mb-2">
-                        Full Name *
-                      </label>
-                      <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-3 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                        placeholder="Your full name"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-primary-800 font-medium mb-2">
-                        Email Address *
-                      </label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-3 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                        placeholder="your.email@example.com"
-                      />
-                    </div>
-                  </div>
-
                   <div>
-                    <label className="block text-primary-800 font-medium mb-2">
+                    <label className="block text-primary-800 font-medium mb-1">
                       Subject *
                     </label>
                     <input
@@ -359,7 +312,7 @@ const ContactUs = () => {
                   </div>
 
                   <div>
-                    <label className="block text-primary-800 font-medium mb-2">
+                    <label className="block text-primary-800 font-medium mb-1">
                       Message *
                     </label>
                     <textarea
@@ -367,7 +320,7 @@ const ContactUs = () => {
                       value={formData.message}
                       onChange={handleInputChange}
                       required
-                      rows={5}
+                      rows={4}
                       className="w-full px-4 py-3 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors resize-none"
                       placeholder="Please provide details about your inquiry..."
                     />
@@ -375,7 +328,7 @@ const ContactUs = () => {
 
                   <button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-primary-600 to-primary-800 text-white px-8 py-4 rounded-lg font-bold text-lg hover:from-primary-700 hover:to-primary-900 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                    className="w-full bg-gradient-to-r from-primary-600 to-primary-800 text-white px-8 py-3 rounded-lg font-bold hover:from-primary-700 hover:to-primary-900 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
                   >
                     <span>Send Message</span>
                     <Send className="h-5 w-5" />
@@ -388,117 +341,78 @@ const ContactUs = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 bg-white">
+      <section className="py-16 bg-gradient-to-r from-primary-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center bg-primary-100 px-4 py-2 rounded-full border border-primary-200 mb-6">
-              <HeadphonesIcon className="h-4 w-4 text-primary-600 mr-2" />
-              <span className="text-primary-600 font-medium">Quick Answers</span>
-            </div>
-
-            <h2 className="font-display font-bold text-4xl md:text-5xl text-primary-800 mb-6">
+          <div className="text-center mb-12">
+            <h2 className="font-display font-bold text-3xl md:text-4xl text-primary-800 mb-4">
               Frequently Asked{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-warning">
                 Questions
               </span>
             </h2>
+            <p className="text-lg text-neutral-dark-grey">Quick answers to common questions</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <div className="bg-gradient-to-br from-primary-50 to-white p-6 rounded-xl border border-primary-200">
-                <h3 className="font-display font-bold text-xl text-primary-800 mb-3">
-                  How accurate are your university recommendations?
-                </h3>
-                <p className="text-neutral-dark-grey">
-                  Our recommendations are based on official university data, Z-score
-                  calculations, and historical acceptance rates, providing 98%
-                  accuracy in matching students with suitable programs.
-                </p>
-              </div>
-
-              <div className="bg-gradient-to-br from-primary-50 to-white p-6 rounded-xl border border-primary-200">
-                <h3 className="font-display font-bold text-xl text-primary-800 mb-3">
-                  Is the platform free for students?
-                </h3>
-                <p className="text-neutral-dark-grey">
-                  Yes! Our core services including university recommendations,
-                  Z-score calculations, and basic guidance are completely free for
-                  all Sri Lankan students.
-                </p>
-              </div>
-
-              <div className="bg-gradient-to-br from-primary-50 to-white p-6 rounded-xl border border-primary-200">
-                <h3 className="font-display font-bold text-xl text-primary-800 mb-3">
-                  Do you cover all Sri Lankan universities?
-                </h3>
-                <p className="text-neutral-dark-grey">
-                  We cover all state universities and most recognized private
-                  institutions in Sri Lanka, with detailed information about
-                  programs, requirements, and admission processes.
-                </p>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white p-6 rounded-xl border border-primary-200 shadow-sm">
+              <h3 className="font-display font-bold text-lg text-primary-800 mb-3">
+                How accurate are your recommendations?
+              </h3>
+              <p className="text-neutral-dark-grey">
+                Our recommendations are based on official data with 98% accuracy in matching students with suitable programs.
+              </p>
             </div>
 
-            <div className="space-y-6">
-              <div className="bg-gradient-to-br from-primary-50 to-white p-6 rounded-xl border border-primary-200">
-                <h3 className="font-display font-bold text-xl text-primary-800 mb-3">
-                  How often is your data updated?
-                </h3>
-                <p className="text-neutral-dark-grey">
-                  We update our university data, cutoff marks, and program
-                  information regularly, typically every semester or when
-                  universities announce changes.
-                </p>
-              </div>
+            <div className="bg-white p-6 rounded-xl border border-primary-200 shadow-sm">
+              <h3 className="font-display font-bold text-lg text-primary-800 mb-3">
+                Is the platform free for students?
+              </h3>
+              <p className="text-neutral-dark-grey">
+                Yes! Our core services including university recommendations and Z-score calculations are completely free.
+              </p>
+            </div>
 
-              <div className="bg-gradient-to-br from-primary-50 to-white p-6 rounded-xl border border-primary-200">
-                <h3 className="font-display font-bold text-xl text-primary-800 mb-3">
-                  Can I get personalized guidance?
-                </h3>
-                <p className="text-neutral-dark-grey">
-                  Absolutely! Our platform offers personalized recommendations
-                  based on your academic performance, interests, and career goals.
-                  You can also book one-on-one consultations with our experts.
-                </p>
-              </div>
+            <div className="bg-white p-6 rounded-xl border border-primary-200 shadow-sm">
+              <h3 className="font-display font-bold text-lg text-primary-800 mb-3">
+                How often is data updated?
+              </h3>
+              <p className="text-neutral-dark-grey">
+                We update university data and cutoff marks regularly, typically every semester or when universities announce changes.
+              </p>
+            </div>
 
-              <div className="bg-gradient-to-br from-primary-50 to-white p-6 rounded-xl border border-primary-200">
-                <h3 className="font-display font-bold text-xl text-primary-800 mb-3">
-                  What if I need help outside business hours?
-                </h3>
-                <p className="text-neutral-dark-grey">
-                  You can always send us an email or use our contact form. We
-                  respond to all inquiries within 24 hours, and our platform
-                  resources are available 24/7.
-                </p>
-              </div>
+            <div className="bg-white p-6 rounded-xl border border-primary-200 shadow-sm">
+              <h3 className="font-display font-bold text-lg text-primary-800 mb-3">
+                Can I get personalized guidance?
+              </h3>
+              <p className="text-neutral-dark-grey">
+                Absolutely! Our platform offers personalized recommendations and you can book consultations with our experts.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-primary-600 to-primary-800">
+      <section className="py-16 bg-gradient-to-r from-primary-600 to-primary-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="font-display font-bold text-4xl md:text-5xl text-white mb-6">
+          <h2 className="font-display font-bold text-3xl md:text-4xl text-white mb-4">
             Ready to Begin Your Journey?
           </h2>
-          <p className="text-xl text-primary-100/80 mb-8">
-            Join thousands of students who have successfully navigated their path
-            to higher education with UniRoute.
+          <p className="text-lg text-primary-100/80 mb-8">
+            Join thousands of students who have successfully navigated their path to higher education with UniRoute.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/register"
-              className="group bg-warning text-primary-800 px-8 py-4 rounded-xl font-bold text-lg hover:bg-white transition-colors duration-200 flex items-center justify-center shadow-lg hover:shadow-xl"
+              className="group bg-warning text-primary-800 px-8 py-3 rounded-xl font-bold hover:bg-white transition-colors duration-200 flex items-center justify-center shadow-lg hover:shadow-xl"
             >
               Start Your Journey
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />
             </Link>
             <Link
               to="/about"
-              className="group border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white hover:text-primary-800 transition-colors duration-200 flex items-center justify-center"
+              className="group border-2 border-white text-white px-8 py-3 rounded-xl font-bold hover:bg-white hover:text-primary-800 transition-colors duration-200 flex items-center justify-center"
             >
               Learn More About Us
             </Link>
