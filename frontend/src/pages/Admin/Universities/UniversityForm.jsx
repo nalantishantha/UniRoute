@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getCurrentUser } from '../../../utils/auth';
+import AdminLayout from '../../../components/common/Admin/AdminLayout';
 import {
   Building2,
   ChevronLeft,
@@ -24,7 +25,7 @@ import {
 const UniversityForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const isEditMode = Boolean(id);
+  const isEditMode = Boolean(id) && id !== 'create' && id !== 'new';
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
@@ -181,39 +182,25 @@ const UniversityForm = () => {
 
   if (loading && isEditMode) {
     return (
-      <div className="p-6">
+      <AdminLayout 
+        pageTitle="Loading..."
+        pageDescription="Loading university information"
+      >
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-3">
-          <Link
-            to="/admin/universities"
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <ChevronLeft className="h-6 w-6 text-gray-600" />
-          </Link>
-          <Building2 className="h-8 w-8 text-blue-600" />
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              {isEditMode ? 'Edit University' : 'Add New University'}
-            </h1>
-            <p className="text-gray-600">
-              {isEditMode ? 'Update university information' : 'Create a new university profile'}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Message */}
-      {message.text && (
+    <AdminLayout 
+      pageTitle={isEditMode ? "Edit University" : "Add New University"}
+      pageDescription="Manage university information and details"
+    >
+      <div className="max-w-4xl mx-auto">
+        {/* Message */}
+        {message.text && (
         <div className={`mb-6 p-4 rounded-lg flex items-center space-x-2 ${
           message.type === 'success' 
             ? 'bg-green-50 text-green-800 border border-green-200' 
@@ -634,7 +621,8 @@ const UniversityForm = () => {
           </div>
         </div>
       </form>
-    </div>
+      </div>
+    </AdminLayout>
   );
 };
 

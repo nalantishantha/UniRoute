@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import AdminLayout from '../../../components/common/Admin/AdminLayout';
 
 const ProgramView = () => {
   const { id } = useParams();
@@ -148,45 +149,53 @@ const ProgramView = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-600"></div>
-      </div>
+      <AdminLayout pageTitle="Program Details" pageDescription="Loading program information">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-600"></div>
+        </div>
+      </AdminLayout>
     );
   }
 
   if (!program) {
     return (
-      <div className="max-w-6xl mx-auto p-6">
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Program Not Found</h1>
-          <p className="text-gray-600 mb-6">The program you're looking for doesn't exist.</p>
-          <button
-            onClick={() => navigate('/admin/programs')}
-            className="px-6 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700"
-          >
-            Back to Programs
-          </button>
+      <AdminLayout pageTitle="Program Not Found" pageDescription="Program information not available">
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-white rounded-lg shadow-md p-6 text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Program Not Found</h1>
+            <p className="text-gray-600 mb-6">The program you're looking for doesn't exist.</p>
+            <button
+              onClick={() => navigate('/admin/programs')}
+              className="px-6 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700"
+            >
+              Back to Programs
+            </button>
+          </div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{program.name}</h1>
-            <div className="flex items-center space-x-2 mt-2">
-              {getTypeBadge(program.type)}
-              <span className="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
-                {program.level.toUpperCase()}
-              </span>
-              {getStatusBadge(program.isActive)}
+    <AdminLayout 
+      pageTitle="Program Details" 
+      pageDescription={`View and manage ${program.name} program details`}
+    >
+      <div className="max-w-6xl mx-auto">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">{program.name}</h1>
+              <div className="flex items-center space-x-2 mt-2">
+                {getTypeBadge(program.type)}
+                <span className="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                  {program.level.toUpperCase()}
+                </span>
+                {getStatusBadge(program.isActive)}
+              </div>
             </div>
-          </div>
-          <div className="flex space-x-2">
+            <div className="flex space-x-2">
             <button
               onClick={() => navigate(`/admin/programs/edit/${program.id}`)}
               className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700"
@@ -374,8 +383,9 @@ const ProgramView = () => {
             Edit Program
           </button>
         </div>
+        </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 

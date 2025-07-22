@@ -21,6 +21,7 @@ import {
   CheckCircle,
   Award
 } from 'lucide-react';
+import AdminLayout from '../../../components/common/Admin/AdminLayout';
 
 const StudentView = () => {
   const { id } = useParams();
@@ -121,84 +122,80 @@ const StudentView = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading student details...</p>
+      <AdminLayout pageTitle="Student Details" pageDescription="Loading student information">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading student details...</p>
+          </div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   if (!student) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Student Not Found</h2>
-          <p className="text-gray-600 mb-4">The student you're looking for doesn't exist.</p>
-          <Link
-            to="/admin/students"
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            Back to Students
-          </Link>
+      <AdminLayout pageTitle="Student Not Found" pageDescription="Student information not available">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Student Not Found</h2>
+            <p className="text-gray-600 mb-4">The student you're looking for doesn't exist.</p>
+            <Link
+              to="/admin/students"
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              Back to Students
+            </Link>
+          </div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <Link
-                to="/admin/students"
-                className="text-gray-600 hover:text-gray-900"
-              >
-                <ChevronLeft className="h-6 w-6" />
-              </Link>
-              <div className="flex items-center space-x-2">
-                <GraduationCap className="h-6 w-6 text-blue-500" />
-                <h1 className="text-2xl font-bold text-gray-900">Student Details</h1>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Link
-                to={`/admin/students/${student.id}/edit`}
-                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center space-x-2"
-              >
-                <Edit className="h-4 w-4" />
-                <span>Edit Student</span>
-              </Link>
-              <button
-                onClick={handleToggleStatus}
-                className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
-                  student.is_active
-                    ? 'bg-orange-500 text-white hover:bg-orange-600'
-                    : 'bg-green-500 text-white hover:bg-green-600'
-                }`}
-              >
-                {student.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
-                <span>{student.is_active ? 'Deactivate' : 'Activate'}</span>
-              </button>
-              <button
-                onClick={handleDeleteStudent}
-                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center space-x-2"
-              >
-                <Trash2 className="h-4 w-4" />
-                <span>Delete</span>
-              </button>
-            </div>
+    <AdminLayout 
+      pageTitle="Student Details" 
+      pageDescription={`View and manage ${student.first_name} ${student.last_name}'s information`}
+    >
+      <div className="max-w-7xl mx-auto">
+        {/* Action Buttons */}
+        <div className="mb-6 flex items-center justify-between">
+          <Link
+            to="/admin/students"
+            className="text-gray-600 hover:text-gray-900 flex items-center space-x-2"
+          >
+            <ChevronLeft className="h-5 w-5" />
+            <span>Back to Students</span>
+          </Link>
+          <div className="flex items-center space-x-3">
+            <Link
+              to={`/admin/students/${student.id}/edit`}
+              className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center space-x-2"
+            >
+              <Edit className="h-4 w-4" />
+              <span>Edit Student</span>
+            </Link>
+            <button
+              onClick={handleToggleStatus}
+              className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
+                student.is_active
+                  ? 'bg-orange-500 text-white hover:bg-orange-600'
+                  : 'bg-green-500 text-white hover:bg-green-600'
+              }`}
+            >
+              {student.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+              <span>{student.is_active ? 'Deactivate' : 'Activate'}</span>
+            </button>
+            <button
+              onClick={handleDeleteStudent}
+              className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center space-x-2"
+            >
+              <Trash2 className="h-4 w-4" />
+              <span>Delete</span>
+            </button>
           </div>
         </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Message */}
         {message.text && (
           <div className={`mb-6 p-4 rounded-lg flex items-center space-x-3 ${
@@ -358,7 +355,7 @@ const StudentView = () => {
           </div>
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 
