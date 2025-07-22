@@ -1,0 +1,1168 @@
+/* Copy all styles from Dashboarduser.css and add these edit button styles */
+
+/* Dark Theme Hero Section */
+.simple-hero-section {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  padding: 3.5rem 0;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.simple-hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 70% 80%, rgba(168, 85, 247, 0.1) 0%, transparent 50%);
+}
+
+.simple-hero-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-text {
+  flex: 1;
+}
+
+.simple-hero-title {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.simple-hero-subtitle {
+  font-size: 1.1rem;
+  color: #cbd5e1;
+  font-weight: 400;
+  line-height: 1.6;
+  max-width: 550px;
+}
+
+.simple-hero-edit-btn {
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  border-radius: 10px;
+  padding: 0.8rem 1.4rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  color: #60a5fa;
+  backdrop-filter: blur(10px);
+}
+
+.simple-hero-edit-btn:hover {
+  background: rgba(59, 130, 246, 0.3);
+  border-color: rgba(59, 130, 246, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2);
+}
+
+/* Edit inputs for simple hero */
+.hero-title-edit-simple {
+  font-size: 2rem;
+  font-weight: 700;
+  background: white;
+  border: 2px dashed #3b82f6;
+  color: #1f2937;
+  padding: 0.5rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  width: 100%;
+}
+
+.hero-subtitle-edit-simple {
+  font-size: 1rem;
+  background: white;
+  border: 2px dashed #3b82f6;
+  color: #6b7280;
+  padding: 0.5rem;
+  border-radius: 8px;
+  width: 100%;
+}
+
+/* Remove old hero styles - comment out or delete the old .dashboard-hero styles */
+/*
+.dashboard-hero {
+  // Old hero styles - remove these
+}
+*/
+
+/* Keep all existing edit button styles */
+.stats-edit-btn {
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.stats-edit-btn:hover {
+  background: #f8fafc;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+}
+
+/* Hero Edit Button */
+.hero-edit-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  color: white;
+  cursor: pointer;
+  z-index: 20;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.hero-edit-btn:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+/* Hero Edit Inputs */
+.hero-title-edit {
+  font-size: 3.5rem;
+  font-weight: 800;
+  background: transparent;
+  border: 2px dashed rgba(255,255,255,0.5);
+  color: white;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem;
+  width: 100%;
+  border-radius: 8px;
+}
+
+.hero-subtitle-edit {
+  font-size: 1.4rem;
+  background: transparent;
+  border: 2px dashed rgba(255,255,255,0.5);
+  color: white;
+  margin-bottom: 2rem;
+  padding: 0.5rem;
+  width: 100%;
+  resize: vertical;
+  min-height: 80px;
+  border-radius: 8px;
+}
+
+/* Stats Section Edit */
+.stats-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.stats-edit-btn {
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.stats-edit-btn:hover {
+  background: #f8fafc;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+}
+
+.stat-edit-individual-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.stat-edit-individual-btn:hover {
+  background: #4f46e5;
+}
+
+/* Section Headers with Edit Buttons */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.section-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-edit-btn {
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.section-edit-btn:hover {
+  background: #f8fafc;
+  transform: translateY(-2px);
+}
+
+/* Action Card Edit Button */
+.action-edit-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
+  border-radius: 4px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.action-edit-btn:hover {
+  background: #f8fafc;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+/* Activity Item Edit Button */
+.activity-edit-btn {
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
+  border-radius: 4px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.activity-edit-btn:hover {
+  background: #f8fafc;
+  transform: scale(1.05);
+}
+
+/* Metric Card Edit Button */
+.metric-edit-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
+  border-radius: 4px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.metric-edit-btn:hover {
+  background: #f8fafc;
+  transform: scale(1.05);
+}
+
+/* Status Item Edit Button */
+.status-edit-btn {
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
+  border-radius: 4px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.7rem;
+  cursor: pointer;
+  margin-left: auto;
+  transition: all 0.3s ease;
+}
+
+.status-edit-btn:hover {
+  background: #f8fafc;
+  transform: scale(1.05);
+}
+
+/* Update status-item to accommodate edit button */
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.status-item:last-child {
+  border-bottom: none;
+}
+
+/* Add or update in Dashboard.css or Dashboarduser.css */
+.stats-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* University Dashboard Styles */
+.university-dashboard-page {
+  min-height: 100vh;
+  background: #f8fafc;
+  font-family: 'Inter', sans-serif;
+}
+
+.dashboard-main-content {
+  flex: 1;
+  margin-left: 0; /* CHANGED: Default when sidebar is closed */
+  min-height: 100vh;
+  transition: margin-left 0.3s ease; /* CHANGED: Add smooth transition */
+  background: #f8fafc;
+  padding-top: 90px;
+}
+
+.dashboard-main-content.sidebar-expanded {
+  margin-left: 288px; /* CHANGED: Updated to match UniversitySidebar width */
+}
+
+.dashboard-main-content.sidebar-collapsed {
+  margin-left: 0; /* CHANGED: Content takes full width when sidebar is closed */
+}
+
+/* Update navbar positioning */
+.university-navbar.sidebar-expanded {
+  margin-left: 288px; /* CHANGED: Updated to match sidebar width */
+  width: calc(100vw - 288px);
+}
+
+.university-navbar.sidebar-collapsed {
+  margin-left: 0; /* CHANGED: Updated for new sidebar behavior */
+  width: 100vw;
+}
+
+/* Enhanced Hero Section */
+.dashboard-hero {
+  position: relative;
+  padding: 4rem 3rem;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%);
+  margin: 2rem;
+  border-radius: 24px;
+  margin-bottom: 3rem;
+  box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
+}
+
+/* Enhanced Stats Section */
+.dashboard-stats-section {
+  margin: 3rem 2rem;
+}
+
+.stats-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.stats-header h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+.stats-header p {
+  color: #64748b;
+  font-size: 1.1rem;
+}
+
+.stats-edit-btn {
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.stats-edit-btn:hover {
+  background: #f8fafc;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+}
+
+
+.dashboard-stats-row-unique {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 1.5rem !important;
+  justify-content: center;
+  align-items: stretch;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Unique alignment for stat cards row to match grid below */
+.dashboard-stats-align-row {
+  max-width: 100%;         /* Make it full width of the container */
+  margin-left: 0;          /* Remove side margins */
+  margin-right: 0;
+  padding-left: 2rem;      /* Match your grid-section horizontal padding */
+  padding-right: 2rem;
+  box-sizing: border-box;
+}
+
+.dashboard-stats-row-unique {
+  display: flex;
+  gap: 2.5rem;
+  justify-content: space-between;
+  align-items: stretch;
+  
+}
+
+/* Responsive: Stack on small screens */
+@media (max-width: 1100px) {
+  .dashboard-stats-row-unique {
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+  .dashboard-stats-align-row {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+
+/* Ensure stat-card flexes properly in the row */
+.dashboard-stats-row-unique .stat-card {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.stat-card {
+  position: relative;
+  background: white;
+  border-radius: 20px;
+  padding: 2.5rem;
+  text-align: center;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+}
+
+.stat-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.stat-card:hover .stat-background {
+  opacity: 0.1;
+}
+
+.stat-card:hover {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 0 20px 60px rgba(99, 102, 241, 0.3);
+}
+
+.stat-content {
+  position: relative;
+  z-index: 2;
+}
+
+.stat-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  animation: iconBounce 2s ease-in-out infinite;
+}
+
+@keyframes iconBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.stat-value {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #6366f1;
+  margin-bottom: 0.5rem;
+  animation: countUp 2s ease-out;
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.stat-label {
+  font-size: 1.1rem;
+  color: #64748b;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.stat-trend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #10b981;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.trend-indicator {
+  animation: trendPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes trendPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+.stat-edit-individual-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.stat-edit-individual-btn:hover {
+  background: #f8fafc;
+  transform: scale(1.05);
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  margin: 2rem;
+}
+
+.grid-section {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+  animation: fadeInUp 1s ease-out;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.section-header h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.section-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.section-badge {
+  background: #6366f1;
+  color: white;
+  padding: 0.3rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.section-edit-btn {
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.section-edit-btn:hover {
+  background: #f8fafc;
+  transform: translateY(-2px);
+}
+
+/* Quick Actions */
+.quick-actions-section {
+  grid-column: span 2;
+}
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.quick-actions-grid.five-column {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.action-card {
+  position: relative;
+  border-radius: 16px;
+  padding: 2rem;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+  border: 2px solid transparent;
+  background: white;
+}
+
+.action-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.1;
+  transition: opacity 0.3s ease;
+}
+
+.action-card.color-blue .action-background {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.action-card.color-purple .action-background {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.action-card.color-green .action-background {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.action-card.color-orange .action-background {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.action-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.action-card:hover .action-background {
+  opacity: 0.15;
+}
+
+.action-content {
+  position: relative;
+  z-index: 2;
+}
+
+.action-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #1e293b;
+}
+
+.action-description {
+  color: #64748b;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.action-stats {
+  font-size: 0.9rem;
+  color: #6366f1;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+  transform: translateX(5px);
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+}
+
+.btn-arrow {
+  transition: transform 0.3s ease;
+}
+
+.action-btn:hover .btn-arrow {
+  transform: translateX(5px);
+}
+
+.action-edit-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
+  border-radius: 4px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.action-edit-btn:hover {
+  background: #f8fafc;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+/* Activities Section */
+.activities-section {
+  /* Grid positioning handled by parent */
+}
+
+.view-all-btn {
+  background: #f1f5f9;
+  color: #6366f1;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.view-all-btn:hover {
+  background: #6366f1;
+  color: white;
+}
+
+.activities-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  background: #f8fafc;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.activity-item:hover {
+  background: #e2e8f0;
+  transform: translateX(5px);
+}
+
+.activity-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.activity-icon.announcement { background: #dbeafe; }
+.activity-icon.event { background: #fecaca; }
+.activity-icon.course { background: #d1fae5; }
+.activity-icon.student { background: #fef3c7; }
+
+.activity-content {
+  flex: 1;
+}
+
+.activity-content h5 {
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.25rem;
+}
+
+.activity-time {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.priority-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.priority-badge.high { background: #fecaca; color: #dc2626; }
+.priority-badge.medium { background: #fef3c7; color: #d97706; }
+.priority-badge.low { background: #d1fae5; color: #059669; }
+
+.activity-edit-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.activity-edit-btn:hover {
+  background: #f8fafc;
+  transform: scale(1.05);
+}
+
+/* Metrics Section */
+.metrics-section {
+  /* Grid positioning handled by parent */
+}
+
+.metrics-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.metric-card {
+  background: #f8fafc;
+  padding: 1.5rem;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.metric-card:hover {
+  background: white;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.metric-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #6366f1;
+  margin-bottom: 0.5rem;
+}
+
+.metric-label {
+  color: #64748b;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.metric-progress {
+  width: 100%;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  border-radius: 3px;
+  transition: width 2s ease;
+  animation: progressFill 2s ease-out;
+}
+
+@keyframes progressFill {
+  from { width: 0%; }
+}
+
+.metric-edit-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.metric-edit-btn:hover {
+  background: #f8fafc;
+  transform: scale(1.05);
+}
+
+/* Status Section */
+.status-section {
+  /* Grid positioning handled by parent */
+}
+
+.status-indicator {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+}
+
+.status-indicator.online {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  background: #f8fafc;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.status-item:hover {
+  background: #e2e8f0;
+  transform: translateX(5px);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+.status-dot.online { background: #10b981; }
+.status-dot.warning { background: #f59e0b; }
+
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.status-uptime {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.status-edit-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.status-edit-btn:hover {
+  background: #f8fafc;
+  transform: scale(1.05);
+}
+
+/* Unique section header styles for System Status and Recent Activities */
+.system-status-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1.2rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.system-status-header h3 {
+  display: flex;
+  align-items: center;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1e293b;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.system-status-header .status-indicator {
+  margin-left: 0;
+  margin-right: 1rem;
+  font-size: 1rem;
+  padding: 0.6rem 1.3rem;
+}
+
+.system-status-header .section-edit-btn {
+  margin-left: auto;
+}
+
+.recent-activities-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1.2rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.recent-activities-header h3 {
+  display: flex;
+  align-items: center;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1e293b;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.recent-activities-header .view-all-btn {
+  margin-left: 0;
+  margin-right: 1rem;
+  font-size: 1rem;
+  padding: 0.6rem 1.3rem;
+}
+
+.recent-activities-header .section-edit-btn {
+  margin-left: auto;
+}
+
+/* Enhanced Animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animated-card {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.slide-in-animation {
+  animation: slideInRight 0.8s ease-out;
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.delay-0 { animation-delay: 0.1s; }
+.delay-1 { animation-delay: 0.2s; }
+.delay-2 { animation-delay: 0.3s; }
+.delay-3 { animation-delay: 0.4s; }
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .quick-actions-grid.five-column {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .dashboard-main-content.sidebar-expanded,
+  .dashboard-main-content.sidebar-collapsed {
+    margin-left: 0;
+    padding-top: 90px;
+  }
+  
+  .quick-actions-grid.five-column {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .quick-actions-grid.five-column {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-grid {
+    margin: 1rem;
+  }
+  
+  .dashboard-stats-section {
+    margin: 2rem 1rem;
+  }
+}

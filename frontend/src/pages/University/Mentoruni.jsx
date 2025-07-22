@@ -905,7 +905,7 @@ const Mentoruni = () => {
                 }}>
                   {selectedMentor.skills.map((skill, index) => (
                     <span key={index} style={{
-                      background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
+                      background: '#174A7C var(--tw-gradient-to-position)',
                       color: 'white',
                       padding: '0.5rem 1rem',
                       borderRadius: '20px',
@@ -1017,32 +1017,46 @@ const Mentoruni = () => {
                         href={RecommendationPDF}
                         download="Recommendation_Letter.pdf"
                         style={{
-                          background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '10px',
-                          padding: '0.75rem 1.5rem',
-                          fontWeight: '600',
+                          background: '#ffffff',
+                          color: '#2563eb',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '8px',
+                          padding: '0.6rem 1.2rem',
+                          fontWeight: '500',
                           cursor: 'pointer',
-                          fontSize: '0.95rem',
+                          fontSize: '0.875rem',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '0.75rem',
+                          gap: '0.5rem',
                           textDecoration: 'none',
-                          boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
-                          transition: 'all 0.3s ease',
+                          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+                          transition: 'all 0.2s ease',
                           letterSpacing: '0.025em'
                         }}
                         onMouseOver={e => {
-                          e.target.style.transform = 'translateY(-2px)';
-                          e.target.style.boxShadow = '0 8px 25px rgba(37, 99, 235, 0.4)';
+                          e.target.style.background = '#f8fafc';
+                          e.target.style.borderColor = '#2563eb';
+                          e.target.style.boxShadow = '0 2px 4px rgba(37, 99, 235, 0.1)';
                         }}
                         onMouseOut={e => {
-                          e.target.style.transform = 'translateY(0)';
-                          e.target.style.boxShadow = '0 4px 12px rgba(37, 99, 235, 0.3)';
+                          e.target.style.background = '#ffffff';
+                          e.target.style.borderColor = '#d1d5db';
+                          e.target.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.05)';
                         }}
                       >
-                        <span role="img" aria-label="Download">📥</span> Download
+                        <div style={{
+                          width: '16px',
+                          height: '16px',
+                          background: '#2563eb',
+                          borderRadius: '3px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '10px',
+                          color: 'white',
+                          fontWeight: 'bold'
+                        }}>⬇</div>
+                        Download
                       </a>
                     </div>
                   </div>
@@ -1216,20 +1230,6 @@ const Mentoruni = () => {
                   fontSize: '0.875rem'
                 }}
               >Cancel</button>
-              <button 
-                onClick={handleRejectMentor}
-                disabled={!rejectReason.trim()}
-                style={{
-                  background: rejectReason.trim() ? '#ef4444' : '#d1d5db',
-                  color: 'white',
-                  border: 'none',
-                  padding: '0.5rem 1rem',
-                  borderRadius: '6px',
-                  fontWeight: '500',
-                  cursor: rejectReason.trim() ? 'pointer' : 'not-allowed',
-                  fontSize: '0.875rem'
-                }}
-              >Send Rejection</button>
             </div>
           </div>
         </div>

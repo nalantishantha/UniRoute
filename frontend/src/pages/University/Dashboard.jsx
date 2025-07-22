@@ -244,7 +244,7 @@ const Dashboard = () => {
           {/* Quick Actions with Edit Button */}
           <div className="grid-section quick-actions-section expanded">
             <div className="section-header">
-              <h3>🚀 Quick Actions</h3>
+              <h2> Quick Actions</h2>
               <div className="section-header-right">
                 <span className="section-badge">5 Available</span>
                 <button onClick={handleEditQuickActions} className="section-edit-btn">
@@ -282,7 +282,6 @@ const Dashboard = () => {
           <div className="grid-section activities-section">
             <div className="recent-activities-header">
               <h3>Recent Activities</h3>
-              <button className="view-all-btn">View All</button>
               <button onClick={handleEditActivities} className="section-edit-btn">
                 {editingActivities ? '💾 Save' : '✏️ Edit'}
               </button>

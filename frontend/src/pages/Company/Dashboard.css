@@ -780,7 +780,7 @@
 
 .view-all-btn {
   background: #f1f5f9;
-  color: #6366f1;
+  color: #174A7C var(--tw-gradient-to-position);;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 8px;
