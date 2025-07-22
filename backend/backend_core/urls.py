@@ -1,5 +1,8 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+
 
 urlpatterns = [
 
@@ -22,4 +25,7 @@ urlpatterns = [
     path('api/advertisements/', include('apps.advertisements.urls')),
     
     path('api/administration/', include('apps.administration.urls')),
+    path('api/resources/', include('apps.academic_resources.urls')),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
