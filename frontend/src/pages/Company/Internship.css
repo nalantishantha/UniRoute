@@ -386,7 +386,7 @@
 /* Edit Button - Match Course.css exactly */
 .btn-edit {
   flex: 1;
-  background: linear-gradient(rgba(49, 43, 167, 0.8), rgba(177, 160, 195, 0.8));
+  background: linear-gradient(rgba(49, 43, 167, 0.8), rgba(43, 40, 46, 0.8));
   color: white;
   border: none;
   padding: 0.6rem 1rem;
@@ -409,7 +409,7 @@
   top: 2px;
   left: 350px;
   background: transparent;
-  color: rgb(195, 34, 34);
+  color: rgb(255, 0, 0);
   border: none;
   width: 30px;
   height: 30px;
