@@ -522,14 +522,14 @@ const UniversityGuide = () => {
                     </div>
                   </div>
                   
-                  <div className="flex space-x-3">
+                  {/* <div className="flex space-x-3">
                     <button className="flex-1 bg-accent-100 text-primary-400 px-4 py-3 rounded-lg hover:bg-accent-200 transition-all duration-200 font-medium text-sm hover:shadow-md">
                       Compare Universities
                     </button>
                     <button className="flex-1 bg-blue-400 from-primary-400 to-accent-400 text-white px-4 py-3 rounded-lg hover:from-primary-600 hover:to-accent-600 transition-all duration-200 font-medium text-sm hover:shadow-lg">
                       View Details
                     </button>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>
