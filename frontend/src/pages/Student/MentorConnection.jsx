@@ -49,7 +49,7 @@ const MentorConnection = () => {
         topic: formData.topic,
         scheduled_at: scheduledAt,
         duration_minutes: parseInt(formData.duration),
-        status: "scheduled",
+        status: "Pending",
       };
 
       const response = await fetch("/api/mentoring/sessions/", {
