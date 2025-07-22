@@ -69,13 +69,13 @@ const initialMentorRequests = [
 const initialActiveMentors = [
   {
     id: 101,
-    name: 'Kasun Gunawardhana',
-    email: 'kasun.gunawardhana@tech.com',
+    name: 'Kasuni Gunawardhana',
+    email: 'kasuni.gunawardhana@tech.com',
     specialization: 'Software Engineering',
     experience: '1 years',
     students: 12,
     rating: 4.8,
-    profileImage: '/api/placeholder/100/100',
+    profileImage: 'https://randomuser.me/api/portraits/men/11.jpg',
     joinDate: '2023-09-15'
   },
   {
@@ -279,7 +279,7 @@ const Mentoruni = () => {
                     background: '#f9fafb',
                     border: '1px solid #e5e7eb',
                     borderRadius: '12px',
-                    padding: '1.5rem',
+                    padding: '2rem',
                     transition: 'all 0.2s',
                     width: '400px',
                     minWidth: '400px',
@@ -297,8 +297,8 @@ const Mentoruni = () => {
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '1rem',
-                      marginBottom: '1rem'
+                      gap: '1.25rem',
+                      marginBottom: '1.75rem'
                     }}>
                       <div style={{
                         width: '60px',
@@ -309,19 +309,32 @@ const Mentoruni = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontSize: '1.5rem',
-                        color: '#6b7280'
-                      }}>👨‍🏫</div>
-                      <div>
+                        color: '#6b7280',
+                        overflow: 'hidden'
+                      }}>
+                        <img 
+                          src={`https://randomuser.me/api/portraits/${mentor.id % 2 === 0 ? 'men' : 'women'}/${(mentor.id % 50) + 1}.jpg`}
+                          alt={mentor.name}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                          }}
+                        />
+                      </div>
+                      <div style={{ flex: 1 }}>
                         <h3 style={{
-                          fontSize: '1.1rem',
+                          fontSize: '1.15rem',
                           fontWeight: '600',
                           color: '#1e293b',
-                          margin: '0 0 0.25rem 0'
+                          margin: '0 0 0.5rem 0',
+                          lineHeight: '1.3'
                         }}>{mentor.name}</h3>
                         <p style={{
                           color: '#64748b',
-                          fontSize: '0.875rem',
-                          margin: '0'
+                          fontSize: '0.9rem',
+                          margin: '0',
+                          fontWeight: '500'
                         }}>{mentor.specialization}</p>
                       </div>
                     </div>
@@ -330,45 +343,59 @@ const Mentoruni = () => {
                     <div style={{
                       display: 'grid',
                       gridTemplateColumns: '1fr 1fr',
-                      gap: '0.5rem',
-                      marginBottom: '1rem',
-                      fontSize: '0.875rem'
+                      gap: '0.75rem 1rem',
+                      marginBottom: '1.5rem',
+                      fontSize: '0.875rem',
+                      lineHeight: '1.4'
                     }}>
-                      <div><strong>Registration number:</strong> {mentor.Registrationnumber}</div>
-                      <div><strong>Year:</strong> {mentor.Year}</div>
-                      <div style={{ gridColumn: '1 / -1' }}><strong>Education:</strong> {mentor.education}</div>
-                      <div></div>
-                      <div style={{ gridColumn: '1 / -1' }}><strong>Email:</strong> {mentor.email}</div>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <strong style={{ marginBottom: '0.25rem' }}>Registration:</strong>
+                        <span style={{ color: '#64748b' }}>{mentor.Registrationnumber}</span>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <strong style={{ marginBottom: '0.25rem' }}>Year:</strong>
+                        <span style={{ color: '#64748b' }}>{mentor.Year}</span>
+                      </div>
+                      <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', marginTop: '0.5rem' }}>
+                        <strong style={{ marginBottom: '0.25rem' }}>Education:</strong>
+                        <span style={{ color: '#64748b' }}>{mentor.education}</span>
+                      </div>
+                      <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', marginTop: '0.5rem' }}>
+                        <strong style={{ marginBottom: '0.25rem' }}>Email:</strong>
+                        <span style={{ color: '#64748b' }}>{mentor.email}</span>
+                      </div>
                     </div>
 
                     {/* Bio */}
-                    <div style={{ marginBottom: '1rem' }}>
-                      <strong style={{ fontSize: '0.875rem' }}>Bio:</strong>
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <strong style={{ fontSize: '0.875rem', marginBottom: '0.5rem', display: 'block' }}>Bio:</strong>
                       <p style={{
                         color: '#64748b',
                         fontSize: '0.875rem',
-                        margin: '0.25rem 0',
-                        lineHeight: '1.5'
+                        margin: '0',
+                        lineHeight: '1.6',
+                        textAlign: 'justify'
                       }}>{mentor.bio}</p>
                     </div>
 
                     {/* Skills */}
-                    <div style={{ marginBottom: '1.5rem' }}>
-                      <strong style={{ fontSize: '0.875rem' }}>Skills:</strong>
+                    <div style={{ marginBottom: '2rem' }}>
+                      <strong style={{ fontSize: '0.875rem', marginBottom: '0.75rem', display: 'block' }}>Skills:</strong>
                       <div style={{
                         display: 'flex',
                         flexWrap: 'wrap',
                         gap: '0.5rem',
-                        marginTop: '0.5rem'
+                        alignItems: 'center'
                       }}>
                         {mentor.skills.map((skill, index) => (
                           <span key={index} style={{
                             background: '#eff6ff',
                             color: '#2563eb',
-                            padding: '0.25rem 0.5rem',
-                            borderRadius: '4px',
+                            padding: '0.375rem 0.75rem',
+                            borderRadius: '6px',
                             fontSize: '0.75rem',
-                            fontWeight: '500'
+                            fontWeight: '500',
+                            border: '1px solid #dbeafe'
                           }}>{skill}</span>
                         ))}
                       </div>
@@ -521,8 +548,19 @@ const Mentoruni = () => {
                         justifyContent: 'center',
                         fontSize: '1.75rem',
                         color: 'white',
-                        boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)'
-                      }}>👨‍🏫</div>
+                        boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
+                        overflow: 'hidden'
+                      }}>
+                        <img 
+                          src={`https://randomuser.me/api/portraits/${mentor.id % 2 === 0 ? 'men' : 'women'}/${(mentor.id % 50) + 10}.jpg`}
+                          alt={mentor.name}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                          }}
+                        />
+                      </div>
                       <div>
                         <h3 style={{
                           fontSize: '1.2rem',
@@ -725,8 +763,19 @@ const Mentoruni = () => {
                   fontSize: '2rem',
                   color: 'white',
                   boxShadow: '0 8px 25px rgba(37, 99, 235, 0.3)',
-                  border: '3px solid #ffffff'
-                }}>👨‍🏫</div>
+                  border: '3px solid #ffffff',
+                  overflow: 'hidden'
+                }}>
+                  <img 
+                    src={`https://randomuser.me/api/portraits/${selectedMentor.id % 2 === 0 ? 'men' : 'women'}/${(selectedMentor.id % 50) + 15}.jpg`}
+                    alt={selectedMentor.name}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
+                    }}
+                  />
+                </div>
                 <div>
                   <h2 style={{
                     fontSize: '1.75rem',

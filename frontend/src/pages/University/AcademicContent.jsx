@@ -1212,7 +1212,7 @@ const AcademicContent = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '1rem'
+          padding: '1rem',
             width: '100%',
             maxHeight: '90vh',
             overflow: 'auto',
@@ -1354,7 +1354,7 @@ const AcademicContent = () => {
               >Update Course</button>
             </div>
           </div>
-        </div>
+        
       )}
 
       {/* Add Subject Modal */}
