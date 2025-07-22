@@ -415,7 +415,7 @@ const Mentoruni = () => {
                         }}
                         style={{
                           flex: 1,
-                          background: '#2563eb',
+                          background: ' #174A7C var(--tw-gradient-to-position)',
                           color: 'white',
                           border: 'none',
                           borderRadius: '6px',
@@ -426,7 +426,7 @@ const Mentoruni = () => {
                           transition: 'all 0.2s'
                         }}
                         onMouseOver={(e) => {
-                          e.target.style.background = '#1d4ed8';
+                          e.target.style.background = '#2563eb';
                         }}
                         onMouseOut={(e) => {
                           e.target.style.background = '#2563eb';
@@ -1063,7 +1063,7 @@ const Mentoruni = () => {
                     handleAcceptMentor(selectedMentor);
                   }}
                   style={{
-                    background: '#2563eb',
+                    background: ' #174A7C var(--tw-gradient-to-position)',
                     color: 'white',
                     border: 'none',
                     borderRadius: '8px',

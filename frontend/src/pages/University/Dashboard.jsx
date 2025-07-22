@@ -383,7 +383,6 @@ const Dashboard = () => {
          <div className="grid-section status-section">
             <div className="system-status-header">
               <h3>System Status</h3>
-              <span className="status-indicator online">All Systems Online</span>
               <button onClick={handleEditStatus} className="section-edit-btn">
                 {editingStatus ? '💾 Save' : '✏️ Edit'}
               </button>

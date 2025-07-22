@@ -146,10 +146,9 @@
 }
 
 .step.completed .step-number {
-  background: linear-gradient(135deg, #10b981, #059669);
-  border-color: #10b981;
+  background: linear-gradient #174A7C var(--tw-gradient-to-position);
+  border-color: #174A7C var(--tw-gradient-to-position);
   color: white;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
 }
 
 .step.completed .step-number::before {
