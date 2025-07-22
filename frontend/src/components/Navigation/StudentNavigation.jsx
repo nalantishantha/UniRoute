@@ -2,12 +2,20 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import logoWhite from "../../assets/logoWhite.png";
 import { Bell, User, Settings, LogOut } from "lucide-react";
+import { logout } from "../../utils/auth"; // ✅ Import logout function
 
 const StudentNavigation = () => {
   const location = useLocation();
 
   const isActive = (path) => {
     return location.pathname === path;
+  };
+
+  // ✅ Handle logout with confirmation
+  const handleLogout = async () => {
+    if (window.confirm('Are you sure you want to logout?')) {
+      await logout();
+    }
   };
 
   const getLinkClass = (path) => {
@@ -101,12 +109,13 @@ const StudentNavigation = () => {
             >
               My Dashboard
             </Link>
-            <Link
-              to="/"
+            <button
+              onClick={handleLogout}
               className="text-white/90 hover:text-primary-100 transition-colors"
+              title="Logout"
             >
               <LogOut className="h-6 w-6" />
-            </Link>
+            </button>
           </div>
 
           <div className="md:hidden">
