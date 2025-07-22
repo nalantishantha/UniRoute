@@ -254,7 +254,6 @@
   padding: 0.3rem 0.5rem;
   font-size: 0.7rem;
   cursor: pointer;
-  z-index: 10;
   transition: all 0.3s ease;
 }
 
@@ -995,6 +994,132 @@
 .status-edit-btn:hover {
   background: #f8fafc;
   transform: scale(1.05);
+}
+
+/* University Dashboard Stats - Four Cards in Same Line */
+.university-dashboard-stats-container {
+  background: white;
+  margin: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 3rem 2rem;
+  margin-bottom: 3rem;
+  border: 1px solid #f1f5f9;
+}
+
+/* University Dashboard Stats Header */
+.university-dashboard-stats-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding: 2rem 0;
+}
+
+.university-dashboard-stats-header h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.025em;
+}
+
+.university-dashboard-stats-header p {
+  color: #64748b;
+  font-size: 1.125rem;
+  margin-bottom: 2rem;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+/* Stats Grid */
+.university-dashboard-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+/* Individual Stat Cards */
+.university-dashboard-stat-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 2.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.university-dashboard-stat-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(37, 99, 235, 0.15);
+  border-color: #3b82f6;
+}
+
+.university-dashboard-stat-icon {
+  font-size: 3.5rem;
+  color: #6366f1;
+  margin-bottom: 1.5rem;
+}
+
+.university-dashboard-stat-value {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #6366f1;
+  margin-bottom: 0.75rem;
+  line-height: 1;
+}
+
+.university-dashboard-stat-label {
+  font-size: 1.125rem;
+  color: #64748b;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.university-dashboard-stat-trend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #10b981;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .university-dashboard-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .university-dashboard-stats-header h2 {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .university-dashboard-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .university-dashboard-stats-container {
+    margin: 1rem;
+    padding: 2rem 1rem;
+  }
+  
+  .university-dashboard-stats-header h2 {
+    font-size: 1.75rem;
+  }
+  
+  .university-dashboard-stat-value {
+    font-size: 2.5rem;
+  }
 }
 
 /* Enhanced Animations */

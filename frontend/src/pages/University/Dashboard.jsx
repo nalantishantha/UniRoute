@@ -170,55 +170,48 @@ const Dashboard = () => {
       <main className={`dashboard-main-content ${isSidebarOpen ? 'sidebar-expanded' : 'sidebar-collapsed'}`}>
         
         {/* Enhanced Stats Section with Edit Button */}
-        <section className="dashboard-stats-section">
-          <div className="stats-header">
-            <div className="stats-header-content">
-              <div style={{ textAlign: 'center' }}>
-                <h2>University Overview</h2>
-                <p>Real-time insights and key metrics</p>
-                <button onClick={handleEditStats} className="stats-edit-btn" style={{ marginTop: '1rem' }}>
-                  {editingStats ? '💾 Save Stats' : '✏️ Edit Stats'}
-                </button>
-              </div>
-            </div>
+        <section className="university-dashboard-stats-container">
+          <div className="university-dashboard-stats-header">
+            <h2>University Overview</h2>
+            <p>Real-time insights and key metrics</p>
+            <button onClick={handleEditStats} className="stats-edit-btn" style={{ marginTop: '1rem' }}>
+              {editingStats ? '💾 Save Stats' : '✏️ Edit Stats'}
+            </button>
           </div>
-          <div className="dashboard-stats">
+          <div className="university-dashboard-stats-grid">
             {stats.map((stat) => (
-              <div className="stat-card no-animation" key={stat.label}>
-                <div className="stat-background"></div>
-                <div className="stat-content">
-                  <div className="stat-icon" style={{ animation: 'none', transition: 'none' }}>{stat.icon}</div>
-                  <div className="stat-value">
-                    {editingStats && editingStatId === stat.id ? (
-                      <input
-                        type="number"
-                        className="stat-edit-input"
-                        value={statEditValue}
-                        autoFocus
-                        onChange={e => setStatEditValue(e.target.value)}
-                        onBlur={() => handleStatEditBlur(stat.id)}
-                        onKeyDown={e => handleStatEditKeyDown(e, stat.id)}
-                        style={{
-                          fontSize: '2.2rem',
-                          fontWeight: 700,
-                          width: '90px',
-                          textAlign: 'center',
-                          border: '2px dashed #f59e0b',
-                          borderRadius: '8px',
-                          outline: 'none',
-                          color: '#6366f1',
-                          background: '#fffbe9',
-                        }}
-                      />
-                    ) : (
-                      stat.value.toLocaleString()
-                    )}
-                  </div>
-                  <div className="stat-label">{stat.label}</div>
-                  <div className="stat-trend">
-                    <span className="trend-indicator">📈</span>
-                    {stat.trend}
-                  </div>
+              <div className="university-dashboard-stat-card" key={stat.label}>
+                <div className="university-dashboard-stat-icon">{stat.icon}</div>
+                <div className="university-dashboard-stat-value">
+                  {editingStats && editingStatId === stat.id ? (
+                    <input
+                      type="number"
+                      className="stat-edit-input"
+                      value={statEditValue}
+                      autoFocus
+                      onChange={e => setStatEditValue(e.target.value)}
+                      onBlur={() => handleStatEditBlur(stat.id)}
+                      onKeyDown={e => handleStatEditKeyDown(e, stat.id)}
+                      style={{
+                        fontSize: '2.2rem',
+                        fontWeight: 700,
+                        width: '90px',
+                        textAlign: 'center',
+                        border: '2px dashed #f59e0b',
+                        borderRadius: '8px',
+                        outline: 'none',
+                        color: '#6366f1',
+                        background: '#fffbe9',
+                      }}
+                    />
+                  ) : (
+                    stat.value.toLocaleString()
+                  )}
+                </div>
+                <div className="university-dashboard-stat-label">{stat.label}</div>
+                <div className="university-dashboard-stat-trend">
+                  <span className="trend-indicator">📈</span>
+                  {stat.trend}
                 </div>
                 {editingStats && (
                   <button
