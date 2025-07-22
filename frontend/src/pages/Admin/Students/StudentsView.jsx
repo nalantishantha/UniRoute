@@ -120,18 +120,18 @@ const StudentView = () => {
     });
   };
 
-  if (loading) {
-    return (
-      <AdminLayout pageTitle="Student Details" pageDescription="Loading student information">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading student details...</p>
-          </div>
-        </div>
-      </AdminLayout>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <AdminLayout pageTitle="Student Details" pageDescription="Loading student information">
+  //       <div className="flex items-center justify-center h-64">
+  //         <div className="text-center">
+  //           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+  //           <p className="text-gray-600">Loading student details...</p>
+  //         </div>
+  //       </div>
+  //     </AdminLayout>
+  //   );
+  // }
 
   if (!student) {
     return (
