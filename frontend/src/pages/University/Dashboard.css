@@ -426,12 +426,50 @@
   box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
 }
 
-.dashboard-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
+
+.dashboard-stats-row-unique {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 1.5rem !important;
+  justify-content: center;
+  align-items: stretch;
   max-width: 1400px;
   margin: 0 auto;
+}
+
+/* Unique alignment for stat cards row to match grid below */
+.dashboard-stats-align-row {
+  max-width: 1320px; /* Match your grid width or adjust as needed */
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 32px;  /* Match .dashboard-grid or .grid-section padding */
+  padding-right: 32px;
+  box-sizing: border-box;
+}
+
+.dashboard-stats-row-unique {
+  display: flex;
+  gap: 2.5rem;
+  justify-content: space-between;
+  align-items: stretch;
+}
+
+/* Responsive: Stack on small screens */
+@media (max-width: 1100px) {
+  .dashboard-stats-row-unique {
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+  .dashboard-stats-align-row {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+/* Ensure stat-card flexes properly in the row */
+.dashboard-stats-row-unique .stat-card {
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .stat-card {

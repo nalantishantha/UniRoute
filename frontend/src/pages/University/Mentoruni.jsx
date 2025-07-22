@@ -754,6 +754,8 @@ const Mentoruni = () => {
               }} />
               
               <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                {/* Remove or comment out this block to hide the profile image */}
+                {/* 
                 <div style={{
                   width: '80px',
                   height: '80px',
@@ -778,6 +780,7 @@ const Mentoruni = () => {
                     }}
                   />
                 </div>
+                */}
                 <div>
                   <h2 style={{
                     fontSize: '1.75rem',
@@ -788,35 +791,29 @@ const Mentoruni = () => {
                   }}>{selectedMentor.name}</h2>
                   <div style={{
                     display: 'flex',
-                    alignItems: 'center',
+                    flexWrap: 'wrap',
                     gap: '0.75rem',
-                    marginBottom: '0.5rem'
+                    marginTop: '0.5rem'
                   }}>
                     <span style={{
                       background: 'linear-gradient(135deg, #eff6ff, #dbeafe)',
                       color: '#2563eb',
-                      padding: '0.4rem 1rem',
-                      borderRadius: '20px',
-                      fontSize: '0.9rem',
-                      fontWeight: '600',
-                      border: '1px solid #bfdbfe'
+                      padding: '0.375rem 0.75rem',
+                      borderRadius: '6px',
+                      fontSize: '0.75rem',
+                      fontWeight: '500',
+                      border: '1px solid #dbeafe'
                     }}>{selectedMentor.specialization}</span>
                     <span style={{
                       background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)',
                       color: '#16a34a',
-                      padding: '0.4rem 1rem',
-                      borderRadius: '20px',
-                      fontSize: '0.85rem',
-                      fontWeight: '600',
+                      padding: '0.375rem 0.75rem',
+                      borderRadius: '6px',
+                      fontSize: '0.75rem',
+                      fontWeight: '500',
                       border: '1px solid #bbf7d0'
                     }}>📋 Application Review</span>
                   </div>
-                  <p style={{
-                    fontSize: '0.95rem',
-                    margin: '0',
-                    color: '#64748b',
-                    fontWeight: '500'
-                  }}>Registration: {selectedMentor.Registrationnumber} • {selectedMentor.Year}</p>
                 </div>
               </div>
               
