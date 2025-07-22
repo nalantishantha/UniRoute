@@ -52,6 +52,7 @@ const navigation = [
     icon: MessageSquare,
   },
   { name: "Profile", href: "/university-student/profile", icon: User },
+  { name: "Settings", href: "/university-student/settings", icon: Settings },
 ];
 
 export default function Sidebar({ isOpen, setIsOpen }) {
@@ -161,7 +162,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           "--scrollbar-thumb-hover": "#3b82f6",
         }}
       >
-        <div className="flex h-full flex-col">
+        <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-primary-700/50">
             <motion.div
@@ -170,11 +171,11 @@ export default function Sidebar({ isOpen, setIsOpen }) {
               transition={{ delay: 0.1 }}
               className="flex items-center space-x-3"
             >
-              <div className="w-11 h-11 bg-gradient-to-br from-secondary to-warning rounded-xl overflow-hidden">
+              <div className="overflow-hidden w-11 h-11 bg-gradient-to-br from-secondary to-warning rounded-xl">
                 <img
                   src={logo}
                   alt="UniRoutes Logo"
-                  className="w-full h-full object-cover"
+                  className="object-cover w-full h-full"
                 />
               </div>
               <div>
@@ -260,15 +261,15 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           </nav>
 
           {/* Settings and Logout */}
-          <div className="p-4 border-t border-primary-700/50 space-y-2">
-            <motion.button
+          <div className="p-4 space-y-2 border-t border-primary-700/50">
+            {/* <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full flex items-center px-4 py-3 text-sm font-medium text-primary-100 hover:bg-primary-700/50 hover:text-white rounded-xl transition-all duration-200 group"
+              className="flex items-center w-full px-4 py-3 text-sm font-medium transition-all duration-200 text-primary-100 hover:bg-primary-700/50 hover:text-white rounded-xl group"
             >
               <Settings className="w-5 h-5 mr-3 transition-transform group-hover:scale-110" />
               Settings
-            </motion.button>
+            </motion.button> */}
 
             <motion.button
               onClick={() => {
@@ -276,7 +277,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
               }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full flex items-center px-4 py-3 text-sm font-medium text-primary-100 hover:bg-primary-700/50 hover:text-white rounded-xl transition-all duration-200 group"
+              className="flex items-center w-full px-4 py-3 text-sm font-medium transition-all duration-200 text-primary-100 hover:bg-primary-700/50 hover:text-white rounded-xl group"
             >
               <LogOut className="w-5 h-5 mr-3 transition-transform group-hover:scale-110" />
               Log Out
