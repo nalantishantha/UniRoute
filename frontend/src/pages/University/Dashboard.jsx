@@ -278,7 +278,7 @@ const Dashboard = () => {
           {/* Recent Activities with Edit Button */}
           <div className="grid-section activities-section">
             <div className="recent-activities-header">
-              <h3>Recent Activities</h3>
+              <h3>📋 Recent Activities</h3>
               <button className="view-all-btn">View All</button>
               <button onClick={handleEditActivities} className="section-edit-btn">
                 {editingActivities ? '💾 Save' : '✏️ Edit'}
@@ -379,7 +379,7 @@ const Dashboard = () => {
           {/* System Status with Edit Button */}
          <div className="grid-section status-section">
             <div className="system-status-header">
-              <h3>System Status</h3>
+              <h3>🔧 System Status</h3>
               <span className="status-indicator online">All Systems Online</span>
               <button onClick={handleEditStatus} className="section-edit-btn">
                 {editingStatus ? '💾 Save' : '✏️ Edit'}
