@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Upload,
@@ -16,66 +16,6 @@ import ResourcesGrid from "./ResourcesGrid";
 import UploadResourcesModal from "./UploadResourcesModal";
 import ResourceDetailModal from "./ResourceDetailModal";
 
-const resources = [
-  {
-    id: 1,
-    title: "Calculus Fundamentals Guide",
-    category: "Mathematics",
-    tags: ["calculus", "derivatives", "integrals"],
-    type: "pdf",
-    size: "2.4 MB",
-    downloads: 128,
-    uploadDate: "2024-01-15",
-    description:
-      "Comprehensive guide covering basic calculus concepts with worked examples",
-  },
-  {
-    id: 2,
-    title: "Physics Formula Sheet",
-    category: "Physics",
-    tags: ["formulas", "mechanics", "electricity"],
-    type: "pdf",
-    size: "1.8 MB",
-    downloads: 89,
-    uploadDate: "2024-01-12",
-    description: "Essential physics formulas for university entrance exams",
-  },
-  {
-    id: 3,
-    title: "Chemistry Lab Safety Protocols",
-    category: "Chemistry",
-    tags: ["safety", "laboratory", "protocols"],
-    type: "pdf",
-    size: "3.2 MB",
-    downloads: 67,
-    uploadDate: "2024-01-10",
-    description: "Complete guide to laboratory safety and best practices",
-  },
-  {
-    id: 4,
-    title: "Biology Cell Structure Diagrams",
-    category: "Biology",
-    tags: ["cells", "diagrams", "anatomy"],
-    type: "pdf",
-    size: "5.1 MB",
-    downloads: 145,
-    uploadDate: "2024-01-08",
-    description: "Detailed diagrams and explanations of cellular structures",
-  },
-  {
-    id: 5,
-    title: "Mathematics Problem Solving Video",
-    category: "Mathematics",
-    tags: ["video", "problem-solving", "algebra"],
-    type: "video",
-    size: "45.2 MB",
-    downloads: 234,
-    uploadDate: "2024-01-05",
-    description:
-      "Step-by-step video guide for solving complex algebra problems",
-  },
-];
-
 const categories = [
   "All",
   "Mathematics",
@@ -90,9 +30,35 @@ export default function Resources() {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedResource, setSelectedResource] = useState(null);
+  const [resources, setResources] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Fetch resources from backend
+  const fetchResources = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/resources/");
+      const data = await response.json();
+      if (response.ok) {
+        setResources(data.resources || []);
+      } else {
+        setError("Failed to fetch resources");
+      }
+    } catch (err) {
+      setError("Network error while fetching resources");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch resources on component mount
+  useEffect(() => {
+    fetchResources();
+  }, []);
 
   // Get all unique tags
-  const allTags = [...new Set(resources.flatMap((resource) => resource.tags))];
+  const allTags = [...new Set(resources.flatMap((resource) => resource.tags || []))];
 
   const handleViewResource = (resource) => {
     setSelectedResource(resource);
@@ -100,21 +66,43 @@ export default function Resources() {
   };
 
   const handleSaveResource = (editedResource) => {
-    // In a real application, this would update the resource in your backend
     console.log("Resource updated:", editedResource);
-    // For this demo, we'll just update the UI
-    const updatedResources = resources.map(resource =>
+    // Update the resource in the list
+    setResources(resources.map(resource =>
       resource.id === editedResource.id ? editedResource : resource
-    );
-    // You would update your state or dispatch an action here
+    ));
   };
 
   const handleRemoveResource = (resource) => {
-    // In a real application, this would delete the resource from your backend
     console.log("Resource removed:", resource);
-    // For this demo, we'll just log it
-    // You would update your state or dispatch an action here
+    // Remove resource from the list
+    setResources(resources.filter(r => r.id !== resource.id));
   };
+
+  // Handle successful upload - refresh resources
+  const handleUploadSuccess = () => {
+    fetchResources(); // Refresh the resources list
+  };
+
+  // Calculate stats
+  const totalDownloads = resources.reduce((sum, resource) => sum + (resource.downloads || 0), 0);
+
+  if (loading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-6"
+      >
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="w-8 h-8 mx-auto mb-4 border-4 rounded-full border-primary-600 border-t-transparent animate-spin"></div>
+            <p className="text-neutral-grey">Loading resources...</p>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
@@ -126,13 +114,13 @@ export default function Resources() {
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-neutral-black">Resources</h1>
-          <p className="text-neutral-grey mt-1">
+          <p className="mt-1 text-neutral-grey">
             Upload and manage your educational resources
           </p>
         </div>
         <Button
           size="lg"
-          className="mt-4 lg:mt-0 flex items-center space-x-2"
+          className="flex items-center mt-4 space-x-2 lg:mt-0"
           onClick={() => setShowUploadModal(true)}
         >
           <Upload className="w-4 h-4" />
@@ -140,12 +128,26 @@ export default function Resources() {
         </Button>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-center text-red-600">
+              <p>{error}</p>
+              <Button onClick={fetchResources} className="mt-2">
+                Try Again
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary-100">
                 <FileText className="w-5 h-5 text-primary-600" />
               </div>
               <div>
@@ -160,11 +162,11 @@ export default function Resources() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-success/20 rounded-lg flex items-center justify-center">
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-success/20">
                 <Download className="w-5 h-5 text-success" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-neutral-black">663</p>
+                <p className="text-2xl font-bold text-neutral-black">{totalDownloads}</p>
                 <p className="text-xs text-neutral-grey">Total Downloads</p>
               </div>
             </div>
@@ -173,7 +175,7 @@ export default function Resources() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-warning/20 rounded-lg flex items-center justify-center">
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-warning/20">
                 <Tag className="w-5 h-5 text-yellow-600" />
               </div>
               <div>
@@ -188,7 +190,7 @@ export default function Resources() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-info/20 rounded-lg flex items-center justify-center">
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-info/20">
                 <FolderOpen className="w-5 h-5 text-info" />
               </div>
               <div>
@@ -213,6 +215,7 @@ export default function Resources() {
       <UploadResourcesModal
         showUploadModal={showUploadModal}
         setShowUploadModal={setShowUploadModal}
+        onUploadSuccess={handleUploadSuccess}
       />
 
       {/* Resource Detail Modal */}

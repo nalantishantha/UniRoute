@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'corsheaders',  # Only one corsheaders entry
     
    # Your apps 
+    'apps.academic_resources',
     'apps.accounts',
     'apps.administration',
     'apps.communications',
