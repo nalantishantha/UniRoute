@@ -1,10 +1,94 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logoWhite from "../../assets/logoWhite.png";
-import { Bell, User, Settings, LogOut } from "lucide-react";
+import { Bell, User, Settings, LogOut, Clock, ExternalLink, X } from "lucide-react";
 
 const StudentNavigation = () => {
   const location = useLocation();
+  const [showNotifications, setShowNotifications] = useState(false);
+  const notificationRef = useRef(null);
+
+  // Sample system alerts data
+  const systemAlerts = [
+    {
+      id: 1,
+      title: "Profile Update Required",
+      summary: "Please update your academic information to get better university recommendations.",
+      time: "1 hour ago",
+      category: "Profile",
+      isRead: false,
+      link: "/student/profile"
+    },
+    {
+      id: 2,
+      title: "Application Deadline Reminder",
+      summary: "University application deadline is approaching in 15 days. Complete your applications now.",
+      time: "3 hours ago",
+      category: "Deadline",
+      isRead: false,
+      link: "/student/applications"
+    },
+    {
+      id: 3,
+      title: "Z-Score Calculation Updated",
+      summary: "Your Z-Score has been recalculated based on latest AL results. Check your new score.",
+      time: "1 day ago",
+      category: "Academic",
+      isRead: true,
+      link: "/student/z-score"
+    },
+    {
+      id: 4,
+      title: "New Mentor Request",
+      summary: "A senior student has accepted your mentorship request. Start your session now.",
+      time: "2 days ago",
+      category: "Mentorship",
+      isRead: true,
+      link: "/student/mentors"
+    },
+    {
+      id: 5,
+      title: "System Maintenance Notice",
+      summary: "Scheduled maintenance on Sunday 2:00 AM - 4:00 AM. Some features may be unavailable.",
+      time: "3 days ago",
+      category: "System",
+      isRead: true,
+      link: "/student/dashboard"
+    }
+  ];
+
+  const unreadCount = systemAlerts.filter(alert => !alert.isRead).length;
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const getCategoryColor = (category) => {
+    switch (category) {
+      case "Profile":
+        return "bg-blue-100 text-blue-700";
+      case "Deadline":
+        return "bg-red-100 text-red-700";
+      case "Academic":
+        return "bg-green-100 text-green-700";
+      case "Mentorship":
+        return "bg-purple-100 text-purple-700";
+      case "System":
+        return "bg-orange-100 text-orange-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
 
   const isActive = (path) => {
     return location.pathname === path;
@@ -65,12 +149,93 @@ const StudentNavigation = () => {
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
-            <button className="text-white/90 hover:text-primary-100 transition-colors relative">
-              <Bell className="h-6 w-6" />
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                3
-              </span>
-            </button>
+            <div className="relative" ref={notificationRef}>
+              <button 
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="text-white/90 hover:text-primary-100 transition-colors relative"
+              >
+                <Bell className="h-6 w-6" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Notifications Dropdown */}
+              {showNotifications && (
+                <div className="absolute right-0 mt-2 w-96 bg-white rounded-2xl shadow-xl border border-blue-200 z-50 max-h-150 overflow-hidden">
+                  <div className="p-4 border-b border-blue-200 bg-gradient-to-r from-blue-50 to-blue-100">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-display font-semibold text-lg text-blue-900">
+                        System Alerts
+                      </h3>
+                      <button
+                        onClick={() => setShowNotifications(false)}
+                        className="text-blue-600 hover:text-blue-800 transition-colors"
+                      >
+                        <X className="h-5 w-5" />
+                      </button>
+                    </div>
+                    <p className="text-sm text-blue-700 mt-1">
+                      {unreadCount} unread notifications
+                    </p>
+                  </div>
+                  
+                  <div className="max-h-80 overflow-y-auto">
+                    {systemAlerts.map((alert) => (
+                      <Link
+                        key={alert.id}
+                        to={alert.link}
+                        onClick={() => setShowNotifications(false)}
+                        className={`block p-4 border-b border-blue-100 hover:bg-blue-50 transition-colors ${
+                          !alert.isRead ? 'bg-blue-25' : ''
+                        }`}
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            <h4 className={`font-medium text-sm ${
+                              !alert.isRead ? 'text-blue-900' : 'text-blue-800'
+                            }`}>
+                              {alert.title}
+                            </h4>
+                            <p className="text-blue-700 text-xs mt-1 leading-relaxed">
+                              {alert.summary}
+                            </p>
+                          </div>
+                          {!alert.isRead && (
+                            <div className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0 mt-1 ml-2"></div>
+                          )}
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(alert.category)}`}>
+                              {alert.category}
+                            </span>
+                            <div className="flex items-center space-x-1 text-blue-600">
+                              <Clock className="h-3 w-3" />
+                              <span className="text-xs">{alert.time}</span>
+                            </div>
+                          </div>
+                          <ExternalLink className="h-3 w-3 text-blue-600" />
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                  
+                  <div className="p-4 border-t border-blue-200 bg-blue-50">
+                    <Link
+                      to="/student/dashboard"
+                      onClick={() => setShowNotifications(false)}
+                      className="block text-center text-blue-700 hover:text-blue-900 font-medium text-sm transition-colors"
+                    >
+                      View All Alerts →
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
             <Link
               to="/student/profile"
               className={
@@ -117,10 +282,10 @@ const StudentNavigation = () => {
               Dashboard
             </Link>
           </div>
+          </div>
         </div>
-      </div>
-    </nav>
-  );
-};
+      </nav>
+    );
+  };
 
 export default StudentNavigation;
