@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import AdminLayout from '../../../components/common/Admin/AdminLayout';
 
 const CompanyForm = () => {
   const { id } = useParams();
@@ -123,19 +124,23 @@ const CompanyForm = () => {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">
-            {isEdit ? 'Edit Company' : 'Add New Company'}
-          </h1>
-          <button
-            onClick={() => navigate('/admin/companies')}
-            className="px-4 py-2 text-gray-600 hover:text-gray-800"
-          >
-            ← Back to Companies
-          </button>
-        </div>
+    <AdminLayout 
+      pageTitle={isEdit ? "Edit Company" : "Add New Company"}
+      pageDescription="Manage company information and details"
+    >
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-2xl font-bold text-gray-900">
+              {isEdit ? 'Edit Company' : 'Add New Company'}
+            </h1>
+            <button
+              onClick={() => navigate('/admin/companies')}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800"
+            >
+              ← Back to Companies
+            </button>
+          </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -374,8 +379,9 @@ const CompanyForm = () => {
             </button>
           </div>
         </form>
+        </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 

@@ -2,13 +2,15 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Mentoring Sessions
-    path('sessions/', views.get_mentoring_sessions, name='get_mentoring_sessions'),
-    path('sessions/create/', views.create_mentoring_session, name='create_mentoring_session'),
-    path('sessions/<int:session_id>/update/', views.update_mentoring_session, name='update_mentoring_session'),
-    path('sessions/<int:session_id>/delete/', views.delete_mentoring_session, name='delete_mentoring_session'),
-    path('sessions/enroll/', views.enroll_in_mentoring_session, name='enroll_in_mentoring_session'),
-    
-    # Mentors
-    path('mentors/', views.get_mentors, name='get_mentors'),
+    path('', views.mentors_list, name='mentors_list'),
+    path('sessions/', views.create_mentoring_session, name='create_mentoring_session'),
+    path('requests/<int:mentor_id>/', views.MentoringRequestsView.as_view(), name='mentoring_requests'),
+    path('sessions/<int:mentor_id>/', views.MentoringSessionsView.as_view(), name='mentoring_sessions'),
+    path('all-sessions/<int:mentor_id>/', views.get_all_sessions, name='all_sessions'),
+    path('requests/<int:request_id>/accept/', views.accept_request, name='accept_request'),
+    path('requests/<int:request_id>/decline/', views.decline_request, name='decline_request'),
+    path('sessions/<int:session_id>/cancel/', views.cancel_session, name='cancel_session'),
+    path('sessions/<int:session_id>/reschedule/', views.reschedule_session, name='reschedule_session'),
+    path('sessions/<int:session_id>/complete/', views.complete_session, name='complete_session'),
+    path('stats/<int:mentor_id>/', views.get_mentor_stats, name='mentor_stats'),
 ]

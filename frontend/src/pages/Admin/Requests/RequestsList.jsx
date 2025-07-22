@@ -9,27 +9,15 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import AdminSidebar from '../../../components/common/Admin/Sidebar';
-import AdminHeader from '../../../components/common/Admin/AdminHeader';
+import AdminLayout from '../../../components/common/Admin/AdminLayout';
 import AdvertisementRequestsTable from "../../../components/Admin/AdvertisementRequestTable";
 import UniversityRequestsTable from '../../../components/Admin/UniversityRequestsTable';
 import CompanyRequestsTable from "../../../components/Admin/CompanyRequestTable";
 
 const RequestsList = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [advertisementRequests, setAdvertisementRequests] = useState([]);
   const navigate = useNavigate();
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('user');
-    window.location.href = '/login';
-  };
 
   // Fetch advertisement requests from database
   const fetchAdvertisementRequests = async () => {
@@ -77,64 +65,18 @@ const RequestsList = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100">
-        <AdminSidebar 
-          isSidebarOpen={isSidebarOpen}
-          toggleSidebar={toggleSidebar}
-          user={user}
-          handleLogout={handleLogout}
-        />
-        
-        <div className="lg:ml-72">
-          <AdminHeader 
-            toggleSidebar={toggleSidebar}
-            user={user}
-            handleLogout={handleLogout}
-          />
-          
-          <main className="pt-16">
-            <div className="p-6">
-              <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              </div>
-            </div>
-          </main>
+      <AdminLayout pageTitle="Requests" pageDescription="Loading requests...">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <AdminSidebar 
-        isSidebarOpen={isSidebarOpen}
-        toggleSidebar={toggleSidebar}
-        user={user}
-        handleLogout={handleLogout}
-      />
-      
-      <div className="lg:ml-72">
-        <AdminHeader 
-          toggleSidebar={toggleSidebar}
-          user={user}
-          handleLogout={handleLogout}
-        />
-        
-        <main className="pt-16">
-          <div className="p-6">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-3">
-                <FileText className="h-8 w-8 text-blue-600" />
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">Requests Management</h1>
-                  <p className="text-gray-600">Manage advertisement, university, and company registration requests</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+    <AdminLayout pageTitle="Requests Management" pageDescription="View and manage all platform requests">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
               <div className="bg-white p-6 rounded-lg shadow-sm border">
                 <div className="flex items-center justify-between">
                   <div>
@@ -283,10 +225,7 @@ const RequestsList = () => {
                 <p className="text-gray-500">Company registration requests will appear here</p>
               </div>
             </div>
-          </div>
-        </main>
-      </div>
-    </div>
+    </AdminLayout>
   );
 };
 

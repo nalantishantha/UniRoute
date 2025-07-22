@@ -22,7 +22,7 @@ import {
 
 const StudentHome = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-r from-primary-100 to-white">
+    <div className="min-h-screen bg-gradient-to-r from-blue-200 to-blue-100">
       {/* Navigation */}
       <StudentNavigation />
 

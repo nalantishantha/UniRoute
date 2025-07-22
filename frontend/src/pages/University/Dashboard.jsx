@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { FaUserGraduate, FaUniversity, FaBook, FaCalendarAlt } from 'react-icons/fa';
 import UniversitySidebar from '../../components/Navigation/UniversitySidebar'; // CHANGED: Import UniversitySidebar
 import UniversityNavbar from '../../components/Navigation/UniversityNavbar';
 import Footer from '../../components/Footer';
 import './Dashboard.css';
 
 const initialStats = [
-  { id: 1, label: 'Total Students', value: 4200, icon: '🎓', trend: '+12%' },
-  { id: 2, label: 'Faculties', value: 8, icon: '🏛️', trend: '+2' },
-  { id: 3, label: 'Active Courses', value: 120, icon: '📚', trend: '+8%' },
-  { id: 4, label: 'Upcoming Events', value: 5, icon: '📅', trend: '+3' },
+  { id: 1, label: 'Total Students', value: 4200, icon: <FaUserGraduate />, trend: '+12%' },
+  { id: 2, label: 'Faculties', value: 8, icon: <FaUniversity />, trend: '+2' },
+  { id: 3, label: 'Active Courses', value: 120, icon: <FaBook />, trend: '+8%' },
+  { id: 4, label: 'Upcoming Events', value: 5, icon: <FaCalendarAlt />, trend: '+3' },
 ];
 
 const initialActivities = [
@@ -182,11 +183,11 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="dashboard-stats">
-            {stats.map((stat, idx) => (
-              <div className={`stat-card animated-card delay-${idx}`} key={stat.label}>
+            {stats.map((stat) => (
+              <div className="stat-card no-animation" key={stat.label}>
                 <div className="stat-background"></div>
                 <div className="stat-content">
-                  <div className="stat-icon">{stat.icon}</div>
+                  <div className="stat-icon" style={{ animation: 'none', transition: 'none' }}>{stat.icon}</div>
                   <div className="stat-value">
                     {editingStats && editingStatId === stat.id ? (
                       <input
@@ -249,8 +250,8 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="quick-actions-grid">
-              {quickActions.map((action, idx) => (
-                <div key={idx} className={`action-card color-${action.color} slide-in-animation delay-${idx}`}>
+              {quickActions.map((action) => (
+                <div key={action.id} className={`action-card color-${action.color} no-animation`}>
                   <div className="action-background"></div>
                   <div className="action-content">
                     <h4>{action.title}</h4>
@@ -286,8 +287,8 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="activities-list">
-              {recentActivities.map((activity, idx) => (
-                <div key={activity.id} className={`activity-item fade-in-up delay-${idx}`}>
+              {recentActivities.map((activity) => (
+                <div key={activity.id} className="activity-item no-animation">
                   <div className={`activity-icon ${activity.type}`}>
                     {activity.type === 'announcement' && '📢'}
                     {activity.type === 'event' && '📅'}

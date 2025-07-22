@@ -37,145 +37,18 @@ const AdPublish = () => {
     billingAddress: ''
   });
 
-  // Get university ID from localStorage
-  const getUniversityId = () => {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    return user.university_id || 1;
-  };
+  // Video upload state
+  const [videoFile, setVideoFile] = useState(null);
+  const [videoPreview, setVideoPreview] = useState('');
 
-  // Fetch advertisement spaces
-  const fetchAdSpaces = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/advertisements/spaces/');
-      const result = await response.json();
-      
-      if (result.success) {
-        setAdSpaces(result.spaces);
-      } else {
-        setMessage({ type: 'error', text: result.message || 'Failed to fetch ad spaces' });
-      }
-    } catch (error) {
-      console.error('Error fetching ad spaces:', error);
-      setMessage({ type: 'error', text: 'Network error. Please try again.' });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Check availability
-  const checkAvailability = async () => {
-    if (!adData.space_id || !adData.start_date || !adData.end_date) {
-      setMessage({ type: 'error', text: 'Please select space and dates first' });
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await fetch('/api/advertisements/check-availability/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          space_id: adData.space_id,
-          start_date: adData.start_date,
-          end_date: adData.end_date
-        })
-      });
-
-      const result = await response.json();
-      
-      if (result.success) {
-        setAvailabilityCheck(result);
-        if (result.available) {
-          setMessage({ type: 'success', text: result.message });
-        } else {
-          setMessage({ type: 'error', text: result.message });
-        }
-      } else {
-        setMessage({ type: 'error', text: result.message || 'Error checking availability' });
-      }
-    } catch (error) {
-      setMessage({ type: 'error', text: 'Network error. Please try again.' });
-      console.error('Error checking availability:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Submit advertisement booking
-  const submitAdvertisementBooking = async () => {
-    try {
-      setLoading(true);
-      
-      const response = await fetch('/api/advertisements/bookings/create/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          university_id: getUniversityId(),
-          space_id: adData.space_id,
-          title: adData.title,
-          image_url: adData.image_url,
-          target_url: adData.target_url,
-          start_date: adData.start_date,
-          end_date: adData.end_date
-        })
-      });
-
-      const result = await response.json();
-      
-      if (result.success) {
-        setMessage({ type: 'success', text: 'Advertisement booking submitted successfully! Pending admin approval.' });
-        // Refresh university bookings to show the new request
-        fetchUniversityBookings();
-        // Reset form
-        setAdData({
-          title: '',
-          description: '',
-          image_url: '',
-          target_url: '',
-          space_id: '',
-          start_date: '',
-          end_date: '',
-          agreeTerms: false
-        });
-        setCurrentStep(1);
-        setAvailabilityCheck(null);
-      } else {
-        setMessage({ type: 'error', text: result.message || 'Error submitting advertisement booking' });
-      }
-    } catch (error) {
-      setMessage({ type: 'error', text: 'Network error. Please try again.' });
-      console.error('Error submitting advertisement booking:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fetch university bookings
-  const fetchUniversityBookings = async () => {
-    try {
-      const universityId = getUniversityId();
-      const response = await fetch(`/api/advertisements/bookings/university/${universityId}/`);
-      const result = await response.json();
-      
-      if (result.success) {
-        setUniversityBookings(result.bookings || []);
-      } else {
-        console.error('Failed to fetch university bookings:', result.message);
-      }
-    } catch (error) {
-      console.error('Error fetching university bookings:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchAdSpaces();
-    fetchUniversityBookings();
-  }, []);
+  const categories = ['Technology', 'Education', 'Healthcare', 'Finance', 'Marketing', 'Business', 'Other'];
+  const audiences = ['All Students', 'Undergraduate', 'Graduate', 'Faculty', 'Alumni'];
+  const adTypes = [
+    { id: 'banner', name: 'Banner Ad', price: 50, description: 'Display banner on homepage' },
+    { id: 'featured', name: 'Featured Listing', price: 100, description: 'Highlighted in search results' },
+    { id: 'sponsored', name: 'Sponsored Content', price: 150, description: 'Native advertising content' },
+    { id: 'premium', name: 'Premium Placement', price: 200, description: 'Top placement across site' }
+  ];
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -359,7 +232,98 @@ const AdPublish = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>Advertisement Image URL *</label>
+                  <label style={{ fontWeight: 700, marginBottom: 8, display: 'block' }}>
+                    <span role="img" aria-label="media">🖼️</span> Advertisement Media
+                  </label>
+                  <div className="company-adpublish-media-upload-container" style={{ display: 'flex', gap: 24 }}>
+                    {/* Image Upload */}
+                    <div className="company-adpublish-image-upload-area" style={{ flex: 1 }}>
+                      <h4 className="company-adpublish-media-title" style={{ marginBottom: 16 }}>
+                        <span role="img" aria-label="upload-image">📸</span> Upload Image
+                      </h4>
+                      {adData.imageUrl ? (
+                        <div className="company-adpublish-image-preview">
+                          <img src={adData.imageUrl} alt="Ad preview" />
+                          <button
+                            type="button"
+                            className="company-adpublish-remove-media-btn"
+                            onClick={() => setAdData(prev => ({ ...prev, imageUrl: '' }))}
+                          >×</button>
+                        </div>
+                      ) : (
+                        <div className="company-adpublish-default-image">
+                          <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80" alt="Default ad" />
+                        </div>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="company-adpublish-file-input"
+                        id="university-image-upload"
+                        onChange={e => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setAdData(prev => ({ ...prev, imageUrl: reader.result }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <label htmlFor="university-image-upload" className="company-adpublish-upload-btn">
+                        Choose Image
+                      </label>
+                    </div>
+                    {/* Video Upload */}
+                    <div className="company-adpublish-video-upload-area" style={{ flex: 1 }}>
+                      <h4 className="company-adpublish-media-title" style={{ marginBottom: 16 }}>
+                        <span role="img" aria-label="upload-video">🎥</span> Upload Video
+                      </h4>
+                      {videoPreview ? (
+                        <div className="company-adpublish-video-preview">
+                          <video src={videoPreview} controls className="company-adpublish-preview-video" style={{ width: '100%', maxHeight: 220, borderRadius: 8 }} />
+                          <button
+                            type="button"
+                            className="company-adpublish-remove-media-btn"
+                            onClick={() => {
+                              setVideoPreview('');
+                              setVideoFile(null);
+                            }}
+                          >×</button>
+                        </div>
+                      ) : (
+                        <div className="company-adpublish-default-video company-adpublish-video-placeholder" style={{ padding: '32px 0', textAlign: 'center', color: '#6b7280', background: '#e0e7ff', borderRadius: 8, marginBottom: 16 }}>
+                          <span className="company-adpublish-video-icon" style={{ fontSize: 48, display: 'block', marginBottom: 8 }}>🎥</span>
+                          <p style={{ margin: 0 }}>No video selected</p>
+                        </div>
+                      )}
+                      <input
+                        type="file"
+                        accept="video/*"
+                        className="company-adpublish-file-input"
+                        id="university-video-upload"
+                        onChange={e => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            setVideoFile(file);
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setVideoPreview(reader.result);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <label htmlFor="university-video-upload" className="company-adpublish-upload-btn">
+                        Choose Video
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Website URL</label>
                   <input
                     type="url"
                     name="image_url"
@@ -724,117 +688,116 @@ const AdPublish = () => {
 
       {/* Payment Modal */}
       {showPaymentModal && (
-        <div className="modal-overlay" onClick={() => setShowPaymentModal(false)}>
-          <div className="modal-content payment-modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
+        <div className="company-adpublish-admin-modal-overlay" onClick={() => setShowPaymentModal(false)}>
+          <div className="company-adpublish-admin-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="company-adpublish-admin-modal-header">
               <h2>💳 Complete Payment</h2>
-              <button className="modal-close" onClick={() => setShowPaymentModal(false)}>✕</button>
+              <button className="company-adpublish-admin-modal-close" onClick={() => setShowPaymentModal(false)}>✕</button>
             </div>
-            <div className="modal-body">
-              <div className="payment-summary">
+            <div className="company-adpublish-admin-modal-body">
+              <div className="company-adpublish-admin-payment-summary">
                 <h3>Order Summary</h3>
-                <div className="summary-item">
-                  <span>Ad Campaign: {adData.title}</span>
-                  <span>${calculateTotalPrice()}</span>
+                <div className="company-adpublish-admin-summary-item">
+                  <span>Ad Campaign: ${subtotal}</span>
                 </div>
-                <div className="summary-item">
+                <div className="company-adpublish-admin-summary-item">
                   <span>Tax (10%)</span>
                   <span>${(calculateTotalPrice() * 0.1).toFixed(2)}</span>
                 </div>
-                <div className="summary-item total">
+                <div className="company-adpublish-admin-summary-total">
                   <span>Total</span>
                   <span>${(calculateTotalPrice() * 1.1).toFixed(2)}</span>
                 </div>
               </div>
 
-              <form onSubmit={handlePayment} className="payment-form">
+              <form onSubmit={handlePayment} className="company-adpublish-admin-payment-form">
                 <h3>Payment Information</h3>
                 
-                <div className="payment-methods">
-                  <div className="payment-option">
-                    <label className="payment-label">
+                <div className="company-adpublish-admin-payment-methods">
+                  <div className="company-adpublish-admin-payment-option">
+                    <label className="company-adpublish-admin-payment-label">
                       <input
                         type="radio"
                         name="paymentMethod"
                         value="credit-card"
                         checked={paymentData.paymentMethod === 'credit-card'}
                         onChange={handlePaymentChange}
-                        className="form-radio"
+                        className="company-adpublish-admin-form-radio"
                       />
                       💳 Credit/Debit Card
-                      <div className="card-icons">
-                        <span className="card-icon">💳</span>
-                        <span className="card-icon">💳</span>
+                      <div className="company-adpublish-admin-card-icons">
+                        <span className="company-adpublish-admin-card-icon">💳</span>
+                        <span className="company-adpublish-admin-card-icon">💳</span>
                       </div>
                     </label>
                   </div>
                   
-                  <div className="payment-option">
-                    <label className="payment-label">
+                  <div className="company-adpublish-admin-payment-option">
+                    <label className="company-adpublish-admin-payment-label">
                       <input
                         type="radio"
                         name="paymentMethod"
                         value="paypal"
                         checked={paymentData.paymentMethod === 'paypal'}
                         onChange={handlePaymentChange}
-                        className="form-radio"
+                        className="company-adpublish-admin-form-radio"
                       />
                       🅿️ PayPal
-                      <span className="paypal-icon">🅿️</span>
+                      <span className="company-adpublish-admin-paypal-icon">🅿️</span>
                     </label>
                   </div>
                 </div>
 
                 {paymentData.paymentMethod === 'credit-card' && (
-                  <div className="credit-card-form">
-                    <div className="form-group">
+                  <div className="company-adpublish-admin-credit-card-form">
+                    <div className="company-adpublish-admin-form-group">
                       <label>Card Number</label>
                       <input
                         type="text"
                         name="cardNumber"
                         value={paymentData.cardNumber}
                         onChange={handlePaymentChange}
-                        className="form-input"
+                        className="company-adpublish-admin-form-input"
                         placeholder="1234 5678 9012 3456"
                         required
                       />
                     </div>
                     
-                    <div className="card-details-row">
-                      <div className="form-group">
+                    <div className="company-adpublish-admin-card-details-row">
+                      <div className="company-adpublish-admin-form-group">
                         <label>Expiry Date</label>
                         <input
                           type="text"
                           name="expiryDate"
                           value={paymentData.expiryDate}
                           onChange={handlePaymentChange}
-                          className="form-input"
+                          className="company-adpublish-admin-form-input"
                           placeholder="MM/YY"
                           required
                         />
                       </div>
-                      <div className="form-group">
+                      <div className="company-adpublish-admin-form-group">
                         <label>CVV</label>
                         <input
                           type="text"
                           name="cvv"
                           value={paymentData.cvv}
                           onChange={handlePaymentChange}
-                          className="form-input"
+                          className="company-adpublish-admin-form-input"
                           placeholder="123"
                           required
                         />
                       </div>
                     </div>
                     
-                    <div className="form-group">
+                    <div className="company-adpublish-admin-form-group">
                       <label>Cardholder Name</label>
                       <input
                         type="text"
                         name="cardName"
                         value={paymentData.cardName}
                         onChange={handlePaymentChange}
-                        className="form-input"
+                        className="company-adpublish-admin-form-input"
                         placeholder="John Doe"
                         required
                       />
@@ -842,25 +805,25 @@ const AdPublish = () => {
                   </div>
                 )}
 
-                <div className="form-group">
+                <div className="company-adpublish-admin-form-group">
                   <label>Email Address</label>
                   <input
                     type="email"
                     name="email"
                     value={paymentData.email}
                     onChange={handlePaymentChange}
-                    className="form-input"
+                    className="company-adpublish-admin-form-input"
                     placeholder="john@company.com"
                     required
                   />
                 </div>
 
-                <div className="form-actions">
-                  <button type="button" className="btn-cancel" onClick={() => setShowPaymentModal(false)}>
+                <div className="company-adpublish-admin-form-actions">
+                  <button type="button" className="company-adpublish-admin-btn-cancel" onClick={() => setShowPaymentModal(false)}>
                     Cancel
                   </button>
-                  <button type="submit" className="btn-pay-now">
-                    Pay ${(calculateTotalPrice() * 1.1).toFixed(2)}
+                  <button type="submit" className="company-adpublish-admin-btn-pay-now">
+                    Pay ${total.toFixed(2)}
                   </button>
                 </div>
               </form>

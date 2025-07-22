@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { initializeSessionGuard } from "./utils/auth";
+import RouteGuard from "./components/common/RouteGuard";
 import LandingPage from "./components/LandingPage";
 import AboutUs from "./components/AboutUs";
 import ContactUs from "./components/ContactUs";
@@ -29,49 +31,57 @@ import { universityRoutes } from "./routes/UniversityRoutes";
 import CounsellorRoutes from "./routes/CounsellorRoutes";
 
 function App() {
+  useEffect(() => {
+    // Initialize session guard to prevent back button access after logout
+    initializeSessionGuard();
+  }, []);
+
   return (
     <Router>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/about" element={<AboutUs />} />
-        <Route path="/contact" element={<ContactUs />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RoleSelectionPage />} />
-        <Route path="/register/student" element={<StudentRegisterPage />} />
-        <Route path="/register/university-student" element={<UniversityStudentRegisterPage />} />
-        <Route path="/register/university" element={<UniversityRegisterPage />} />
-        <Route path="/register/company" element={<CompanyRegisterPage />} />
-        <Route path="/universities" element={<Universities />} />
+      <RouteGuard>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/contact" element={<ContactUs />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RoleSelectionPage />} />
+          <Route path="/register/student" element={<StudentRegisterPage />} />
+          <Route path="/register/university-student" element={<UniversityStudentRegisterPage />} />
+          <Route path="/register/university" element={<UniversityRegisterPage />} />
+          <Route path="/register/company" element={<CompanyRegisterPage />} />
+          <Route path="/universities" element={<Universities />} />
 
-        {/* Student Routes */}
-        <Route path="/student/*" element={<StudentRoutes />} />
+          {/* Student Routes */}
+          <Route path="/student/*" element={<StudentRoutes />} />
 
-        {/* University Student Routes */}
-        <Route path="/university-student/*" element={<UniStudentRoutes />} />
-        <Route path="/unistudent/*" element={<UniStudentRoutes />} />
+          {/* University Student Routes */}
+          <Route path="/university-student/*" element={<UniStudentRoutes />} />
+          <Route path="/unistudent/*" element={<UniStudentRoutes />} />
 
-        {/* Admin Routes */}
-        <Route path="/admin/*" element={<AdminRoutes />} />
+          {/* Admin Routes */}
+          <Route path="/admin/*" element={<AdminRoutes />} />
 
-        {/* Company Routes */}
-        {companyRoutes.map((route, idx) => (
-          <Route key={idx} path={route.path} element={route.element} />
-        ))}
-        <Route path="/company/dashboard-edit" element={<Dashboard />} />
-        <Route path="/company/course" element={<Courses />} />
-        <Route path="/company/internship" element={<Internships />} />
-        <Route path="/company/ad-publish" element={<AdPublish />} />
+          {/* Company Routes */}
+          {companyRoutes.map((route, idx) => (
+            <Route key={idx} path={route.path} element={route.element} />
+          ))}
+          <Route path="/company/dashboard-edit" element={<Dashboard />} />
+          <Route path="/company/course" element={<Courses />} />
+          <Route path="/company/internship" element={<Internships />} />
+          <Route path="/company/ad-publish" element={<AdPublish />} />
 
-        {/* University Routes */}
-        {universityRoutes.map((route, idx) => (
-          <Route key={`uni-${idx}`} path={route.path} element={route.element} />
-        ))}
+          {/* University Routes */}
+          {universityRoutes.map((route, idx) => (
+            <Route key={`uni-${idx}`} path={route.path} element={route.element} />
+          ))}
 
-        {/*Counsellor Routes */}
-        <Route path="/counsellor/*" element={<CounsellorRoutes />} />
+          {/*Counsellor Routes */}
+          <Route path="/counsellor/*" element={<CounsellorRoutes />} />
+        </Routes>
       </Routes>
-    </Router>
+    </RouteGuard>
+    </Router >
   );
 }
 
