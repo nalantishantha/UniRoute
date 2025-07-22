@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import StudentNavigation from "../../components/Navigation/StudentNavigation";
 import {
   GraduationCap,
   ArrowLeft,
@@ -181,116 +182,33 @@ const ProgramMatching = () => {
     .sort((a, b) => b.matchScore - a.matchScore);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50">
+    <div className="min-h-screen bg-gradient-to-r from-blue-200 to-blue-100">
       {/* Navigation */}
-      <nav className="bg-white/90 backdrop-blur-md border-b border-accent-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link to="/student/home" className="flex items-center space-x-2">
-              <GraduationCap className="h-8 w-8 text-primary-400" />
-              <span className="font-display font-bold text-2xl text-primary-400">
-                UniRoute
-              </span>
-            </Link>
+      <StudentNavigation />
 
-            <div className="hidden md:flex items-center space-x-8">
-              <Link
-                to="/student/mentors"
-                className="text-primary-300 hover:text-primary-400 transition-colors duration-200"
-              >
-                Mentors
-              </Link>
-              <Link
-                to="/student/tutors"
-                className="text-primary-300 hover:text-primary-400 transition-colors duration-200"
-              >
-                Tutors
-              </Link>
-              <Link
-                to="/student/news"
-                className="text-primary-300 hover:text-primary-400 transition-colors duration-200"
-              >
-                News
-              </Link>
-              <Link
-                to="/student/career-counseling"
-                className="text-primary-300 hover:text-primary-400 transition-colors duration-200"
-              >
-                Counseling
-              </Link>
-            </div>
-
-            <div className="hidden md:flex items-center space-x-4">
-              <button className="text-primary-300 hover:text-primary-400 transition-colors relative">
-                <Bell className="h-6 w-6" />
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  3
-                </span>
-              </button>
-              <Link
-                to="/student/profile"
-                className="text-primary-300 hover:text-primary-400 transition-colors"
-              >
-                <User className="h-6 w-6" />
-              </Link>
-              <Link
-                to="/student/settings"
-                className="text-primary-300 hover:text-primary-400 transition-colors"
-              >
-                <Settings className="h-6 w-6" />
-              </Link>
-              <Link
-                to="/student/dashboard"
-                className="bg-accent-200 text-primary-400 px-6 py-2 rounded-full font-medium hover:bg-accent-300 transition-all duration-200 hover:shadow-lg"
-              >
-                My Dashboard
-              </Link>
-              <Link
-                to="/"
-                className="text-primary-300 hover:text-primary-400 transition-colors"
-              >
-                <LogOut className="h-6 w-6" />
-              </Link>
-            </div>
-
-            <div className="md:hidden">
-              <Link
-                to="/student/dashboard"
-                className="bg-accent-200 text-primary-400 px-4 py-2 rounded-full text-sm font-medium"
-              >
-                Dashboard
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Header */}
-      <div className="bg-gradient-to-r from-primary-400 to-accent-400 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="font-display font-bold text-5xl mb-6">
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center mb-8">
+          <h1 className="font-display font-bold text-5xl text-blue-900 mb-4 drop-shadow-md">
             Program Matching
           </h1>
-          <p className="text-xl opacity-90 max-w-3xl mx-auto">
+          <p className="text-xl text-blue-800 max-w-3xl mx-auto">
             Find the perfect university program that matches your interests,
             skills, and career goals. Our AI-powered matching system analyzes
             your profile to recommend the best fit.
           </p>
         </div>
-      </div>
-
-      {/* Search and Filters */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Search and Filters */}
         <div className="bg-white rounded-2xl shadow-lg p-6 border border-accent-100 mb-8">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-300" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-600" />
               <input
                 type="text"
                 placeholder="Search programs, universities, or faculties..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
+                className="w-full pl-12 pr-4 py-3 border border-accent-100 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-blue-900 placeholder-blue-600"
               />
             </div>
           </div>
@@ -306,8 +224,8 @@ const ProgramMatching = () => {
                 onClick={() => setSelectedFilter(category.id)}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
                   selectedFilter === category.id
-                    ? "bg-primary-400 text-white"
-                    : "bg-white text-primary-400 border border-accent-100 hover:bg-accent-50"
+                    ? "bg-blue-600 text-white"
+                    : "bg-white text-blue-700 border border-accent-100 hover:bg-blue-50"
                 }`}
               >
                 <IconComponent className="h-4 w-4" />
@@ -318,41 +236,41 @@ const ProgramMatching = () => {
         </div>
 
         {/* Match Score Summary */}
-        <div className="bg-gradient-to-r from-primary-100 to-accent-100 rounded-2xl p-6 mb-8">
-          <h2 className="font-display font-semibold text-2xl text-primary-400 mb-4">
+        <div className="bg-gradient-to-r from-blue-100 to-blue-200 rounded-2xl p-6 mb-8">
+          <h2 className="font-display font-semibold text-2xl text-blue-900 mb-4">
             Your Match Summary
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white rounded-lg p-4">
               <div className="flex items-center justify-between">
-                <span className="text-primary-300">Best Match</span>
+                <span className="text-blue-700">Best Match</span>
                 <CheckCircle className="h-5 w-5 text-green-500" />
               </div>
-              <div className="text-2xl font-bold text-primary-400">
+              <div className="text-2xl font-bold text-blue-900">
                 {filteredPrograms[0]?.matchScore || 0}%
               </div>
-              <div className="text-sm text-primary-300">
+              <div className="text-sm text-blue-700">
                 {filteredPrograms[0]?.name || "No programs found"}
               </div>
             </div>
             <div className="bg-white rounded-lg p-4">
               <div className="flex items-center justify-between">
-                <span className="text-primary-300">Programs Found</span>
-                <BookOpen className="h-5 w-5 text-primary-400" />
+                <span className="text-blue-700">Programs Found</span>
+                <BookOpen className="h-5 w-5 text-blue-600" />
               </div>
-              <div className="text-2xl font-bold text-primary-400">
+              <div className="text-2xl font-bold text-blue-900">
                 {filteredPrograms.length}
               </div>
-              <div className="text-sm text-primary-300">
+              <div className="text-sm text-blue-700">
                 Matching your criteria
               </div>
             </div>
             <div className="bg-white rounded-lg p-4">
               <div className="flex items-center justify-between">
-                <span className="text-primary-300">Avg. Match Score</span>
-                <TrendingUp className="h-5 w-5 text-accent-400" />
+                <span className="text-blue-700">Avg. Match Score</span>
+                <TrendingUp className="h-5 w-5 text-blue-600" />
               </div>
-              <div className="text-2xl font-bold text-primary-400">
+              <div className="text-2xl font-bold text-blue-900">
                 {filteredPrograms.length > 0
                   ? Math.round(
                       filteredPrograms.reduce(
@@ -363,7 +281,7 @@ const ProgramMatching = () => {
                   : 0}
                 %
               </div>
-              <div className="text-sm text-primary-300">Across all matches</div>
+              <div className="text-sm text-blue-700">Across all matches</div>
             </div>
           </div>
         </div>
@@ -379,14 +297,14 @@ const ProgramMatching = () => {
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="font-display font-semibold text-2xl text-primary-400">
+                      <h3 className="font-display font-semibold text-2xl text-blue-900">
                         {program.name}
                       </h3>
                       <div className="bg-gradient-to-r from-green-400 to-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
                         {program.matchScore}% Match
                       </div>
                     </div>
-                    <div className="flex items-center space-x-4 text-primary-300 mb-3">
+                    <div className="flex items-center space-x-4 text-blue-700 mb-3">
                       <div className="flex items-center space-x-1">
                         <MapPin className="h-4 w-4" />
                         <span>{program.university}</span>
@@ -400,42 +318,42 @@ const ProgramMatching = () => {
                         <span>{program.duration}</span>
                       </div>
                     </div>
-                    <p className="text-primary-300 mb-4">
+                    <p className="text-blue-700 mb-4">
                       {program.description}
                     </p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                  <div className="bg-accent-50 rounded-lg p-3">
-                    <div className="text-sm text-primary-300 mb-1">
+                  <div className="bg-blue-50 rounded-lg p-3">
+                    <div className="text-sm text-blue-700 mb-1">
                       Z-Score Required
                     </div>
-                    <div className="font-semibold text-primary-400">
+                    <div className="font-semibold text-blue-900">
                       {program.zScoreRequired}
                     </div>
                   </div>
-                  <div className="bg-accent-50 rounded-lg p-3">
-                    <div className="text-sm text-primary-300 mb-1">
+                  <div className="bg-blue-50 rounded-lg p-3">
+                    <div className="text-sm text-blue-700 mb-1">
                       Employment Rate
                     </div>
-                    <div className="font-semibold text-primary-400">
+                    <div className="font-semibold text-blue-900">
                       {program.employmentRate}
                     </div>
                   </div>
-                  <div className="bg-accent-50 rounded-lg p-3">
-                    <div className="text-sm text-primary-300 mb-1">
+                  <div className="bg-blue-50 rounded-lg p-3">
+                    <div className="text-sm text-blue-700 mb-1">
                       Average Salary
                     </div>
-                    <div className="font-semibold text-primary-400">
+                    <div className="font-semibold text-blue-900">
                       {program.averageSalary}
                     </div>
                   </div>
-                  <div className="bg-accent-50 rounded-lg p-3">
-                    <div className="text-sm text-primary-300 mb-1">
+                  <div className="bg-blue-50 rounded-lg p-3">
+                    <div className="text-sm text-blue-700 mb-1">
                       Duration
                     </div>
-                    <div className="font-semibold text-primary-400">
+                    <div className="font-semibold text-blue-900">
                       {program.duration}
                     </div>
                   </div>
@@ -443,7 +361,7 @@ const ProgramMatching = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
-                    <h4 className="font-medium text-primary-400 mb-2">
+                    <h4 className="font-medium text-blue-900 mb-2">
                       Specializations
                     </h4>
                     <div className="space-y-1">
@@ -453,13 +371,13 @@ const ProgramMatching = () => {
                           className="flex items-center space-x-2"
                         >
                           <CheckCircle className="h-4 w-4 text-green-500" />
-                          <span className="text-primary-300">{spec}</span>
+                          <span className="text-blue-700">{spec}</span>
                         </div>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <h4 className="font-medium text-primary-400 mb-2">
+                    <h4 className="font-medium text-blue-900 mb-2">
                       Career Prospects
                     </h4>
                     <div className="space-y-1">
@@ -468,8 +386,8 @@ const ProgramMatching = () => {
                           key={index}
                           className="flex items-center space-x-2"
                         >
-                          <TrendingUp className="h-4 w-4 text-accent-400" />
-                          <span className="text-primary-300">{career}</span>
+                          <TrendingUp className="h-4 w-4 text-blue-600" />
+                          <span className="text-blue-700">{career}</span>
                         </div>
                       ))}
                     </div>
@@ -478,14 +396,14 @@ const ProgramMatching = () => {
 
                 <div className="flex justify-between items-center">
                   <div className="flex space-x-3">
-                    <button className="bg-primary-400 text-white px-6 py-2 rounded-lg hover:bg-primary-600 transition-colors">
+                    <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                       Apply Now
                     </button>
-                    <button className="border border-accent-100 text-primary-400 px-6 py-2 rounded-lg hover:bg-accent-50 transition-colors">
+                    <button className="border border-accent-100 text-blue-700 px-6 py-2 rounded-lg hover:bg-blue-50 transition-colors">
                       Learn More
                     </button>
                   </div>
-                  <button className="flex items-center space-x-2 text-primary-300 hover:text-primary-400 transition-colors">
+                  <button className="flex items-center space-x-2 text-blue-700 hover:text-blue-900 transition-colors">
                     <span>View Details</span>
                     <ChevronRight className="h-4 w-4" />
                   </button>
@@ -497,11 +415,11 @@ const ProgramMatching = () => {
 
         {filteredPrograms.length === 0 && (
           <div className="text-center py-12">
-            <BookOpen className="h-16 w-16 text-primary-200 mx-auto mb-4" />
-            <h3 className="font-display font-semibold text-2xl text-primary-400 mb-2">
+            <BookOpen className="h-16 w-16 text-blue-300 mx-auto mb-4" />
+            <h3 className="font-display font-semibold text-2xl text-blue-900 mb-2">
               No Programs Found
             </h3>
-            <p className="text-primary-300">
+            <p className="text-blue-700">
               Try adjusting your search criteria or filters.
             </p>
           </div>

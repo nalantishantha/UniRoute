@@ -247,42 +247,39 @@ const ScholarshipInfo = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50">
+    <div className="min-h-screen bg-gradient-to-r from-blue-200 to-blue-100">
       {/* Navigation */}
       <StudentNavigation />
 
-      {/* Header */}
-      <div className="bg-gradient-to-r from-primary-400 to-accent-400 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="font-display font-bold text-5xl mb-6">
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center mb-8">
+          <h1 className="font-display font-bold text-5xl text-blue-900 mb-4 drop-shadow-md">
             Scholarship Information
           </h1>
-          <p className="text-xl opacity-90 max-w-3xl mx-auto">
+          <p className="text-xl text-blue-800 max-w-3xl mx-auto">
             Discover funding opportunities to support your higher education
             journey. Find scholarships that match your profile and career goals.
           </p>
         </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Search and Filters */}
         <div className="bg-white rounded-2xl shadow-lg p-6 border border-accent-100 mb-8">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-300" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-600" />
               <input
                 type="text"
                 placeholder="Search scholarships, providers, or keywords..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
+                className="w-full pl-12 pr-4 py-3 border border-accent-100 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-blue-900 placeholder-blue-600"
               />
             </div>
             <div className="flex space-x-3">
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
+                className="px-4 py-3 border border-accent-100 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-blue-900"
               >
                 {categories.map((category) => (
                   <option key={category.id} value={category.id}>
@@ -293,7 +290,7 @@ const ScholarshipInfo = () => {
               <select
                 value={selectedLevel}
                 onChange={(e) => setSelectedLevel(e.target.value)}
-                className="px-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
+                className="px-4 py-3 border border-accent-100 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-blue-900"
               >
                 {levels.map((level) => (
                   <option key={level.id} value={level.id}>
@@ -310,21 +307,21 @@ const ScholarshipInfo = () => {
           <div className="bg-white rounded-xl shadow-lg p-6 border border-accent-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-primary-300 text-sm">
+                <p className="text-blue-700 text-sm">
                   Available Scholarships
                 </p>
-                <p className="text-2xl font-bold text-primary-400">
+                <p className="text-2xl font-bold text-blue-900">
                   {filteredScholarships.length}
                 </p>
               </div>
-              <Award className="h-8 w-8 text-accent-400" />
+              <Award className="h-8 w-8 text-blue-600" />
             </div>
           </div>
           <div className="bg-white rounded-xl shadow-lg p-6 border border-accent-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-primary-300 text-sm">Open Applications</p>
-                <p className="text-2xl font-bold text-primary-400">
+                <p className="text-blue-700 text-sm">Open Applications</p>
+                <p className="text-2xl font-bold text-blue-900">
                   {
                     filteredScholarships.filter((s) => s.status === "Open")
                       .length
@@ -337,17 +334,17 @@ const ScholarshipInfo = () => {
           <div className="bg-white rounded-xl shadow-lg p-6 border border-accent-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-primary-300 text-sm">Total Funding</p>
-                <p className="text-2xl font-bold text-primary-400">Rs. 50M+</p>
+                <p className="text-blue-700 text-sm">Total Funding</p>
+                <p className="text-2xl font-bold text-blue-900">Rs. 50M+</p>
               </div>
-              <DollarSign className="h-8 w-8 text-accent-400" />
+              <DollarSign className="h-8 w-8 text-blue-600" />
             </div>
           </div>
           <div className="bg-white rounded-xl shadow-lg p-6 border border-accent-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-primary-300 text-sm">Success Rate</p>
-                <p className="text-2xl font-bold text-primary-400">28%</p>
+                <p className="text-blue-700 text-sm">Success Rate</p>
+                <p className="text-2xl font-bold text-blue-900">28%</p>
               </div>
               <TrendingUp className="h-8 w-8 text-green-500" />
             </div>
@@ -365,7 +362,7 @@ const ScholarshipInfo = () => {
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="font-display font-semibold text-2xl text-primary-400">
+                      <h3 className="font-display font-semibold text-2xl text-blue-900">
                         {scholarship.name}
                       </h3>
                       <span
@@ -376,43 +373,43 @@ const ScholarshipInfo = () => {
                         {scholarship.status}
                       </span>
                     </div>
-                    <p className="text-primary-300 mb-2">
+                    <p className="text-blue-700 mb-2">
                       {scholarship.provider}
                     </p>
-                    <p className="text-primary-300 mb-4">
+                    <p className="text-blue-700 mb-4">
                       {scholarship.description}
                     </p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                  <div className="bg-accent-50 rounded-lg p-3">
-                    <div className="text-sm text-primary-300 mb-1">Amount</div>
-                    <div className="font-semibold text-primary-400">
+                  <div className="bg-blue-50 rounded-lg p-3">
+                    <div className="text-sm text-blue-700 mb-1">Amount</div>
+                    <div className="font-semibold text-blue-900">
                       {scholarship.amount}
                     </div>
                   </div>
-                  <div className="bg-accent-50 rounded-lg p-3">
-                    <div className="text-sm text-primary-300 mb-1">
+                  <div className="bg-blue-50 rounded-lg p-3">
+                    <div className="text-sm text-blue-700 mb-1">
                       Duration
                     </div>
-                    <div className="font-semibold text-primary-400">
+                    <div className="font-semibold text-blue-900">
                       {scholarship.duration}
                     </div>
                   </div>
-                  <div className="bg-accent-50 rounded-lg p-3">
-                    <div className="text-sm text-primary-300 mb-1">
+                  <div className="bg-blue-50 rounded-lg p-3">
+                    <div className="text-sm text-blue-700 mb-1">
                       Deadline
                     </div>
-                    <div className="font-semibold text-primary-400">
+                    <div className="font-semibold text-blue-900">
                       {scholarship.deadline}
                     </div>
                   </div>
-                  <div className="bg-accent-50 rounded-lg p-3">
-                    <div className="text-sm text-primary-300 mb-1">
+                  <div className="bg-blue-50 rounded-lg p-3">
+                    <div className="text-sm text-blue-700 mb-1">
                       Success Rate
                     </div>
-                    <div className="font-semibold text-primary-400">
+                    <div className="font-semibold text-blue-900">
                       {scholarship.successRate}
                     </div>
                   </div>
@@ -420,15 +417,15 @@ const ScholarshipInfo = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
-                    <h4 className="font-medium text-primary-400 mb-3 flex items-center space-x-2">
+                    <h4 className="font-medium text-blue-900 mb-3 flex items-center space-x-2">
                       <CheckCircle className="h-5 w-5" />
                       <span>Eligibility Criteria</span>
                     </h4>
                     <ul className="space-y-1">
                       {scholarship.eligibility.map((criteria, index) => (
                         <li key={index} className="flex items-start space-x-2">
-                          <div className="w-1.5 h-1.5 bg-primary-400 rounded-full mt-2 flex-shrink-0"></div>
-                          <span className="text-primary-300 text-sm">
+                          <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-blue-700 text-sm">
                             {criteria}
                           </span>
                         </li>
@@ -436,15 +433,15 @@ const ScholarshipInfo = () => {
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-medium text-primary-400 mb-3 flex items-center space-x-2">
+                    <h4 className="font-medium text-blue-900 mb-3 flex items-center space-x-2">
                       <Award className="h-5 w-5" />
                       <span>Benefits</span>
                     </h4>
                     <ul className="space-y-1">
                       {scholarship.benefits.map((benefit, index) => (
                         <li key={index} className="flex items-start space-x-2">
-                          <div className="w-1.5 h-1.5 bg-accent-400 rounded-full mt-2 flex-shrink-0"></div>
-                          <span className="text-primary-300 text-sm">
+                          <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-blue-700 text-sm">
                             {benefit}
                           </span>
                         </li>
@@ -454,7 +451,7 @@ const ScholarshipInfo = () => {
                 </div>
 
                 <div className="mb-6">
-                  <h4 className="font-medium text-primary-400 mb-3 flex items-center space-x-2">
+                  <h4 className="font-medium text-blue-900 mb-3 flex items-center space-x-2">
                     <BookOpen className="h-5 w-5" />
                     <span>Required Documents</span>
                   </h4>
@@ -462,7 +459,7 @@ const ScholarshipInfo = () => {
                     {scholarship.requirements.map((requirement, index) => (
                       <span
                         key={index}
-                        className="bg-accent-100 text-primary-400 px-3 py-1 rounded-full text-sm"
+                        className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm"
                       >
                         {requirement}
                       </span>
@@ -472,23 +469,23 @@ const ScholarshipInfo = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-sm">
                   <div>
-                    <div className="text-primary-300 mb-1">
+                    <div className="text-blue-700 mb-1">
                       Application Process
                     </div>
-                    <div className="text-primary-400">
+                    <div className="text-blue-900">
                       {scholarship.applicationProcess}
                     </div>
                   </div>
                   <div>
-                    <div className="text-primary-300 mb-1">Contact</div>
-                    <div className="text-primary-400">
+                    <div className="text-blue-700 mb-1">Contact</div>
+                    <div className="text-blue-900">
                       {scholarship.contactInfo}
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between pt-4 border-t border-accent-100">
-                  <div className="flex items-center space-x-4 text-sm text-primary-300">
+                  <div className="flex items-center space-x-4 text-sm text-blue-700">
                     <div className="flex items-center space-x-1">
                       <Users className="h-4 w-4" />
                       <span>{scholarship.applicants} applicants</span>
@@ -507,12 +504,12 @@ const ScholarshipInfo = () => {
                       href={scholarship.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center space-x-1 bg-accent-100 text-primary-400 px-4 py-2 rounded-lg hover:bg-accent-200 transition-colors"
+                      className="flex items-center space-x-1 bg-blue-100 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-200 transition-colors"
                     >
                       <span>Visit Website</span>
                       <ExternalLink className="h-4 w-4" />
                     </a>
-                    <button className="bg-primary-400 text-white px-6 py-2 rounded-lg hover:bg-primary-600 transition-colors">
+                    <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                       Apply Now
                     </button>
                   </div>
@@ -524,44 +521,44 @@ const ScholarshipInfo = () => {
 
         {filteredScholarships.length === 0 && (
           <div className="text-center py-12">
-            <Award className="h-16 w-16 text-primary-200 mx-auto mb-4" />
-            <h3 className="font-display font-semibold text-2xl text-primary-400 mb-2">
+            <Award className="h-16 w-16 text-blue-300 mx-auto mb-4" />
+            <h3 className="font-display font-semibold text-2xl text-blue-900 mb-2">
               No Scholarships Found
             </h3>
-            <p className="text-primary-300">
+            <p className="text-blue-700">
               Try adjusting your search criteria or filters.
             </p>
           </div>
         )}
 
         {/* Tips Section */}
-        <div className="mt-12 bg-gradient-to-r from-primary-100 to-accent-100 rounded-2xl p-8">
-          <h2 className="font-display font-semibold text-2xl text-primary-400 mb-6 text-center">
+        <div className="mt-12 bg-gradient-to-r from-blue-100 to-blue-200 rounded-2xl p-8">
+          <h2 className="font-display font-semibold text-2xl text-blue-900 mb-6 text-center">
             Tips for Scholarship Applications
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white rounded-lg p-4">
-              <AlertCircle className="h-8 w-8 text-accent-400 mb-3" />
-              <h3 className="font-medium text-primary-400 mb-2">Start Early</h3>
-              <p className="text-primary-300 text-sm">
+              <AlertCircle className="h-8 w-8 text-blue-600 mb-3" />
+              <h3 className="font-medium text-blue-900 mb-2">Start Early</h3>
+              <p className="text-blue-700 text-sm">
                 Begin your application process well before deadlines to ensure
                 you have time to gather all required documents.
               </p>
             </div>
             <div className="bg-white rounded-lg p-4">
               <CheckCircle className="h-8 w-8 text-green-500 mb-3" />
-              <h3 className="font-medium text-primary-400 mb-2">
+              <h3 className="font-medium text-blue-900 mb-2">
                 Read Requirements
               </h3>
-              <p className="text-primary-300 text-sm">
+              <p className="text-blue-700 text-sm">
                 Carefully review all eligibility criteria and application
                 requirements before applying.
               </p>
             </div>
             <div className="bg-white rounded-lg p-4">
               <Star className="h-8 w-8 text-yellow-500 mb-3" />
-              <h3 className="font-medium text-primary-400 mb-2">Stand Out</h3>
-              <p className="text-primary-300 text-sm">
+              <h3 className="font-medium text-blue-900 mb-2">Stand Out</h3>
+              <p className="text-blue-700 text-sm">
                 Highlight your unique achievements, community involvement, and
                 future goals in your application.
               </p>
