@@ -1,15 +1,12 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
 
 class UserTypes(models.Model):
     type_id = models.AutoField(primary_key=True)
     type_name = models.CharField(unique=True, max_length=30)
 
     class Meta:
+        managed = True
         db_table = 'user_types'
-        
-    def __str__(self):
-        return self.type_name
 
 class Users(models.Model):
     user_id = models.AutoField(primary_key=True)
@@ -21,17 +18,12 @@ class Users(models.Model):
     created_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
+        managed = True
         db_table = 'users'
-        
-    def __str__(self):
-        return self.username
 
 class UserDetails(models.Model):
-    detail_id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(Users, models.DO_NOTHING)
-    first_name = models.CharField(max_length=50, blank=True, null=True)
-    last_name = models.CharField(max_length=50, blank=True, null=True)
-    date_of_birth = models.DateField(blank=True, null=True)
+    user = models.OneToOneField(Users, models.DO_NOTHING, primary_key=True)
+    full_name = models.CharField(max_length=100, blank=True, null=True)
     profile_picture = models.CharField(max_length=255, blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
     contact_number = models.CharField(max_length=20, blank=True, null=True)
@@ -41,8 +33,5 @@ class UserDetails(models.Model):
     updated_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
+        managed = True
         db_table = 'user_details'
-        db_table_comment = 'User details table'
-        
-    def __str__(self):
-        return f"{self.first_name} {self.last_name}"

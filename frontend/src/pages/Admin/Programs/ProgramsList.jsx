@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import AdminLayout from '../../../components/common/Admin/AdminLayout';
 
 const ProgramsList = () => {
   const navigate = useNavigate();
@@ -157,14 +158,16 @@ const ProgramsList = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-600"></div>
-      </div>
+      <AdminLayout pageTitle="Programs Management" pageDescription="Loading programs...">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-600"></div>
+        </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="p-6">
+    <AdminLayout pageTitle="Programs Management" pageDescription="Manage academic programs and courses">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
@@ -327,7 +330,7 @@ const ProgramsList = () => {
           </div>
         )}
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getCurrentUser } from '../../../utils/auth';
+import AdminLayout from '../../../components/common/Admin/AdminLayout';
 import {
   Users,
   Edit,
@@ -210,95 +211,49 @@ const MentorView = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading mentor details...</p>
+      <AdminLayout 
+        pageTitle="Loading..."
+        pageDescription="Loading mentor information"
+      >
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading mentor details...</p>
+          </div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   if (!mentor) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Mentor Not Found</h2>
-          <p className="text-gray-600 mb-4">The mentor you're looking for doesn't exist.</p>
-          <Link
-            to="/admin/mentors"
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            Back to Mentors
-          </Link>
+      <AdminLayout 
+        pageTitle="Mentor Not Found"
+        pageDescription="The requested mentor could not be found"
+      >
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Mentor Not Found</h2>
+            <p className="text-gray-600 mb-4">The mentor you're looking for doesn't exist.</p>
+            <Link
+              to="/admin/mentors"
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              Back to Mentors
+            </Link>
+          </div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <Link
-                to="/admin/mentors"
-                className="text-gray-600 hover:text-gray-900"
-              >
-                <ChevronLeft className="h-6 w-6" />
-              </Link>
-              <div className="flex items-center space-x-2">
-                <Users className="h-6 w-6 text-blue-500" />
-                <h1 className="text-2xl font-bold text-gray-900">Mentor Details</h1>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Link
-                to={`/admin/mentors/${mentor.id}/edit`}
-                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center space-x-2"
-              >
-                <Edit className="h-4 w-4" />
-                <span>Edit Mentor</span>
-              </Link>
-              <button
-                onClick={handleToggleVerification}
-                className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
-                  mentor.is_verified
-                    ? 'bg-orange-500 text-white hover:bg-orange-600'
-                    : 'bg-blue-500 text-white hover:bg-blue-600'
-                }`}
-              >
-                <Award className="h-4 w-4" />
-                <span>{mentor.is_verified ? 'Unverify' : 'Verify'}</span>
-              </button>
-              <button
-                onClick={handleToggleStatus}
-                className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
-                  mentor.is_active
-                    ? 'bg-orange-500 text-white hover:bg-orange-600'
-                    : 'bg-green-500 text-white hover:bg-green-600'
-                }`}
-              >
-                {mentor.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
-                <span>{mentor.is_active ? 'Deactivate' : 'Activate'}</span>
-              </button>
-              <button
-                onClick={handleDeleteMentor}
-                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center space-x-2"
-              >
-                <Trash2 className="h-4 w-4" />
-                <span>Delete</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <AdminLayout 
+      pageTitle={`${mentor.first_name} ${mentor.last_name}`}
+      pageDescription="View mentor details and information"
+    >
+      <div className="max-w-6xl mx-auto">
         {/* Message */}
         {message.text && (
           <div className={`mb-6 p-4 rounded-lg flex items-center space-x-3 ${
@@ -548,7 +503,7 @@ const MentorView = () => {
           </div>
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 

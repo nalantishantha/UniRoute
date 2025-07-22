@@ -1,25 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { 
-  GraduationCap, 
-  Home, 
-  School2, 
-  BookOpen, 
-  User, 
-  Calendar,
-  FileText,
-  Users,
-  Bell,
-  Menu,
-  X,
-  LogOut,
-  Award,
-  MessageSquare
-} from 'lucide-react';
-import { logout, getCurrentUser } from '../../utils/auth'; // ✅ Import logout function
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useLocation } from "react-router-dom";
+import { MessageSquare } from "lucide-react";
+import { useChatContext } from "../../context/ChatContext";
 
-const UniversityStudentNavbar = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+import {
+  Menu,
+  Bell,
+  Search,
+  User,
+  MessageCircle,
+  Calendar,
+  LogOut,
+  ChevronDown,
+  Settings,
+  UserCircle,
+} from "lucide-react";
+import { logout, getCurrentUser } from "../../utils/auth"; // ✅ Import logout function
+import { cn } from "../../utils/cn";
+import Chat from "../UniStudents/Chat";
+import CompactCalendar from "../UniStudents/CompactCalendar";
+
+export default function TopNavigation({ onMenuClick }) {
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [user, setUser] = useState(null); // ✅ Add user state
   const location = useLocation();
 
@@ -29,169 +35,296 @@ const UniversityStudentNavbar = () => {
     setUser(currentUser);
   }, []);
 
-  const isActive = (path) => location.pathname === path;
-
   // ✅ Handle logout with confirmation
   const handleLogout = async () => {
-    if (window.confirm('Are you sure you want to logout?')) {
+    if (window.confirm("Are you sure you want to logout?")) {
       await logout();
     }
   };
 
-  const navigationItems = [
-    { path: '/university-student/dashboard', label: 'Dashboard', icon: Home },
-    { path: '/university-student/courses', label: 'My Courses', icon: BookOpen },
-    { path: '/university-student/schedule', label: 'Schedule', icon: Calendar },
-    { path: '/university-student/assignments', label: 'Assignments', icon: FileText },
-    { path: '/university-student/grades', label: 'Grades', icon: Award },
-    { path: '/university-student/community', label: 'Community', icon: Users },
-    { path: '/university-student/messages', label: 'Messages', icon: MessageSquare },
-  ];
+  // Function to get page name from current route
+  const getPageName = () => {
+    const path = location.pathname;
+    switch (path) {
+      case "/university-student/dashboard":
+        return "Dashboard";
+      case "/university-student/mentoring":
+        return "Mentoring";
+      case "/university-student/tutoring":
+        return "Tutoring";
+      case "/university-student/courses":
+        return "Pre-Uni Courses";
+      case "/university-student/resources":
+        return "Resources";
+      case "/university-student/calendar":
+        return "Calendar";
+      case "/university-student/earnings":
+        return "Earnings";
+      case "/university-student/feedback":
+        return "Feedback";
+      case "/university-student/profile":
+        return "Profile";
+      case "/university-student/settings":
+        return "Settings";
+      default:
+        return "university-student/Dashboard";
+    }
+  };
+
+  // Function to get page description
+  const getPageDescription = () => {
+    const path = location.pathname;
+    switch (path) {
+      case "/university-student/dashboard":
+        return "Track your progress and manage activities";
+      case "/university-student/mentoring":
+        return "Guide students towards their goals";
+      case "/university-student/tutoring":
+        return "Help students with academic subjects";
+      case "/university-student/courses":
+        return "Manage pre-university course offerings";
+      case "/university-student/resources":
+        return "Access and share educational materials";
+      case "/university-student/calendar":
+        return "Manage your schedule and appointments";
+      case "/university-student/earnings":
+        return "View your earnings and payments";
+      case "/university-student/feedback":
+        return "Review student feedback and ratings";
+      case "/university-student/profile":
+        return "Manage your account and preferences";
+      case "/university-student/settings":
+        return "Manage your account and preferences";
+      default:
+        return "Track your progress and manage activities";
+    }
+  };
+
+  const { toggleChat } = useChatContext();
 
   return (
-    <nav className="bg-white shadow-lg border-b border-primary-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          
-          {/* Logo Section */}
-          <div className="flex items-center space-x-3">
-            <Link to="/university-student/dashboard" className="flex items-center space-x-2">
-              <GraduationCap className="h-8 w-8 text-primary-500" />
-              <span className="font-bold text-2xl text-primary-600">UniRoute</span>
-            </Link>
-            <div className="hidden md:block">
-              <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
-                University Student
-              </span>
-            </div>
-          </div>
+    <motion.header
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      className="sticky top-0 z-30 bg-white border-b-2 shadow-md border-neutral-silver/50 backdrop-blur-sm"
+    >
+      <div className="flex items-center justify-between px-6 py-5">
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={onMenuClick}
+            className="lg:hidden p-2.5 rounded-xl hover:bg-neutral-silver/70 transition-all duration-200 hover:shadow-sm"
+          >
+            <Menu className="w-5 h-5 text-neutral-dark-grey" />
+          </button>
 
-          {/* University Info */}
-          <div className="hidden lg:flex items-center space-x-2">
-            <School2 className="h-5 w-5 text-primary-400" />
-            <span className="text-primary-600 font-medium">University of Colombo</span>
-          </div>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1">
-            {navigationItems.map((item) => {
-              const IconComponent = item.icon;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                    isActive(item.path)
-                      ? 'bg-primary-500 text-white shadow-md'
-                      : 'text-primary-400 hover:text-primary-600 hover:bg-primary-50'
-                  }`}
-                >
-                  <IconComponent className="h-4 w-4" />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </div>
-
-          {/* Right Side - Notifications & Profile */}
-          <div className="hidden md:flex items-center space-x-4">
-            {/* Notifications */}
-            <button className="relative p-2 text-primary-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors duration-200">
-              <Bell className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                5
-              </span>
-            </button>
-
-            {/* Profile Dropdown */}
-            <div className="relative">
-              <button className="flex items-center space-x-2 p-2 text-primary-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors duration-200">
-                <User className="h-5 w-5" />
-                <div className="text-left">
-                  <span className="font-medium block">
-                    {user ? user.first_name : 'Sarah'} {/* ✅ Show actual user name */}
-                  </span>
-                  <span className="text-xs text-primary-300">Computer Science</span>
-                </div>
-              </button>
-            </div>
-
-            {/* Logout Button - Updated */}
-            <button 
-              onClick={handleLogout} // ✅ Connect to logout function
-              className="flex items-center space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="font-medium">Logout</span>
-            </button>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 text-primary-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors duration-200"
-            >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
+          <div className="hidden md:block">
+            <h2 className="text-2xl font-bold text-transparent text-neutral-black bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text">
+              {getPageName()}
+            </h2>
+            <p className="text-sm font-medium text-neutral-grey">
+              {getPageDescription()}
+            </p>
           </div>
         </div>
 
-        {/* Mobile Navigation Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden border-t border-primary-200 py-4">
-            {/* University Info Mobile */}
-            <div className="flex items-center space-x-2 px-4 py-2 mb-4 bg-primary-50 rounded-lg">
-              <School2 className="h-5 w-5 text-primary-400" />
-              <span className="text-primary-600 font-medium">University of Colombo</span>
-            </div>
-
-            <div className="space-y-2">
-              {navigationItems.map((item) => {
-                const IconComponent = item.icon;
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
-                      isActive(item.path)
-                        ? 'bg-primary-500 text-white shadow-md'
-                        : 'text-primary-400 hover:text-primary-600 hover:bg-primary-50'
-                    }`}
-                  >
-                    <IconComponent className="h-5 w-5" />
-                    <span>{item.label}</span>
-                  </Link>
-                );
-              })}
-              
-              {/* Mobile Profile & Logout */}
-              <div className="border-t border-primary-200 pt-4 mt-4 space-y-2">
-                <div className="flex items-center space-x-3 px-4 py-3 text-primary-600">
-                  <User className="h-5 w-5" />
-                  <div>
-                    <span className="font-medium block">
-                      {user ? user.first_name : 'Sarah'} {/* ✅ Show actual user name */}
-                    </span>
-                    <span className="text-xs text-primary-300">Computer Science</span>
-                  </div>
-                  <Bell className="h-5 w-5 ml-auto" />
-                </div>
-                <button 
-                  onClick={handleLogout} // ✅ Connect to logout function
-                  className="flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200 w-full"
-                >
-                  <LogOut className="h-5 w-5" />
-                  <span className="font-medium">Logout</span>
-                </button>
-              </div>
-            </div>
+        <div className="flex-1 hidden max-w-lg mx-8 md:flex">
+          <div
+            className={cn(
+              "relative w-full transition-all duration-300",
+              searchFocused && "transform scale-105"
+            )}
+          >
+            {/* Search functionality can be added here if needed */}
           </div>
-        )}
-      </div>
-    </nav>
-  );
-};
+        </div>
 
-export default UniversityStudentNavbar;
+        <div className="flex items-center space-x-4">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowCalendar(true)}
+            className="p-3 transition-all duration-200 rounded-xl hover:bg-neutral-silver/70 group hover:shadow-sm"
+          >
+            <Calendar className="w-5 h-5 text-neutral-dark-grey group-hover:text-primary-600" />
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={toggleChat}
+            className="relative p-2 transition-colors duration-200 rounded-lg text-primary-400 hover:text-primary-600 hover:bg-primary-50"
+          >
+            <MessageSquare className="w-5 h-5" />
+            <span className="absolute flex items-center justify-center w-4 h-4 text-xs text-white bg-green-500 rounded-full -top-1 -right-1">
+              2
+            </span>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="relative p-3 transition-all duration-200 rounded-xl hover:bg-neutral-silver/70 group hover:shadow-sm"
+          >
+            <Bell className="w-5 h-5 text-neutral-dark-grey group-hover:text-primary-600" />
+            <span className="absolute flex items-center justify-center w-4 h-4 rounded-full shadow-sm -top-1 -right-1 bg-error">
+              <span className="w-2 h-2 bg-white rounded-full"></span>
+            </span>
+          </motion.button>
+
+          {/* User Profile Dropdown */}
+          <div className="relative">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              onClick={() => setShowUserDropdown(!showUserDropdown)}
+              className="flex items-center p-3 space-x-3 transition-all duration-200 border border-transparent cursor-pointer rounded-xl hover:bg-gradient-to-r hover:from-primary-50 hover:to-primary-100 group hover:border-primary-200 hover:shadow-sm"
+            >
+              <div className="flex items-center justify-center rounded-full shadow-sm w-9 h-9 bg-gradient-to-br from-primary-400 to-primary-600">
+                <User className="w-5 h-5 text-white" />
+              </div>
+              <div className="hidden sm:block">
+                <p className="text-sm font-semibold text-neutral-black group-hover:text-primary-700">
+                  {user
+                    ? `${user.first_name} ${user.last_name || ""}`.trim()
+                    : "University Student"}
+                </p>
+                <p className="text-xs font-medium text-neutral-grey">
+                  {user?.university || "Student Mentor"}
+                </p>
+              </div>
+              <ChevronDown
+                className={cn(
+                  "w-4 h-4 text-neutral-grey transition-transform duration-200",
+                  showUserDropdown && "rotate-180"
+                )}
+              />
+            </motion.button>
+
+            {/* User Dropdown Menu */}
+            <AnimatePresence>
+              {showUserDropdown && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute right-0 z-50 py-2 mt-2 bg-white border shadow-lg w-80 rounded-xl border-neutral-silver-900"
+                >
+                  {/* User Info Header */}
+                  <div className="px-4 py-3 border-b border-neutral-silver/30">
+                    <div className="flex items-center space-x-3">
+                      <div className="flex items-center justify-center w-12 h-12 rounded-full shadow-sm bg-gradient-to-br from-primary-400 to-primary-600">
+                        <User className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-neutral-black">
+                          {user
+                            ? `${user.first_name} ${user.last_name || ""
+                              }`.trim()
+                            : "University Student"}
+                        </h3>
+                        <p className="text-sm text-neutral-grey">
+                          {user?.email || "student@university.edu"}
+                        </p>
+                        <p className="text-xs text-neutral-grey">
+                          {user?.university || "University Student"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* User Details */}
+                  <div className="px-4 py-3 border-b border-neutral-silver">
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-neutral-grey">Student ID:</span>
+                        <span className="font-medium text-neutral-black">
+                          {user?.student_id || "N/A"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-neutral-grey">Program:</span>
+                        <span className="font-medium text-neutral-black">
+                          {user?.program || "Computer Science"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-neutral-grey">Year:</span>
+                        <span className="font-medium text-neutral-black">
+                          {user?.year || "3rd Year"}
+                        </span>
+                      </div>
+                      {/* <div className="flex justify-between">
+                        <span className="text-neutral-grey">Status:</span>
+                        <span className="inline-flex items-center px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full">
+                          Active
+                        </span>
+                      </div> */}
+                    </div>
+                  </div>
+
+                  {/* Menu Items */}
+                  <div className="py-2">
+                    <button
+                      onClick={() => {
+                        setShowUserDropdown(false);
+                        // Navigate to profile page
+                        window.location.href = "/university-student/profile";
+                      }}
+                      className="flex items-center w-full px-4 py-2 space-x-3 text-sm transition-colors duration-200 text-neutral-black hover:bg-neutral-silver/50"
+                    >
+                      <UserCircle className="w-4 h-4" />
+                      <span>View Profile</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setShowUserDropdown(false);
+                        // Navigate to settings page
+                        window.location.href = "/university-student/settings";
+                      }}
+                      className="flex items-center w-full px-4 py-2 space-x-3 text-sm transition-colors duration-200 text-neutral-black hover:bg-neutral-silver/50"
+                    >
+                      <Settings className="w-4 h-4" />
+                      <span>Settings</span>
+                    </button>
+                  </div>
+
+                  {/* Logout Button */}
+                  <div className="pt-2 border-t border-neutral-silver/30">
+                    <button
+                      onClick={() => {
+                        setShowUserDropdown(false);
+                        handleLogout();
+                      }}
+                      className="flex items-center w-full px-4 py-2 space-x-3 text-sm text-red-600 transition-colors duration-200 hover:bg-red-50"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span className="font-medium">Logout</span>
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
+
+      {/* Chat Component */}
+      <Chat isOpen={showChat} onClose={() => setShowChat(false)} />
+
+      {/* Compact Calendar Component */}
+      <CompactCalendar
+        isOpen={showCalendar}
+        onClose={() => setShowCalendar(false)}
+      />
+
+      {/* Click outside to close dropdown */}
+      {showUserDropdown && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setShowUserDropdown(false)}
+        />
+      )}
+    </motion.header>
+  );
+}

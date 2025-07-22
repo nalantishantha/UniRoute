@@ -57,17 +57,27 @@ export {
   ProgramView 
 } from './Programs';
 
+//jobs
+export {
+  JobList,
+  JobDetails,
+  JobForm
+} from './Jobs';
+
 // // Analytics
 // export { 
 //   Analytics 
 // } from './Analytics';
 
-// // Reports
-// export { 
-//   Reports 
-// } from './Reports';
+// Reports
+export { 
+  Reports,
+  ReportDetails
+} from './Reports';
 
-// // Settings
+// Settings
 // export { 
-//   Settings 
-// } from './Settings';
+//   AdminSettings 
+// } from './AdminSettings';
+
+export { default as AdminSettings } from './AdminSettings';

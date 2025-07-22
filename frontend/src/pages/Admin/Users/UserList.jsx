@@ -18,6 +18,8 @@ import {
   ChevronRight
 } from 'lucide-react';
 
+import AdminLayout from '../../../components/common/Admin/AdminLayout';
+
 const UsersList = () => {
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -205,20 +207,25 @@ const UsersList = () => {
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading users...</p>
-        </div>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <AdminLayout pageTitle="Users Management" pageDescription="Manage all platform users">
+  //       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+  //         <div className="text-center">
+  //           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+  //           <p className="text-gray-600">Loading users...</p>
+  //         </div>
+  //       </div>
+  //     </AdminLayout>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
+      <AdminLayout pageTitle="Users Management" pageDescription="Manage all platform users">
+      <div className="min-h-screen bg-gray-50">
+      {/* Main Content */}
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -244,8 +251,6 @@ const UsersList = () => {
           </div>
         </div>
       </div>
-
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filters */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
@@ -449,6 +454,8 @@ const UsersList = () => {
           )}
         </div>
       </div>
+      </div>
+    </AdminLayout>
     </div>
   );
 };

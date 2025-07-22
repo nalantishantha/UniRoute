@@ -1,58 +1,81 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import LandingPage from './components/LandingPage';
-import LoginPage from './components/LoginPage';
-import RegisterPage from './components/RegisterPage';
-import { StudentLayout, UniversityStudentLayout } from './components/Navigation';
+import React, { useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { initializeSessionGuard } from "./utils/auth";
+import RouteGuard from "./components/common/RouteGuard";
+import LandingPage from "./components/LandingPage";
+import AboutUs from "./components/AboutUs";
+import ContactUs from "./components/ContactUs";
+import LoginPage from "./components/LoginPage";
+import RoleSelectionPage from "./components/RoleSelectionPage";
+import StudentRegisterPage from "./components/StudentRegisterPage";
+import UniversityStudentRegisterPage from "./components/UniversityStudentRegisterPage";
+import UniversityRegisterPage from "./components/UniversityRegisterPage";
+import CompanyRegisterPage from "./components/CompanyRegisterPage";
+import Universities from "./components/Universities";
 
-// Import route components
-import AdminRoutes from './routes/AdminRoutes';
+// Layouts
+import { StudentLayout, UniversityStudentLayout } from "./components/Navigation";
 
-// Test Dashboard Components
-const StudentDashboard = () => (
-  <div className="max-w-7xl mx-auto px-4 py-8">
-    <h1 className="text-3xl font-bold text-primary-600 mb-4">Student Dashboard</h1>
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <p className="text-primary-400">Welcome to your student dashboard!</p>
-    </div>
-  </div>
-);
+// Company pages
+import Dashboard from "./pages/Company/Dashboard";
+import Courses from "./pages/Company/Course";
+import Internships from "./pages/Company/Internship";
+import AdPublish from "./pages/Company/AdPublish";
 
-const UniversityStudentDashboard = () => (
-  <div className="max-w-7xl mx-auto px-4 py-8">
-    <h1 className="text-3xl font-bold text-primary-600 mb-4">University Student Dashboard</h1>
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <p className="text-primary-400">Welcome to your university student dashboard!</p>
-    </div>
-  </div>
-);
+// Route groups
+import AdminRoutes from "./routes/AdminRoutes";
+import UniStudentRoutes from "./routes/UniStudentRoutes";
+import StudentRoutes from "./routes/StudentRoutes";
+import { companyRoutes } from "./routes/CompanyRoutes";
+import { universityRoutes } from "./routes/UniversityRoutes";
 
 function App() {
+  useEffect(() => {
+    // Initialize session guard to prevent back button access after logout
+    initializeSessionGuard();
+  }, []);
+
   return (
     <Router>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        
+      <RouteGuard>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/contact" element={<ContactUs />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RoleSelectionPage />} />
+          <Route path="/register/student" element={<StudentRegisterPage />} />
+          <Route path="/register/university-student" element={<UniversityStudentRegisterPage />} />
+          <Route path="/register/university" element={<UniversityRegisterPage />} />
+          <Route path="/register/company" element={<CompanyRegisterPage />} />
+          <Route path="/universities" element={<Universities />} />
+
         {/* Student Routes */}
-        <Route path="/student/dashboard" element={
-          <StudentLayout>
-            <StudentDashboard />
-          </StudentLayout>
-        } />
-        
+        <Route path="/student/*" element={<StudentRoutes />} />
+
         {/* University Student Routes */}
-        <Route path="/university-student/dashboard" element={
-          <UniversityStudentLayout>
-            <UniversityStudentDashboard />
-          </UniversityStudentLayout>
-        } />
-        
-        {/* Admin Routes - All admin routes handled by AdminRoutes */}
+        <Route path="/university-student/*" element={<UniStudentRoutes />} />
+        <Route path="/unistudent/*" element={<UniStudentRoutes />} />
+
+        {/* Admin Routes */}
         <Route path="/admin/*" element={<AdminRoutes />} />
-      </Routes>
+
+        {/* Company Routes */}
+        {companyRoutes.map((route, idx) => (
+          <Route key={idx} path={route.path} element={route.element} />
+        ))}
+        <Route path="/company/dashboard-edit" element={<Dashboard />} />
+        <Route path="/company/course" element={<Courses />} />
+        <Route path="/company/internship" element={<Internships />} />
+        <Route path="/company/ad-publish" element={<AdPublish />} />
+
+        {/* University Routes */}
+        {universityRoutes.map((route, idx) => (
+          <Route key={`uni-${idx}`} path={route.path} element={route.element} />
+        ))}
+        </Routes>
+      </RouteGuard>
     </Router>
   );
 }

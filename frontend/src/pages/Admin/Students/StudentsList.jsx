@@ -20,6 +20,7 @@ import {
   MapPin,
   BookOpen
 } from 'lucide-react';
+import AdminLayout from '../../../components/common/Admin/AdminLayout';
 
 const StudentsList = () => {
   const [students, setStudents] = useState([]);
@@ -182,18 +183,21 @@ const StudentsList = () => {
   const currentStudents = filteredStudents.slice(indexOfFirstStudent, indexOfLastStudent);
   const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading students...</p>
-        </div>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <AdminLayout pageTitle="Students" pageDescription="Manage all students">
+  //       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+  //         <div className="text-center">
+  //           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+  //           <p className="text-gray-600">Loading students...</p>
+  //         </div>
+  //       </div>
+  //     </AdminLayout>
+  //   );
+  // }
 
   return (
+    <AdminLayout pageTitle="Students" pageDescription="Manage all students">
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
@@ -213,7 +217,7 @@ const StudentsList = () => {
             </div>
             <Link
               to="/admin/students/new"
-              className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center space-x-2"
+              className="bg-[#1D5D9B] text-white px-4 py-2 rounded-lg hover:bg-[#174A7C] transition-colors flex items-center space-x-2"
             >
               <Plus className="h-4 w-4" />
               <span>Add Student</span>
@@ -345,14 +349,14 @@ const StudentsList = () => {
                       <div className="flex items-center justify-end space-x-2">
                         <Link
                           to={`/admin/students/${student.id}`}
-                          className="text-blue-600 hover:text-blue-900 p-1 rounded"
+                          className="text-[#1D5D9B] hover:text-[#174A7C] p-1 rounded"
                           title="View"
                         >
                           <Eye className="h-4 w-4" />
                         </Link>
                         <Link
                           to={`/admin/students/${student.id}/edit`}
-                          className="text-green-600 hover:text-green-900 p-1 rounded"
+                          className="text-[#81C784] hover:text-[#5EA46A] p-1 rounded"
                           title="Edit"
                         >
                           <Edit className="h-4 w-4" />
@@ -361,8 +365,8 @@ const StudentsList = () => {
                           onClick={() => handleToggleStatus(student.id)}
                           className={`p-1 rounded ${
                             student.is_active
-                              ? 'text-orange-600 hover:text-orange-900'
-                              : 'text-green-600 hover:text-green-900'
+                              ? 'text-[#F4D160] hover:text-[#D9B23A]'
+                              : 'text-[#81C784] hover:text-[#5EA46A]'
                           }`}
                           title={student.is_active ? 'Deactivate' : 'Activate'}
                         >
@@ -370,7 +374,7 @@ const StudentsList = () => {
                         </button>
                         <button
                           onClick={() => handleDeleteStudent(student.id)}
-                          className="text-red-600 hover:text-red-900 p-1 rounded"
+                          className="text-[#E57373] hover:text-[#C94A4A] p-1 rounded"
                           title="Delete"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -385,6 +389,7 @@ const StudentsList = () => {
         </div>
       </div>
     </div>
+     </AdminLayout>
   );
 };
 

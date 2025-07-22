@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import AdminLayout from '../../../components/common/Admin/AdminLayout';
 
 const CompanyView = () => {
   const { id } = useParams();
@@ -90,33 +91,42 @@ const CompanyView = () => {
     });
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-600"></div>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="flex justify-center items-center h-64">
+  //       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-600"></div>
+  //     </div>
+  //   );
+  // }
 
   if (!company) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Company Not Found</h1>
-          <p className="text-gray-600 mb-6">The company you're looking for doesn't exist.</p>
-          <button
-            onClick={() => navigate('/admin/companies')}
-            className="px-6 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700"
-          >
-            Back to Companies
-          </button>
+      <AdminLayout 
+        pageTitle="Company Not Found"
+        pageDescription="The requested company could not be found"
+      >
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-lg shadow-md p-6 text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Company Not Found</h1>
+            <p className="text-gray-600 mb-6">The company you're looking for doesn't exist.</p>
+            <button
+              onClick={() => navigate('/admin/companies')}
+              className="px-6 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700"
+            >
+              Back to Companies
+            </button>
+          </div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <AdminLayout 
+      pageTitle={company.name}
+      pageDescription="View company details and information"
+    >
+      <div className="max-w-4xl mx-auto">
       <div className="bg-white rounded-lg shadow-md p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -261,7 +271,8 @@ const CompanyView = () => {
           </button>
         </div>
       </div>
-    </div>
+      </div>
+    </AdminLayout>
   );
 };
 

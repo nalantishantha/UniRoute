@@ -1,0 +1,1205 @@
+.academic-content-page {
+  min-height: 100vh;
+  background: #f8fafc;
+  font-family: 'Inter', sans-serif;
+}
+
+.academic-dashboard-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.academic-main-content {
+  flex: 1;
+  margin-left: 0; /* CHANGED: Default when sidebar is closed */
+  min-height: 100vh;
+  transition: margin-left 0.3s ease; /* CHANGED: Add smooth transition */
+  background: #f8fafc;
+  padding-top: 90px; /* Increased for UniversityNavbar */
+}
+
+.academic-main-content.sidebar-expanded {
+  margin-left: 288px; /* CHANGED: Updated to match UniversitySidebar width */
+}
+
+.academic-main-content.sidebar-collapsed {
+  margin-left: 0; /* CHANGED: Content takes full width when sidebar is closed */
+}
+
+/* Update navbar positioning */
+.university-navbar.sidebar-expanded {
+  margin-left: 288px; /* CHANGED: Updated to match sidebar width */
+  width: calc(100vw - 288px);
+}
+
+.university-navbar.sidebar-collapsed {
+  margin-left: 0; /* CHANGED: Updated for new sidebar behavior */
+  width: 100vw;
+}
+
+/* Overview Section */
+.academic-overview {
+  background: white;
+  margin: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.overview-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+.overview-header p {
+  color: #64748b;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+.overview-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.stat-card {
+  background: #f8fafc;
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+}
+
+.stat-card h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #6366f1;
+  margin-bottom: 0.5rem;
+}
+
+.stat-card p {
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Faculties Section */
+.faculties-section {
+  background: white;
+  margin: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.faculties-section h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+}
+
+.faculties-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.faculty-card {
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.faculty-card:hover {
+  border-color: #6366f1;
+  box-shadow: 0 4px 12px rgba(99,102,241,0.1);
+}
+
+.faculty-card.selected {
+  border-color: #6366f1;
+  background: #eef2ff;
+}
+
+.faculty-card h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+.faculty-card p {
+  color: #64748b;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.faculty-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* Courses Section */
+.courses-section, .subjects-section, .content-section {
+  background: white;
+  margin: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.courses-list, .subjects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.course-card, .subject-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.course-card:hover, .subject-card:hover {
+  border-color: #6366f1;
+  box-shadow: 0 4px 12px rgba(99,102,241,0.1);
+}
+
+.course-card.selected, .subject-card.selected {
+  border-color: #6366f1;
+  background: #eef2ff;
+}
+
+/* ...existing styles... */
+
+.course-info h4,
+.subject-info h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+.course-meta, .subject-meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.course-actions, .subject-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.course-actions button, .subject-actions button {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.course-actions button:hover, .subject-actions button:hover {
+  background: #e5e7eb;
+}
+
+.syllabus-preview {
+  color: #6b7280;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* Content Section */
+.content-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.content-file {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.file-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.file-actions button {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+/* Enhanced Professional Modal Styles - Average Size - UNIQUE CLASSES */
+.admin-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.admin-modal-content {
+  background: #fff;
+  border-radius: 12px;
+  max-width: 420px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  position: relative;
+  animation: adminModalSlideIn 0.3s ease-out;
+  border: 1px solid #e2e8f0;
+}
+
+.admin-modal-content.admin-modal-large {
+  max-width: 700px;
+  max-height: 90vh;
+}
+
+/* Professional Modal Header - Reduced */
+.admin-modal-header {
+  background: #fff;
+  color: #1e293b;
+  padding: 1.25rem 1.5rem;
+  margin: 0;
+  border-radius: 12px 12px 0 0;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Enhanced Form Styling - Compact */
+.admin-modal-form {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.admin-modal-input, 
+.admin-modal-textarea, 
+.admin-modal-select {
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  background: #fff;
+  font-family: inherit;
+}
+
+.admin-modal-input:focus, 
+.admin-modal-textarea:focus, 
+.admin-modal-select:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  background: #fafbff;
+}
+
+.admin-modal-input::placeholder,
+.admin-modal-textarea::placeholder {
+  color: #9ca3af;
+}
+
+/* Enhanced Textarea Styling - Compact */
+.admin-modal-textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.admin-syllabus-editor {
+  min-height: 200px;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* Professional Upload Area - Compact */
+.admin-upload-area {
+  border: 2px dashed #cbd5e1;
+  border-radius: 6px;
+  padding: 1.5rem;
+  text-align: center;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin: 0.5rem 0;
+}
+
+.admin-upload-area:hover {
+  border-color: #6366f1;
+  background: #eef2ff;
+}
+
+.admin-upload-area p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.admin-upload-area p:first-child {
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+}
+
+.admin-upload-note {
+  font-size: 0.75rem !important;
+  color: #9ca3af !important;
+  font-style: italic;
+}
+
+/* Professional Modal Actions - Compact */
+.admin-modal-actions {
+  padding: 0.875rem 1.5rem 1.25rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.625rem;
+  background: #f8fafc;
+  border-radius: 0 0 12px 12px;
+}
+
+.admin-modal-btn {
+  padding: 0.5rem 0.875rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  font-size: 0.8125rem;
+  min-width: 70px;
+}
+
+.admin-modal-btn:not(.admin-btn-primary) {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.admin-modal-btn:not(.admin-btn-primary):hover {
+  background: #e5e7eb;
+  transform: none;
+}
+
+.admin-btn-primary {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+  color: white !important;
+  border: none !important;
+}
+
+.admin-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+/* File Preview Modal Enhancement - Compact */
+.admin-file-preview {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin: 1.25rem 1.5rem;
+  min-height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-preview-placeholder {
+  text-align: center;
+  color: #64748b;
+}
+
+.admin-preview-placeholder p {
+  margin: 0.5rem 0;
+  line-height: 1.5;
+}
+
+.admin-preview-placeholder p:first-child {
+  font-size: 1.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.admin-preview-placeholder p:nth-child(2) {
+  font-weight: 600;
+  color: #374151;
+  font-size: 1rem;
+}
+
+/* Form Validation Enhancement */
+.admin-modal-input:invalid:not(:placeholder-shown),
+.admin-modal-textarea:invalid:not(:placeholder-shown) {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.admin-modal-input:valid:not(:placeholder-shown),
+.admin-modal-textarea:valid:not(:placeholder-shown) {
+  border-color: #10b981;
+  background: #f0fdf4;
+}
+
+/* Success/Error States Enhancement - Compact */
+.admin-success-message {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 0.625rem 0.875rem;
+  border-radius: 6px;
+  margin: 0.875rem 1.5rem;
+  border-left: 4px solid #10b981;
+  font-size: 0.8125rem;
+}
+
+.admin-error-message {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 0.625rem 0.875rem;
+  border-radius: 6px;
+  margin: 0.875rem 1.5rem;
+  border-left: 4px solid #ef4444;
+  font-size: 0.8125rem;
+}
+
+/* Animation */
+@keyframes adminModalSlideIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(-20px) scale(0.98);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Close Button Enhancement - Compact */
+.admin-modal-close {
+  background: #f8fafc;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  color: #64748b;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e2e8f0;
+  position: absolute;
+  top: 1.25rem;
+  right: 1.5rem;
+}
+
+.admin-modal-close:hover {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+/* Enhanced Syllabus Modal Styling - Matching User Page */
+.admin-syllabus-modal-header {
+  background: #fff;
+  color: #1e293b;
+  padding: 1.5rem 2rem;
+  margin: 0;
+  border-radius: 12px 12px 0 0;
+  border-bottom: 1px solid #e2e8f0;
+  position: relative;
+}
+
+.admin-syllabus-modal-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: #1e293b;
+}
+
+.admin-subject-code {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+  margin: 0;
+}
+
+.admin-syllabus-modal-body {
+  padding: 1.5rem 2rem;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.admin-syllabus-section {
+  margin-bottom: 1.5rem;
+}
+
+.admin-syllabus-section:last-child {
+  margin-bottom: 0;
+}
+
+.admin-syllabus-section h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.75rem 0;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-syllabus-overview {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  font-style: italic;
+  color: #475569;
+}
+
+.admin-syllabus-field {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #374151;
+}
+
+.admin-syllabus-field:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  background: #fafbff;
+}
+
+/* Scrollbar Styling for Syllabus Body */
+.admin-syllabus-modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.admin-syllabus-modal-body::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.admin-syllabus-modal-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.admin-syllabus-modal-body::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Enhanced Textarea Placeholder Styling */
+.admin-syllabus-field::placeholder {
+  color: #9ca3af;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* Section Dividers */
+.admin-syllabus-section + .admin-syllabus-section {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 1.5rem;
+}
+
+/* Responsive Design for Syllabus Modal */
+@media (max-width: 768px) {
+  .admin-modal-content {
+    max-width: 90%;
+    margin: 1rem;
+  }
+  
+  .admin-modal-header {
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
+  }
+  
+  .admin-modal-form {
+    padding: 1rem 1.25rem;
+  }
+  
+  .admin-modal-actions {
+    padding: 0.875rem 1.25rem;
+    flex-direction: column;
+  }
+  
+  .admin-modal-btn {
+    width: 100%;
+  }
+  
+  .admin-upload-area {
+    padding: 1.25rem 0.875rem;
+  }
+  
+  .admin-modal-content.admin-modal-large {
+    max-width: 95%;
+    margin: 0.5rem;
+    max-height: 95vh;
+  }
+  
+  .admin-syllabus-modal-header {
+    padding: 1rem 1.5rem;
+  }
+  
+  .admin-syllabus-modal-header h3 {
+    font-size: 1.1rem;
+  }
+  
+  .admin-syllabus-modal-body {
+    padding: 1rem 1.5rem;
+    max-height: 70vh;
+  }
+  
+  .admin-syllabus-section {
+    margin-bottom: 1rem;
+  }
+  
+  .admin-syllabus-section h4 {
+    font-size: 0.95rem;
+  }
+}
+
+/* UNIVERSITY ACADEMIC CONTENT ADMIN SYLLABUS MODAL - EXACTLY LIKE USER PAGE */
+.university-academiccontent-admin-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.university-academiccontent-admin-modal-content {
+  background: #fff;
+  border-radius: 12px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  position: relative;
+  animation: universityAcademiccontentAdminSlideIn 0.3s ease-out;
+  border: 1px solid #e2e8f0;
+}
+
+.university-academiccontent-admin-modal-content.university-academiccontent-admin-modal-large {
+  max-width: 800px;
+}
+
+.university-academiccontent-admin-modal-header {
+  background: #fff;
+  color: #1e293b;
+  padding: 1.5rem 2rem;
+  border-radius: 12px 12px 0 0;
+  position: relative;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.university-academiccontent-admin-modal-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.university-academiccontent-admin-subject-code {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+  font-weight: 400;
+}
+
+.university-academiccontent-admin-modal-close {
+  background: #f8fafc;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  color: #64748b;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e2e8f0;
+}
+
+.university-academiccontent-admin-modal-close:hover {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.university-academiccontent-admin-modal-body {
+  padding: 1.5rem 2rem;
+}
+
+/* Syllabus Section Styles - EXACTLY LIKE USER PAGE */
+.university-academiccontent-admin-section {
+  margin-bottom: 1.5rem;
+}
+
+.university-academiccontent-admin-section:last-child {
+  margin-bottom: 0;
+}
+
+.university-academiccontent-admin-section h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.university-academiccontent-admin-overview {
+  background: #f8fafc;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 3px solid #6366f1;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #475569;
+}
+
+.university-academiccontent-admin-textarea {
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  background: #fff;
+  font-family: inherit;
+  resize: vertical;
+  width: 100%;
+  line-height: 1.5;
+}
+
+.university-academiccontent-admin-textarea:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  background: #fafbff;
+}
+
+.university-academiccontent-admin-textarea::placeholder {
+  color: #9ca3af;
+}
+
+.university-academiccontent-admin-field {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #374151;
+}
+
+.university-academiccontent-admin-field:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  background: #fafbff;
+}
+
+/* Modal Actions - EXACTLY LIKE USER PAGE */
+.university-academiccontent-admin-modal-actions {
+  padding: 1rem 2rem 1.5rem 2rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.university-academiccontent-admin-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  font-size: 0.875rem;
+}
+
+.university-academiccontent-admin-btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.university-academiccontent-admin-btn-secondary:hover {
+  background: #e5e7eb;
+}
+
+.university-academiccontent-admin-btn-primary {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  border: none;
+}
+
+.university-academiccontent-admin-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+/* Section Dividers - EXACTLY LIKE USER PAGE */
+.university-academiccontent-admin-section + .university-academiccontent-admin-section {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 1.5rem;
+}
+
+/* Animation */
+@keyframes universityAcademiccontentAdminSlideIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(-20px) scale(0.98);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* SIMPLE MODALS FOR OTHER FORMS */
+.university-academiccontent-admin-simple-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.university-academiccontent-admin-simple-content {
+  background: #fff;
+  border-radius: 12px;
+  max-width: 420px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  position: relative;
+  animation: universityAcademiccontentAdminSimpleSlideIn 0.3s ease-out;
+  border: 1px solid #e2e8f0;
+}
+
+.university-academiccontent-admin-simple-header {
+  background: #fff;
+  color: #1e293b;
+  padding: 1.25rem 1.5rem;
+  margin: 0;
+  border-radius: 12px 12px 0 0;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.university-academiccontent-admin-simple-close {
+  background: #f8fafc;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  color: #64748b;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e2e8f0;
+}
+
+.university-academiccontent-admin-simple-close:hover {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.university-academiccontent-admin-simple-form {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.university-academiccontent-admin-simple-input {
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  background: #fff;
+  font-family: inherit;
+}
+
+.university-academiccontent-admin-simple-input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  background: #fafbff;
+}
+
+.university-academiccontent-admin-simple-actions {
+  padding: 0.875rem 1.5rem 1.25rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.625rem;
+  background: #f8fafc;
+  border-radius: 0 0 12px 12px;
+}
+
+.university-academiccontent-admin-simple-btn {
+  padding: 0.5rem 0.875rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  font-size: 0.8125rem;
+  min-width: 70px;
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.university-academiccontent-admin-simple-btn:hover {
+  background: #e5e7eb;
+}
+
+.university-academiccontent-admin-simple-primary {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+  color: white !important;
+  border: none !important;
+}
+
+.university-academiccontent-admin-simple-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+@keyframes universityAcademiccontentAdminSimpleSlideIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(-20px) scale(0.98);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* --- PROFESSIONAL COURSE EDIT MODAL & BUTTONS --- */
+.university-academiccontent-admin-current-edit-btn,
+.university-academiccontent-admin-current-delete-btn {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0.5rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  margin-left: 0.25rem;
+}
+.university-academiccontent-admin-current-edit-btn:hover {
+  background: #f59e0b;
+  color: #fff;
+  border-color: #f59e0b;
+}
+.university-academiccontent-admin-current-delete-btn:hover {
+  background: #ef4444;
+  color: #fff;
+  border-color: #ef4444;
+}
+
+/* Modal Overlay */
+.university-academiccontent-admin-current-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+/* Modal Content */
+.university-academiccontent-admin-current-modal-content {
+  background: #fff;
+  border-radius: 14px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 10px 32px rgba(0,0,0,0.18);
+  position: relative;
+  animation: fadeInScale 0.25s;
+  border: 1px solid #e2e8f0;
+}
+
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.97) translateY(20px);}
+  to { opacity: 1; transform: scale(1) translateY(0);}
+}
+
+.university-academiccontent-admin-current-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem 1rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  border-radius: 14px 14px 0 0;
+  background: #f8fafc;
+}
+.university-academiccontent-admin-current-modal-header h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+.university-academiccontent-admin-current-modal-close {
+  background: #f3f4f6;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  color: #64748b;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e2e8f0;
+}
+.university-academiccontent-admin-current-modal-close:hover {
+  background: #e2e8f0;
+  color: #ef4444;
+}
+
+.university-academiccontent-admin-current-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem 1.5rem 1.5rem;
+}
+.university-academiccontent-admin-current-modal-form label {
+  font-size: 0.97rem;
+  color: #374151;
+  margin-bottom: 0.15rem;
+  font-weight: 500;
+}
+.university-academiccontent-admin-current-modal-input {
+  padding: 0.6rem 0.9rem;
+  border: 1.5px solid #d1d5db;
+  border-radius: 7px;
+  font-size: 1rem;
+  background: #f9fafb;
+  transition: border 0.2s;
+}
+.university-academiccontent-admin-current-modal-input:focus {
+  border-color: #6366f1;
+  background: #fff;
+  outline: none;
+}
+.university-academiccontent-admin-current-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.7rem;
+  margin-top: 1.1rem;
+}
+.university-academiccontent-admin-current-modal-btn {
+  padding: 0.5rem 1.1rem;
+  border-radius: 7px;
+  font-weight: 500;
+  font-size: 0.97rem;
+  border: none;
+  background: #f3f4f6;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.university-academiccontent-admin-current-modal-btn-primary {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+}
+.university-academiccontent-admin-current-modal-btn-primary:hover {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+}
+.university-academiccontent-admin-current-modal-btn:hover {
+  background: #e5e7eb;
+}

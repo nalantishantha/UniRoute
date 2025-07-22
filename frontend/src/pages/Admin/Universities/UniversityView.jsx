@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getCurrentUser } from '../../../utils/auth';
+import AdminLayout from '../../../components/common/Admin/AdminLayout';
 import {
   Building2,
   Edit,
@@ -156,17 +157,23 @@ const UniversityView = () => {
 
   if (loading) {
     return (
-      <div className="p-6">
+      <AdminLayout 
+        pageTitle="Loading..."
+        pageDescription="Loading university information"
+      >
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   if (!university) {
     return (
-      <div className="p-6">
+      <AdminLayout 
+        pageTitle="University Not Found"
+        pageDescription="The requested university could not be found"
+      >
         <div className="text-center py-12">
           <AlertCircle className="mx-auto h-12 w-12 text-red-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">University not found</h3>
@@ -180,48 +187,18 @@ const UniversityView = () => {
             </Link>
           </div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-3">
-          <Link
-            to="/admin/universities"
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <ChevronLeft className="h-6 w-6 text-gray-600" />
-          </Link>
-          <Building2 className="h-8 w-8 text-blue-600" />
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{university.name}</h1>
-            <p className="text-gray-600">University Details</p>
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-3">
-          <Link
-            to={`/admin/universities/${university.id}/edit`}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-          >
-            <Edit className="h-4 w-4" />
-            <span>Edit</span>
-          </Link>
-          <button
-            onClick={handleDelete}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-          >
-            <Trash2 className="h-4 w-4" />
-            <span>Delete</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Message */}
-      {message.text && (
+    <AdminLayout 
+      pageTitle={university.name}
+      pageDescription="View university details and information"
+    >
+      <div className="max-w-6xl mx-auto">
+        {/* Message */}
+        {message.text && (
         <div className={`mb-6 p-4 rounded-lg flex items-center space-x-2 ${
           message.type === 'success' 
             ? 'bg-green-50 text-green-800 border border-green-200' 
@@ -540,7 +517,8 @@ const UniversityView = () => {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </AdminLayout>
   );
 };
 

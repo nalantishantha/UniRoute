@@ -1,0 +1,494 @@
+.user-announcement-page {
+  min-height: 100vh;
+  background: #f8fafc;
+  font-family: 'Inter', sans-serif;
+}
+
+.user-announcement-dashboard-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.user-announcement-main-content {
+  flex: 1;
+  margin-left: 0; /* CHANGED: Default when sidebar is closed */
+  min-height: 100vh;
+  transition: margin-left 0.3s ease; /* CHANGED: Add smooth transition */
+  background: #f8fafc;
+  padding-top: 90px; /* Updated to accommodate the new navbar */
+}
+
+.user-announcement-main-content.sidebar-expanded {
+  margin-left: 288px; /* CHANGED: Updated to match UniversitySidebar width */
+}
+
+.user-announcement-main-content.sidebar-collapsed {
+  margin-left: 0; /* CHANGED: Content takes full width when sidebar is closed */
+}
+
+.user-announcements-section, .user-calendar-section {
+  background: white;
+  margin: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 2rem;
+}
+
+.user-announcements-header, .user-calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.user-announcements-header h2,
+.user-calendar-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 1rem;
+  letter-spacing: -1px;
+}
+
+.user-announcements-list, .user-calendar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.user-announcement-card, .user-event-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  transition: box-shadow 0.2s;
+}
+
+.user-announcement-card:hover, .user-event-card:hover {
+  box-shadow: 0 4px 16px rgba(99,102,241,0.08);
+}
+
+.user-announcement-meta, .user-event-date {
+  font-size: 0.9rem;
+  color: #6b7280;
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.user-status-badge {
+  padding: 0.2rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+  text-transform: capitalize;
+}
+
+.user-status-badge.published {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.user-status-badge.draft {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.user-announcement-actions, .user-event-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.user-btn-action {
+  background: #6366f1;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: background 0.2s;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-btn-action:hover {
+  background: #5046e4;
+}
+
+.user-btn {
+  background: #6366f1;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-left: 0.5rem;
+  transition: background 0.2s;
+}
+
+.user-btn:hover {
+  background: #5046e4;
+}
+
+.user-btn-secondary {
+  background: #64748b;
+  color: white;
+}
+
+.user-btn-secondary:hover {
+  background: #475569;
+}
+
+.user-empty-msg {
+  color: #6b7280;
+  text-align: center;
+  margin: 2rem 0;
+  font-style: italic;
+}
+
+/* Enhanced Modal Styles - Unique for University User Announcement */
+.user-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.user-modal-content {
+  background: #fff;
+  border-radius: 20px;
+  max-width: 520px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+  position: relative;
+  animation: userAnnouncementModalSlideIn 0.4s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.user-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 2rem 1rem 2rem;
+  margin-bottom: 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.user-modal-header h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.3;
+  flex: 1;
+  padding-right: 1.5rem;
+}
+
+.user-modal-close {
+  background: #f8fafc;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  color: #64748b;
+  cursor: pointer;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  font-weight: 300;
+}
+
+.user-modal-close:hover {
+  background: #e2e8f0;
+  color: #475569;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.user-modal-body {
+  padding: 1rem 2rem 2rem 2rem;
+}
+
+/* Enhanced Detail Styles */
+.user-announcement-details,
+.user-event-details {
+  /* Container for details */
+}
+
+.user-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  border-left: 4px solid #3b82f6;
+  margin-bottom: 0.75rem;
+}
+
+.user-detail-row strong {
+  color: #1e293b;
+  font-weight: 600;
+  min-width: 80px;
+}
+
+.user-detail-description {
+  margin-bottom: 1.5rem;
+}
+
+.user-detail-description strong {
+  color: #1e293b;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+}
+
+.user-detail-description p {
+  color: #475569;
+  line-height: 1.6;
+  margin: 0;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border-left: 4px solid #10b981;
+}
+
+.user-modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.user-btn {
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.user-btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.user-btn-secondary:hover {
+  background: #e5e7eb;
+  transform: translateY(-1px);
+}
+
+.user-btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+}
+
+.user-btn-primary:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Enhanced icons for detail rows */
+.user-detail-row[data-info="date"]::before {
+  content: "📅";
+  font-size: 1.1rem;
+  margin-right: 0.25rem;
+}
+
+.user-detail-row[data-info="author"]::before {
+  content: "👤";
+  font-size: 1.1rem;
+  margin-right: 0.25rem;
+}
+
+.user-detail-row[data-info="status"]::before {
+  content: "📊";
+  font-size: 1.1rem;
+  margin-right: 0.25rem;
+}
+
+/* Modal Animation */
+@keyframes userAnnouncementModalSlideIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(-30px) scale(0.9);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsive modal */
+@media (max-width: 600px) {
+  .user-modal-content {
+    max-width: 95%;
+    margin: 1rem;
+  }
+  
+  .user-modal-header {
+    padding: 1.5rem 1.5rem 0.75rem 1.5rem;
+  }
+  
+  .user-modal-body {
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
+  }
+  
+  .user-modal-actions {
+    flex-direction: column;
+  }
+  
+  .user-detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .user-announcement-main-content {
+    margin-left: 0;
+    padding-top: 90px; /* Updated padding */
+  }
+  
+  .user-announcements-section, .user-calendar-section {
+    margin: 1rem 0.5rem;
+    padding: 1rem;
+  }
+  
+  .user-modal-content {
+    min-width: 320px;
+    margin: 1rem;
+  }
+  
+  .user-announcement-card {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .user-announcement-actions {
+    align-self: flex-end;
+  }
+}
+
+/* Calendar Controls - Matching Announcement page style */
+.user-calendar-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-view-buttons {
+  display: flex;
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 4px;
+  gap: 2px;
+}
+
+.user-view-btn {
+  background: transparent;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #64748b;
+  transition: all 0.2s;
+}
+
+.user-view-btn.active {
+  background: white;
+  color: #6366f1;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.user-view-btn:hover:not(.active) {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+/* Calendar wrapper styling */
+.user-calendar-component-wrapper {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Custom toolbar styles */
+.user-custom-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding: 0 0.5rem;
+}
+
+.user-toolbar-navigation {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-nav-btn {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #475569;
+  transition: all 0.2s;
+}
+
+.user-nav-btn:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+}
+
+.user-today-btn {
+  background: #6366f1 !important;
+  color: white !important;
+  border-color: #6366f1 !important;
+}
+
+.user-today-btn:hover {
+  background: #5046e4 !important;
+}
+
+.user-toolbar-label h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+}
