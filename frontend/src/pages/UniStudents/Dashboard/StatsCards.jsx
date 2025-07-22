@@ -38,7 +38,7 @@ const stats = [
   },
   {
     title: "Monthly Revenue",
-    value: "$2,840",
+    value: "LKR2,840",
     change: "+18%",
     changeType: "positive",
     icon: DollarSign,
@@ -50,7 +50,7 @@ const StatsCards = ({ itemVariants }) => {
   return (
     <motion.div
       variants={itemVariants}
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+      className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4"
     >
       {stats.map((stat) => (
         <motion.div
@@ -66,7 +66,7 @@ const StatsCards = ({ itemVariants }) => {
                   <p className="text-sm font-medium text-neutral-grey">
                     {stat.title}
                   </p>
-                  <div className="flex items-baseline space-x-2 mt-2">
+                  <div className="flex items-baseline mt-2 space-x-2">
                     <p className="text-2xl font-bold text-neutral-black">
                       {stat.value}
                     </p>
@@ -86,7 +86,7 @@ const StatsCards = ({ itemVariants }) => {
                   <stat.icon className="w-6 h-6 text-white" />
                 </div>
               </div>
-              <div className="mt-4 w-full bg-neutral-silver rounded-full h-2">
+              <div className="w-full h-2 mt-4 rounded-full bg-neutral-silver">
                 <div
                   className={`h-2 rounded-full bg-gradient-to-r ${stat.color}`}
                   style={{ width: `${Math.random() * 40 + 60}%` }}

@@ -26,6 +26,7 @@ import UniStudentRoutes from "./routes/UniStudentRoutes";
 import StudentRoutes from "./routes/StudentRoutes";
 import { companyRoutes } from "./routes/CompanyRoutes";
 import { universityRoutes } from "./routes/UniversityRoutes";
+import CounsellorRoutes from "./routes/CounsellorRoutes";
 
 function App() {
   return (
@@ -66,6 +67,9 @@ function App() {
         {universityRoutes.map((route, idx) => (
           <Route key={`uni-${idx}`} path={route.path} element={route.element} />
         ))}
+
+        {/*Counsellor Routes */}
+        <Route path="/counsellor/*" element={<CounsellorRoutes />} />
       </Routes>
     </Router>
   );
