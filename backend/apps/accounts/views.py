@@ -88,20 +88,18 @@ def register_student(request):
                 # Create user details
                 user_details = UserDetails.objects.create(
                     user=user,
-                    first_name=first_name,
-                    last_name=last_name,
+                    full_name=f"{first_name} {last_name}",
                     contact_number=phone_number or '',
                     is_verified=0,
                     updated_at=timezone.now()
                 )
-                print(f"User details created: {user_details.first_name} {user_details.last_name}")
+                print(f"User details created: {user_details.full_name}")
                 
                 # Create basic student record (without optional fields)
                 student = Students.objects.create(
                     user=user,
-                    student_stage='ol',  # Default stage
+                    current_stage='ol',  # Default stage
                     school='',  # Empty for now
-                    created_at=timezone.now()
                 )
                 print(f"Student created with ID: {student.student_id}")
                 
@@ -112,9 +110,7 @@ def register_student(request):
                         'id': user.user_id,
                         'username': user.username,
                         'email': user.email,
-                        'first_name': user_details.first_name,
-                        'last_name': user_details.last_name,
-                        'full_name': f"{user_details.first_name} {user_details.last_name}",
+                        'full_name': user_details.full_name,
                         'contact_number': user_details.contact_number,
                         'user_type': 'student',
                         'student_id': student.student_id
@@ -291,55 +287,61 @@ def register_university_student(request):
             phone_number = data.get('phoneNumber')
             password = data.get('password')
             confirm_password = data.get('confirmPassword')
-            university_name = data.get('universityName')
-            student_id = data.get('studentId')
+            university_id = data.get('universityId')
+            faculty_id = data.get('facultyId')
+            degree_program_id = data.get('degreeProgramId')
+            duration_id = data.get('durationId')
             year_of_study = data.get('yearOfStudy')
-            program = data.get('program')
-            
+            registration_number = data.get('registrationNumber')
+
             # Basic validation
-            if not all([first_name, last_name, email, password, confirm_password, university_name, student_id, year_of_study, program]):
+            if not all([
+                first_name, last_name, email, password, confirm_password,
+                university_id, degree_program_id, duration_id, year_of_study, registration_number
+            ]):
                 return JsonResponse({
                     'success': False,
                     'message': 'All required fields must be filled'
                 }, status=400)
-            
+
             if password != confirm_password:
                 return JsonResponse({
                     'success': False,
                     'message': 'Passwords do not match'
                 }, status=400)
-            
+
             if len(password) < 8:
                 return JsonResponse({
                     'success': False,
                     'message': 'Password must be at least 8 characters long'
                 }, status=400)
-            
+
             # Create username from first and last name
             username = f"{first_name.lower()}.{last_name.lower()}".replace(' ', '')
-            
+
             # Check if username already exists, if so add numbers
             original_username = username
             counter = 1
             while Users.objects.filter(username=username).exists():
                 username = f"{original_username}{counter}"
                 counter += 1
-            
+
             # Check if email already exists
             if Users.objects.filter(email=email).exists():
                 return JsonResponse({
                     'success': False,
                     'message': 'Email already exists'
                 }, status=400)
-            
+
             print("✅ Validation passed, creating university student...")
-            
+
             # Create user with transaction
             with transaction.atomic():
-                # Get or create university student user type
-                uni_student_user_type, created = UserTypes.objects.get_or_create(
-                    type_name='university_student'
+                # Get or create university student user type (use uni_student with type_id = 2)
+                uni_student_user_type, _ = UserTypes.objects.get_or_create(
+                    type_name='uni_student'
                 )
+                print(f"Using user type: {uni_student_user_type.type_name} (ID: {uni_student_user_type.type_id})")
                 
                 # Create user
                 user = Users.objects.create(
@@ -350,34 +352,25 @@ def register_university_student(request):
                     is_active=1,
                     created_at=timezone.now()
                 )
-                
                 # Create user details
                 user_details = UserDetails.objects.create(
                     user=user,
-                    first_name=first_name,
-                    last_name=last_name,
+                    full_name=f"{first_name} {last_name}",
                     contact_number=phone_number or '',
                     is_verified=0,
                     updated_at=timezone.now()
                 )
-                
-                # Create university student record with basic info for now
-                # We'll need to handle the complex relationships later
-                try:
-                    # For now, just store basic info in user details additional_info field
-                    user_details.additional_info = json.dumps({
-                        'university_name': university_name,
-                        'student_id': student_id,
-                        'year_of_study': year_of_study,
-                        'program': program
-                    })
-                    user_details.save()
-                    
-                    uni_student_id = f"uni_student_{user.user_id}"
-                except Exception as e:
-                    print(f"Note: Could not create university student record: {e}")
-                    uni_student_id = f"uni_student_{user.user_id}"
-                
+                # Create university student record
+                university_student = UniversityStudents.objects.create(
+                    user=user,
+                    university_id=university_id,
+                    faculty_id=faculty_id,
+                    degree_program_id=degree_program_id,
+                    duration_id=duration_id,
+                    year_of_study=year_of_study,
+                    registration_number=registration_number
+                )
+                print(f"University student created with ID: {university_student.university_student_id}")
                 return JsonResponse({
                     'success': True,
                     'message': 'University student registration successful!',
@@ -385,12 +378,17 @@ def register_university_student(request):
                         'id': user.user_id,
                         'username': user.username,
                         'email': user.email,
-                        'first_name': user_details.first_name,
-                        'last_name': user_details.last_name,
-                        'full_name': f"{user_details.first_name} {user_details.last_name}",
+                        'full_name': user_details.full_name,
                         'contact_number': user_details.contact_number,
-                        'user_type': 'university_student',
-                        'university_student_id': uni_student_id
+                        'user_type': 'uni_student',
+                        'user_type_id': user.user_type.type_id,
+                        'university_student_id': university_student.university_student_id,
+                        'university_id': university_id,
+                        'faculty_id': faculty_id,
+                        'degree_program_id': degree_program_id,
+                        'duration_id': duration_id,
+                        'year_of_study': year_of_study,
+                        'registration_number': registration_number
                     }
                 })
             
