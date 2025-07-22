@@ -112,9 +112,9 @@ const MentorConnection = () => {
       <div className="min-h-screen bg-gradient-to-r from-blue-200 to-primary-100">
         <StudentNavigation />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="max-w-2xl mx-auto text-center">
+          <div className="text-center">
             <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <h2 className="font-display font-bold text-3xl text-blue-900 mb-4">
+            <h2 className="text-3xl font-bold text-primary-400 mb-4">
               Session Request Sent!
             </h2>
             <p className="text-primary-300 text-lg mb-6">
@@ -166,15 +166,15 @@ const MentorConnection = () => {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden sticky top-8">
               {/* Mentor Header */}
-              <div className="relative h-32 bg-gradient-to-r from-blue-500 to-primary-500">
-                <div className="absolute inset-0 bg-black/20"></div>
+              <div className="relative h-32 bg-gradient-to-r from-primary-400 to-accent-400">
+                <div className="absolute inset-0 bg-black/10"></div>
 
                 {/* Rating Badge */}
                 <div className="absolute top-3 right-3">
-                  <div className="bg-white/25 backdrop-blur-md rounded-lg px-2 py-1 border border-white/40">
+                  <div className="bg-white/20 backdrop-blur-md rounded-lg px-2 py-1 border border-white/30">
                     <div className="flex items-center space-x-1">
-                      <Star className="h-3 w-3 text-yellow-300 fill-current drop-shadow-sm" />
-                      <span className="text-white font-semibold text-xs drop-shadow-sm">
+                      <Star className="h-3 w-3 text-yellow-300 fill-current" />
+                      <span className="text-white font-semibold text-xs">
                         {mentor.rating}
                       </span>
                     </div>
@@ -183,7 +183,7 @@ const MentorConnection = () => {
 
                 {/* Duration Badge */}
                 <div className="absolute top-3 left-3">
-                  <span className="bg-green-500/25 text-green-100 border border-green-300/40 px-2 py-1 rounded-full text-xs font-semibold backdrop-blur-sm drop-shadow-sm">
+                  <span className="bg-green-500/20 text-green-100 border border-green-300/30 px-2 py-1 rounded-full text-xs font-semibold">
                     {mentor.duration}
                   </span>
                 </div>
@@ -197,10 +197,10 @@ const MentorConnection = () => {
                       className="w-12 h-12 rounded-full object-cover border-2 border-white/30"
                     />
                     <div className="flex-1">
-                      <h3 className="font-display font-bold text-lg text-white leading-tight drop-shadow-md">
+                      <h3 className="font-display font-bold text-lg text-white leading-tight">
                         {mentor.name}
                       </h3>
-                      <p className="text-white/95 text-xs drop-shadow-sm">{mentor.title}</p>
+                      <p className="text-white/90 text-xs">{mentor.title}</p>
                     </div>
                   </div>
                 </div>
@@ -209,12 +209,12 @@ const MentorConnection = () => {
               <div className="p-4">
                 {/* Expertise */}
                 <div className="mb-4">
-                  <div className="bg-gradient-to-r from-blue-100 to-blue-50 rounded-lg p-3 border border-blue-200/50">
-                    <h4 className="font-semibold text-blue-900 mb-1 flex items-center space-x-2">
+                  <div className="bg-gradient-to-r from-blue-100 to-primary-50 rounded-lg p-3">
+                    <h4 className="font-semibold text-primary-400 mb-1 flex items-center space-x-2">
                       <Award className="h-3 w-3" />
                       <span className="text-sm">Expertise</span>
                     </h4>
-                    <p className="text-blue-800 text-xs leading-relaxed font-medium">
+                    <p className="text-primary-300 text-xs leading-relaxed">
                       {mentor.expertise}
                     </p>
                   </div>
@@ -250,10 +250,10 @@ const MentorConnection = () => {
             <div className="bg-white rounded-2xl shadow-lg border border-accent-100">
               <div className="p-6">
                 <div className="mb-6">
-                  <h1 className="font-display font-bold text-3xl text-blue-900 mb-2">
+                  <h1 className="font-display font-bold text-3xl text-primary-400 mb-2">
                     Schedule Session with {mentor.name}
                   </h1>
-                  <p className="text-blue-800">
+                  <p className="text-primary-300">
                     Schedule a mentoring session with {mentor.name}. Choose your
                     preferred date, time, and meeting duration.
                   </p>
