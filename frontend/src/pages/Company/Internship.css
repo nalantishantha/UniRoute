@@ -138,8 +138,8 @@
   margin: 0;
 }
 
-.btn-add-new {
-  background: linear-gradient(135deg, #10b981, #059669);
+.internship-btn-add-new {
+  background:#174A7C var(--tw-gradient-to-position);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -148,11 +148,10 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .btn-add-new:hover {
-  background: linear-gradient(135deg, #059669, #047857);
+  background: linear-gradient(135deg, #2e0596, #310fb6);
   transform: translateY(-2px);
 }
 
@@ -386,7 +385,7 @@
 /* Edit Button - Match Course.css exactly */
 .btn-edit {
   flex: 1;
-  background: linear-gradient(rgba(49, 43, 167, 0.8), rgba(43, 40, 46, 0.8));
+  background: #174A7C var(--tw-gradient-to-position);
   color: white;
   border: none;
   padding: 0.6rem 1rem;

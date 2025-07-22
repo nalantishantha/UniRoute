@@ -439,11 +439,11 @@
 
 /* Unique alignment for stat cards row to match grid below */
 .dashboard-stats-align-row {
-  max-width: 1320px; /* Match your grid width or adjust as needed */
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 32px;  /* Match .dashboard-grid or .grid-section padding */
-  padding-right: 32px;
+  max-width: 100%;         /* Make it full width of the container */
+  margin-left: 0;          /* Remove side margins */
+  margin-right: 0;
+  padding-left: 2rem;      /* Match your grid-section horizontal padding */
+  padding-right: 2rem;
   box-sizing: border-box;
 }
 
@@ -452,6 +452,7 @@
   gap: 2.5rem;
   justify-content: space-between;
   align-items: stretch;
+  
 }
 
 /* Responsive: Stack on small screens */
@@ -461,8 +462,8 @@
     gap: 1.5rem;
   }
   .dashboard-stats-align-row {
-    padding-left: 12px;
-    padding-right: 12px;
+    padding-left: 10px;
+    padding-right: 10px;
   }
 }
 

@@ -1063,7 +1063,7 @@ const Mentoruni = () => {
                     handleAcceptMentor(selectedMentor);
                   }}
                   style={{
-                    background: 'linear-gradient(135deg, #10b981, #059669)',
+                    background: '#2563eb',
                     color: 'white',
                     border: 'none',
                     borderRadius: '8px',

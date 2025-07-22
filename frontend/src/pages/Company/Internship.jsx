@@ -361,7 +361,7 @@ const Internship = () => {
             <h2>Manage Internships</h2>
             <button 
               onClick={() => setShowAddModal(true)}
-              className="btn-add"
+              className="internship-btn-add-new"
             >
               + Add New Internship
             </button>
