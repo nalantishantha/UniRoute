@@ -301,15 +301,17 @@ const Mentoruni = () => {
                       marginBottom: '1.75rem'
                     }}>
                       <div style={{
-                        width: '60px',
-                        height: '60px',
-                        borderRadius: '50%',
-                        background: '#e5e7eb',
+                        width: '80px',
+                        height: '80px',
+                        borderRadius: '20px',
+                        background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '1.5rem',
-                        color: '#6b7280',
+                        fontSize: '2rem',
+                        color: 'white',
+                        boxShadow: '0 8px 25px rgba(37, 99, 235, 0.3)',
+                        border: '3px solid #ffffff',
                         overflow: 'hidden'
                       }}>
                         <img 
@@ -767,7 +769,7 @@ const Mentoruni = () => {
                   overflow: 'hidden'
                 }}>
                   <img 
-                    src={`https://randomuser.me/api/portraits/${selectedMentor.id % 2 === 0 ? 'men' : 'women'}/${(selectedMentor.id % 50) + 15}.jpg`}
+                    src={selectedMentor.profileImage}
                     alt={selectedMentor.name}
                     style={{
                       width: '100%',
@@ -1016,41 +1018,31 @@ const Mentoruni = () => {
                     <div style={{ display: 'flex', gap: '0.75rem' }}>
                       <a
                         href={RecommendationPDF}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          background: '#2563eb',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '8px',
-                          padding: '0.5rem 1rem',
-                          fontWeight: '600',
-                          cursor: 'pointer',
-                          fontSize: '0.875rem',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          textDecoration: 'none'
-                        }}
-                      >
-                        <span role="img" aria-label="View PDF">👁️</span> View PDF
-                      </a>
-                      <a
-                        href={RecommendationPDF}
                         download="Recommendation_Letter.pdf"
                         style={{
-                          background: '#10b981',
+                          background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
                           color: 'white',
                           border: 'none',
-                          borderRadius: '8px',
-                          padding: '0.5rem 1rem',
+                          borderRadius: '10px',
+                          padding: '0.75rem 1.5rem',
                           fontWeight: '600',
                           cursor: 'pointer',
-                          fontSize: '0.875rem',
+                          fontSize: '0.95rem',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '0.5rem',
-                          textDecoration: 'none'
+                          gap: '0.75rem',
+                          textDecoration: 'none',
+                          boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
+                          transition: 'all 0.3s ease',
+                          letterSpacing: '0.025em'
+                        }}
+                        onMouseOver={e => {
+                          e.target.style.transform = 'translateY(-2px)';
+                          e.target.style.boxShadow = '0 8px 25px rgba(37, 99, 235, 0.4)';
+                        }}
+                        onMouseOut={e => {
+                          e.target.style.transform = 'translateY(0)';
+                          e.target.style.boxShadow = '0 4px 12px rgba(37, 99, 235, 0.3)';
                         }}
                       >
                         <span role="img" aria-label="Download">📥</span> Download

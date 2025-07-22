@@ -170,48 +170,55 @@ const Dashboard = () => {
       <main className={`dashboard-main-content ${isSidebarOpen ? 'sidebar-expanded' : 'sidebar-collapsed'}`}>
         
         {/* Enhanced Stats Section with Edit Button */}
-        <section className="university-dashboard-stats-container">
-          <div className="university-dashboard-stats-header">
-            <h2>University Overview</h2>
-            <p>Real-time insights and key metrics</p>
-            <button onClick={handleEditStats} className="stats-edit-btn" style={{ marginTop: '1rem' }}>
-              {editingStats ? '💾 Save Stats' : '✏️ Edit Stats'}
-            </button>
+        <section className="dashboard-stats-section">
+          <div className="stats-header">
+            <div className="stats-header-content">
+              <div style={{ textAlign: 'center' }}>
+                <h2>University Overview</h2>
+                <p>Real-time insights and key metrics</p>
+                <button onClick={handleEditStats} className="stats-edit-btn" style={{ marginTop: '1rem' }}>
+                  {editingStats ? '💾 Save Stats' : '✏️ Edit Stats'}
+                </button>
+              </div>
+            </div>
           </div>
-          <div className="university-dashboard-stats-grid">
+          <div className="dashboard-stats">
             {stats.map((stat) => (
-              <div className="university-dashboard-stat-card" key={stat.label}>
-                <div className="university-dashboard-stat-icon">{stat.icon}</div>
-                <div className="university-dashboard-stat-value">
-                  {editingStats && editingStatId === stat.id ? (
-                    <input
-                      type="number"
-                      className="stat-edit-input"
-                      value={statEditValue}
-                      autoFocus
-                      onChange={e => setStatEditValue(e.target.value)}
-                      onBlur={() => handleStatEditBlur(stat.id)}
-                      onKeyDown={e => handleStatEditKeyDown(e, stat.id)}
-                      style={{
-                        fontSize: '2.2rem',
-                        fontWeight: 700,
-                        width: '90px',
-                        textAlign: 'center',
-                        border: '2px dashed #f59e0b',
-                        borderRadius: '8px',
-                        outline: 'none',
-                        color: '#6366f1',
-                        background: '#fffbe9',
-                      }}
-                    />
-                  ) : (
-                    stat.value.toLocaleString()
-                  )}
-                </div>
-                <div className="university-dashboard-stat-label">{stat.label}</div>
-                <div className="university-dashboard-stat-trend">
-                  <span className="trend-indicator">📈</span>
-                  {stat.trend}
+              <div className="stat-card no-animation" key={stat.label}>
+                <div className="stat-background"></div>
+                <div className="stat-content">
+                  <div className="stat-icon" style={{ animation: 'none', transition: 'none' }}>{stat.icon}</div>
+                  <div className="stat-value">
+                    {editingStats && editingStatId === stat.id ? (
+                      <input
+                        type="number"
+                        className="stat-edit-input"
+                        value={statEditValue}
+                        autoFocus
+                        onChange={e => setStatEditValue(e.target.value)}
+                        onBlur={() => handleStatEditBlur(stat.id)}
+                        onKeyDown={e => handleStatEditKeyDown(e, stat.id)}
+                        style={{
+                          fontSize: '2.2rem',
+                          fontWeight: 700,
+                          width: '90px',
+                          textAlign: 'center',
+                          border: '2px dashed #f59e0b',
+                          borderRadius: '8px',
+                          outline: 'none',
+                          color: '#6366f1',
+                          background: '#fffbe9',
+                        }}
+                      />
+                    ) : (
+                      stat.value.toLocaleString()
+                    )}
+                  </div>
+                  <div className="stat-label">{stat.label}</div>
+                  <div className="stat-trend">
+                    <span className="trend-indicator">📈</span>
+                    {stat.trend}
+                  </div>
                 </div>
                 {editingStats && (
                   <button
@@ -270,14 +277,12 @@ const Dashboard = () => {
 
           {/* Recent Activities with Edit Button */}
           <div className="grid-section activities-section">
-            <div className="section-header">
-              <h3>📋 Recent Activities</h3>
-              <div className="section-header-right">
-                <button className="view-all-btn">View All</button>
-                <button onClick={handleEditActivities} className="section-edit-btn">
-                  {editingActivities ? '💾 Save' : '✏️ Edit'}
-                </button>
-              </div>
+            <div className="recent-activities-header">
+              <h3>Recent Activities</h3>
+              <button className="view-all-btn">View All</button>
+              <button onClick={handleEditActivities} className="section-edit-btn">
+                {editingActivities ? '💾 Save' : '✏️ Edit'}
+              </button>
             </div>
             <div className="activities-list">
               {recentActivities.map((activity) => (
@@ -372,16 +377,15 @@ const Dashboard = () => {
           </div>
 
           {/* System Status with Edit Button */}
-          <div className="grid-section status-section">
-            <div className="section-header">
-              <h3>🔧 System Status</h3>
-              <div className="section-header-right">
-                <span className="status-indicator online">All Systems Online</span>
-                <button onClick={handleEditStatus} className="section-edit-btn">
-                  {editingStatus ? '💾 Save' : '✏️ Edit'}
-                </button>
-              </div>
+         <div className="grid-section status-section">
+            <div className="system-status-header">
+              <h3>System Status</h3>
+              <span className="status-indicator online">All Systems Online</span>
+              <button onClick={handleEditStatus} className="section-edit-btn">
+                {editingStatus ? '💾 Save' : '✏️ Edit'}
+              </button>
             </div>
+          
             <div className="status-list">
               <div className="status-item">
                 <span className="status-dot online"></span>
@@ -451,4 +455,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default Dashboard
