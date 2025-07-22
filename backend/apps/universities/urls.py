@@ -19,4 +19,9 @@ urlpatterns = [
     path('events/create/', views.create_university_event, name='create_university_event'),
     path('events/<int:event_id>/update/', views.update_university_event, name='update_university_event'),
     path('events/<int:event_id>/delete/', views.delete_university_event, name='delete_university_event'),
+    
+    # Admin functions for university request management
+    path('requests/', views.university_requests_list, name='university_requests_list'),
+    path('requests/<int:request_id>/approve/', views.approve_university_request, name='approve_university_request'),
+    path('requests/<int:request_id>/reject/', views.reject_university_request, name='reject_university_request'),
 ]

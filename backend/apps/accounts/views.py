@@ -10,8 +10,8 @@ import json
 from .models import Users, UserDetails, UserTypes
 from apps.students.models import Students
 from apps.university_students.models import UniversityStudents
-from apps.universities.models import Universities
-from apps.companies.models import Companies
+from apps.universities.models import Universities, UniversityRequests
+from apps.companies.models import Companies, CompanyRequests
 
 @csrf_exempt
 def register_student(request):
@@ -415,6 +415,7 @@ def register_university(request):
             # Get form data
             university_name = data.get('universityName')
             contact_person_name = data.get('contactPersonName')
+            contact_person_title = data.get('contactPersonTitle', '')
             email = data.get('email')
             phone_number = data.get('phoneNumber')
             password = data.get('password')
@@ -444,93 +445,54 @@ def register_university(request):
                     'message': 'Password must be at least 8 characters long'
                 }, status=400)
             
-            # Create username from university name
-            username = university_name.lower().replace(' ', '.').replace('-', '.')
-            
-            # Check if username already exists, if so add numbers
-            original_username = username
-            counter = 1
-            while Users.objects.filter(username=username).exists():
-                username = f"{original_username}{counter}"
-                counter += 1
-            
-            # Check if email already exists
+            # Check if email already exists in requests or users
+            if UniversityRequests.objects.filter(email=email, status__in=['pending', 'approved']).exists():
+                return JsonResponse({
+                    'success': False,
+                    'message': 'A registration request with this email already exists'
+                }, status=400)
+                
             if Users.objects.filter(email=email).exists():
                 return JsonResponse({
                     'success': False,
-                    'message': 'Email already exists'
+                    'message': 'An account with this email already exists'
                 }, status=400)
             
-            print("✅ Validation passed, creating university...")
+            print("✅ Validation passed, creating university request...")
             
-            # Create user with transaction
-            with transaction.atomic():
-                # Get or create university user type
-                university_user_type, created = UserTypes.objects.get_or_create(
-                    type_name='university'
-                )
-                
-                # Create user (initially inactive for approval)
-                user = Users.objects.create(
-                    username=username,
-                    email=email,
-                    password_hash=make_password(password),
-                    user_type=university_user_type,
-                    is_active=0,  # Inactive until approved
-                    created_at=timezone.now()
-                )
-                
-                # Create user details
-                user_details = UserDetails.objects.create(
-                    user=user,
-                    first_name=contact_person_name.split()[0] if contact_person_name else '',
-                    last_name=' '.join(contact_person_name.split()[1:]) if len(contact_person_name.split()) > 1 else '',
-                    contact_number=phone_number or '',
-                    is_verified=0,
-                    updated_at=timezone.now()
-                )
-                
-                # Create university record
-                university = Universities.objects.create(
-                    name=university_name,
-                    address=address,
-                    location=city,  # Using location field for city
-                    contact_email=email,
-                    phone_number=phone_number,
-                    website=website,
-                    description=description,
-                    is_active=0,  # Inactive until approved
-                    created_at=timezone.now()
-                )
-                
-                # Store additional info in user details
-                user_details.additional_info = json.dumps({
-                    'contact_person': contact_person_name,
-                    'established_year': established_year,
-                    'status': 'pending'
-                })
-                user_details.save()
-                
-                return JsonResponse({
-                    'success': True,
-                    'message': 'University registration submitted successfully! We will review your application within 24-48 hours.',
-                    'user': {
-                        'id': user.user_id,
-                        'username': user.username,
-                        'email': user.email,
-                        'university_name': university_name,
-                        'contact_person': contact_person_name,
-                        'user_type': 'university',
-                        'status': 'pending',
-                        'university_id': university.university_id
-                    }
-                })
+            # Create university registration request
+            university_request = UniversityRequests.objects.create(
+                university_name=university_name,
+                contact_person_name=contact_person_name,
+                contact_person_title=contact_person_title,
+                email=email,
+                phone_number=phone_number or '',
+                password_hash=make_password(password),
+                location=city,
+                district='',  # Can be updated later by admin
+                address=address,
+                description=description,
+                website=website,
+                established_year=established_year,
+                status='pending'
+            )
+            
+            print(f"University request created with ID: {university_request.request_id}")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'University registration request submitted successfully! We will review your application within 24-48 hours and notify you via email.',
+                'request_id': university_request.request_id,
+                'university_name': university_name,
+                'contact_person': contact_person_name,
+                'status': 'pending'
+            })
             
         except Exception as e:
             print(f"University registration error: {str(e)}")
             return JsonResponse({
                 'success': False,
-                'message': f'Registration failed: {str(e)}'
+                'message': f'Registration request failed: {str(e)}'
             }, status=500)
     
     return JsonResponse({
@@ -549,7 +511,7 @@ def register_company(request):
             # Get form data
             company_name = data.get('companyName')
             contact_person_name = data.get('contactPersonName')
-            contact_person_title = data.get('contactPersonTitle')
+            contact_person_title = data.get('contactPersonTitle', '')
             email = data.get('email')
             phone_number = data.get('phoneNumber')
             password = data.get('password')
@@ -559,11 +521,11 @@ def register_company(request):
             website = data.get('website', '')
             industry = data.get('industry')
             company_size = data.get('companySize')
-            founded_year = data.get('foundedYear')
+            established_year = data.get('establishedYear')
             description = data.get('description', '')
             
             # Basic validation
-            if not all([company_name, contact_person_name, contact_person_title, email, password, confirm_password, address, city, industry, company_size]):
+            if not all([company_name, contact_person_name, email, password, confirm_password, address, city]):
                 return JsonResponse({
                     'success': False,
                     'message': 'All required fields must be filled'
@@ -581,96 +543,55 @@ def register_company(request):
                     'message': 'Password must be at least 8 characters long'
                 }, status=400)
             
-            # Create username from company name
-            username = company_name.lower().replace(' ', '.').replace('-', '.')
-            
-            # Check if username already exists, if so add numbers
-            original_username = username
-            counter = 1
-            while Users.objects.filter(username=username).exists():
-                username = f"{original_username}{counter}"
-                counter += 1
-            
-            # Check if email already exists
+            # Check if email already exists in requests or users
+            if CompanyRequests.objects.filter(email=email, status__in=['pending', 'approved']).exists():
+                return JsonResponse({
+                    'success': False,
+                    'message': 'A registration request with this email already exists'
+                }, status=400)
+                
             if Users.objects.filter(email=email).exists():
                 return JsonResponse({
                     'success': False,
-                    'message': 'Email already exists'
+                    'message': 'An account with this email already exists'
                 }, status=400)
             
-            print("✅ Validation passed, creating company...")
+            print("✅ Validation passed, creating company request...")
             
-            # Create user with transaction
-            with transaction.atomic():
-                # Get or create company user type
-                company_user_type, created = UserTypes.objects.get_or_create(
-                    type_name='company'
-                )
-                
-                # Create user (initially inactive for approval)
-                user = Users.objects.create(
-                    username=username,
-                    email=email,
-                    password_hash=make_password(password),
-                    user_type=company_user_type,
-                    is_active=0,  # Inactive until approved
-                    created_at=timezone.now()
-                )
-                
-                # Create user details
-                user_details = UserDetails.objects.create(
-                    user=user,
-                    first_name=contact_person_name.split()[0] if contact_person_name else '',
-                    last_name=' '.join(contact_person_name.split()[1:]) if len(contact_person_name.split()) > 1 else '',
-                    contact_number=phone_number or '',
-                    is_verified=0,
-                    updated_at=timezone.now()
-                )
-                
-                # Create company record
-                company = Companies.objects.create(
-                    name=company_name,
-                    description=description,
-                    address=address,
-                    district=city,  # Using district field for city
-                    contact_email=email,
-                    contact_phone=phone_number,
-                    website=website,
-                    created_at=timezone.now()
-                )
-                
-                # Store additional info in user details
-                user_details.additional_info = json.dumps({
-                    'contact_person': contact_person_name,
-                    'contact_person_title': contact_person_title,
-                    'industry': industry,
-                    'company_size': company_size,
-                    'founded_year': founded_year,
-                    'status': 'pending'
-                })
-                user_details.save()
-                
-                return JsonResponse({
-                    'success': True,
-                    'message': 'Company registration submitted successfully! We will review your application within 24-48 hours.',
-                    'user': {
-                        'id': user.user_id,
-                        'username': user.username,
-                        'email': user.email,
-                        'company_name': company_name,
-                        'contact_person': contact_person_name,
-                        'contact_person_title': contact_person_title,
-                        'user_type': 'company',
-                        'status': 'pending',
-                        'company_id': company.company_id
-                    }
-                })
+            # Create company registration request
+            company_request = CompanyRequests.objects.create(
+                company_name=company_name,
+                contact_person_name=contact_person_name,
+                contact_person_title=contact_person_title,
+                email=email,
+                phone_number=phone_number or '',
+                password_hash=make_password(password),
+                address=address,
+                city=city,
+                website=website,
+                industry=industry,
+                company_size=company_size,
+                established_year=established_year,
+                description=description,
+                status='pending'
+            )
+            
+            print(f"Company request created with ID: {company_request.request_id}")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Company registration request submitted successfully! We will review your application within 24-48 hours and notify you via email.',
+                'request_id': company_request.request_id,
+                'company_name': company_name,
+                'contact_person': contact_person_name,
+                'status': 'pending'
+            })
             
         except Exception as e:
             print(f"Company registration error: {str(e)}")
             return JsonResponse({
                 'success': False,
-                'message': f'Registration failed: {str(e)}'
+                'message': f'Registration request failed: {str(e)}'
             }, status=500)
     
     return JsonResponse({
