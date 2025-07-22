@@ -1,348 +1,179 @@
 from django.shortcuts import render
 from django.http import JsonResponse
+from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
-from django.db import transaction
 from django.utils import timezone
 import json
-from .models import Mentors, MentoringSessions, MentoringSessionEnrollments, MentoringFeedback
-from apps.accounts.models import Users
-from apps.students.models import Students
+from .models import Mentors, MentoringSessions, MentoringSessionEnrollments
+from apps.accounts.models import UserDetails
+from apps.universities.models import Universities
+from apps.university_programs.models import DegreePrograms, DegreeProgramDurations
+from apps.university_students.models import UniversityStudents
 
+def mentors_list(request):
+    """
+    Get all approved mentors with their details
+    """
+    print("Mentors API called")
+    try:
+        # Get all approved mentors with related data
+        mentors = Mentors.objects.select_related(
+            'user',
+            'university_student__user',
+            'university_student__university', 
+            'university_student__degree_program',
+            'university_student__duration'
+        ).filter(approved=1)
+        print(f"Mentors found: {mentors.count()}")
+        
+        data = []
+        for mentor in mentors:
+            try:
+                # Get user details
+                user_details = UserDetails.objects.get(user=mentor.user)
+                print(f"UserDetails found for mentor {mentor.mentor_id}")  # Add this
+                
+                # Get university student details
+                university_student = mentor.university_student
+                if university_student:
+                    university_name = university_student.university.name if university_student.university else "Not specified"
+                    degree_title = university_student.degree_program.title if university_student.degree_program else "Not specified"
+                    duration_years = university_student.duration.duration_years if university_student.duration else 0
+                else:
+                    university_name = "Not specified"
+                    degree_title = "Not specified"
+                    duration_years = 0
+                
+                mentor_data = {
+                    'id': mentor.mentor_id,
+                    'name': user_details.full_name or mentor.user.username,
+                    'title': f"{degree_title} Student",
+                    'university': university_name,
+                    'degree': degree_title,
+                    'location': user_details.location or "Not specified",
+                    'duration': f"{duration_years} years",
+                    'rating': 4.8,  # Default rating for now
+                    'reviews': 25,  # Default review count for now
+                    'students': 5,  # Default student count for now
+                    'image': user_details.profile_picture or "https://images.pexels.com/photos/5212345/pexels-photo-5212345.jpeg?auto=compress&cs=tinysrgb&w=80&h=80&fit=crop",
+                    'description': mentor.bio or user_details.bio or "Passionate about helping students with their university journey.",
+                    'expertise': mentor.expertise or "General mentoring"
+                }
+                
+                data.append(mentor_data)
+                
+            except UserDetails.DoesNotExist:
+                print(f"UserDetails missing for mentor {mentor.mentor_id}")  # Add this
+                continue
+            except Exception as e:
+                print(f"Error for mentor {mentor.mentor_id}: {e}")  # Add this
+                continue
+        
+        return JsonResponse({
+            'success': True,
+            'mentors': data,
+            'count': len(data)
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': 'Error fetching mentors',
+            'error': str(e)
+        }, status=500)
 
 @csrf_exempt
 def create_mentoring_session(request):
-    """Create a new mentoring session"""
+    """
+    Create a new mentoring session
+    """
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             
-            # Get required fields
+            # Extract data from request
             mentor_id = data.get('mentor_id')
             topic = data.get('topic')
             scheduled_at = data.get('scheduled_at')
-            duration_minutes = data.get('duration_minutes', 60)
+            duration_minutes = data.get('duration_minutes')
             status = data.get('status', 'scheduled')
             
-            # Validation
-            if not all([mentor_id, topic, scheduled_at]):
+            # Validate required fields
+            if not all([mentor_id, topic, scheduled_at, duration_minutes]):
                 return JsonResponse({
                     'success': False,
-                    'message': 'Mentor ID, topic, and scheduled time are required'
+                    'message': 'Missing required fields'
                 }, status=400)
             
-            # Check if mentor exists and is approved
+            # Check if mentor exists
             try:
-                mentor = Mentors.objects.get(mentor_id=mentor_id, approved=1)
+                mentor = Mentors.objects.get(mentor_id=mentor_id)
             except Mentors.DoesNotExist:
                 return JsonResponse({
                     'success': False,
-                    'message': 'Mentor not found or not approved'
+                    'message': 'Mentor not found'
                 }, status=404)
             
-            # Create the session
-            with transaction.atomic():
-                session = MentoringSessions.objects.create(
-                    mentor=mentor,
-                    topic=topic,
-                    scheduled_at=scheduled_at,
-                    duration_minutes=duration_minutes,
-                    status=status,
-                    created_at=timezone.now()
-                )
+            # Create the mentoring session
+            session = MentoringSessions.objects.create(
+                mentor=mentor,
+                topic=topic,
+                scheduled_at=scheduled_at,
+                duration_minutes=duration_minutes,
+                status=status,
+                created_at=timezone.now()
+            )
+            
+            # For now, we'll create a session enrollment with a default student_id
+            # In a real application, you would get the student_id from the authenticated user
+            try:
+                # Create session enrollment (using a placeholder student_id for now)
+                # You should replace this with the actual logged-in student's ID
+                from apps.students.models import Students
                 
-                return JsonResponse({
-                    'success': True,
-                    'message': 'Mentoring session created successfully',
-                    'session': {
-                        'session_id': session.session_id,
-                        'topic': session.topic,
-                        'scheduled_at': session.scheduled_at,
-                        'mentor_id': mentor.mentor_id,
-                        'status': session.status
-                    }
-                })
-                
-        except Exception as e:
-            return JsonResponse({
-                'success': False,
-                'message': f'Error creating session: {str(e)}'
-            }, status=500)
-    
-    return JsonResponse({
-        'success': False,
-        'message': 'Only POST method allowed'
-    }, status=405)
-
-
-@csrf_exempt
-def get_mentoring_sessions(request):
-    """Get all mentoring sessions or sessions by mentor"""
-    if request.method == 'GET':
-        try:
-            mentor_id = request.GET.get('mentor_id')
-            status = request.GET.get('status')
-            
-            filters = {}
-            if mentor_id:
-                filters['mentor_id'] = mentor_id
-            if status:
-                filters['status'] = status
-            
-            sessions = MentoringSessions.objects.filter(**filters)
-            
-            sessions_data = []
-            for session in sessions:
-                # Get mentor user details
-                mentor_user = session.mentor.user
+                # For demo purposes, we'll try to get the first student or create a placeholder
                 try:
-                    from apps.accounts.models import UserDetails
-                    user_details = UserDetails.objects.get(user=mentor_user)
-                    mentor_name = f"{user_details.first_name} {user_details.last_name}"
-                except:
-                    mentor_name = mentor_user.username
-                
-                # Count enrollments
-                enrollment_count = MentoringSessionEnrollments.objects.filter(session=session).count()
-                
-                sessions_data.append({
-                    'session_id': session.session_id,
-                    'mentor_id': session.mentor.mentor_id,
-                    'mentor_name': mentor_name,
-                    'mentor_expertise': session.mentor.expertise,
-                    'topic': session.topic,
-                    'scheduled_at': session.scheduled_at,
-                    'duration_minutes': session.duration_minutes,
-                    'status': session.status,
-                    'enrollment_count': enrollment_count,
-                    'created_at': session.created_at
-                })
+                    # This is just for testing - you should get the actual logged-in student
+                    student = Students.objects.first()
+                    if student:
+                        MentoringSessionEnrollments.objects.create(
+                            session=session,
+                            student=student,
+                            enrolled_at=timezone.now()
+                        )
+                except Exception as e:
+                    # If no students exist, just create the session without enrollment for now
+                    pass
+            except Exception as e:
+                # Continue even if enrollment creation fails
+                pass
             
             return JsonResponse({
                 'success': True,
-                'sessions': sessions_data
-            })
-            
-        except Exception as e:
-            return JsonResponse({
-                'success': False,
-                'message': f'Error fetching sessions: {str(e)}'
-            }, status=500)
-    
-    return JsonResponse({
-        'success': False,
-        'message': 'Only GET method allowed'
-    }, status=405)
-
-
-@csrf_exempt
-def enroll_in_mentoring_session(request):
-    """Enroll a student in a mentoring session"""
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            
-            session_id = data.get('session_id')
-            user_id = data.get('user_id')
-            
-            if not all([session_id, user_id]):
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Session ID and User ID are required'
-                }, status=400)
-            
-            # Check if session exists and is scheduled
-            try:
-                session = MentoringSessions.objects.get(session_id=session_id, status='scheduled')
-            except MentoringSessions.DoesNotExist:
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Session not found or not available for enrollment'
-                }, status=404)
-            
-            # Check if user exists and is a student
-            try:
-                user = Users.objects.get(user_id=user_id)
-                student = Students.objects.get(user=user)
-            except (Users.DoesNotExist, Students.DoesNotExist):
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Student not found'
-                }, status=404)
-            
-            # Check if student is already enrolled
-            if MentoringSessionEnrollments.objects.filter(session=session, student=student).exists():
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Student is already enrolled in this session'
-                }, status=400)
-            
-            # Create enrollment
-            with transaction.atomic():
-                enrollment = MentoringSessionEnrollments.objects.create(
-                    session=session,
-                    student=student,
-                    enrolled_at=timezone.now()
-                )
-                
-                return JsonResponse({
-                    'success': True,
-                    'message': 'Successfully enrolled in the mentoring session',
-                    'enrollment': {
-                        'session_enrollment_id': enrollment.session_enrollment_id,
-                        'session_topic': session.topic,
-                        'scheduled_at': session.scheduled_at,
-                        'enrolled_at': enrollment.enrolled_at
-                    }
-                })
-                
-        except Exception as e:
-            return JsonResponse({
-                'success': False,
-                'message': f'Error enrolling in session: {str(e)}'
-            }, status=500)
-    
-    return JsonResponse({
-        'success': False,
-        'message': 'Only POST method allowed'
-    }, status=405)
-
-
-@csrf_exempt
-def update_mentoring_session(request, session_id):
-    """Update a mentoring session"""
-    if request.method == 'PUT':
-        try:
-            data = json.loads(request.body)
-            
-            try:
-                session = MentoringSessions.objects.get(session_id=session_id)
-            except MentoringSessions.DoesNotExist:
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Session not found'
-                }, status=404)
-            
-            # Update fields if provided
-            if 'topic' in data:
-                session.topic = data['topic']
-            if 'scheduled_at' in data:
-                session.scheduled_at = data['scheduled_at']
-            if 'duration_minutes' in data:
-                session.duration_minutes = data['duration_minutes']
-            if 'status' in data:
-                session.status = data['status']
-            
-            session.save()
-            
-            return JsonResponse({
-                'success': True,
-                'message': 'Session updated successfully',
+                'message': 'Mentoring session created successfully',
                 'session': {
                     'session_id': session.session_id,
-                    'topic': session.topic,
-                    'scheduled_at': session.scheduled_at,
-                    'status': session.status
+                    'mentor_id': mentor_id,
+                    'topic': topic,
+                    'scheduled_at': scheduled_at,
+                    'duration_minutes': duration_minutes,
+                    'status': status
                 }
             })
             
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'success': False,
+                'message': 'Invalid JSON data'
+            }, status=400)
         except Exception as e:
             return JsonResponse({
                 'success': False,
-                'message': f'Error updating session: {str(e)}'
+                'message': 'Error creating session',
+                'error': str(e)
             }, status=500)
     
     return JsonResponse({
         'success': False,
-        'message': 'Only PUT method allowed'
-    }, status=405)
-
-
-@csrf_exempt
-def delete_mentoring_session(request, session_id):
-    """Delete a mentoring session"""
-    if request.method == 'DELETE':
-        try:
-            try:
-                session = MentoringSessions.objects.get(session_id=session_id)
-            except MentoringSessions.DoesNotExist:
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Session not found'
-                }, status=404)
-            
-            # Check if session can be deleted (only if not completed)
-            if session.status == 'completed':
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Cannot delete a completed session'
-                }, status=400)
-            
-            # Delete the session (this will also delete related enrollments due to CASCADE)
-            session.delete()
-            
-            return JsonResponse({
-                'success': True,
-                'message': 'Session deleted successfully'
-            })
-            
-        except Exception as e:
-            return JsonResponse({
-                'success': False,
-                'message': f'Error deleting session: {str(e)}'
-            }, status=500)
-    
-    return JsonResponse({
-        'success': False,
-        'message': 'Only DELETE method allowed'
-    }, status=405)
-
-
-@csrf_exempt
-def get_mentors(request):
-    """Get all approved mentors"""
-    if request.method == 'GET':
-        try:
-            mentors = Mentors.objects.filter(approved=1)
-            
-            mentors_data = []
-            for mentor in mentors:
-                # Get mentor user details
-                try:
-                    from apps.accounts.models import UserDetails
-                    user_details = UserDetails.objects.get(user=mentor.user)
-                    mentor_name = f"{user_details.first_name} {user_details.last_name}"
-                except:
-                    mentor_name = mentor.user.username
-                
-                # Get university info if available
-                university_info = None
-                if mentor.university_student:
-                    university_info = {
-                        'university_name': getattr(mentor.university_student, 'university_name', 'N/A'),
-                        'program': getattr(mentor.university_student, 'program', 'N/A')
-                    }
-                
-                mentors_data.append({
-                    'mentor_id': mentor.mentor_id,
-                    'mentor_name': mentor_name,
-                    'expertise': mentor.expertise,
-                    'bio': mentor.bio,
-                    'university_info': university_info,
-                    'created_at': mentor.created_at
-                })
-            
-            return JsonResponse({
-                'success': True,
-                'mentors': mentors_data
-            })
-            
-        except Exception as e:
-            return JsonResponse({
-                'success': False,
-                'message': f'Error fetching mentors: {str(e)}'
-            }, status=500)
-    
-    return JsonResponse({
-        'success': False,
-        'message': 'Only GET method allowed'
+        'message': 'Only POST method allowed'
     }, status=405)
