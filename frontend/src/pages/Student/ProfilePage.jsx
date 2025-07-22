@@ -15,7 +15,7 @@ import {
 
 const ProfilePage = () => {
   const studentData = {
-    name: "Kasun Perera",
+    name: "Gaja Man",
     email: "kasun.perera@example.com",
     phone: "+94 77 123 4567",
     district: "Colombo",
