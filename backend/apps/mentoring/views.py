@@ -309,6 +309,24 @@ def create_mentoring_session(request):
                             student=student,
                             enrolled_at=timezone.now()
                         )
+                        
+                        # Also create a mentoring request entry
+                        MentoringRequests.objects.create(
+                            student=student,
+                            mentor=mentor,
+                            topic=topic,
+                            description=f"Mentoring session request for: {topic}",
+                            preferred_time="Flexible",  # We don't have this from the form
+                            session_type="online",  # Default value since not in form
+                            urgency="medium",  # Default value since not in form
+                            status="pending",
+                            requested_date=scheduled_at,
+                            decline_reason=None,
+                            created_at=timezone.now(),
+                            updated_at=timezone.now(),
+                            expiry_date=timezone.now() + timedelta(days=7)  # Expire in 7 days
+                        )
+                        
                 except Exception as e:
                     # If no students exist, just create the session without enrollment for now
                     pass
