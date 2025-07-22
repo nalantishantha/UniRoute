@@ -122,6 +122,11 @@ const initialData = {
   ]
 };
 
+const fileDisplayNames = {
+  "Course Details.pdf": "Syllabus PDF",
+  // Add more mappings as needed
+};
+
 const AcademicContent = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [data, setData] = useState(initialData);
@@ -826,7 +831,7 @@ const AcademicContent = () => {
                         e.target.style.background = 'white';
                       }}
                     >
-                      📝 View Syllabus
+                      📝 Course Overview
                     </button>
                     <button 
                       onClick={(e) => {
@@ -976,7 +981,7 @@ const AcademicContent = () => {
                   borderRadius: '8px',
                   padding: '1rem'
                 }}>
-                  <span>📄 {file}</span>
+                  <span>📄 {fileDisplayNames[file] || file}</span>
                   <div style={{
                     display: 'flex',
                     gap: '0.5rem'
@@ -1208,11 +1213,6 @@ const AcademicContent = () => {
           alignItems: 'center',
           justifyContent: 'center',
           padding: '1rem'
-        }} onClick={() => setShowEditCourseModal(false)}>
-          <div style={{
-            background: '#fff',
-            borderRadius: '12px',
-            maxWidth: '500px',
             width: '100%',
             maxHeight: '90vh',
             overflow: 'auto',

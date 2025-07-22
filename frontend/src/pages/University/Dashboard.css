@@ -105,17 +105,20 @@
 
 /* Keep all existing edit button styles */
 .stats-edit-btn {
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
   border-radius: 8px;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 0.9rem;
   transition: all 0.3s ease;
 }
 
 .stats-edit-btn:hover {
-  background: #e5e7eb;
+  background: #f8fafc;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
 }
 
 /* Hero Edit Button */
@@ -174,17 +177,20 @@
 }
 
 .stats-edit-btn {
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
   border-radius: 8px;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 0.9rem;
   transition: all 0.3s ease;
 }
 
 .stats-edit-btn:hover {
-  background: #e5e7eb;
+  background: #f8fafc;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
 }
 
 .stat-edit-individual-btn {
@@ -220,26 +226,30 @@
 }
 
 .section-edit-btn {
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
   border-radius: 6px;
-  padding: 0.3rem 0.8rem;
-  cursor: pointer;
+  padding: 0.5rem 1rem;
   font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .section-edit-btn:hover {
-  background: #e5e7eb;
+  background: #f8fafc;
+  transform: translateY(-2px);
 }
 
 /* Action Card Edit Button */
 .action-edit-btn {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  background: rgba(255,255,255,0.9);
-  border: 1px solid #d1d5db;
+  top: 10px;
+  right: 10px;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
   border-radius: 4px;
   padding: 0.3rem 0.5rem;
   font-size: 0.7rem;
@@ -249,34 +259,35 @@
 }
 
 .action-edit-btn:hover {
-  background: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background: #f8fafc;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 }
 
 /* Activity Item Edit Button */
 .activity-edit-btn {
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
   border-radius: 4px;
-  padding: 0.2rem 0.5rem;
+  padding: 0.3rem 0.6rem;
   font-size: 0.7rem;
   cursor: pointer;
-  margin-left: 0.5rem;
   transition: all 0.3s ease;
 }
 
 .activity-edit-btn:hover {
-  background: #e5e7eb;
+  background: #f8fafc;
+  transform: scale(1.05);
 }
 
 /* Metric Card Edit Button */
 .metric-edit-btn {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  background: #3b82f6;
-  color: white;
-  border: none;
+  top: 10px;
+  right: 10px;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
   border-radius: 4px;
   padding: 0.3rem 0.5rem;
   font-size: 0.7rem;
@@ -285,15 +296,17 @@
 }
 
 .metric-edit-btn:hover {
-  background: #2563eb;
+  background: #f8fafc;
+  transform: scale(1.05);
 }
 
 /* Status Item Edit Button */
 .status-edit-btn {
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
   border-radius: 4px;
-  padding: 0.2rem 0.5rem;
+  padding: 0.3rem 0.6rem;
   font-size: 0.7rem;
   cursor: pointer;
   margin-left: auto;
@@ -301,7 +314,8 @@
 }
 
 .status-edit-btn:hover {
-  background: #e5e7eb;
+  background: #f8fafc;
+  transform: scale(1.05);
 }
 
 /* Update status-item to accommodate edit button */
@@ -397,20 +411,20 @@
 }
 
 .stats-edit-btn {
-  background: #6366f1;
-  color: white;
-  border: none;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
   padding: 0.75rem 1.5rem;
-  border-radius: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .stats-edit-btn:hover {
-  background: #5b21b6;
+  background: #f8fafc;
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
 }
 
 .dashboard-stats {
@@ -512,18 +526,18 @@
   position: absolute;
   top: 10px;
   right: 10px;
-  background: #f59e0b;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
   border-radius: 8px;
+  padding: 0.5rem 1rem;
   font-size: 0.8rem;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .stat-edit-individual-btn:hover {
-  background: #d97706;
+  background: #f8fafc;
   transform: scale(1.05);
 }
 
@@ -574,11 +588,11 @@
 }
 
 .section-edit-btn {
-  background: #f59e0b;
-  color: white;
-  border: none;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
+  border-radius: 6px;
   padding: 0.5rem 1rem;
-  border-radius: 8px;
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
@@ -586,7 +600,7 @@
 }
 
 .section-edit-btn:hover {
-  background: #d97706;
+  background: #f8fafc;
   transform: translateY(-2px);
 }
 
@@ -706,19 +720,19 @@
   position: absolute;
   top: 10px;
   right: 10px;
-  background: #f59e0b;
-  color: white;
-  border: none;
-  padding: 0.5rem;
-  border-radius: 8px;
-  font-size: 0.8rem;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
+  border-radius: 4px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.7rem;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .action-edit-btn:hover {
-  background: #d97706;
-  transform: scale(1.05);
+  background: #f8fafc;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 }
 
 /* Activities Section */
@@ -810,18 +824,18 @@
   position: absolute;
   top: 10px;
   right: 10px;
-  background: #f59e0b;
-  color: white;
-  border: none;
-  padding: 0.3rem 0.6rem;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
   border-radius: 6px;
+  padding: 0.3rem 0.6rem;
   font-size: 0.7rem;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .activity-edit-btn:hover {
-  background: #d97706;
+  background: #f8fafc;
   transform: scale(1.05);
 }
 
@@ -891,18 +905,18 @@
   position: absolute;
   top: 10px;
   right: 10px;
-  background: #f59e0b;
-  color: white;
-  border: none;
-  padding: 0.3rem 0.6rem;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
   border-radius: 6px;
+  padding: 0.3rem 0.6rem;
   font-size: 0.7rem;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .metric-edit-btn:hover {
-  background: #d97706;
+  background: #f8fafc;
   transform: scale(1.05);
 }
 
@@ -968,18 +982,18 @@
   position: absolute;
   top: 10px;
   right: 10px;
-  background: #f59e0b;
-  color: white;
-  border: none;
-  padding: 0.3rem 0.6rem;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
   border-radius: 6px;
+  padding: 0.3rem 0.6rem;
   font-size: 0.7rem;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .status-edit-btn:hover {
-  background: #d97706;
+  background: #f8fafc;
   transform: scale(1.05);
 }
 

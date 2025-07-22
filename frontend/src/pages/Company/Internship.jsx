@@ -427,7 +427,7 @@ const Internship = () => {
                     ))}
                   </div>
                   
-                  {/* MODIFIED CARD ACTIONS - MOVED DELETE TO BOTTOM */}
+                  {/* MODIFIED CARD ACTIONS - Update the delete button */}
                   <div className="card-actions">
                     <div className="action-buttons-top">
                       <button className="btn-view" onClick={() => handleView(internship)}>View</button>
@@ -439,7 +439,6 @@ const Internship = () => {
                         onClick={() => handleDelete(internship.internship_id)}
                         title="Delete Internship"
                       >
-                        🗑️ Delete Internship
                       </button>
                     </div>
                   </div>
