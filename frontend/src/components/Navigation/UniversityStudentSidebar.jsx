@@ -17,6 +17,8 @@ import {
   ChevronRight,
   Settings,
 } from "lucide-react";
+import { logout, getCurrentUser } from "../../utils/auth"; // ✅ Import logout function
+
 import { cn } from "../../utils/cn";
 import logo from "../../assets/logo.png";
 
@@ -104,6 +106,12 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         damping: 30,
       },
     },
+  };
+
+  const handleLogout = async () => {
+    if (window.confirm("Are you sure you want to logout?")) {
+      await logout();
+    }
   };
 
   return (
@@ -263,6 +271,9 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             </motion.button>
 
             <motion.button
+              onClick={() => {
+                handleLogout();
+              }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="w-full flex items-center px-4 py-3 text-sm font-medium text-primary-100 hover:bg-primary-700/50 hover:text-white rounded-xl transition-all duration-200 group"

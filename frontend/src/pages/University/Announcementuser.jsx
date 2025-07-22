@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import UniSidebar from '../../components/UniSidebar';
-import UniHeader from '../../components/UniHeader';
+import UniversityUserSidebar from '../../components/Navigation/UniversityUsersidebar'; // CHANGED: Import UniversityUserSidebar
+import UniversityNavbar from '../../components/Navigation/UniversityNavbar';
 import Footer from '../../components/Footer';
 import './Announcementuser.css';
 
@@ -94,7 +94,7 @@ const initialEvents = [
 ];
 
 const Announcementuser = () => {
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // CHANGED: Rename from isSidebarExpanded to isSidebarOpen
   
   // Only published announcements for users
   const announcements = initialAnnouncements.filter(ann => ann.status === 'published');
@@ -136,136 +136,133 @@ const Announcementuser = () => {
 
   return (
     <div className="user-announcement-page">
-      <div className="user-announcement-dashboard-container">
-        <UniSidebar activePage="announcement-user" onExpandChange={setIsSidebarExpanded} />
-        <UniHeader sidebarExpanded={isSidebarExpanded} />
+      {/* SIDEBAR AT THE VERY TOP - OUTSIDE CONTAINER */}
+      <UniversityUserSidebar 
+        isOpen={isSidebarOpen}
+        setIsOpen={setIsSidebarOpen}
+      />
 
-        <main className={`user-announcement-main-content ${isSidebarExpanded ? 'sidebar-expanded' : 'sidebar-collapsed'}`}>
-          
-          {/* Calendar section */}
-          <section className="user-calendar-section">
-            <div className="user-calendar-header">
-              <h2>Upcoming Events</h2>
-              <div className="user-calendar-controls">
-                <div className="user-view-buttons">
-                  <button 
-                    className={`user-view-btn ${calendarView === 'month' ? 'active' : ''}`}
-                    onClick={() => setCalendarView('month')}
-                  >
-                    Month
-                  </button>
-                  <button 
-                    className={`user-view-btn ${calendarView === 'week' ? 'active' : ''}`}
-                    onClick={() => setCalendarView('week')}
-                  >
-                    Week
-                  </button>
-                  <button 
-                    className={`user-view-btn ${calendarView === 'day' ? 'active' : ''}`}
-                    onClick={() => setCalendarView('day')}
-                  >
-                    Day
-                  </button>
-                  <button 
-                    className={`user-view-btn ${calendarView === 'agenda' ? 'active' : ''}`}
-                    onClick={() => setCalendarView('agenda')}
-                  >
-                    Agenda
+      {/* NAVBAR */}
+      <UniversityNavbar
+        onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        sidebarExpanded={isSidebarOpen}
+      />
+
+      {/* MAIN CONTENT */}
+      <main className={`user-announcement-main-content ${isSidebarOpen ? 'sidebar-expanded' : 'sidebar-collapsed'}`}>
+        
+        {/* Calendar section */}
+        <section className="user-calendar-section">
+          <div className="user-calendar-header">
+            <h2>Upcoming Events</h2>
+            <div className="user-calendar-controls">
+              <div className="user-view-buttons">
+                <button 
+                  className={`user-view-btn ${calendarView === 'month' ? 'active' : ''}`}
+                  onClick={() => setCalendarView('month')}
+                >
+                  Month
+                </button>
+                
+                <button 
+                  className={`user-view-btn ${calendarView === 'agenda' ? 'active' : ''}`}
+                  onClick={() => setCalendarView('agenda')}
+                >
+                  Agenda
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="user-calendar-component-wrapper">
+            <Calendar
+              localizer={localizer}
+              events={calendarEvents}
+              startAccessor="start"
+              endAccessor="end"
+              view={calendarView}
+              onView={setCalendarView}
+              views={['month', 'week', 'day', 'agenda']}
+              style={{ height: 600 }}
+              popup
+              onSelectEvent={handleSelectEvent}
+              eventPropGetter={(event) => ({
+                style: {
+                  backgroundColor: '#6366f1',
+                  borderRadius: '6px',
+                  border: 'none',
+                  color: 'white',
+                  fontSize: '0.875rem',
+                  fontWeight: '500'
+                }
+              })}
+              components={{
+                toolbar: (props) => (
+                  <div className="user-custom-toolbar">
+                    <div className="user-toolbar-navigation">
+                      <button className="user-nav-btn" onClick={() => props.onNavigate('PREV')}>
+                        ←
+                      </button>
+                      <button className="user-nav-btn user-today-btn" onClick={() => props.onNavigate('TODAY')}>
+                        Today
+                      </button>
+                      <button className="user-nav-btn" onClick={() => props.onNavigate('NEXT')}>
+                        →
+                      </button>
+                    </div>
+                    <div className="user-toolbar-label">
+                      <h3>{props.label}</h3>
+                    </div>
+                  </div>
+                )
+              }}
+            />
+          </div>
+        </section>
+
+        {/* Announcements section */}
+        <section className="user-announcements-section">
+          <div className="user-announcements-header">
+            <h2>Latest Announcements</h2>
+          </div>
+          <div className="user-announcements-list">
+            {announcements.map(ann => (
+              <div className="user-announcement-card" key={ann.id}>
+                <div>
+                  <h3>{ann.title}</h3>
+                  <p>{ann.description}</p>
+                  <div className="user-announcement-meta">
+                    <span>{ann.date}</span>
+                    <span>By {ann.author}</span>
+                    <span className={`user-status-badge ${ann.status}`}>{ann.status}</span>
+                  </div>
+                </div>
+                <div className="user-announcement-actions">
+                  <button className="user-btn-action" onClick={() => handleAnnView(ann)} title="View">
+                    👁️ View
                   </button>
                 </div>
               </div>
-            </div>
-            <div className="user-calendar-component-wrapper">
-              <Calendar
-                localizer={localizer}
-                events={calendarEvents}
-                startAccessor="start"
-                endAccessor="end"
-                view={calendarView}
-                onView={setCalendarView}
-                views={['month', 'week', 'day', 'agenda']}
-                style={{ height: 600 }}
-                popup
-                onSelectEvent={handleSelectEvent}
-                eventPropGetter={(event) => ({
-                  style: {
-                    backgroundColor: '#6366f1',
-                    borderRadius: '6px',
-                    border: 'none',
-                    color: 'white',
-                    fontSize: '0.875rem',
-                    fontWeight: '500'
-                  }
-                })}
-                components={{
-                  toolbar: (props) => (
-                    <div className="user-custom-toolbar">
-                      <div className="user-toolbar-navigation">
-                        <button className="user-nav-btn" onClick={() => props.onNavigate('PREV')}>
-                          ←
-                        </button>
-                        <button className="user-nav-btn user-today-btn" onClick={() => props.onNavigate('TODAY')}>
-                          Today
-                        </button>
-                        <button className="user-nav-btn" onClick={() => props.onNavigate('NEXT')}>
-                          →
-                        </button>
-                      </div>
-                      <div className="user-toolbar-label">
-                        <h3>{props.label}</h3>
-                      </div>
-                    </div>
-                  )
-                }}
-              />
-            </div>
-          </section>
+            ))}
+            {announcements.length === 0 && (
+              <div className="user-empty-msg">No announcements available at the moment.</div>
+            )}
+          </div>
+        </section>
 
-          {/* Announcements section */}
-          <section className="user-announcements-section">
-            <div className="user-announcements-header">
-              <h2>Latest Announcements</h2>
-            </div>
-            <div className="user-announcements-list">
-              {announcements.map(ann => (
-                <div className="user-announcement-card" key={ann.id}>
-                  <div>
-                    <h3>{ann.title}</h3>
-                    <p>{ann.description}</p>
-                    <div className="user-announcement-meta">
-                      <span>{ann.date}</span>
-                      <span>By {ann.author}</span>
-                      <span className={`user-status-badge ${ann.status}`}>{ann.status}</span>
-                    </div>
-                  </div>
-                  <div className="user-announcement-actions">
-                    <button className="user-btn-action" onClick={() => handleAnnView(ann)} title="View">
-                      👁️ View
-                    </button>
-                  </div>
-                </div>
-              ))}
-              {announcements.length === 0 && (
-                <div className="user-empty-msg">No announcements available at the moment.</div>
-              )}
-            </div>
-          </section>
+        <Footer
+          title="Stay Connected"
+          subtitle="Get the latest updates about University of Colombo and academic opportunities"
+          theme="dark"
+          sidebarExpanded={isSidebarOpen}
+        />
+      </main>
 
-          <Footer
-            title="Stay Connected"
-            subtitle="Get the latest updates about University of Colombo and academic opportunities"
-            theme="dark"
-            sidebarExpanded={isSidebarExpanded}
-          />
-        </main>
-      </div>
-
-      {/* Announcement View Modal */}
+      {/* Enhanced Announcement View Modal */}
       {showAnnViewModal && viewingAnn && (
         <div className="user-modal-overlay" onClick={() => setShowAnnViewModal(false)}>
           <div className="user-modal-content" onClick={e => e.stopPropagation()}>
             <div className="user-modal-header">
-              <h3>{viewingAnn.title}</h3>
+              <h3>📢 {viewingAnn.title}</h3>
               <button 
                 className="user-modal-close"
                 onClick={() => setShowAnnViewModal(false)}
@@ -275,13 +272,20 @@ const Announcementuser = () => {
             </div>
             <div className="user-modal-body">
               <div className="user-announcement-details">
-                <div className="user-detail-row">
-                  <strong>Date:</strong> {viewingAnn.date}
+                <div className="user-detail-row" data-info="date">
+                  <strong>Date:</strong> 
+                  <span>{new Date(viewingAnn.date).toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}</span>
                 </div>
-                <div className="user-detail-row">
-                  <strong>Author:</strong> {viewingAnn.author}
+                <div className="user-detail-row" data-info="author">
+                  <strong>Author:</strong> 
+                  <span>{viewingAnn.author}</span>
                 </div>
-                <div className="user-detail-row">
+                <div className="user-detail-row" data-info="status">
                   <strong>Status:</strong> 
                   <span className={`user-status-badge ${viewingAnn.status}`}>
                     {viewingAnn.status}
@@ -305,12 +309,12 @@ const Announcementuser = () => {
         </div>
       )}
 
-      {/* Event View Modal */}
+      {/* Enhanced Event View Modal */}
       {showEventViewModal && viewingEvent && (
         <div className="user-modal-overlay" onClick={() => setShowEventViewModal(false)}>
           <div className="user-modal-content" onClick={e => e.stopPropagation()}>
             <div className="user-modal-header">
-              <h3>{viewingEvent.title}</h3>
+              <h3>📅 {viewingEvent.title}</h3>
               <button 
                 className="user-modal-close"
                 onClick={() => setShowEventViewModal(false)}
@@ -320,8 +324,18 @@ const Announcementuser = () => {
             </div>
             <div className="user-modal-body">
               <div className="user-event-details">
+                <div className="user-detail-row" data-info="date">
+                  <strong>Date:</strong> 
+                  <span>{new Date(viewingEvent.date).toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}</span>
+                </div>
                 <div className="user-detail-row">
-                  <strong>Date:</strong> {viewingEvent.date}
+                  <strong>Event ID:</strong> 
+                  <span>#{viewingEvent.id}</span>
                 </div>
                 <div className="user-detail-description">
                   <strong>Description:</strong>

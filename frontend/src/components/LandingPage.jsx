@@ -90,7 +90,7 @@ const LandingPage = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex grid grid-cols-1 lg:grid-cols-10 overflow-hidden">
+      <section className="relative min-h-screen grid grid-cols-1 lg:grid-cols-10 overflow-hidden">
         {/* Content */}
         <div className="left-32 lg:col-span-5 relative z-10 w-full py-20 lg:py-32 ">
           <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">

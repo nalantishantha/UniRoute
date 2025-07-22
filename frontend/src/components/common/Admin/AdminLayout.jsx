@@ -1,22 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import AdminSidebar from './Sidebar';
-import AdminHeader from './AdminHeader';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import AdminSidebar from "./Sidebar";
+import AdminHeader from "./AdminHeader";
 
-const AdminLayout = ({ children, pageTitle = "Dashboard", pageDescription = "" }) => {
+const AdminLayout = ({
+  children,
+  pageTitle = "Dashboard",
+  pageDescription = "",
+}) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     // Get user data from localStorage or your auth system
-    const userData = localStorage.getItem('user');
+    const userData = localStorage.getItem("user");
     if (userData) {
       try {
         const parsedUser = JSON.parse(userData);
         setUser(parsedUser);
       } catch (error) {
-        console.error('Error parsing user data:', error);
+        console.error("Error parsing user data:", error);
       }
     }
   }, []);
@@ -27,17 +31,17 @@ const AdminLayout = ({ children, pageTitle = "Dashboard", pageDescription = "" }
 
   const handleLogout = () => {
     // Clear user data
-    localStorage.removeItem('user');
-    localStorage.removeItem('authToken');
-    
+    localStorage.removeItem("user");
+    localStorage.removeItem("authToken");
+
     // Redirect to login
-    navigate('/login');
+    navigate("/login");
   };
 
   return (
     <div className="min-h-screen bg-[#F5F7FA]">
       {/* Sidebar */}
-      <AdminSidebar 
+      <AdminSidebar
         isSidebarOpen={isSidebarOpen}
         toggleSidebar={toggleSidebar}
         user={user}
@@ -45,9 +49,9 @@ const AdminLayout = ({ children, pageTitle = "Dashboard", pageDescription = "" }
       />
 
       {/* Main Content */}
-      <div className="lg:ml-64">
+      <div className="lg:ml-72">
         {/* Header */}
-        <AdminHeader 
+        <AdminHeader
           toggleSidebar={toggleSidebar}
           user={user}
           handleLogout={handleLogout}
@@ -56,9 +60,7 @@ const AdminLayout = ({ children, pageTitle = "Dashboard", pageDescription = "" }
         />
 
         {/* Page Content */}
-        <main className="p-6">
-          {children}
-        </main>
+        <main className="p-6">{children}</main>
       </div>
     </div>
   );

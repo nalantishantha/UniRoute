@@ -19,11 +19,11 @@
 }
 
 .edit-dashboard-main.edit-sidebar-expanded {
-  margin-left: 280px;
+  margin-left: 288px; /* CHANGED: Updated to match CompanySidebar width */
 }
 
 .edit-dashboard-main.edit-sidebar-collapsed {
-  margin-left: 80px;
+  margin-left: 0; /* CHANGED: Updated for new sidebar behavior */
 }
 
 /* Edit Controls */
@@ -781,7 +781,7 @@
   color: white;
   padding: 2rem;
   text-align: center;
-  margin-top: 2rem;
+  margin-top: 2
 }
 
 .edit-footer-content {
@@ -829,6 +829,38 @@
 
 .edit-newsletter button:hover {
   background: #2563eb;
+}
+
+/* Navbar */
+.company-dashboard-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: #fff;
+  transition: margin-left 0.3s;
+  min-width: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+
+.company-dashboard-navbar.sidebar-expanded {
+  margin-left: 288px; /* CHANGED: Updated to match sidebar width */
+  width: calc(100vw - 288px);
+}
+
+.company-dashboard-navbar.sidebar-collapsed {
+  margin-left: 0; /* CHANGED: Updated for new sidebar behavior */
+  width: 100vw;
+}
+
+@media (max-width: 900px) {
+  .company-dashboard-navbar,
+  .company-dashboard-navbar.sidebar-expanded,
+  .company-dashboard-navbar.sidebar-collapsed {
+    margin-left: 0;
+    width: 100vw;
+  }
 }
 
 /* Responsive Design */
@@ -903,5 +935,386 @@
     align-items: center;
     gap: 2rem;
     text-align: center;
+  }
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(149, 17, 17, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 16px;
+  max-width: 380px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  position: relative;
+  animation: modalSlideIn 0.3s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 1.5rem 0 1.5rem;
+  margin-bottom: 0;
+}
+
+.modal-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  line-height: 1.3;
+  flex: 1;
+  padding-right: 1rem;
+}
+
+.modal-close-btn {
+  background: #f3f4f6;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  color: #6b7280;
+  cursor: pointer;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.modal-close-btn:hover {
+  background: #e5e7eb;
+  color: #374151;
+  transform: scale(1.05);
+}
+
+.modal-body {
+  padding: 1rem 1.5rem 1.5rem 1.5rem;
+}
+
+.modal-img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  border: 1px solid #e5e7eb;
+}
+
+.modal-body p {
+  margin: 0.75rem 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.modal-body p strong {
+  color: #1f2937;
+  font-weight: 600;
+  min-width: 70px;
+  font-size: 0.85rem;
+}
+
+.modal-body p:last-child {
+  margin-bottom: 0;
+}
+
+/* Modal Animation */
+@keyframes modalSlideIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(-20px) scale(0.95);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Add subtle icons for modal info */
+.modal-body p[data-info="company"]::before {
+  content: "🏢";
+  font-size: 0.8rem;
+}
+
+.modal-body p[data-info="location"]::before {
+  content: "📍";
+  font-size: 0.8rem;
+}
+
+.modal-body p[data-info="type"]::before {
+  content: "💼";
+  font-size: 0.8rem;
+}
+
+.modal-body p[data-info="level"]::before {
+  content: "📊";
+  font-size: 0.8rem;
+}
+
+.modal-body p[data-info="duration"]::before {
+  content: "⏱️";
+  font-size: 0.8rem;
+}
+
+.modal-body p[data-info="uploaded"]::before {
+  content: "📅";
+  font-size: 0.8rem;
+}
+
+/* Responsive modal */
+@media (max-width: 480px) {
+  .modal-content {
+    max-width: 95%;
+    margin: 1rem;
+  }
+  
+  .modal-header {
+    padding: 1rem 1rem 0 1rem;
+  }
+  
+  .modal-body {
+    padding: 0.75rem 1rem 1rem 1rem;
+  }
+  
+  .modal-header h2 {
+    font-size: 1.1rem;
+  }
+}
+
+/* Enhanced Modal Styles - Unique for Dashboard Edit */
+.edit-dashboard-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.edit-dashboard-modal-content {
+  background: #fff;
+  border-radius: 20px;
+  max-width: 520px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+  position: relative;
+  animation: editDashboardModalSlideIn 0.4s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.edit-dashboard-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 2rem 1rem 2rem;
+  margin-bottom: 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.edit-dashboard-modal-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.3;
+  flex: 1;
+  padding-right: 1.5rem;
+}
+
+.edit-dashboard-modal-close-btn {
+  background: #f8fafc;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  color: #64748b;
+  cursor: pointer;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  font-weight: 300;
+}
+
+.edit-dashboard-modal-close-btn:hover {
+  background: #e2e8f0;
+  color: #475569;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.edit-dashboard-modal-body {
+  padding: 1rem 2rem 2rem 2rem;
+}
+
+.edit-dashboard-modal-img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.edit-dashboard-modal-body p {
+  margin: 1rem 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border-left: 4px solid #3b82f6;
+}
+
+.edit-dashboard-modal-body p strong {
+  color: #1e293b;
+  font-weight: 600;
+  min-width: 90px;
+  font-size: 0.95rem;
+}
+
+.edit-dashboard-modal-body p:last-child {
+  margin-bottom: 0;
+}
+
+/* Modal Animation */
+@keyframes editDashboardModalSlideIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(-30px) scale(0.9);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Enhanced icons for modal info */
+.edit-dashboard-modal-body p[data-info="company"]::before {
+  content: "🏢";
+  font-size: 1.1rem;
+  margin-right: 0.25rem;
+}
+
+.edit-dashboard-modal-body p[data-info="location"]::before {
+  content: "📍";
+  font-size: 1.1rem;
+  margin-right: 0.25rem;
+}
+
+.edit-dashboard-modal-body p[data-info="type"]::before {
+  content: "💼";
+  font-size: 1.1rem;
+  margin-right: 0.25rem;
+}
+
+.edit-dashboard-modal-body p[data-info="level"]::before {
+  content: "📊";
+  font-size: 1.1rem;
+  margin-right: 0.25rem;
+}
+
+.edit-dashboard-modal-body p[data-info="duration"]::before {
+  content: "⏱️";
+  font-size: 1.1rem;
+  margin-right: 0.25rem;
+}
+
+.edit-dashboard-modal-body p[data-info="uploaded"]::before {
+  content: "📅";
+  font-size: 1.1rem;
+  margin-right: 0.25rem;
+}
+
+/* Responsive modal */
+@media (max-width: 600px) {
+  .edit-dashboard-modal-content {
+    max-width: 95%;
+    margin: 1rem;
+  }
+  
+  .edit-dashboard-modal-header {
+    padding: 1.5rem 1.5rem 0.75rem 1.5rem;
+  }
+  
+  .edit-dashboard-modal-body {
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
+  }
+  
+  .edit-dashboard-modal-header h2 {
+    font-size: 1.25rem;
+  }
+  
+  .edit-dashboard-modal-img {
+    height: 160px;
+  }
+  
+  .edit-dashboard-modal-body p {
+    font-size: 0.9rem;
+    padding: 0.6rem;
+  }
+  
+  .edit-dashboard-modal-body p strong {
+    min-width: 75px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .edit-dashboard-modal-content {
+    max-width: 90%;
+  }
+  
+  .edit-dashboard-modal-header {
+    padding: 1.25rem 1.25rem 0.5rem 1.25rem;
+  }
+  
+  .edit-dashboard-modal-body {
+    padding: 0.75rem 1.25rem 1.25rem 1.25rem;
+  }
+  
+  .edit-dashboard-modal-header h2 {
+    font-size: 1.1rem;
+    padding-right: 1rem;
+  }
+  
+  .edit-dashboard-modal-close-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1.2rem;
   }
 }

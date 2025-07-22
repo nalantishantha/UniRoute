@@ -42,9 +42,46 @@ class InternshipOpportunities(models.Model):
     application_deadline = models.DateField(blank=True, null=True)
     contact_email = models.CharField(max_length=100, blank=True, null=True)
     contact_phone = models.CharField(max_length=50, blank=True, null=True)
+    image_url = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         managed = True
         db_table = 'internship_opportunities'
+
+
+class CompanyEvents(models.Model):
+    event_id = models.AutoField(primary_key=True)
+    company = models.ForeignKey(Companies, models.DO_NOTHING)
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    event_type = models.CharField(max_length=50, blank=True, null=True)  # workshop, seminar, job_fair, etc.
+    event_date = models.DateTimeField(blank=True, null=True)
+    end_date = models.DateTimeField(blank=True, null=True)
+    location = models.CharField(max_length=255, blank=True, null=True)
+    is_virtual = models.BooleanField(default=False)
+    meeting_link = models.URLField(blank=True, null=True)
+    max_participants = models.IntegerField(blank=True, null=True)
+    registration_deadline = models.DateTimeField(blank=True, null=True)
+    contact_email = models.CharField(max_length=100, blank=True, null=True)
+    contact_phone = models.CharField(max_length=50, blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'company_events'
+
+
+class CompanyEventRegistrations(models.Model):
+    registration_id = models.AutoField(primary_key=True)
+    event = models.ForeignKey(CompanyEvents, models.DO_NOTHING)
+    user = models.ForeignKey('accounts.Users', models.DO_NOTHING)
+    registration_date = models.DateTimeField(blank=True, null=True)
+    status = models.CharField(max_length=20, default='registered')  # registered, attended, cancelled
+    notes = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'company_event_registrations'
 

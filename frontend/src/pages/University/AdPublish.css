@@ -13,19 +13,19 @@
 /* Main Content - Responsive to sidebar state */
 .ad-publish-main {
   flex: 1;
-  margin-left: 80px;
-  overflow-y: auto;
-  background: #f8fafc;
+  margin-left: 0; /* CHANGED: Default when sidebar is closed */
   min-height: 100vh;
-  transition: margin-left 0.3s ease;
+  transition: margin-left 0.3s ease; /* CHANGED: Add smooth transition */
+  background: #f8fafc;
+  padding-top: 90px;
 }
 
 .ad-publish-main.sidebar-expanded {
-  margin-left: 280px;
+  margin-left: 288px; /* CHANGED: Updated to match UniversitySidebar width */
 }
 
 .ad-publish-main.sidebar-collapsed {
-  margin-left: 80px;
+  margin-left: 0; /* CHANGED: Content takes full width when sidebar is closed */
 }
 
 /* Hero Section */
@@ -730,6 +730,16 @@
   color: #92400e;
 }
 
+.ad-status.rejected {
+  background: #fecaca;
+  color: #991b1b;
+}
+
+.ad-status.completed {
+  background: #e5e7eb;
+  color: #374151;
+}
+
 .ad-details {
   flex: 1;
 }
@@ -746,6 +756,46 @@
   gap: 1rem;
   font-size: 0.75rem;
   color: #6b7280;
+}
+
+.ad-space-info {
+  margin-top: 0.25rem;
+}
+
+.ad-space-info small {
+  color: #9ca3af;
+  font-size: 0.7rem;
+}
+
+.no-ads {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: #6b7280;
+}
+
+.no-ads p {
+  margin: 0.25rem 0;
+}
+
+.see-more {
+  text-align: center;
+  padding: 1rem;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 1rem;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.btn-link:hover {
+  text-decoration: underline;
 }
 
 .view-btn {

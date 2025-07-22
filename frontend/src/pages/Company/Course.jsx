@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import Sidebar from '../../components/Sidebar';
+import CompanySidebar from '../../components/Navigation/CompanySidebar'; // CHANGED: Import CompanySidebar
+import CompanyDashboardNavbar from '../../components/Navigation/CompanyDashboardNavbar';
 import './Course.css';
 
 const Course = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // CHANGED: Rename from isSidebarExpanded to isSidebarOpen
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -29,7 +30,7 @@ const Course = () => {
       enrollments: 156,
       rating: 4.8,
       image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=400&q=80',
-      skills: ['React', 'JavaScript', 'Redux', 'TypeScript'],
+      skills: ['React', 'JavaScript', 'Redux', 'TypeScript','SEO'],
       startDate: '2024-07-01',
       endDate: '2024-09-24'
     },
@@ -83,7 +84,7 @@ const Course = () => {
       enrollments: 0,
       rating: 0,
       image: 'https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&w=400&q=80',
-      skills: ['Figma', 'User Research', 'Prototyping', 'Design Systems'],
+      skills: ['User Research', 'Prototyping', 'Design Systems'],
       startDate: '2024-08-01',
       endDate: '2024-11-05'
     },
@@ -101,7 +102,7 @@ const Course = () => {
       enrollments: 127,
       rating: 4.5,
       image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=400&q=80',
-      skills: ['Strategy', 'Leadership', 'Planning', 'Management'],
+      skills: ['Strategy', 'Leadership', 'Planning', 'Management',],
       startDate: '2024-06-20',
       endDate: '2024-08-29'
     },
@@ -243,197 +244,195 @@ const Course = () => {
 
   return (
     <div className="course-page">
-      <div className="course-container">
-        {/* Sidebar Component with callback */}
-        <Sidebar 
-          activePage="course" 
-          onExpandChange={setIsSidebarExpanded}
-        />
+      {/* SIDEBAR AT THE VERY TOP - OUTSIDE CONTAINER */}
+      <CompanySidebar 
+        isOpen={isSidebarOpen}
+        setIsOpen={setIsSidebarOpen}
+      />
 
-        {/* Main Content with responsive class */}
-        <main className={`course-main ${isSidebarExpanded ? 'sidebar-expanded' : 'sidebar-collapsed'}`}>
-          {/* Hero Section */}
-          <section className="course-hero-unique">
-            <div className="course-hero-content">
-              <h1>Course Management</h1>
-              <p>Create and manage exceptional courses for talented students</p>
-            </div>
-          </section>
+      {/* NAVBAR */}
+      <CompanyDashboardNavbar
+        onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        sidebarExpanded={isSidebarOpen}
+      />
 
-          {/* Search and Filter Section */}
-          <section className="course-search">
-            <div className="search-container">
-              <input
-                type="text"
-                placeholder="Search courses, instructors, or skills..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
-            </div>
-            
-            <div className="filter-container">
-              <select 
-                value={selectedCategory} 
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="filter-select"
-              >
-                {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
-              
-              <select 
-                value={selectedLevel} 
-                onChange={(e) => setSelectedLevel(e.target.value)}
-                className="filter-select"
-              >
-                {levels.map(level => (
-                  <option key={level} value={level}>{level}</option>
-                ))}
-              </select>
-            </div>
-          </section>
+      {/* MAIN CONTENT */}
+      <main className={`course-main ${isSidebarOpen ? 'sidebar-expanded' : 'sidebar-collapsed'}`}>
+        {/* REMOVED HERO SECTION */}
 
-          {/* Courses Section Header */}
-          <section className="course-section-unique">
-            <div className="course-section-header-unique">
-              <h2>All Courses</h2>
-              <button className="btn-add-new" onClick={handleAddNew}>
-                + New Course
-              </button>
-            </div>
-            
-            {/* Courses Grid */}
-            <div className="course-grid-container-unique">
-              {filteredCourses.map((course) => (
-                <div key={course.id} className="course-card-unique">
-                  <button 
-                    className="btn-delete-course"
-                    onClick={() => handleDelete(course.id)}
-                    title="Delete Course"
-                  >
-                    ✕
-                  </button>
-                  
-                  <div className="course-card-image-container">
-                    <img src={course.image} alt={course.title} className="course-card-image" />
-                    <div className="course-card-overlay">
-                      <span className="course-card-category">{course.category}</span>
-                      <div className="course-card-stats">
-                        <span>👥 {course.enrollments}</span>
-                        <span>⭐ {course.rating}</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="course-card-content">
-                    <div className="course-card-header">
-                      <h3 className="course-card-title">{course.title}</h3>
-                      <div className="course-card-meta">
-                        <span 
-                          className="course-status-badge" 
-                          style={{ backgroundColor: getStatusColor(course.status) }}
-                        >
-                          {course.status}
-                        </span>
-                        <span 
-                          className="course-level-badge" 
-                          style={{ color: getLevelColor(course.level) }}
-                        >
-                          {course.level}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div className="course-card-details">
-                      <span>⏱️ {course.duration}</span>
-                      <span>📚 {course.level}</span>
-                      <span>💰 ${course.price}</span>
-                    </div>
-                    
-                    <div className="course-card-instructor">
-                      <span>👨‍🏫 {course.instructor}</span>
-                    </div>
-                    
-                    <p className="course-card-description">{course.description}</p>
-                    
-                    <div className="course-card-skills">
-                      {course.skills.map((skill, index) => (
-                        <span key={index} className="course-skill">{skill}</span>
-                      ))}
-                    </div>
-                    
-                    <div className="course-card-actions">
-                      <button className="course-btn-view" onClick={() => handleView(course)}>View</button>
-                      <button className="course-btn-edit" onClick={() => handleEdit(course)}>Edit</button>
-                    </div>
-                  </div>
-                </div>
+        {/* Search and Filter Section */}
+        <section className="course-search">
+          <div className="search-container">
+            <input
+              type="text"
+              placeholder="Search courses, instructors, or skills..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+          </div>
+          
+          <div className="filter-container">
+            <select 
+              value={selectedCategory} 
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="filter-select"
+            >
+              {categories.map(category => (
+                <option key={category} value={category}>{category}</option>
               ))}
-            </div>
-          </section>
+            </select>
+            
+            <select 
+              value={selectedLevel} 
+              onChange={(e) => setSelectedLevel(e.target.value)}
+              className="filter-select"
+            >
+              {levels.map(level => (
+                <option key={level} value={level}>{level}</option>
+              ))}
+            </select>
+          </div>
+        </section>
 
-          {/* Course Statistics */}
-          <section className="course-stats">
-            <div className="stats-content">
-              <h2>Course Statistics</h2>
-              <div className="stats-grid">
-                <div className="stat-item">
-                  <div className="stat-icon">📚</div>
-                  <div className="stat-value">{courses.length}</div>
-                  <div className="stat-label">Total Courses</div>
+        {/* Courses Section Header */}
+        <section className="course-section-unique">
+          <div className="course-section-header-unique">
+            <h2>All Courses</h2>
+            <button className="btn-add-new" onClick={handleAddNew}>
+              + New Course
+            </button>
+          </div>
+          
+          {/* Courses Grid */}
+          <div className="course-grid-container-unique">
+            {filteredCourses.map((course) => (
+              <div key={course.id} className="course-card-unique">
+                <button 
+                  className="btn-delete-course"
+                  onClick={() => handleDelete(course.id)}
+                  title="Delete Course"
+                >
+                  ✕
+                </button>
+                
+                <div className="course-card-image-container">
+                  <img src={course.image} alt={course.title} className="course-card-image" />
+                  <div className="course-card-overlay">
+                    <span className="course-card-category">{course.category}</span>
+                    <div className="course-card-stats">
+                      <span>👥 {course.enrollments}</span>
+                      <span>⭐ {course.rating}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="stat-item">
-                  <div className="stat-icon">✅</div>
-                  <div className="stat-value">{courses.filter(c => c.status === 'active').length}</div>
-                  <div className="stat-label">Active Courses</div>
-                </div>
-                <div className="stat-item">
-                  <div className="stat-icon">👥</div>
-                  <div className="stat-value">{courses.reduce((sum, c) => sum + c.enrollments, 0)}</div>
-                  <div className="stat-label">Total Enrollments</div>
-                </div>
-                <div className="stat-item">
-                  <div className="stat-icon">💰</div>
-                  <div className="stat-value">${courses.reduce((sum, c) => sum + (c.price * c.enrollments), 0).toLocaleString()}</div>
-                  <div className="stat-label">Total Revenue</div>
+                
+                <div className="course-card-content">
+                  <div className="course-card-header">
+                    <h3 className="course-card-title">{course.title}</h3>
+                    <div className="course-card-meta">
+                      <span 
+                        className="course-status-badge" 
+                        style={{ backgroundColor: getStatusColor(course.status) }}
+                      >
+                        {course.status}
+                      </span>
+                      <span 
+                        className="course-level-badge" 
+                        style={{ color: getLevelColor(course.level) }}
+                      >
+                        {course.level}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="course-card-details">
+                    <span>⏱️ {course.duration}</span>
+                    <span>📚 {course.level}</span>
+                    <span>💰 ${course.price}</span>
+                  </div>
+                  
+                  <div className="course-card-instructor">
+                    <span>👨‍🏫 {course.instructor}</span>
+                  </div>
+                  
+                  <p className="course-card-description">{course.description}</p>
+                  
+                  <div className="course-card-skills">
+                    {course.skills.map((skill, index) => (
+                      <span key={index} className="course-skill">{skill}</span>
+                    ))}
+                  </div>
+                  
+                  <div className="course-card-actions">
+                    <button className="course-btn-view" onClick={() => handleView(course)}>View</button>
+                    <button className="course-btn-edit" onClick={() => handleEdit(course)}>Edit</button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </section>
+            ))}
+          </div>
+        </section>
 
-          {/* Footer */}
-          <footer className="course-footer">
-            <div className="footer-content">
-              <h3>Stay Connected</h3>
-              <div className="newsletter">
-                <input type="email" placeholder="Your email" />
-                <button>Subscribe</button>
+        {/* Course Statistics */}
+        <section className="course-stats">
+          <div className="stats-content">
+            <h2>Course Statistics</h2>
+            <div className="stats-grid">
+              <div className="stat-item">
+                <div className="stat-icon">📚</div>
+                <div className="stat-value">{courses.length}</div>
+                <div className="stat-label">Total Courses</div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-icon">✅</div>
+                <div className="stat-value">{courses.filter(c => c.status === 'active').length}</div>
+                <div className="stat-label">Active Courses</div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-icon">👥</div>
+                <div className="stat-value">{courses.reduce((sum, c) => sum + c.enrollments, 0)}</div>
+                <div className="stat-label">Total Enrollments</div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-icon">💰</div>
+                <div className="stat-value">${courses.reduce((sum, c) => sum + (c.price * c.enrollments), 0).toLocaleString()}</div>
+                <div className="stat-label">Total Revenue</div>
               </div>
             </div>
-          </footer>
-        </main>
-      </div>
+          </div>
+        </section>
+
+        {/* Footer */}
+        <footer className="course-footer">
+          <div className="footer-content">
+            <h3>Stay Connected</h3>
+            <div className="newsletter">
+              <input type="email" placeholder="Your email" />
+              <button>Subscribe</button>
+            </div>
+          </div>
+        </footer>
+      </main>
 
       {/* View Modal */}
       {showViewModal && selectedCourse && (
-        <div className="modal-overlay" onClick={() => setShowViewModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
+        <div className="company-course-admin-modal-overlay" onClick={() => setShowViewModal(false)}>
+          <div className="company-course-admin-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="company-course-admin-modal-header">
               <h2>View Course</h2>
-              <button className="modal-close" onClick={() => setShowViewModal(false)}>✕</button>
+              <button className="company-course-admin-modal-close" onClick={() => setShowViewModal(false)}>✕</button>
             </div>
-            <div className="modal-body">
+            <div className="company-course-admin-modal-body">
               <img
                 src={selectedCourse.image}
                 alt={selectedCourse.title}
-                className="modal-image course-modal-image"
+                className="company-course-admin-modal-image"
               />
-              <div className="modal-info">
-                <div className="modal-title-section">
+              <div className="company-course-admin-modal-info">
+                <div className="company-course-admin-modal-title-section">
                   <h3>{selectedCourse.title}</h3>
-                  <div className="modal-badges">
+                  <div className="company-course-admin-modal-badges">
                     <span 
                       className="status-badge" 
                       style={{ backgroundColor: getStatusColor(selectedCourse.status) }}
@@ -449,47 +448,44 @@ const Course = () => {
                   </div>
                 </div>
                 
-                <div className="modal-meta">
-                  <div className="meta-item">
-                    <strong>👨‍🏫 Instructor:</strong> {selectedCourse.instructor}
+                <div className="company-course-admin-modal-meta">
+                  <div className="company-course-admin-meta-item" data-info="instructor">
+                    <strong>Instructor:</strong> {selectedCourse.instructor}
                   </div>
-                  <div className="meta-item">
-                    <strong>🏷️ Category:</strong> {selectedCourse.category}
+                  <div className="company-course-admin-meta-item" data-info="category">
+                    <strong>Category:</strong> {selectedCourse.category}
                   </div>
-                  <div className="meta-item">
-                    <strong>⏱️ Duration:</strong> {selectedCourse.duration}
+                  <div className="company-course-admin-meta-item" data-info="duration">
+                    <strong>Duration:</strong> {selectedCourse.duration}
                   </div>
-                  <div className="meta-item">
-                    <strong>📚 Level:</strong> {selectedCourse.level}
+                  <div className="company-course-admin-meta-item" data-info="level">
+                    <strong>Level:</strong> {selectedCourse.level}
                   </div>
-                  <div className="meta-item">
-                    <strong>💰 Price:</strong> ${selectedCourse.price}
+                  <div className="company-course-admin-meta-item" data-info="price">
+                    <strong>Price:</strong> ${selectedCourse.price}
                   </div>
-                  <div className="meta-item">
-                    <strong>📋 Prerequisites:</strong> {selectedCourse.prerequisites}
+                  <div className="company-course-admin-meta-item" data-info="enrollments">
+                    <strong>Enrollments:</strong> {selectedCourse.enrollments} students
                   </div>
-                  <div className="meta-item">
-                    <strong>👥 Enrollments:</strong> {selectedCourse.enrollments} students
+                  <div className="company-course-admin-meta-item" data-info="rating">
+                    <strong>Rating:</strong> {selectedCourse.rating}/5.0
                   </div>
-                  <div className="meta-item">
-                    <strong>⭐ Rating:</strong> {selectedCourse.rating}/5.0
+                  <div className="company-course-admin-meta-item" data-info="start-date">
+                    <strong>Start Date:</strong> {new Date(selectedCourse.startDate).toLocaleDateString()}
                   </div>
-                  <div className="meta-item">
-                    <strong>📅 Start Date:</strong> {new Date(selectedCourse.startDate).toLocaleDateString()}
-                  </div>
-                  <div className="meta-item">
-                    <strong>📅 End Date:</strong> {new Date(selectedCourse.endDate).toLocaleDateString()}
+                  <div className="company-course-admin-meta-item" data-info="end-date">
+                    <strong>End Date:</strong> {new Date(selectedCourse.endDate).toLocaleDateString()}
                   </div>
                 </div>
                 
-                <div className="modal-description">
-                  <strong>📝 Description:</strong>
+                <div className="company-course-admin-modal-description">
+                  <strong>Description:</strong>
                   <p>{selectedCourse.description}</p>
                 </div>
                 
-                <div className="modal-skills">
-                  <strong>🛠️ Skills Covered:</strong>
-                  <div className="skills-container">
+                <div className="company-course-admin-modal-skills">
+                  <strong>Skills Covered:</strong>
+                  <div className="company-course-admin-skills-container">
                     {selectedCourse.skills.map((skill, index) => (
                       <span key={index} className="skill">{skill}</span>
                     ))}
@@ -503,15 +499,15 @@ const Course = () => {
 
       {/* Edit Modal */}
       {showEditModal && selectedCourse && (
-        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
+        <div className="company-course-admin-modal-overlay" onClick={() => setShowEditModal(false)}>
+          <div className="company-course-admin-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="company-course-admin-modal-header">
               <h2>Edit Course</h2>
-              <button className="modal-close" onClick={() => setShowEditModal(false)}>✕</button>
+              <button className="company-course-admin-modal-close" onClick={() => setShowEditModal(false)}>✕</button>
             </div>
-            <div className="modal-body">
+            <div className="company-course-admin-modal-body">
               <form onSubmit={handleSaveEdit}>
-                <div className="form-group">
+                <div className="company-course-admin-form-group">
                   <label>Course Title</label>
                   <input
                     type="text"
@@ -522,8 +518,8 @@ const Course = () => {
                   />
                 </div>
                 
-                <div className="form-row">
-                  <div className="form-group">
+                <div className="company-course-admin-form-row">
+                  <div className="company-course-admin-form-group">
                     <label>Category</label>
                     <select
                       name="category"
@@ -536,7 +532,7 @@ const Course = () => {
                       ))}
                     </select>
                   </div>
-                  <div className="form-group">
+                  <div className="company-course-admin-form-group">
                     <label>Level</label>
                     <select
                       name="level"
@@ -551,8 +547,8 @@ const Course = () => {
                   </div>
                 </div>
                 
-                <div className="form-row">
-                  <div className="form-group">
+                <div className="company-course-admin-form-row">
+                  <div className="company-course-admin-form-group">
                     <label>Duration</label>
                     <input
                       type="text"
@@ -563,7 +559,7 @@ const Course = () => {
                       required
                     />
                   </div>
-                  <div className="form-group">
+                  <div className="company-course-admin-form-group">
                     <label>Price ($)</label>
                     <input
                       type="number"
@@ -577,8 +573,8 @@ const Course = () => {
                   </div>
                 </div>
                 
-                <div className="form-row">
-                  <div className="form-group">
+                <div className="company-course-admin-form-row">
+                  <div className="company-course-admin-form-group">
                     <label>Instructor</label>
                     <input
                       type="text"
@@ -588,7 +584,7 @@ const Course = () => {
                       required
                     />
                   </div>
-                  <div className="form-group">
+                  <div className="company-course-admin-form-group">
                     <label>Status</label>
                     <select
                       name="status"
@@ -603,7 +599,7 @@ const Course = () => {
                   </div>
                 </div>
                 
-                <div className="form-group">
+                <div className="company-course-admin-form-group">
                   <label>Prerequisites</label>
                   <input
                     type="text"
@@ -614,8 +610,8 @@ const Course = () => {
                   />
                 </div>
                 
-                <div className="form-row">
-                  <div className="form-group">
+                <div className="company-course-admin-form-row">
+                  <div className="company-course-admin-form-group">
                     <label>Start Date</label>
                     <input
                       type="date"
@@ -625,7 +621,7 @@ const Course = () => {
                       required
                     />
                   </div>
-                  <div className="form-group">
+                  <div className="company-course-admin-form-group">
                     <label>End Date</label>
                     <input
                       type="date"
@@ -637,7 +633,7 @@ const Course = () => {
                   </div>
                 </div>
                 
-                <div className="form-group">
+                <div className="company-course-admin-form-group">
                   <label>Description</label>
                   <textarea
                     name="description"
@@ -648,7 +644,7 @@ const Course = () => {
                   />
                 </div>
                 
-                <div className="form-group">
+                <div className="company-course-admin-form-group">
                   <label>Skills Covered (comma-separated)</label>
                   <input
                     type="text"
@@ -660,7 +656,7 @@ const Course = () => {
                   />
                 </div>
                 
-                <div className="form-group">
+                <div className="company-course-admin-form-group">
                   <label>Image URL</label>
                   <input
                     type="url"
@@ -671,11 +667,11 @@ const Course = () => {
                   />
                 </div>
                 
-                <div className="form-actions">
-                  <button type="button" className="btn-cancel" onClick={() => setShowEditModal(false)}>
+                <div className="company-course-admin-form-actions">
+                  <button type="button" className="company-course-admin-btn-cancel" onClick={() => setShowEditModal(false)}>
                     Cancel
                   </button>
-                  <button type="submit" className="btn-save">Save Changes</button>
+                  <button type="submit" className="company-course-admin-btn-save">Save Changes</button>
                 </div>
               </form>
             </div>
@@ -685,15 +681,15 @@ const Course = () => {
 
       {/* Add New Modal */}
       {showAddModal && (
-        <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
+        <div className="company-course-admin-modal-overlay" onClick={() => setShowAddModal(false)}>
+          <div className="company-course-admin-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="company-course-admin-modal-header">
               <h2>Add New Course</h2>
-              <button className="modal-close" onClick={() => setShowAddModal(false)}>✕</button>
+              <button className="company-course-admin-modal-close" onClick={() => setShowAddModal(false)}>✕</button>
             </div>
-            <div className="modal-body">
+            <div className="company-course-admin-modal-body">
               <form onSubmit={handleAddSave}>
-                <div className="form-group">
+                <div className="company-course-admin-form-group">
                   <label>Course Title</label>
                   <input
                     type="text"
@@ -704,8 +700,8 @@ const Course = () => {
                   />
                 </div>
                 
-                <div className="form-row">
-                  <div className="form-group">
+                <div className="company-course-admin-form-row">
+                  <div className="company-course-admin-form-group">
                     <label>Category</label>
                     <select
                       name="category"
@@ -718,7 +714,7 @@ const Course = () => {
                       ))}
                     </select>
                   </div>
-                  <div className="form-group">
+                  <div className="company-course-admin-form-group">
                     <label>Level</label>
                     <select
                       name="level"
@@ -733,8 +729,8 @@ const Course = () => {
                   </div>
                 </div>
                 
-                <div className="form-row">
-                  <div className="form-group">
+                <div className="company-course-admin-form-row">
+                  <div className="company-course-admin-form-group">
                     <label>Duration</label>
                     <input
                       type="text"
@@ -745,7 +741,7 @@ const Course = () => {
                       required
                     />
                   </div>
-                  <div className="form-group">
+                  <div className="company-course-admin-form-group">
                     <label>Price ($)</label>
                     <input
                       type="number"
@@ -759,8 +755,8 @@ const Course = () => {
                   </div>
                 </div>
                 
-                <div className="form-row">
-                  <div className="form-group">
+                <div className="company-course-admin-form-row">
+                  <div className="company-course-admin-form-group">
                     <label>Instructor</label>
                     <input
                       type="text"
@@ -770,7 +766,7 @@ const Course = () => {
                       required
                     />
                   </div>
-                  <div className="form-group">
+                  <div className="company-course-admin-form-group">
                     <label>Status</label>
                     <select
                       name="status"
@@ -785,7 +781,7 @@ const Course = () => {
                   </div>
                 </div>
                 
-                <div className="form-group">
+                <div className="company-course-admin-form-group">
                   <label>Prerequisites</label>
                   <input
                     type="text"
@@ -796,8 +792,8 @@ const Course = () => {
                   />
                 </div>
                 
-                <div className="form-row">
-                  <div className="form-group">
+                <div className="company-course-admin-form-row">
+                  <div className="company-course-admin-form-group">
                     <label>Start Date</label>
                     <input
                       type="date"
@@ -807,7 +803,7 @@ const Course = () => {
                       required
                     />
                   </div>
-                  <div className="form-group">
+                  <div className="company-course-admin-form-group">
                     <label>End Date</label>
                     <input
                       type="date"
@@ -819,7 +815,7 @@ const Course = () => {
                   </div>
                 </div>
                 
-                <div className="form-group">
+                <div className="company-course-admin-form-group">
                   <label>Description</label>
                   <textarea
                     name="description"
@@ -830,7 +826,7 @@ const Course = () => {
                   />
                 </div>
                 
-                <div className="form-group">
+                <div className="company-course-admin-form-group">
                   <label>Skills Covered (comma-separated)</label>
                   <input
                     type="text"
@@ -842,7 +838,7 @@ const Course = () => {
                   />
                 </div>
                 
-                <div className="form-group">
+                <div className="company-course-admin-form-group">
                   <label>Image URL</label>
                   <input
                     type="url"
@@ -853,11 +849,11 @@ const Course = () => {
                   />
                 </div>
                 
-                <div className="form-actions">
-                  <button type="button" className="btn-cancel" onClick={() => setShowAddModal(false)}>
+                <div className="company-course-admin-form-actions">
+                  <button type="button" className="company-course-admin-btn-cancel" onClick={() => setShowAddModal(false)}>
                     Cancel
                   </button>
-                  <button type="submit" className="btn-save">Add Course</button>
+                  <button type="submit" className="company-course-admin-btn-save">Add Course</button>
                 </div>
               </form>
             </div>

@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Sidebar from '../../components/Sidebar';
+import CompanySidebar from '../../components/Navigation/CompanySidebar'; // CHANGED: Import CompanySidebar
+import CompanyDashboardNavbar from '../../components/Navigation/CompanyDashboardNavbar';
 import './Dashboardedit.css';
 
 const Dashboardedit = () => {
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // CHANGED: Rename state variable
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isEditing, setIsEditing] = useState({});
+  const [showInternshipModal, setShowInternshipModal] = useState(false);
+  const [showCourseModal, setShowCourseModal] = useState(false);
+  const [selectedInternship, setSelectedInternship] = useState(null);
+  const [selectedCourse, setSelectedCourse] = useState(null);
   const navigate = useNavigate();
 
   // Editable company info
@@ -174,6 +179,18 @@ const Dashboardedit = () => {
     navigate('/company/announcement');
   };
 
+  // Handle internship view
+  const handleViewInternship = (internship) => {
+    setSelectedInternship(internship);
+    setShowInternshipModal(true);
+  };
+
+  // Handle course view
+  const handleViewCourse = (course) => {
+    setSelectedCourse(course);
+    setShowCourseModal(true);
+  };
+
   // Edit functions
   const toggleEdit = (section, id = null) => {
     const key = id ? `${section}-${id}` : section;
@@ -244,456 +261,450 @@ const Dashboardedit = () => {
 
   return (
     <div className="edit-dashboard-page">
-      <div className="edit-dashboard-container">
-        {/* Toggle Sidebar Component */}
-        <Sidebar 
-          activePage="dashboard" 
-          onExpandChange={setIsSidebarExpanded}
-        />
+      {/* SIDEBAR AT THE VERY TOP - OUTSIDE CONTAINER */}
+      <CompanySidebar 
+        isOpen={isSidebarOpen}
+        setIsOpen={setIsSidebarOpen}
+      />
 
-        {/* Main Content with responsive class */}
-        <main className={`edit-dashboard-main ${isSidebarExpanded ? 'edit-sidebar-expanded' : 'edit-sidebar-collapsed'}`}>
-          {/* Hero Section */}
-          <section className="edit-company-dashboard-hero">
-            <div className="edit-hero-content">
-              <div className="edit-hero-text">
-                <div className="edit-hero-title-with-logo">
-                  
-                  {isEditing.hero ? (
-                    <input
-                      type="url"
-                      value={companyInfo.logo}
-                      onChange={(e) => setCompanyInfo(prev => ({...prev, logo: e.target.value}))}
-                      className="edit-input-field"
-                      placeholder="Logo URL"
-                    />
-                  ) : (
-                    <img
-                      src={companyInfo.logo}
-                      alt="Company Logo"
-                      className="edit-company-logo"
-                    />
-                  )}
-                  {isEditing.hero ? (
+      {/* NAVBAR */}
+      <CompanyDashboardNavbar
+        onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        sidebarExpanded={isSidebarOpen}
+      />
+
+      {/* MAIN CONTENT */}
+      <main className={`edit-dashboard-main ${isSidebarOpen ? 'edit-sidebar-expanded' : 'edit-sidebar-collapsed'}`}>
+        {/* Company Story Section */}
+        <section className="edit-dashboard-story">
+          <div className="edit-story-header">
+            <button 
+              className="edit-section-btn"
+              onClick={() => toggleEdit('story')}
+            >
+              {isEditing.story ? 'Save Story' : 'Edit Story'}
+            </button>
+          </div>
+          {isEditing.story ? (
+            <input
+              type="text"
+              value={storyContent.title}
+              onChange={(e) => setStoryContent(prev => ({...prev, title: e.target.value}))}
+              className="edit-input-field edit-title-input"
+            />
+          ) : (
+            <h2>{storyContent.title}</h2>
+          )}
+          {isEditing.story ? (
+            <textarea
+              value={storyContent.subtitle}
+              onChange={(e) => setStoryContent(prev => ({...prev, subtitle: e.target.value}))}
+              className="edit-textarea-field"
+            />
+          ) : (
+            <p className="edit-dashboard-story__subtitle">{storyContent.subtitle}</p>
+          )}
+          <div className="edit-dashboard-story__details">
+            <div>
+              {isEditing.story ? (
+                <input
+                  type="text"
+                  value={storyContent.sectionTitle}
+                  onChange={(e) => setStoryContent(prev => ({...prev, sectionTitle: e.target.value}))}
+                  className="edit-input-field"
+                />
+              ) : (
+                <h3>{storyContent.sectionTitle}</h3>
+              )}
+              {isEditing.story ? (
+                <>
+                  <textarea
+                    value={storyContent.description}
+                    onChange={(e) => setStoryContent(prev => ({...prev, description: e.target.value}))}
+                    className="edit-textarea-field"
+                  />
+                  <textarea
+                    value={storyContent.secondDescription}
+                    onChange={(e) => setStoryContent(prev => ({...prev, secondDescription: e.target.value}))}
+                    className="edit-textarea-field"
+                    onBlur={() => saveChanges('story')}
+                  />
+                </>
+              ) : (
+                <>
+                  <p>{storyContent.description}</p>
+                  <p>{storyContent.secondDescription}</p>
+                </>
+              )}
+              <a href="#" className="edit-dashboard-link">Learn More About Us →</a>
+            </div>
+            <div>
+              {isEditing.story ? (
+                <input
+                  type="url"
+                  value={storyContent.image}
+                  onChange={(e) => setStoryContent(prev => ({...prev, image: e.target.value}))}
+                  className="edit-input-field"
+                  placeholder="Image URL"
+                />
+              ) : (
+                <img src={storyContent.image} alt="Team" />
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* What We Offer Section */}
+        <section className="edit-dashboard-offer">
+          <div className="edit-offer-header">
+            <h2>What We Offer</h2>
+            <button 
+              className="edit-section-btn"
+              onClick={() => toggleEdit('offers')}
+            >
+              {isEditing.offers ? 'Save Offers' : 'Edit Offers'}
+            </button>
+          </div>
+          <p>Our comprehensive suite of services and products are designed to empower your business, enhance efficiency, and drive unparalleled growth.</p>
+          <div className="edit-dashboard-offer__grid">
+            {offers.map((offer) => (
+              <div key={offer.id} className="edit-dashboard-offer__item">
+                {isEditing.offers ? (
+                  <>
                     <input
                       type="text"
-                      value={companyInfo.name}
-                      onChange={(e) => setCompanyInfo(prev => ({...prev, name: e.target.value}))}
-                      className="edit-input-field edit-hero-title-input"
-                      onBlur={() => saveChanges('hero')}
+                      value={offer.title}
+                      onChange={(e) => updateOffer(offer.id, 'title', e.target.value)}
+                      className="edit-input-field"
                     />
-                  ) : (
-                    <h1>{companyInfo.name}</h1>
-                  )}
-                </div>
-                {isEditing.hero ? (
-                  <textarea
-                    value={companyInfo.description}
-                    onChange={(e) => setCompanyInfo(prev => ({...prev, description: e.target.value}))}
-                    className="edit-textarea-field"
-                    onBlur={() => saveChanges('hero')}
-                  />
+                    <textarea
+                      value={offer.description}
+                      onChange={(e) => updateOffer(offer.id, 'description', e.target.value)}
+                      className="edit-textarea-field"
+                      onBlur={() => saveChanges('offers')}
+                    />
+                  </>
                 ) : (
-                  <p>{companyInfo.description}</p>
+                  <>
+                    <h4>{offer.title}</h4>
+                    <p>{offer.description}</p>
+                  </>
                 )}
-                <div className="edit-hero-time-display">
-                  <div className="edit-current-time">{formatTime(currentTime)}</div>
-                  <div className="edit-current-date">{formatDate(currentTime)}</div>
-                </div>
               </div>
-            </div>
-          </section>
+            ))}
+          </div>
+        </section>
 
-          {/* Company Story Section */}
-          <section className="edit-dashboard-story">
-            <div className="edit-story-header">
-              <button 
-                className="edit-section-btn"
-                onClick={() => toggleEdit('story')}
-              >
-                {isEditing.story ? 'Save Story' : 'Edit Story'}
-              </button>
-            </div>
-            {isEditing.story ? (
-              <input
-                type="text"
-                value={storyContent.title}
-                onChange={(e) => setStoryContent(prev => ({...prev, title: e.target.value}))}
-                className="edit-input-field edit-title-input"
-              />
-            ) : (
-              <h2>{storyContent.title}</h2>
-            )}
-            {isEditing.story ? (
-              <textarea
-                value={storyContent.subtitle}
-                onChange={(e) => setStoryContent(prev => ({...prev, subtitle: e.target.value}))}
-                className="edit-textarea-field"
-              />
-            ) : (
-              <p className="edit-dashboard-story__subtitle">{storyContent.subtitle}</p>
-            )}
-            <div className="edit-dashboard-story__details">
-              <div>
-                {isEditing.story ? (
-                  <input
-                    type="text"
-                    value={storyContent.sectionTitle}
-                    onChange={(e) => setStoryContent(prev => ({...prev, sectionTitle: e.target.value}))}
-                    className="edit-input-field"
-                  />
-                ) : (
-                  <h3>{storyContent.sectionTitle}</h3>
-                )}
-                {isEditing.story ? (
-                  <>
-                    <textarea
-                      value={storyContent.description}
-                      onChange={(e) => setStoryContent(prev => ({...prev, description: e.target.value}))}
-                      className="edit-textarea-field"
-                    />
-                    <textarea
-                      value={storyContent.secondDescription}
-                      onChange={(e) => setStoryContent(prev => ({...prev, secondDescription: e.target.value}))}
-                      className="edit-textarea-field"
-                      onBlur={() => saveChanges('story')}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <p>{storyContent.description}</p>
-                    <p>{storyContent.secondDescription}</p>
-                  </>
-                )}
-                <a href="#" className="edit-dashboard-link">Learn More About Us →</a>
+        {/* Recently Uploaded Internships */}
+        <section className="edit-recent-uploads">
+          <div className="edit-section-header-with-button">
+            <h3>Recently Uploaded Internships</h3>
+            <button className="edit-view-all-btn" onClick={handleViewAllInternships}>
+              View All Internships →
+            </button>
+          </div>
+          <div className="edit-upload-grid">
+            {recentInternships.map((internship) => (
+              <div key={internship.id} className="edit-upload-card">
+                <img src={internship.image} alt={internship.title} />
+                <div className="edit-upload-content">
+                  <div className="edit-upload-title">{internship.title}</div>
+                  <div className="edit-upload-meta">{internship.type} | {internship.location}</div>
+                  <div className="edit-upload-company">{internship.company}</div>
+                  <div className="edit-upload-time">Uploaded {internship.uploadedDate}</div>
+                  <button className="edit-btn edit-btn-outline" onClick={() => handleViewInternship(internship)}>
+                    View Details
+                  </button>
+                </div>
               </div>
-              <div>
-                {isEditing.story ? (
+            ))}
+          </div>
+        </section>
+
+        {/* Recently Uploaded Courses */}
+        <section className="edit-recent-uploads">
+          <div className="edit-section-header-with-button">
+            <h3>Recently Uploaded Courses</h3>
+            <button className="edit-view-all-btn" onClick={handleViewAllCourses}>
+              View All Courses →
+            </button>
+          </div>
+          <div className="edit-upload-grid">
+            {recentCourses.map((course) => (
+              <div key={course.id} className="edit-upload-card">
+                <img src={course.image} alt={course.title} />
+                <div className="edit-upload-content">
+                  <div className="edit-upload-title">{course.title}</div>
+                  <div className="edit-upload-meta">{course.level} | {course.duration}</div>
+                  <div className="edit-upload-time">Uploaded {course.uploadedDate}</div>
+                  <button className="edit-btn edit-btn-outline" onClick={() => handleViewCourse(course)}>
+                    View Details
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Recent Announcements */}
+        <section className="edit-recent-section">
+          <div className="edit-recent-box">
+            <div className="edit-recent-box-header">
+              <h4>Recent Announcements</h4>
+              <div className="edit-announcement-controls">
+                <button 
+                  className="edit-section-btn"
+                  onClick={() => toggleEdit('announcements')}
+                >
+                  {isEditing.announcements ? 'Save' : 'Edit'}
+                </button>
+                <button className="edit-view-all-link-btn" onClick={handleViewAllAnnouncements}>
+                  View All Announcements →
+                </button>
+              </div>
+            </div>
+            <ul>
+              {recentAnnouncements.map((announcement) => (
+                <li key={announcement.id}>
+                  {isEditing.announcements ? (
+                    <>
+                      <input
+                        type="text"
+                        value={announcement.title}
+                        onChange={(e) => updateAnnouncement(announcement.id, 'title', e.target.value)}
+                        className="edit-input-field"
+                      />
+                      <textarea
+                        value={announcement.description}
+                        onChange={(e) => updateAnnouncement(announcement.id, 'description', e.target.value)}
+                        className="edit-textarea-field"
+                        onBlur={() => saveChanges('announcements')}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <b>{announcement.title}</b>
+                      <span>{announcement.description}</span>
+                    </>
+                  )}
+                  <div className="edit-time-stamp">{announcement.time}</div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        {/* Team Section */}
+        <section className="edit-dashboard-team">
+          <div className="edit-team-header">
+            <h2>Meet Our Visionaries</h2>
+            <button 
+              className="edit-section-btn"
+              onClick={() => toggleEdit('team')}
+            >
+              {isEditing.team ? 'Save Team' : 'Edit Team'}
+            </button>
+          </div>
+          <p>Our team is composed of passionate innovators, dedicated problem-solvers, and industry leaders committed to pushing the boundaries of technology.</p>
+          <div className="edit-dashboard-team__grid">
+            {teamMembers.map((member) => (
+              <div key={member.id} className="edit-dashboard-team__member">
+                {isEditing.team ? (
                   <input
                     type="url"
-                    value={storyContent.image}
-                    onChange={(e) => setStoryContent(prev => ({...prev, image: e.target.value}))}
+                    value={member.image}
+                    onChange={(e) => updateTeamMember(member.id, 'image', e.target.value)}
                     className="edit-input-field"
                     placeholder="Image URL"
                   />
                 ) : (
-                  <img src={storyContent.image} alt="Team" />
+                  <img src={member.image} alt={member.name} />
                 )}
-              </div>
-            </div>
-          </section>
-
-          {/* What We Offer Section */}
-          <section className="edit-dashboard-offer">
-            <div className="edit-offer-header">
-              <h2>What We Offer</h2>
-              <button 
-                className="edit-section-btn"
-                onClick={() => toggleEdit('offers')}
-              >
-                {isEditing.offers ? 'Save Offers' : 'Edit Offers'}
-              </button>
-            </div>
-            <p>Our comprehensive suite of services and products are designed to empower your business, enhance efficiency, and drive unparalleled growth.</p>
-            <div className="edit-dashboard-offer__grid">
-              {offers.map((offer) => (
-                <div key={offer.id} className="edit-dashboard-offer__item">
-                  {isEditing.offers ? (
-                    <>
-                      <input
-                        type="text"
-                        value={offer.title}
-                        onChange={(e) => updateOffer(offer.id, 'title', e.target.value)}
-                        className="edit-input-field"
-                      />
-                      <textarea
-                        value={offer.description}
-                        onChange={(e) => updateOffer(offer.id, 'description', e.target.value)}
-                        className="edit-textarea-field"
-                        onBlur={() => saveChanges('offers')}
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <h4>{offer.title}</h4>
-                      <p>{offer.description}</p>
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Recently Uploaded Internships */}
-          <section className="edit-recent-uploads">
-            <div className="edit-section-header-with-button">
-              <h3>Recently Uploaded Internships</h3>
-              <button className="edit-view-all-btn" onClick={handleViewAllInternships}>
-                View All Internships →
-              </button>
-            </div>
-            <div className="edit-upload-grid">
-              {recentInternships.map((internship) => (
-                <div key={internship.id} className="edit-upload-card">
-                  <img src={internship.image} alt={internship.title} />
-                  <div className="edit-upload-content">
-                    <div className="edit-upload-title">{internship.title}</div>
-                    <div className="edit-upload-meta">{internship.type} | {internship.location}</div>
-                    <div className="edit-upload-company">{internship.company}</div>
-                    <div className="edit-upload-time">Uploaded {internship.uploadedDate}</div>
-                    <button className="edit-btn edit-btn-outline">View Details</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Recently Uploaded Courses */}
-          <section className="edit-recent-uploads">
-            <div className="edit-section-header-with-button">
-              <h3>Recently Uploaded Courses</h3>
-              <button className="edit-view-all-btn" onClick={handleViewAllCourses}>
-                View All Courses →
-              </button>
-            </div>
-            <div className="edit-upload-grid">
-              {recentCourses.map((course) => (
-                <div key={course.id} className="edit-upload-card">
-                  <img src={course.image} alt={course.title} />
-                  <div className="edit-upload-content">
-                    <div className="edit-upload-title">{course.title}</div>
-                    <div className="edit-upload-meta">{course.level} | {course.duration}</div>
-                    <div className="edit-upload-time">Uploaded {course.uploadedDate}</div>
-                    <button className="edit-btn edit-btn-outline">View Details</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Recent Announcements */}
-          <section className="edit-recent-section">
-            <div className="edit-recent-box">
-              <div className="edit-recent-box-header">
-                <h4>Recent Announcements</h4>
-                <div className="edit-announcement-controls">
-                  <button 
-                    className="edit-section-btn"
-                    onClick={() => toggleEdit('announcements')}
-                  >
-                    {isEditing.announcements ? 'Save' : 'Edit'}
-                  </button>
-                  <button className="edit-view-all-link-btn" onClick={handleViewAllAnnouncements}>
-                    View All Announcements →
-                  </button>
-                </div>
-              </div>
-              <ul>
-                {recentAnnouncements.map((announcement) => (
-                  <li key={announcement.id}>
-                    {isEditing.announcements ? (
-                      <>
-                        <input
-                          type="text"
-                          value={announcement.title}
-                          onChange={(e) => updateAnnouncement(announcement.id, 'title', e.target.value)}
-                          className="edit-input-field"
-                        />
-                        <textarea
-                          value={announcement.description}
-                          onChange={(e) => updateAnnouncement(announcement.id, 'description', e.target.value)}
-                          className="edit-textarea-field"
-                          onBlur={() => saveChanges('announcements')}
-                        />
-                      </>
-                    ) : (
-                      <>
-                        <b>{announcement.title}</b>
-                        <span>{announcement.description}</span>
-                      </>
-                    )}
-                    <div className="edit-time-stamp">{announcement.time}</div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
-
-          {/* Team Section */}
-          <section className="edit-dashboard-team">
-            <div className="edit-team-header">
-              <h2>Meet Our Visionaries</h2>
-              <button 
-                className="edit-section-btn"
-                onClick={() => toggleEdit('team')}
-              >
-                {isEditing.team ? 'Save Team' : 'Edit Team'}
-              </button>
-            </div>
-            <p>Our team is composed of passionate innovators, dedicated problem-solvers, and industry leaders committed to pushing the boundaries of technology.</p>
-            <div className="edit-dashboard-team__grid">
-              {teamMembers.map((member) => (
-                <div key={member.id} className="edit-dashboard-team__member">
+                <div className="edit-dashboard-team__member-info">
                   {isEditing.team ? (
-                    <input
-                      type="url"
-                      value={member.image}
-                      onChange={(e) => updateTeamMember(member.id, 'image', e.target.value)}
-                      className="edit-input-field"
-                      placeholder="Image URL"
+                    <>
+                      <input
+                        type="text"
+                        value={member.name}
+                        onChange={(e) => updateTeamMember(member.id, 'name', e.target.value)}
+                        className="edit-input-field"
+                      />
+                      <input
+                        type="text"
+                        value={member.role}
+                        onChange={(e) => updateTeamMember(member.id, 'role', e.target.value)}
+                        className="edit-input-field"
+                        onBlur={() => saveChanges('team')}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <h5>{member.name}</h5>
+                      <span>{member.role}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Testimonials Section */}
+        <section className="edit-dashboard-testimonials">
+          <div className="edit-testimonials-header">
+            <h2>What Our Clients Say</h2>
+            <button 
+              className="edit-section-btn"
+              onClick={() => toggleEdit('testimonials')}
+            >
+              {isEditing.testimonials ? 'Save Testimonials' : 'Edit Testimonials'}
+            </button>
+          </div>
+          <div className="edit-dashboard-testimonials__grid">
+            {testimonials.map((testimonial) => (
+              <div key={testimonial.id} className="edit-dashboard-testimonial">
+                {isEditing.testimonials ? (
+                  <>
+                    <textarea
+                      value={testimonial.quote}
+                      onChange={(e) => updateTestimonial(testimonial.id, 'quote', e.target.value)}
+                      className="edit-textarea-field"
                     />
-                  ) : (
-                    <img src={member.image} alt={member.name} />
-                  )}
-                  <div className="edit-dashboard-team__member-info">
-                    {isEditing.team ? (
-                      <>
-                        <input
-                          type="text"
-                          value={member.name}
-                          onChange={(e) => updateTeamMember(member.id, 'name', e.target.value)}
-                          className="edit-input-field"
-                        />
-                        <input
-                          type="text"
-                          value={member.role}
-                          onChange={(e) => updateTeamMember(member.id, 'role', e.target.value)}
-                          className="edit-input-field"
-                          onBlur={() => saveChanges('team')}
-                        />
-                      </>
-                    ) : (
-                      <>
-                        <h5>{member.name}</h5>
-                        <span>{member.role}</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Testimonials Section */}
-          <section className="edit-dashboard-testimonials">
-            <div className="edit-testimonials-header">
-              <h2>What Our Clients Say</h2>
-              <button 
-                className="edit-section-btn"
-                onClick={() => toggleEdit('testimonials')}
-              >
-                {isEditing.testimonials ? 'Save Testimonials' : 'Edit Testimonials'}
-              </button>
-            </div>
-            <div className="edit-dashboard-testimonials__grid">
-              {testimonials.map((testimonial) => (
-                <div key={testimonial.id} className="edit-dashboard-testimonial">
-                  {isEditing.testimonials ? (
-                    <>
-                      <textarea
-                        value={testimonial.quote}
-                        onChange={(e) => updateTestimonial(testimonial.id, 'quote', e.target.value)}
-                        className="edit-textarea-field"
-                      />
-                      <input
-                        type="text"
-                        value={testimonial.author}
-                        onChange={(e) => updateTestimonial(testimonial.id, 'author', e.target.value)}
-                        className="edit-input-field"
-                      />
-                      <input
-                        type="text"
-                        value={testimonial.role}
-                        onChange={(e) => updateTestimonial(testimonial.id, 'role', e.target.value)}
-                        className="edit-input-field"
-                        onBlur={() => saveChanges('testimonials')}
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <p>"{testimonial.quote}"</p>
-                      <span>
-                        {testimonial.author}<br />
-                        <small>{testimonial.role}</small>
-                      </span>
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Contact Section */}
-          <section className="edit-dashboard-contact">
-            <div className="edit-contact-header">
-              <h2>Get in Touch</h2>
-              <button 
-                className="edit-section-btn"
-                onClick={() => toggleEdit('contact')}
-              >
-                {isEditing.contact ? 'Save Contact' : 'Edit Contact'}
-              </button>
-            </div>
-            <p>We'd love to hear from you. Whether you have a question about our services, need support, or just want to chat, our team is ready.</p>
-            <div className="edit-dashboard-contact__grid">
-              <div className="edit-dashboard-contact__item">
-                <span className="edit-dashboard-contact__icon">✉️</span>
-                <h5>Email Us</h5>
-                {isEditing.contact ? (
-                  <input
-                    type="email"
-                    value={contactInfo.email}
-                    onChange={(e) => setContactInfo(prev => ({...prev, email: e.target.value}))}
-                    className="edit-input-field"
-                  />
+                    <input
+                      type="text"
+                      value={testimonial.author}
+                      onChange={(e) => updateTestimonial(testimonial.id, 'author', e.target.value)}
+                      className="edit-input-field"
+                    />
+                    <input
+                      type="text"
+                      value={testimonial.role}
+                      onChange={(e) => updateTestimonial(testimonial.id, 'role', e.target.value)}
+                      className="edit-input-field"
+                      onBlur={() => saveChanges('testimonials')}
+                    />
+                  </>
                 ) : (
-                  <p>{contactInfo.email}</p>
+                  <>
+                    <p>"{testimonial.quote}"</p>
+                    <span>
+                      {testimonial.author}<br />
+                      <small>{testimonial.role}</small>
+                    </span>
+                  </>
                 )}
               </div>
-              <div className="edit-dashboard-contact__item">
-                <span className="edit-dashboard-contact__icon">📞</span>
-                <h5>Call Us</h5>
-                {isEditing.contact ? (
-                  <input
-                    type="tel"
-                    value={contactInfo.phone}
-                    onChange={(e) => setContactInfo(prev => ({...prev, phone: e.target.value}))}
-                    className="edit-input-field"
-                  />
-                ) : (
-                  <p>{contactInfo.phone}</p>
-                )}
-              </div>
-              <div className="edit-dashboard-contact__item">
-                <span className="edit-dashboard-contact__icon">📍</span>
-                <h5>Visit Us</h5>
-                {isEditing.contact ? (
-                  <input
-                    type="text"
-                    value={contactInfo.address}
-                    onChange={(e) => setContactInfo(prev => ({...prev, address: e.target.value}))}
-                    className="edit-input-field"
-                    onBlur={() => saveChanges('contact')}
-                  />
-                ) : (
-                  <p>{contactInfo.address}</p>
-                )}
-              </div>
-            </div>
-          </section>
+            ))}
+          </div>
+        </section>
 
-          {/* Footer */}
-          <footer className="edit-dashboard-footer">
-            <div className="edit-footer-content">
-              <h3>Stay Connected</h3>
-              <div className="edit-newsletter">
-                <input type="email" placeholder="Your email" />
-                <button>Subscribe</button>
+        {/* Contact Section */}
+        <section className="edit-dashboard-contact">
+          <div className="edit-contact-header">
+            <h2>Get in Touch</h2>
+            <button 
+              className="edit-section-btn"
+              onClick={() => toggleEdit('contact')}
+            >
+              {isEditing.contact ? 'Save Contact' : 'Edit Contact'}
+            </button>
+          </div>
+          <p>We'd love to hear from you. Whether you have a question about our services, need support, or just want to chat, our team is ready.</p>
+          <div className="edit-dashboard-contact__grid">
+            <div className="edit-dashboard-contact__item">
+              <span className="edit-dashboard-contact__icon">✉️</span>
+              <h5>Email Us</h5>
+              {isEditing.contact ? (
+                <input
+                  type="email"
+                  value={contactInfo.email}
+                  onChange={(e) => setContactInfo(prev => ({...prev, email: e.target.value}))}
+                  className="edit-input-field"
+                />
+              ) : (
+                <p>{contactInfo.email}</p>
+              )}
+            </div>
+            <div className="edit-dashboard-contact__item">
+              <span className="edit-dashboard-contact__icon">📞</span>
+              <h5>Call Us</h5>
+              {isEditing.contact ? (
+                <input
+                  type="tel"
+                  value={contactInfo.phone}
+                  onChange={(e) => setContactInfo(prev => ({...prev, phone: e.target.value}))}
+                  className="edit-input-field"
+                />
+              ) : (
+                <p>{contactInfo.phone}</p>
+              )}
+            </div>
+            <div className="edit-dashboard-contact__item">
+              <span className="edit-dashboard-contact__icon">📍</span>
+              <h5>Visit Us</h5>
+              {isEditing.contact ? (
+                <input
+                  type="text"
+                  value={contactInfo.address}
+                  onChange={(e) => setContactInfo(prev => ({...prev, address: e.target.value}))}
+                  className="edit-input-field"
+                  onBlur={() => saveChanges('contact')}
+                />
+              ) : (
+                <p>{contactInfo.address}</p>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Internship Details Modal */}
+        {showInternshipModal && selectedInternship && (
+          <div className="edit-dashboard-modal-overlay" onClick={() => setShowInternshipModal(false)}>
+            <div className="edit-dashboard-modal-content" onClick={e => e.stopPropagation()}>
+              <div className="edit-dashboard-modal-header">
+                <h2>{selectedInternship.title}</h2>
+                <button className="edit-dashboard-modal-close-btn" onClick={() => setShowInternshipModal(false)}>×</button>
+              </div>
+              <div className="edit-dashboard-modal-body">
+                <img src={selectedInternship.image} alt={selectedInternship.title} className="edit-dashboard-modal-img" />
+                <p data-info="company"><strong>Company:</strong> {selectedInternship.company}</p>
+                <p data-info="location"><strong>Location:</strong> {selectedInternship.location}</p>
+                <p data-info="type"><strong>Type:</strong> {selectedInternship.type}</p>
+                <p data-info="uploaded"><strong>Uploaded:</strong> {selectedInternship.uploadedDate}</p>
               </div>
             </div>
-          </footer>
-        </main>
-      </div>
+          </div>
+        )}
+
+        {/* Course Details Modal */}
+        {showCourseModal && selectedCourse && (
+          <div className="edit-dashboard-modal-overlay" onClick={() => setShowCourseModal(false)}>
+            <div className="edit-dashboard-modal-content" onClick={e => e.stopPropagation()}>
+              <div className="edit-dashboard-modal-header">
+                <h2>{selectedCourse.title}</h2>
+                <button className="edit-dashboard-modal-close-btn" onClick={() => setShowCourseModal(false)}>×</button>
+              </div>
+              <div className="edit-dashboard-modal-body">
+                <img src={selectedCourse.image} alt={selectedCourse.title} className="edit-dashboard-modal-img" />
+                <p data-info="level"><strong>Level:</strong> {selectedCourse.level}</p>
+                <p data-info="duration"><strong>Duration:</strong> {selectedCourse.duration}</p>
+                <p data-info="uploaded"><strong>Uploaded:</strong> {selectedCourse.uploadedDate}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Footer */}
+        <footer className="edit-dashboard-footer">
+          <div className="edit-footer-content">
+            <h3>Stay Connected</h3>
+            <div className="edit-newsletter">
+              <input type="email" placeholder="Your email" />
+              <button>Subscribe</button>
+            </div>
+          </div>
+        </footer>
+      </main>
     </div>
   );
 };

@@ -4,7 +4,11 @@ import LandingPage from "./components/LandingPage";
 import AboutUs from "./components/AboutUs";
 import ContactUs from "./components/ContactUs";
 import LoginPage from "./components/LoginPage";
-import RegisterPage from "./components/RegisterPage";
+import RoleSelectionPage from "./components/RoleSelectionPage";
+import StudentRegisterPage from "./components/StudentRegisterPage";
+import UniversityStudentRegisterPage from "./components/UniversityStudentRegisterPage";
+import UniversityRegisterPage from "./components/UniversityRegisterPage";
+import CompanyRegisterPage from "./components/CompanyRegisterPage";
 import Universities from "./components/Universities";
 
 // Layouts
@@ -32,7 +36,11 @@ function App() {
         <Route path="/about" element={<AboutUs />} />
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/register" element={<RoleSelectionPage />} />
+        <Route path="/register/student" element={<StudentRegisterPage />} />
+        <Route path="/register/university-student" element={<UniversityStudentRegisterPage />} />
+        <Route path="/register/university" element={<UniversityRegisterPage />} />
+        <Route path="/register/company" element={<CompanyRegisterPage />} />
         <Route path="/universities" element={<Universities />} />
 
         {/* Student Routes */}
@@ -49,7 +57,7 @@ function App() {
         {companyRoutes.map((route, idx) => (
           <Route key={idx} path={route.path} element={route.element} />
         ))}
-        <Route path="/company/dashboard" element={<Dashboard />} />
+        <Route path="/company/dashboard-edit" element={<Dashboard />} />
         <Route path="/company/course" element={<Courses />} />
         <Route path="/company/internship" element={<Internships />} />
         <Route path="/company/ad-publish" element={<AdPublish />} />

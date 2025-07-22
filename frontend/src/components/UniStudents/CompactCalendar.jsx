@@ -262,7 +262,9 @@ export default function CompactCalendar({ isOpen, onClose }) {
               </div>
 
               <button
-                onClick={() => (window.location.href = "/calendar")}
+                onClick={() =>
+                  (window.location.href = "/university-student/calendar")
+                }
                 className="w-full px-4 py-2 text-sm text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-colors font-medium"
               >
                 View Full Calendar

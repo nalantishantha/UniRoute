@@ -1,20 +1,22 @@
-import { Dashboard,Dashboardedit, Internship, AdPublish,Announcement,Announcementuser,Course,Courseuser,Internshipuser } from '../pages/Company';
+import { Internship, AdPublish, Announcement, Announcementuser, Course, Courseuser, Internshipuser } from '../pages/Company';
+import Dashboard from '../pages/Company/Dashboard'; // user dashboard
+import Dashboardedit from '../pages/Company/Dashboardedit'; // admin dashboard
 
 export const companyRoutes = [
   {
     path: '/company/dashboard',
-    element: <Dashboard />,
+    element: <Dashboard />, // USER dashboard
   },
   {
     path: '/company/dashboard-edit',
-    element: <Dashboardedit />,
+    element: <Dashboardedit />, // ADMIN dashboard
   },
   {
     path: '/company/internship',
     element: <Internship />,
   },
   {
-    path: '/company/internship-user',
+    path: '/company/internshipuser',
     element: <Internshipuser />,
   },
   {
@@ -25,9 +27,8 @@ export const companyRoutes = [
     path: '/company/announcement',
     element: <Announcement />,
   },
-  
   {
-    path: '/company/announcement-user',
+    path: '/company/announcementuser',
     element: <Announcementuser />,
   },
   {
@@ -35,8 +36,7 @@ export const companyRoutes = [
     element: <Course />,
   },
   {
-    path: '/company/course-user',
+    path: '/company/courseuser',
     element: <Courseuser />,
   }
-  
 ];

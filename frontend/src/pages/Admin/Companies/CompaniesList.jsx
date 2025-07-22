@@ -220,17 +220,17 @@ const CompaniesList = () => {
     return <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Active</span>;
   };
 
-  if (loading) {
-    return (
-      <AdminLayout>
-        <div className="p-6">
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          </div>
-        </div>
-      </AdminLayout>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <AdminLayout>
+  //       <div className="p-6">
+  //         <div className="flex items-center justify-center h-64">
+  //           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+  //         </div>
+  //       </div>
+  //     </AdminLayout>
+  //   );
+  // }
 
   return (
     <AdminLayout>

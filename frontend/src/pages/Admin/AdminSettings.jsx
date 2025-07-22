@@ -229,7 +229,7 @@ const AdminSettings = () => {
       return;
     }
 
-    setLoading(true);
+    // setLoading(true);
     setMessage({ type: '', text: '' });
 
     try {
@@ -311,7 +311,7 @@ const AdminSettings = () => {
       return;
     }
 
-    setLoading(true);
+    // setLoading(true);
 
     try {
       const response = await fetch('/api/administration/admin/account/delete/', {
@@ -350,18 +350,18 @@ const AdminSettings = () => {
     }
   };
 
-  if (dataLoading) {
-    return (
-      <AdminLayout pageTitle="Admin Settings" pageDescription="Manage your account and system preferences">
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="flex items-center space-x-3">
-            <RefreshCw className="h-6 w-6 animate-spin text-[#1D5D9B]" />
-            <span className="text-[#717171]">Loading admin details...</span>
-          </div>
-        </div>
-      </AdminLayout>
-    );
-  }
+  // if (dataLoading) {
+  //   return (
+  //     <AdminLayout pageTitle="Admin Settings" pageDescription="Manage your account and system preferences">
+  //       <div className="flex items-center justify-center min-h-screen">
+  //         <div className="flex items-center space-x-3">
+  //           <RefreshCw className="h-6 w-6 animate-spin text-[#1D5D9B]" />
+  //           <span className="text-[#717171]">Loading admin details...</span>
+  //         </div>
+  //       </div>
+  //     </AdminLayout>
+  //   );
+  // }
 
   return (
     <AdminLayout pageTitle="Admin Settings" pageDescription="Manage your account and system preferences">
