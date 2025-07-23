@@ -8,6 +8,7 @@ import { UsersList, UserForm, UserView } from '../pages/Admin/Users';
 import { StudentsList, StudentForm, StudentView } from '../pages/Admin/Students';
 import { UniversityStudentsList, UniversityStudentsForm, UniversityStudentsView } from '../pages/Admin/UniversityStudents';
 import { MentorsList, MentorForm, MentorView } from '../pages/Admin/Mentors';
+import { CounsellorsList, CounsellorForm, CounsellorView } from '../pages/Admin/Counsellors';
 import { TutorsList, TutorForm, TutorView } from '../pages/Admin/Tutors';
 import { UniversitiesList, UniversityForm, UniversityView } from '../pages/Admin/Universities';
 import { CompaniesList, CompanyForm, CompanyView } from '../pages/Admin/Companies';
@@ -51,6 +52,12 @@ const AdminRoutes = () => {
         <Route path="/mentors/new" element={<MentorForm />} />
         <Route path="/mentors/:id" element={<MentorView />} />
         <Route path="/mentors/:id/edit" element={<MentorForm />} />
+
+        {/* Counsellors Management */}
+        <Route path="/counsellors" element={<CounsellorsList />} />
+        <Route path="/counsellors/new" element={<CounsellorForm />} />
+        <Route path="/counsellors/:id" element={<CounsellorView />} />
+        <Route path="/counsellors/:id/edit" element={<CounsellorForm />} />
 
         {/* Tutors Management */}
         <Route path="/tutors" element={<TutorsList />} />
