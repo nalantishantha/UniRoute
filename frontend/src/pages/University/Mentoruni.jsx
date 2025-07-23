@@ -1230,6 +1230,23 @@ const Mentoruni = () => {
                   fontSize: '0.875rem'
                 }}
               >Cancel</button>
+              <button
+                onClick={handleRejectMentor}
+                disabled={!rejectReason.trim()}
+                style={{
+                  background: '#ef4444',
+                  color: 'white',
+                  border: 'none',
+                  padding: '0.5rem 1.2rem',
+                  borderRadius: '6px',
+                  fontWeight: '600',
+                  cursor: rejectReason.trim() ? 'pointer' : 'not-allowed',
+                  fontSize: '0.875rem',
+                  opacity: rejectReason.trim() ? 1 : 0.6
+                }}
+              >
+                Send Rejection
+              </button>
             </div>
           </div>
         </div>
