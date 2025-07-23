@@ -3,6 +3,8 @@ import UniversityUserSidebar from '../../components/Navigation/UniversityUsersid
 import UniversityNavbar from '../../components/Navigation/UniversityNavbar';
 import Footer from '../../components/Footer';
 import './Manageportfoliouser.css';
+import colomboHero from '../../assets/university-image-colombo.jpg';
+
 
 const Manageportfoliouser = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // CHANGED: Rename from isSidebarExpanded to isSidebarOpen

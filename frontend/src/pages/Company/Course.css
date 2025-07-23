@@ -182,8 +182,8 @@
   margin: 0;
 }
 
-.btn-add-new {
-  background: linear-gradient(135deg, #10b981, #059669);
+.course-company-btn-add-new {
+  background: #174A7C var(--tw-gradient-to-position);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -192,7 +192,6 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .btn-add-new:hover {
@@ -462,9 +461,9 @@
   transform: translateY(-1px);
 }
 
-.btn-edit {
+.course-btn-edit {
   flex: 1;
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  background: #174A7C var(--tw-gradient-to-position);;
   color: white;
   border: none;
   padding: 0.6rem 1rem;
@@ -691,7 +690,7 @@ color: rgb(195, 34, 34);
 
 .course-btn-edit {
   flex: 1;
-  background: linear-gradient(rgba(49, 43, 167, 0.8), rgba(177, 160, 195, 0.8));
+  background: #174A7C var(--tw-gradient-to-position);;
   color: white;
   border: none;
   padding: 0.6rem 1rem;

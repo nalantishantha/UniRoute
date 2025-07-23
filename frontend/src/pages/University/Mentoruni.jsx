@@ -69,13 +69,13 @@ const initialMentorRequests = [
 const initialActiveMentors = [
   {
     id: 101,
-    name: 'Kasun Gunawardhana',
-    email: 'kasun.gunawardhana@tech.com',
+    name: 'Kasuni Gunawardhana',
+    email: 'kasuni.gunawardhana@tech.com',
     specialization: 'Software Engineering',
     experience: '1 years',
     students: 12,
     rating: 4.8,
-    profileImage: '/api/placeholder/100/100',
+    profileImage: 'https://randomuser.me/api/portraits/men/11.jpg',
     joinDate: '2023-09-15'
   },
   {
@@ -279,7 +279,7 @@ const Mentoruni = () => {
                     background: '#f9fafb',
                     border: '1px solid #e5e7eb',
                     borderRadius: '12px',
-                    padding: '1.5rem',
+                    padding: '2rem',
                     transition: 'all 0.2s',
                     width: '400px',
                     minWidth: '400px',
@@ -297,31 +297,46 @@ const Mentoruni = () => {
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '1rem',
-                      marginBottom: '1rem'
+                      gap: '1.25rem',
+                      marginBottom: '1.75rem'
                     }}>
                       <div style={{
-                        width: '60px',
-                        height: '60px',
-                        borderRadius: '50%',
-                        background: '#e5e7eb',
+                        width: '80px',
+                        height: '80px',
+                        borderRadius: '20px',
+                        background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '1.5rem',
-                        color: '#6b7280'
-                      }}>👨‍🏫</div>
-                      <div>
+                        fontSize: '2rem',
+                        color: 'white',
+                        boxShadow: '0 8px 25px rgba(37, 99, 235, 0.3)',
+                        border: '3px solid #ffffff',
+                        overflow: 'hidden'
+                      }}>
+                        <img 
+                          src={`https://randomuser.me/api/portraits/${mentor.id % 2 === 0 ? 'men' : 'women'}/${(mentor.id % 50) + 1}.jpg`}
+                          alt={mentor.name}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                          }}
+                        />
+                      </div>
+                      <div style={{ flex: 1 }}>
                         <h3 style={{
-                          fontSize: '1.1rem',
+                          fontSize: '1.15rem',
                           fontWeight: '600',
                           color: '#1e293b',
-                          margin: '0 0 0.25rem 0'
+                          margin: '0 0 0.5rem 0',
+                          lineHeight: '1.3'
                         }}>{mentor.name}</h3>
                         <p style={{
                           color: '#64748b',
-                          fontSize: '0.875rem',
-                          margin: '0'
+                          fontSize: '0.9rem',
+                          margin: '0',
+                          fontWeight: '500'
                         }}>{mentor.specialization}</p>
                       </div>
                     </div>
@@ -330,45 +345,59 @@ const Mentoruni = () => {
                     <div style={{
                       display: 'grid',
                       gridTemplateColumns: '1fr 1fr',
-                      gap: '0.5rem',
-                      marginBottom: '1rem',
-                      fontSize: '0.875rem'
+                      gap: '0.75rem 1rem',
+                      marginBottom: '1.5rem',
+                      fontSize: '0.875rem',
+                      lineHeight: '1.4'
                     }}>
-                      <div><strong>Registration number:</strong> {mentor.Registrationnumber}</div>
-                      <div><strong>Year:</strong> {mentor.Year}</div>
-                      <div style={{ gridColumn: '1 / -1' }}><strong>Education:</strong> {mentor.education}</div>
-                      <div></div>
-                      <div style={{ gridColumn: '1 / -1' }}><strong>Email:</strong> {mentor.email}</div>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <strong style={{ marginBottom: '0.25rem' }}>Registration:</strong>
+                        <span style={{ color: '#64748b' }}>{mentor.Registrationnumber}</span>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <strong style={{ marginBottom: '0.25rem' }}>Year:</strong>
+                        <span style={{ color: '#64748b' }}>{mentor.Year}</span>
+                      </div>
+                      <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', marginTop: '0.5rem' }}>
+                        <strong style={{ marginBottom: '0.25rem' }}>Education:</strong>
+                        <span style={{ color: '#64748b' }}>{mentor.education}</span>
+                      </div>
+                      <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', marginTop: '0.5rem' }}>
+                        <strong style={{ marginBottom: '0.25rem' }}>Email:</strong>
+                        <span style={{ color: '#64748b' }}>{mentor.email}</span>
+                      </div>
                     </div>
 
                     {/* Bio */}
-                    <div style={{ marginBottom: '1rem' }}>
-                      <strong style={{ fontSize: '0.875rem' }}>Bio:</strong>
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <strong style={{ fontSize: '0.875rem', marginBottom: '0.5rem', display: 'block' }}>Bio:</strong>
                       <p style={{
                         color: '#64748b',
                         fontSize: '0.875rem',
-                        margin: '0.25rem 0',
-                        lineHeight: '1.5'
+                        margin: '0',
+                        lineHeight: '1.6',
+                        textAlign: 'justify'
                       }}>{mentor.bio}</p>
                     </div>
 
                     {/* Skills */}
-                    <div style={{ marginBottom: '1.5rem' }}>
-                      <strong style={{ fontSize: '0.875rem' }}>Skills:</strong>
+                    <div style={{ marginBottom: '2rem' }}>
+                      <strong style={{ fontSize: '0.875rem', marginBottom: '0.75rem', display: 'block' }}>Skills:</strong>
                       <div style={{
                         display: 'flex',
                         flexWrap: 'wrap',
                         gap: '0.5rem',
-                        marginTop: '0.5rem'
+                        alignItems: 'center'
                       }}>
                         {mentor.skills.map((skill, index) => (
                           <span key={index} style={{
                             background: '#eff6ff',
                             color: '#2563eb',
-                            padding: '0.25rem 0.5rem',
-                            borderRadius: '4px',
+                            padding: '0.375rem 0.75rem',
+                            borderRadius: '6px',
                             fontSize: '0.75rem',
-                            fontWeight: '500'
+                            fontWeight: '500',
+                            border: '1px solid #dbeafe'
                           }}>{skill}</span>
                         ))}
                       </div>
@@ -386,7 +415,7 @@ const Mentoruni = () => {
                         }}
                         style={{
                           flex: 1,
-                          background: '#2563eb',
+                          background: ' #174A7C var(--tw-gradient-to-position)',
                           color: 'white',
                           border: 'none',
                           borderRadius: '6px',
@@ -397,7 +426,7 @@ const Mentoruni = () => {
                           transition: 'all 0.2s'
                         }}
                         onMouseOver={(e) => {
-                          e.target.style.background = '#1d4ed8';
+                          e.target.style.background = '#2563eb';
                         }}
                         onMouseOut={(e) => {
                           e.target.style.background = '#2563eb';
@@ -521,8 +550,19 @@ const Mentoruni = () => {
                         justifyContent: 'center',
                         fontSize: '1.75rem',
                         color: 'white',
-                        boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)'
-                      }}>👨‍🏫</div>
+                        boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
+                        overflow: 'hidden'
+                      }}>
+                        <img 
+                          src={`https://randomuser.me/api/portraits/${mentor.id % 2 === 0 ? 'men' : 'women'}/${(mentor.id % 50) + 10}.jpg`}
+                          alt={mentor.name}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                          }}
+                        />
+                      </div>
                       <div>
                         <h3 style={{
                           fontSize: '1.2rem',
@@ -714,6 +754,8 @@ const Mentoruni = () => {
               }} />
               
               <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                {/* Remove or comment out this block to hide the profile image */}
+                {/* 
                 <div style={{
                   width: '80px',
                   height: '80px',
@@ -725,8 +767,20 @@ const Mentoruni = () => {
                   fontSize: '2rem',
                   color: 'white',
                   boxShadow: '0 8px 25px rgba(37, 99, 235, 0.3)',
-                  border: '3px solid #ffffff'
-                }}>👨‍🏫</div>
+                  border: '3px solid #ffffff',
+                  overflow: 'hidden'
+                }}>
+                  <img 
+                    src={selectedMentor.profileImage}
+                    alt={selectedMentor.name}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
+                    }}
+                  />
+                </div>
+                */}
                 <div>
                   <h2 style={{
                     fontSize: '1.75rem',
@@ -737,35 +791,29 @@ const Mentoruni = () => {
                   }}>{selectedMentor.name}</h2>
                   <div style={{
                     display: 'flex',
-                    alignItems: 'center',
+                    flexWrap: 'wrap',
                     gap: '0.75rem',
-                    marginBottom: '0.5rem'
+                    marginTop: '0.5rem'
                   }}>
                     <span style={{
                       background: 'linear-gradient(135deg, #eff6ff, #dbeafe)',
                       color: '#2563eb',
-                      padding: '0.4rem 1rem',
-                      borderRadius: '20px',
-                      fontSize: '0.9rem',
-                      fontWeight: '600',
-                      border: '1px solid #bfdbfe'
+                      padding: '0.375rem 0.75rem',
+                      borderRadius: '6px',
+                      fontSize: '0.75rem',
+                      fontWeight: '500',
+                      border: '1px solid #dbeafe'
                     }}>{selectedMentor.specialization}</span>
                     <span style={{
                       background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)',
                       color: '#16a34a',
-                      padding: '0.4rem 1rem',
-                      borderRadius: '20px',
-                      fontSize: '0.85rem',
-                      fontWeight: '600',
+                      padding: '0.375rem 0.75rem',
+                      borderRadius: '6px',
+                      fontSize: '0.75rem',
+                      fontWeight: '500',
                       border: '1px solid #bbf7d0'
                     }}>📋 Application Review</span>
                   </div>
-                  <p style={{
-                    fontSize: '0.95rem',
-                    margin: '0',
-                    color: '#64748b',
-                    fontWeight: '500'
-                  }}>Registration: {selectedMentor.Registrationnumber} • {selectedMentor.Year}</p>
                 </div>
               </div>
               
@@ -857,7 +905,7 @@ const Mentoruni = () => {
                 }}>
                   {selectedMentor.skills.map((skill, index) => (
                     <span key={index} style={{
-                      background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
+                      background: '#174A7C var(--tw-gradient-to-position)',
                       color: 'white',
                       padding: '0.5rem 1rem',
                       borderRadius: '20px',
@@ -967,44 +1015,48 @@ const Mentoruni = () => {
                     <div style={{ display: 'flex', gap: '0.75rem' }}>
                       <a
                         href={RecommendationPDF}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          background: '#2563eb',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '8px',
-                          padding: '0.5rem 1rem',
-                          fontWeight: '600',
-                          cursor: 'pointer',
-                          fontSize: '0.875rem',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          textDecoration: 'none'
-                        }}
-                      >
-                        <span role="img" aria-label="View PDF">👁️</span> View PDF
-                      </a>
-                      <a
-                        href={RecommendationPDF}
                         download="Recommendation_Letter.pdf"
                         style={{
-                          background: '#10b981',
-                          color: 'white',
-                          border: 'none',
+                          background: '#ffffff',
+                          color: '#2563eb',
+                          border: '1px solid #d1d5db',
                           borderRadius: '8px',
-                          padding: '0.5rem 1rem',
-                          fontWeight: '600',
+                          padding: '0.6rem 1.2rem',
+                          fontWeight: '500',
                           cursor: 'pointer',
                           fontSize: '0.875rem',
                           display: 'flex',
                           alignItems: 'center',
                           gap: '0.5rem',
-                          textDecoration: 'none'
+                          textDecoration: 'none',
+                          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+                          transition: 'all 0.2s ease',
+                          letterSpacing: '0.025em'
+                        }}
+                        onMouseOver={e => {
+                          e.target.style.background = '#f8fafc';
+                          e.target.style.borderColor = '#2563eb';
+                          e.target.style.boxShadow = '0 2px 4px rgba(37, 99, 235, 0.1)';
+                        }}
+                        onMouseOut={e => {
+                          e.target.style.background = '#ffffff';
+                          e.target.style.borderColor = '#d1d5db';
+                          e.target.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.05)';
                         }}
                       >
-                        <span role="img" aria-label="Download">📥</span> Download
+                        <div style={{
+                          width: '16px',
+                          height: '16px',
+                          background: '#2563eb',
+                          borderRadius: '3px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '10px',
+                          color: 'white',
+                          fontWeight: 'bold'
+                        }}>⬇</div>
+                        Download
                       </a>
                     </div>
                   </div>
@@ -1025,7 +1077,7 @@ const Mentoruni = () => {
                     handleAcceptMentor(selectedMentor);
                   }}
                   style={{
-                    background: 'linear-gradient(135deg, #10b981, #059669)',
+                    background: ' #174A7C var(--tw-gradient-to-position)',
                     color: 'white',
                     border: 'none',
                     borderRadius: '8px',
@@ -1178,20 +1230,23 @@ const Mentoruni = () => {
                   fontSize: '0.875rem'
                 }}
               >Cancel</button>
-              <button 
+              <button
                 onClick={handleRejectMentor}
                 disabled={!rejectReason.trim()}
                 style={{
-                  background: rejectReason.trim() ? '#ef4444' : '#d1d5db',
+                  background: '#ef4444',
                   color: 'white',
                   border: 'none',
-                  padding: '0.5rem 1rem',
+                  padding: '0.5rem 1.2rem',
                   borderRadius: '6px',
-                  fontWeight: '500',
+                  fontWeight: '600',
                   cursor: rejectReason.trim() ? 'pointer' : 'not-allowed',
-                  fontSize: '0.875rem'
+                  fontSize: '0.875rem',
+                  opacity: rejectReason.trim() ? 1 : 0.6
                 }}
-              >Send Rejection</button>
+              >
+                Send Rejection
+              </button>
             </div>
           </div>
         </div>
