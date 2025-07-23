@@ -244,7 +244,7 @@ const Dashboard = () => {
           {/* Quick Actions with Edit Button */}
           <div className="grid-section quick-actions-section expanded">
             <div className="section-header">
-              <h2> Quick Actions</h2>
+              <h3> Quick Actions</h3>
               <div className="section-header-right">
                 <span className="section-badge">5 Available</span>
                 <button onClick={handleEditQuickActions} className="section-edit-btn">
@@ -289,12 +289,7 @@ const Dashboard = () => {
             <div className="activities-list">
               {recentActivities.map((activity) => (
                 <div key={activity.id} className="activity-item no-animation">
-                  <div className={`activity-icon ${activity.type}`}>
-                    {activity.type === 'announcement' && '📢'}
-                    {activity.type === 'event' && '📅'}
-                    {activity.type === 'course' && '📚'}
-                    {activity.type === 'student' && '👥'}
-                  </div>
+                  
                   <div className="activity-content">
                     <h5>{activity.title}</h5>
                     <span className="activity-time">{activity.time}</span>
@@ -318,7 +313,7 @@ const Dashboard = () => {
           {/* Performance Metrics with Edit Button */}
           <div className="grid-section metrics-section">
             <div className="section-header">
-              <h3>📊 Performance Metrics</h3>
+              <h3> Performance Metrics</h3>
               <div className="section-header-right">
                 <span className="section-badge">This Month</span>
                 <button onClick={handleEditMetrics} className="section-edit-btn">

@@ -246,7 +246,7 @@ const Announcement = () => {
               onSelectSlot={handleSelectSlot}
               eventPropGetter={(event) => ({
                 style: {
-                  backgroundColor: '#6366f1',
+                  backgroundColor: '#174A7C var(--tw-gradient-to-position)',
                   borderRadius: '6px',
                   border: 'none',
                   color: 'white',

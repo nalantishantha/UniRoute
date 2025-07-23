@@ -690,7 +690,7 @@
 
 .edit-dashboard-testimonial span {
   display: block;
-  color: #3b82f6;
+  color: #174A7C var(--tw-gradient-to-position);
   font-weight: 600;
   font-size: 1rem;
   font-style: normal;

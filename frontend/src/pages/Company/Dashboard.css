@@ -491,7 +491,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: #174A7C var(--tw-gradient-to-position);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -524,7 +524,7 @@
 .stat-value {
   font-size: 3rem;
   font-weight: 800;
-  color: #6366f1;
+  color: #174A7C var(--tw-gradient-to-position);
   margin-bottom: 0.5rem;
   animation: countUp 2s ease-out;
 }
