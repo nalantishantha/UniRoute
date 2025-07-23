@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+// import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import StudentNavigation from "../../components/Navigation/StudentNavigation";
 import {
@@ -23,7 +23,6 @@ import {
 } from "lucide-react";
 
 const CareerCounseling = () => {
-
   const counselors = [
     {
       id: 1,
@@ -200,18 +199,22 @@ const CareerCounseling = () => {
             {counselingServices.map((service, index) => (
               <div
                 key={index}
-                className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col h-full"
               >
                 {/* Service Header */}
                 <div className="relative h-20 bg-gradient-to-r from-blue-500 to-primary-500">
                   <div className="absolute inset-0 bg-black/20"></div>
-                  
+
                   {/* Service Icon */}
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-12 h-12 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center border-2 border-white/50 shadow-lg">
                       {index === 0 && <User className="h-6 w-6 text-white" />}
-                      {index === 1 && <GraduationCap className="h-6 w-6 text-white" />}
-                      {index === 2 && <MessageCircle className="h-6 w-6 text-white" />}
+                      {index === 1 && (
+                        <GraduationCap className="h-6 w-6 text-white" />
+                      )}
+                      {index === 2 && (
+                        <MessageCircle className="h-6 w-6 text-white" />
+                      )}
                       {index === 3 && <Target className="h-6 w-6 text-white" />}
                     </div>
                   </div>
@@ -224,7 +227,7 @@ const CareerCounseling = () => {
                   </div>
                 </div>
 
-                <div className="p-6">
+                <div className="p-6 flex flex-col flex-grow">
                   {/* Service Title */}
                   <div className="mb-4">
                     <h3 className="font-display font-semibold text-xl text-blue-900 mb-2">
@@ -240,13 +243,15 @@ const CareerCounseling = () => {
                     <div className="bg-gradient-to-r from-blue-100 to-primary-50 rounded-lg p-3">
                       <div className="flex items-center space-x-2 text-blue-900">
                         <Clock className="h-4 w-4" />
-                        <span className="text-sm font-medium">Duration: {service.duration}</span>
+                        <span className="text-sm font-medium">
+                          Duration: {service.duration}
+                        </span>
                       </div>
                     </div>
                   </div>
 
                   {/* Features */}
-                  <div className="mb-6">
+                  <div className="mb-6 flex-grow">
                     <h4 className="font-medium text-blue-900 mb-3 flex items-center space-x-2">
                       <CheckCircle className="h-4 w-4" />
                       <span>What's Included</span>
@@ -267,7 +272,7 @@ const CareerCounseling = () => {
                   </div>
 
                   {/* Action Button */}
-                  <div className="border-t border-accent-100 pt-4">
+                  <div className="border-t border-accent-100 pt-4 mt-auto">
                     <Link
                       to={`/student/book-counseling-service/${index + 1}`}
                       className="block w-full bg-primary-400 text-white px-4 py-3 rounded-lg hover:bg-primary-600 transition-all duration-200 font-medium text-sm hover:shadow-lg text-center"
@@ -295,7 +300,7 @@ const CareerCounseling = () => {
                 {/* Counselor Header */}
                 <div className="relative h-32 bg-gradient-to-r from-blue-500 to-primary-500">
                   <div className="absolute inset-0 bg-black/20"></div>
-                  
+
                   {/* Rating Badge */}
                   <div className="absolute top-2 right-2">
                     <div className="bg-white/25 backdrop-blur-md rounded-lg px-2 py-1 border border-white/40">
@@ -326,7 +331,9 @@ const CareerCounseling = () => {
                           <h3 className="font-display font-bold text-lg text-white leading-tight drop-shadow-md">
                             {counselor.name}
                           </h3>
-                          <p className="text-white/95 text-sm mb-2 font-semibold drop-shadow-sm">{counselor.title}</p>
+                          <p className="text-white/95 text-sm mb-2 font-semibold drop-shadow-sm">
+                            {counselor.title}
+                          </p>
                           <div className="flex items-center space-x-2 text-white/90 text-xs drop-shadow-sm">
                             <span>{counselor.reviews} reviews</span>
                             <span>•</span>
@@ -365,7 +372,9 @@ const CareerCounseling = () => {
                       <div className="flex items-center justify-center w-8 h-8 bg-white rounded-lg mx-auto mb-1 shadow-sm">
                         <Users className="h-4 w-4 text-green-600" />
                       </div>
-                      <div className="text-xs text-green-700 mb-1 font-medium">Success</div>
+                      <div className="text-xs text-green-700 mb-1 font-medium">
+                        Success
+                      </div>
                       <div className="font-bold text-green-700 text-sm">
                         {counselor.successStories}+
                       </div>
@@ -374,7 +383,9 @@ const CareerCounseling = () => {
                       <div className="flex items-center justify-center w-8 h-8 bg-white rounded-lg mx-auto mb-1 shadow-sm">
                         <Target className="h-4 w-4 text-blue-600" />
                       </div>
-                      <div className="text-xs text-blue-700 mb-1 font-medium">Rate</div>
+                      <div className="text-xs text-blue-700 mb-1 font-medium">
+                        Rate
+                      </div>
                       <div className="font-bold text-blue-700 text-xs">
                         {counselor.hourlyRate}
                       </div>
