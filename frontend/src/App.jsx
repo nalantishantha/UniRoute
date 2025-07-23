@@ -79,7 +79,6 @@ function App() {
           {/*Counsellor Routes */}
           <Route path="/counsellor/*" element={<CounsellorRoutes />} />
         </Routes>
-      </Routes>
     </RouteGuard>
     </Router >
   );

@@ -66,6 +66,9 @@ const LoginPage = () => {
         case 'company':
           navigate('/company/dashboard-edit', { replace: true });
           break;
+        case 'counselor':
+          navigate('/counsellor/dashboard', { replace: true });
+          break;
         default:
           // Clear invalid session
           console.log('Invalid user type, clearing auth');
