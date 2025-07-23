@@ -241,6 +241,21 @@ const UniversitiesList = () => {
         </div>
       </div>
 
+      {/* Page Header with Add Button */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-[#263238]">Universities Management</h1>
+          <p className="text-[#717171] mt-1">Manage and monitor university information</p>
+        </div>
+        <Link
+          to="/admin/universities/new"
+          className="inline-flex items-center px-4 py-2 bg-[#1D5D9B] hover:bg-[#174A7C] text-white rounded-lg shadow-sm transition-colors"
+        >
+          <Plus className="h-5 w-5 mr-2" />
+          Add University
+        </Link>
+      </div>
+
       {/* Filters and Search */}
       <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-4 mb-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">

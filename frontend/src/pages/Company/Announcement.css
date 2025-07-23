@@ -1,67 +1,65 @@
+/* Announcement Page - Harmonized Color Pattern */
+
 /* Base Styles */
-.announcement-page {
+.company-announcement-page {
   min-height: 100vh;
   background: #f8fafc;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-.announcement-container {
+.company-announcement-container {
   display: flex;
   min-height: 100vh;
 }
 
-/* Main Content - Responsive to sidebar state */
-.announcement-main {
+/* Main Content */
+.company-announcement-main {
   flex: 1;
   margin-left: 80px;
   overflow-y: auto;
   min-height: 100vh;
   transition: margin-left 0.3s ease;
+  background: #f8fafc;
 }
 
-.announcement-main.sidebar-expanded {
-  margin-left: 288px; /* CHANGED: Updated to match CompanySidebar width */
+.company-announcement-main.company-announcement-sidebar-expanded {
+  margin-left: 288px;
 }
 
-.announcement-main.sidebar-collapsed {
-  margin-left: 0; /* CHANGED: Updated for new sidebar behavior */
+.company-announcement-main.company-announcement-sidebar-collapsed {
+  margin-left: 0;
 }
 
 /* Hero Section */
-.announcement-hero {
-  background: linear-gradient(rgba(79, 70, 229, 0.8), rgba(213, 210, 216, 0.8)), 
-              url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1920&q=80');
-  background-size: cover;
-  background-position: center;
+.company-announcement-hero {
+  background: linear-gradient(135deg, #2563eb 60%, #3b82f6 100%);
   padding: 3rem 2rem;
   text-align: center;
   color: white;
   position: relative;
 }
 
-.hero-content {
+.company-announcement-hero-content {
   max-width: 800px;
   margin: 0 auto;
 }
 
-.hero-content h1 {
+.company-announcement-hero-content h1 {
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 1rem;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.hero-content p {
+.company-announcement-hero-content p {
   font-size: 1.1rem;
   opacity: 0.95;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
   line-height: 1.6;
 }
 
 /* Search and Filter Section */
-.announcement-search {
+.company-announcement-search {
   padding: 2rem;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: #f8fafc;
   border-bottom: 1px solid #e5e7eb;
   display: flex;
   justify-content: space-between;
@@ -69,63 +67,63 @@
   gap: 30rem;
 }
 
-.search-container {
+.company-announcement-search-container {
   display: flex;
   gap: 1rem;
   flex: 1;
   max-width: 600px;
 }
 
-.search-input {
+.company-announcement-search-input {
   flex: 1;
   padding: 1rem 1.5rem;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
   font-size: 1rem;
-  background: #f8fafc;
+  background: #fff;
   transition: all 0.3s ease;
   outline: none;
   max-width: 600px;
 }
 
-.search-input:focus {
-  border-color: #3b82f6;
-  background: white;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+.company-announcement-search-input:focus {
+  border-color: #2563eb;
+  background: #f8fafc;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
 }
 
-.filter-container {
+.company-announcement-filter-container {
   display: flex;
   gap: 1rem;
 }
 
-.filter-select {
+.company-announcement-filter-select {
   padding: 0.75rem 1rem;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
   font-size: 0.9rem;
-  background: white;
+  background: #fff;
   cursor: pointer;
   transition: all 0.2s ease;
   min-width: 140px;
   text-align: center;
 }
 
-.filter-select:focus {
+.company-announcement-filter-select:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
 }
 
 /* Announcements Section */
-.announcements {
+.company-announcements {
   padding: 2rem;
   background: #f8fafc;
   max-width: 1200px;
   margin: 0 auto;
 }
 
-.announcements-header {
+.company-announcements-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -133,15 +131,15 @@
   padding: 0 1rem;
 }
 
-.announcements-header h2 {
+.company-announcements-header h2 {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #1f2937;
+  color: #1e293b;
   margin: 0;
 }
 
-.btn-add-new {
-  background: linear-gradient(135deg, #10b981, #059669);
+.company-announcement-btn-add-new {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -150,24 +148,24 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
 }
 
-.btn-add-new:hover {
-  background: linear-gradient(135deg, #059669, #047857);
+.company-announcement-btn-add-new:hover {
+  background: linear-gradient(135deg, #1d4ed8, #2563eb);
   transform: translateY(-2px);
 }
 
 /* Announcements Table */
-.announcements-table {
-  background: white;
+.company-announcements-table {
+  background: #fff;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   border: 1px solid #e5e7eb;
 }
 
-.table-header {
+.company-announcement-table-header {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 100px;
   background: #f8fafc;
@@ -180,17 +178,17 @@
   letter-spacing: 0.05em;
 }
 
-.header-cell {
+.company-announcement-header-cell {
   padding: 0.5rem;
   display: flex;
   align-items: center;
 }
 
-.table-body {
-  background: white;
+.company-announcement-table-body {
+  background: #fff;
 }
 
-.table-row {
+.company-announcement-table-row {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 100px;
   padding: 1.5rem 1rem;
@@ -199,32 +197,32 @@
   align-items: center;
 }
 
-.table-row:hover {
-  background: #f8fafc;
+.company-announcement-table-row:hover {
+  background: #f1f5f9;
 }
 
-.table-row:last-child {
+.company-announcement-table-row:last-child {
   border-bottom: none;
 }
 
-.cell {
+.company-announcement-cell {
   padding: 0.5rem;
   display: flex;
   align-items: center;
 }
 
 /* Announcement Cell */
-.announcement-cell {
+.company-announcement-announcement-cell {
   padding: 0;
 }
 
-.announcement-info {
+.company-announcement-announcement-info {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
-.announcement-icon {
+.company-announcement-announcement-icon {
   width: 48px;
   height: 48px;
   background: #eff6ff;
@@ -237,24 +235,24 @@
   flex-shrink: 0;
 }
 
-.announcement-details {
+.company-announcement-announcement-details {
   flex: 1;
   min-width: 0;
 }
 
-.announcement-title {
+.company-announcement-announcement-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #1f2937;
+  color: #1e293b;
   margin: 0 0 0.25rem 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.announcement-subtitle {
+.company-announcement-announcement-subtitle {
   font-size: 0.85rem;
-  color: #6b7280;
+  color: #2563eb;
   margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -262,22 +260,22 @@
 }
 
 /* Date Cell */
-.date-cell {
+.company-announcement-date-cell {
   justify-content: flex-start;
 }
 
-.date-text {
+.company-announcement-date-text {
   font-size: 0.9rem;
   color: #6b7280;
   font-weight: 500;
 }
 
 /* Status Cell */
-.status-cell {
+.company-announcement-status-cell {
   justify-content: flex-start;
 }
 
-.status-badge {
+.company-announcement-status-badge {
   padding: 0.3rem 1rem;
   border-radius: 16px;
   font-size: 0.7rem;
@@ -291,63 +289,26 @@
   align-items: center;
   justify-content: center;
   height: 28px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
 }
 
-.status-badge.published {
-  background: linear-gradient(135deg, #10b981, #059669);
-}
-
-.status-badge.draft {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+.company-announcement-status-badge.company-announcement-draft {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  color: #fff;
 }
 
 /* Actions Cell */
-.actions-cell {
+.company-announcement-actions-cell {
   justify-content: flex-end;
 }
 
-.action-buttons {
+.company-announcement-action-buttons {
   display: flex;
   gap: 0.5rem;
   align-items: center;
 }
 
-.btn-action {
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
-  background: #f3f4f6;
-  color: #3b82f6;
-}
-
-.btn-action:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  background: #eff6ff;
-  color: #2563eb;
-}
-
-.btn-delete {
-  background:#fef2f2 !important;
-  color: #dc2626 !important;
-}
-
-.btn-delete:hover {
-  background: #fee2e2 !important;
-  color: #b91c1c !important;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2) !important;
-}
-
-/* Update Delete Button Styles with Unique Class Names */
 .company-announcement-btn-action {
   width: 32px;
   height: 32px;
@@ -360,14 +321,12 @@
   font-size: 0.9rem;
   transition: all 0.2s ease;
   background: #f3f4f6;
-  color: #3b82f6;
+  color: #2563eb;
 }
 
 .company-announcement-btn-action:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   background: #eff6ff;
-  color: #2563eb;
+  color: #1d4ed8;
 }
 
 .company-announcement-btn-delete {
@@ -378,24 +337,10 @@
 .company-announcement-btn-delete:hover {
   background: #fee2e2 !important;
   color: #b91c1c !important;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2) !important;
-}
-
-/* Update Action Buttons Container */
-.company-announcement-action-buttons {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-/* Update Actions Cell */
-.company-announcement-actions-cell {
-  justify-content: flex-end;
 }
 
 /* Pagination */
-.pagination {
+.company-announcement-pagination {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -403,9 +348,9 @@
   padding: 0 1rem;
 }
 
-.pagination-btn {
+.company-announcement-pagination-btn {
   background: #f3f4f6;
-  color: #374151;
+  color: #2563eb;
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 6px;
@@ -415,12 +360,13 @@
   transition: all 0.2s ease;
 }
 
-.pagination-btn:hover {
-  background: #e5e7eb;
+.company-announcement-pagination-btn:hover {
+  background: #e0e7ef;
+  color: #1d4ed8;
   transform: translateY(-1px);
 }
 
-.pagination-info {
+.company-announcement-pagination-info {
   font-size: 0.9rem;
   color: #6b7280;
   font-weight: 500;
@@ -428,31 +374,35 @@
 }
 
 /* Statistics Section */
-.announcement-stats {
+.company-announcement-stats {
   padding: 2rem;
-  background: white;
+  background: #fff;
+  border-radius: 12px;
+  margin: 2rem auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  max-width: 1200px;
 }
 
-.stats-content {
+.company-announcement-stats-content {
   max-width: 1200px;
   margin: 0 auto;
   text-align: center;
 }
 
-.stats-content h2 {
+.company-announcement-stats-content h2 {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #1f2937;
+  color: #1e293b;
   margin-bottom: 2rem;
 }
 
-.stats-grid {
+.company-announcement-stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1.5rem;
 }
 
-.stat-item {
+.company-announcement-stat-item {
   background: #f8fafc;
   padding: 2rem;
   border-radius: 12px;
@@ -461,179 +411,30 @@
   transition: all 0.3s ease;
 }
 
-.stat-item:hover {
+.company-announcement-stat-item:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
 }
 
-.stat-icon {
+.company-announcement-stat-icon {
   font-size: 2rem;
   margin-bottom: 1rem;
 }
 
-.stat-value {
+.company-announcement-stat-value {
   font-size: 2rem;
   font-weight: 700;
-  color: #1f2937;
+  color: #1e293b;
   margin-bottom: 0.5rem;
 }
 
-.stat-label {
+.company-announcement-stat-label {
   font-size: 0.9rem;
   color: #6b7280;
   font-weight: 500;
 }
 
 /* Modal Styles */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 1rem;
-}
-
-.modal-content {
-  background: white;
-  border-radius: 12px;
-  max-width: 700px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.modal-header h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin: 0;
-}
-
-.modal-close {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #6b7280;
-  padding: 0.25rem;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-}
-
-.modal-close:hover {
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.modal-body {
-  padding: 1.5rem;
-}
-
-.modal-image {
-  width: 50%;           /* Reduce width to 70% of the modal */
-  margin: 0 auto 1.5rem auto;
-  object-fit: cover;
-  border-radius: 8px;
-}
-
-.modal-title-section {
-  margin-bottom: 1.5rem;
-}
-
-.modal-title-section h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 0.5rem;
-}
-
-.modal-badges {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.priority-badge {
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.modal-meta {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.meta-item {
-  padding: 0.75rem;
-  background: #f8fafc;
-  border-radius: 8px;
-  font-size: 0.9rem;
-}
-
-.meta-item strong {
-  color: #374151;
-  font-weight: 600;
-}
-
-.modal-description {
-  margin-bottom: 1.5rem;
-}
-
-.modal-description strong {
-  color: #374151;
-  font-weight: 600;
-  display: block;
-  margin-bottom: 0.5rem;
-}
-
-.modal-description p {
-  color: #4b5563;
-  line-height: 1.6;
-  margin: 0;
-}
-
-.modal-tags strong {
-  color: #374151;
-  font-weight: 600;
-  display: block;
-  margin-bottom: 0.5rem;
-}
-
-.tags-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.tag {
-  background: #eff6ff;
-  color: #2563eb;
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.7rem;
-  font-weight: 500;
-  border: 1px solid #dbeafe;
-}
-
-/* Enhanced Modal Styles - Unique for Company Announcement Admin */
 .company-announcement-admin-modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -653,10 +454,10 @@
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.15);
   position: relative;
   animation: companyAnnouncementAdminModalSlideIn 0.4s ease-out;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid #e2e8f0;
 }
 
 .company-announcement-admin-modal-header {
@@ -714,11 +515,7 @@
   border-radius: 12px;
   margin-bottom: 1.5rem;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.company-announcement-admin-modal-info {
-  /* Container for all modal info */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .company-announcement-admin-modal-title-section {
@@ -739,6 +536,12 @@
   margin-bottom: 1rem;
 }
 
+.company-announcement-priority-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
 .company-announcement-admin-modal-meta {
   display: grid;
   grid-template-columns: 1fr;
@@ -751,7 +554,7 @@
   background: #f8fafc;
   border-radius: 8px;
   font-size: 0.95rem;
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid #2563eb;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -803,7 +606,7 @@
   gap: 0.5rem;
 }
 
-.company-announcement-admin-tags-container .tag {
+.company-announcement-admin-tags-container .company-announcement-tag {
   background: #eff6ff;
   color: #2563eb;
   padding: 0.4rem 0.8rem;
@@ -845,15 +648,15 @@
   font-size: 0.9rem;
   transition: all 0.2s ease;
   box-sizing: border-box;
-  background: white;
+  background: #fff;
 }
 
 .company-announcement-admin-form-group input:focus,
 .company-announcement-admin-form-group textarea:focus,
 .company-announcement-admin-form-group select:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
 }
 
 .company-announcement-admin-form-group textarea {
@@ -888,7 +691,7 @@
 }
 
 .company-announcement-admin-btn-save {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -900,9 +703,9 @@
 }
 
 .company-announcement-admin-btn-save:hover {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  background: linear-gradient(135deg, #1d4ed8, #2563eb);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
 }
 
 /* Modal Animation */
@@ -915,43 +718,6 @@
     opacity: 1; 
     transform: translateY(0) scale(1);
   }
-}
-
-/* Enhanced icons for announcement modal info */
-.company-announcement-admin-meta-item[data-info="author"]::before {
-  content: "👤";
-  font-size: 1.1rem;
-  margin-right: 0.25rem;
-}
-
-.company-announcement-admin-meta-item[data-info="category"]::before {
-  content: "🏷️";
-  font-size: 1.1rem;
-  margin-right: 0.25rem;
-}
-
-.company-announcement-admin-meta-item[data-info="date"]::before {
-  content: "📅";
-  font-size: 1.1rem;
-  margin-right: 0.25rem;
-}
-
-.company-announcement-admin-meta-item[data-info="priority"]::before {
-  content: "📊";
-  font-size: 1.1rem;
-  margin-right: 0.25rem;
-}
-
-.company-announcement-admin-meta-item[data-info="status"]::before {
-  content: "📋";
-  font-size: 1.1rem;
-  margin-right: 0.25rem;
-}
-
-.company-announcement-admin-meta-item[data-info="statistics"]::before {
-  content: "👁️";
-  font-size: 1.1rem;
-  margin-right: 0.25rem;
 }
 
 /* Responsive modal */
@@ -969,7 +735,7 @@
     padding: 1rem 1.5rem 1.5rem 1.5rem;
   }
   
-  .company-announcement-admin-form-row {
+  .company-announcement-admin-form_row {
     flex-direction: column;
     gap: 0;
   }

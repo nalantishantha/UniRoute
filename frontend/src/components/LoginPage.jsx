@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { getCurrentUser, clearAuth } from "../utils/auth";
 import {
   GraduationCap,
   Mail,
@@ -24,6 +25,55 @@ const LoginPage = () => {
     password: "",
     rememberMe: false,
   });
+
+  // Check if user is already logged in and redirect accordingly
+  useEffect(() => {
+    const currentUser = getCurrentUser();
+    const logoutTimestamp = localStorage.getItem('logout_timestamp');
+    
+    console.log('LoginPage useEffect - Current user:', currentUser, 'Logout timestamp:', logoutTimestamp);
+    
+    // If there's a recent logout timestamp, clear any stale user data
+    if (logoutTimestamp) {
+      const logoutTime = parseInt(logoutTimestamp);
+      const currentTime = Date.now();
+      
+      // If logout was recent (within 1 hour), don't auto-redirect
+      if (currentTime - logoutTime < 3600000) {
+        console.log('Recent logout detected, clearing any stale auth data');
+        clearAuth();
+        return;
+      }
+    }
+    
+    if (currentUser) {
+      const userType = currentUser.user_type;
+      console.log("User already logged in, redirecting to:", userType);
+      
+      switch (userType) {
+        case "admin":
+          navigate("/admin/dashboard", { replace: true });
+          break;
+        case "student":
+          navigate("/student/home", { replace: true });
+          break;
+        case "uni_student":
+          navigate("/university-student/dashboard", { replace: true });
+          break;
+        case "institution":
+          navigate("/university/dashboard", { replace: true });
+          break;
+        case 'company':
+          navigate('/company/dashboard-edit', { replace: true });
+          break;
+        default:
+          // Clear invalid session
+          console.log('Invalid user type, clearing auth');
+          clearAuth();
+          break;
+      }
+    }
+  }, [navigate]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -68,7 +118,20 @@ const LoginPage = () => {
           text: "Login successful! Welcome back!",
         });
 
+        // Clear any previous logout timestamp
+        localStorage.removeItem('logout_timestamp');
+        
+        // Clear any existing auth data first
+        localStorage.removeItem('user');
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('refreshToken');
+        sessionStorage.clear();
+        
+        // Set new authentication data
         localStorage.setItem("user", JSON.stringify(data.user));
+        
+        // Set login timestamp for session management
+        localStorage.setItem('login_timestamp', Date.now().toString());
 
         setTimeout(() => {
           const userType = data.user.user_type;
@@ -76,22 +139,22 @@ const LoginPage = () => {
 
           switch (userType) {
             case "admin":
-              navigate("/admin/dashboard");
+              window.location.replace("/admin/dashboard");
               break;
             case "student":
-              navigate("/student/home");
+              window.location.replace("/student/home");
               break;
             case "uni_student":
-              navigate("/university-student/dashboard");
+              window.location.replace("/university-student/dashboard");
               break;
             case "institution":
-              navigate("/university/dashboard");
+              window.location.replace("/university/dashboard");
               break;
-              case 'company':
-              navigate('/company/dashboard-edit');
+            case 'company':
+              window.location.replace('/company/dashboard-edit');
               break;
             default:
-              navigate("/student/home");
+              window.location.replace("/student/home");
               break;
           }
         }, 1000);

@@ -2,64 +2,77 @@ import React, { useState } from 'react';
 import UniversitySidebar from '../../components/Navigation/UniversitySidebar';
 import UniversityNavbar from '../../components/Navigation/UniversityNavbar';
 import Footer from '../../components/Footer';
+import { number } from 'framer-motion';
+import nicFront from '../../assets/id_1F.jpg';
+import nicBack from '../../assets/id_2_b.jpg';
+import uniIdFront from '../../assets/id_2F.jpg';
+import uniIdBack from '../../assets/ID-back-EN.png';
+
+// Path to the real PDF in public folder
+const RecommendationPDF = '/Letter.pdf';
 
 // Mock data for mentor requests
 const initialMentorRequests = [
   {
     id: 1,
     name: ' Sarah Amarasingha',
-    email: 'sarah.johnson@email.com',
+    email: 'ucsccmb22000@gmail.com',
     phone: '070-3144967',
-    specialization: 'Computer Science & AI',
-    experience: '8 years',
-    education: 'PhD in Computer Science, MIT',
-    currentPosition: 'Senior Software Engineer at Google',
+    education: 'Undergraduate Computer Science, MIT',
+    Recommendation : 'Pro Sandun Rangana of university colombo',
     bio: 'Experienced software engineer with expertise in machine learning and artificial intelligence.',
     skills: ['Python', 'Machine Learning', 'React', 'Node.js', 'AI/ML','Marketing'],
     profileImage: '/api/placeholder/100/100',
     requestDate: '2024-01-15',
+    specialization: 'Computer Science & AI',
+    Year: '4th year',
+    Registrationnumber: '22000771',
     status: 'pending'
+
   },
   {
-    id: 2,
-    name: 'Rasindu Wijesinghe',
-    email: 'rasindu.wijesinghe@university.edu',
-    phone: '070-5689028',
-    specialization: 'Business Administration',
-    experience: '12 years',
-    education: 'MBA from Harvard Business School',
-    currentPosition: 'Associate Professor at Stanford University',
-    bio: 'Business strategy expert with extensive experience in startup mentoring and entrepreneurship.',
-    skills: ['Business Strategy', 'Entrepreneurship', 'Finance', 'Leadership', 'Patient Care'],
-    profileImage: '/api/placeholder/100/100',
-    requestDate: '2024-01-16',
-    status: 'pending'
+    "id": 2,
+    "name": "Nimal Perera",
+    "email": "ucscmb21001@cmb.ac.lk",
+    "phone": "071-2345678",
+    "education": "Undergraduate in Computer Science, University of Colombo",
+    "Recommendation": "Prof. Kamal Gunawardena of University of Colombo",
+    "bio": "Passionate about AI and software development with experience in university research projects.",
+    "skills": ["Python", "Java", "Machine Learning", "Web Development", "Database Management"],
+    "profileImage": "/api/placeholder/100/100",
+    "requestDate": "2024-02-10",
+    "specialization": "Artificial Intelligence",
+    "Year": "3rd year",
+    "Registrationnumber": '22000761',
+    "status": "approved"
   },
   {
-    id: 3,
-    name: 'Dasun Rangana',
-    email: 'dasun.rangana@hospital.com',
-    phone: '070-5689028',
-    specialization: 'Medicine & Healthcare',
-    experience: '15 years',
-    education: 'MD from Johns Hopkins University',
-    currentPosition: 'Chief of Cardiology at City Hospital',
-    bio: 'Experienced cardiologist dedicated to training the next generation of medical professionals.',
-    skills: ['Cardiology', 'Medical Research', 'Patient Care', 'Medical Education', 'Surgery'],
-    profileImage: '/api/placeholder/100/100',
-    requestDate: '2024-01-17',
-    status: 'pending'
-  }
+    "id": 3,
+    "name": "Samanthi Silva",
+    "email": "ucscmb21045@cmb.ac.lk",
+    "phone": "072-3456789",
+    "education": "Undergraduate in Information Systems, University of Colombo",
+    "Recommendation": "Dr. Priyantha Fernando of University of Colombo",
+    "bio": "Interested in data science and business analytics, with hands-on experience in Python and SQL.",
+    "skills": ["Python", "SQL", "Data Analysis", "Statistics", "UI/UX Design"],
+    "profileImage": "/api/placeholder/100/100",
+    "requestDate": "2024-01-25",
+    "specialization": "Data Science",
+    "Year": "2nd year",
+    "Registrationnumber": '22000761',
+    "status": "pending"
+    
+  },
 ];
 
 // Mock data for active mentors
 const initialActiveMentors = [
   {
     id: 101,
-    name: 'Dr. James Wilson',
-    email: 'james.wilson@tech.com',
+    name: 'Kasun Gunawardhana',
+    email: 'kasun.gunawardhana@tech.com',
     specialization: 'Software Engineering',
-    experience: '10 years',
+    experience: '1 years',
     students: 12,
     rating: 4.8,
     profileImage: '/api/placeholder/100/100',
@@ -67,10 +80,10 @@ const initialActiveMentors = [
   },
   {
     id: 102,
-    name: 'Prof. Lisa Anderson',
-    email: 'lisa.anderson@business.com',
+    name: 'Lisitha Dissanayake',
+    email: 'lisitha.dissanayake@business.com',
     specialization: 'Digital Marketing',
-    experience: '7 years',
+    experience: '2 years',
     students: 8,
     rating: 4.9,
     profileImage: '/api/placeholder/100/100',
@@ -84,6 +97,8 @@ const Mentoruni = () => {
   const [activeMentors, setActiveMentors] = useState(initialActiveMentors);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedMentor, setSelectedMentor] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
   const [activeTab, setActiveTab] = useState('requests');
 
@@ -121,6 +136,16 @@ const Mentoruni = () => {
   const openRejectModal = (mentor) => {
     setSelectedRequest(mentor);
     setShowRejectModal(true);
+  };
+
+  const handleViewMentor = (mentor) => {
+    setSelectedMentor(mentor);
+    setShowViewModal(true);
+  };
+
+  const handleDownloadPDF = () => {
+    // In a real app, this would download the actual PDF
+    alert('Downloading recommendation letter PDF...');
   };
 
   return (
@@ -256,15 +281,18 @@ const Mentoruni = () => {
                     borderRadius: '12px',
                     padding: '1.5rem',
                     transition: 'all 0.2s',
-                    width: '400px',           // Fixed width for all cards
+                    width: '400px',
                     minWidth: '400px',
                     maxWidth: '400px',
                     boxSizing: 'border-box',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
-                    height: '100%'            // Make all cards the same height
-                  }}>
+                    height: '100%',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => handleViewMentor(mentor)}
+                  >
                     {/* Mentor Header */}
                     <div style={{
                       display: 'flex',
@@ -306,10 +334,11 @@ const Mentoruni = () => {
                       marginBottom: '1rem',
                       fontSize: '0.875rem'
                     }}>
-                      <div><strong>Experience:</strong> {mentor.experience}</div>
-                      <div><strong>Email:</strong> {mentor.email}</div>
+                      <div><strong>Registration number:</strong> {mentor.Registrationnumber}</div>
+                      <div><strong>Year:</strong> {mentor.Year}</div>
                       <div style={{ gridColumn: '1 / -1' }}><strong>Education:</strong> {mentor.education}</div>
-                      <div style={{ gridColumn: '1 / -1' }}><strong>Position:</strong> {mentor.currentPosition}</div>
+                      <div></div>
+                      <div style={{ gridColumn: '1 / -1' }}><strong>Email:</strong> {mentor.email}</div>
                     </div>
 
                     {/* Bio */}
@@ -351,7 +380,10 @@ const Mentoruni = () => {
                       gap: '0.75rem'
                     }}>
                       <button
-                        onClick={() => handleAcceptMentor(mentor)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAcceptMentor(mentor);
+                        }}
                         style={{
                           flex: 1,
                           background: '#2563eb',
@@ -374,10 +406,13 @@ const Mentoruni = () => {
                         ✓ Accept
                       </button>
                       <button
-                        onClick={() => openRejectModal(mentor)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openRejectModal(mentor);
+                        }}
                         style={{
                           flex: 1,
-                          background: '#64748b', // Changed from '#ef4444' (red) to '#64748b' (blue-gray)
+                          background: '#64748b',
                           color: 'white',
                           border: 'none',
                           borderRadius: '6px',
@@ -388,7 +423,7 @@ const Mentoruni = () => {
                           transition: 'all 0.2s'
                         }}
                         onMouseOver={(e) => {
-                          e.target.style.background = '#475569'; // Slightly darker on hover
+                          e.target.style.background = '#475569';
                         }}
                         onMouseOut={(e) => {
                           e.target.style.background = '#64748b';
@@ -632,6 +667,405 @@ const Mentoruni = () => {
           sidebarExpanded={isSidebarOpen}
         />
       </main>
+
+      {/* View Mentor Modal */}
+      {showViewModal && selectedMentor && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0, 0, 0, 0.65)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem'
+        }} onClick={() => setShowViewModal(false)}>
+          <div style={{
+            background: '#fff',
+            borderRadius: '20px',
+            maxWidth: '800px',
+            width: '95%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25)',
+            border: '1px solid #e2e8f0'
+          }} onClick={e => e.stopPropagation()}>
+            {/* Updated Modal Header */}
+            <div style={{
+              background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+              padding: '2rem',
+              borderRadius: '20px 20px 0 0',
+              borderBottom: '2px solid #e2e8f0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              position: 'relative'
+            }}>
+              {/* Decorative gradient bar */}
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '4px',
+                background: 'linear-gradient(90deg, #2563eb, #3b82f6, #1d4ed8)',
+                borderRadius: '20px 20px 0 0'
+              }} />
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                <div style={{
+                  width: '80px',
+                  height: '80px',
+                  borderRadius: '20px',
+                  background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '2rem',
+                  color: 'white',
+                  boxShadow: '0 8px 25px rgba(37, 99, 235, 0.3)',
+                  border: '3px solid #ffffff'
+                }}>👨‍🏫</div>
+                <div>
+                  <h2 style={{
+                    fontSize: '1.75rem',
+                    fontWeight: '700',
+                    margin: '0 0 0.5rem 0',
+                    color: '#1e293b',
+                    lineHeight: '1.2'
+                  }}>{selectedMentor.name}</h2>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    marginBottom: '0.5rem'
+                  }}>
+                    <span style={{
+                      background: 'linear-gradient(135deg, #eff6ff, #dbeafe)',
+                      color: '#2563eb',
+                      padding: '0.4rem 1rem',
+                      borderRadius: '20px',
+                      fontSize: '0.9rem',
+                      fontWeight: '600',
+                      border: '1px solid #bfdbfe'
+                    }}>{selectedMentor.specialization}</span>
+                    <span style={{
+                      background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)',
+                      color: '#16a34a',
+                      padding: '0.4rem 1rem',
+                      borderRadius: '20px',
+                      fontSize: '0.85rem',
+                      fontWeight: '600',
+                      border: '1px solid #bbf7d0'
+                    }}>📋 Application Review</span>
+                  </div>
+                  <p style={{
+                    fontSize: '0.95rem',
+                    margin: '0',
+                    color: '#64748b',
+                    fontWeight: '500'
+                  }}>Registration: {selectedMentor.Registrationnumber} • {selectedMentor.Year}</p>
+                </div>
+              </div>
+              
+              <button 
+                onClick={() => setShowViewModal(false)}
+                style={{
+                  background: 'linear-gradient(135deg, #f1f5f9, #e2e8f0)',
+                  border: '2px solid #cbd5e1',
+                  width: '45px',
+                  height: '45px',
+                  borderRadius: '15px',
+                  color: '#64748b',
+                  fontSize: '1.3rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.3s ease',
+                  fontWeight: '300'
+                }}
+                onMouseOver={e => {
+                  e.target.style.background = 'linear-gradient(135deg, #fee2e2, #fecaca)';
+                  e.target.style.borderColor = '#f87171';
+                  e.target.style.color = '#dc2626';
+                  e.target.style.transform = 'scale(1.05)';
+                }}
+                onMouseOut={e => {
+                  e.target.style.background = 'linear-gradient(135deg, #f1f5f9, #e2e8f0)';
+                  e.target.style.borderColor = '#cbd5e1';
+                  e.target.style.color = '#64748b';
+                  e.target.style.transform = 'scale(1)';
+                }}
+              >✕</button>
+            </div>
+            
+            {/* Modal Body */}
+            <div style={{ padding: '2rem' }}>
+              {/* Basic Information */}
+              <div style={{ marginBottom: '2rem' }}>
+                <h3 style={{
+                  fontSize: '1.2rem',
+                  fontWeight: '600',
+                  color: '#1e293b',
+                  marginBottom: '1rem',
+                  borderBottom: '2px solid #e2e8f0',
+                  paddingBottom: '0.5rem'
+                }}>📋 Basic Information</h3>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gap: '1rem',
+                  background: '#f8fafc',
+                  padding: '1.5rem',
+                  borderRadius: '12px',
+                  border: '1px solid #e2e8f0'
+                }}>
+                  <div><strong>Registration Number:</strong> {selectedMentor.Registrationnumber}</div>
+                  <div><strong>Academic Year:</strong> {selectedMentor.Year}</div>
+                  <div><strong>Email:</strong> {selectedMentor.email}</div>
+                  <div><strong>Phone:</strong> {selectedMentor.phone}</div>
+                  <div style={{ gridColumn: '1 / -1' }}><strong>Education:</strong> {selectedMentor.education}</div>
+                  <div style={{ gridColumn: '1 / -1' }}><strong>Recommendation:</strong> {selectedMentor.Recommendation}</div>
+                </div>
+              </div>
+
+              {/* Bio & Skills */}
+              <div style={{ marginBottom: '2rem' }}>
+                <h3 style={{
+                  fontSize: '1.2rem',
+                  fontWeight: '600',
+                  color: '#1e293b',
+                  marginBottom: '1rem',
+                  borderBottom: '2px solid #e2e8f0',
+                  paddingBottom: '0.5rem'
+                }}>📝 Bio & Skills</h3>
+                <div style={{
+                  background: '#f8fafc',
+                  padding: '1.5rem',
+                  borderRadius: '12px',
+                  border: '1px solid #e2e8f0',
+                  marginBottom: '1rem'
+                }}>
+                  <p style={{ lineHeight: '1.6', margin: '0', color: '#374151' }}>{selectedMentor.bio}</p>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '0.5rem'
+                }}>
+                  {selectedMentor.skills.map((skill, index) => (
+                    <span key={index} style={{
+                      background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
+                      color: 'white',
+                      padding: '0.5rem 1rem',
+                      borderRadius: '20px',
+                      fontSize: '0.875rem',
+                      fontWeight: '500'
+                    }}>{skill}</span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Identity Documents */}
+              <div style={{ marginBottom: '2rem' }}>
+                <h3 style={{
+                  fontSize: '1.2rem',
+                  fontWeight: '600',
+                  color: '#1e293b',
+                  marginBottom: '1rem',
+                  borderBottom: '2px solid #e2e8f0',
+                  paddingBottom: '0.5rem'
+                }}>🆔 Identity Documents</h3>
+                
+                {/* NIC Images */}
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <h4 style={{ fontSize: '1rem', fontWeight: '600', color: '#374151', marginBottom: '0.75rem' }}>National Identity Card</h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div style={{
+                      background: '#f8fafc',
+                      border: '2px dashed #d1d5db',
+                      borderRadius: '12px',
+                      padding: '1rem',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
+                    }}>
+                      <img src={nicFront} alt="NIC Front" style={{ width: '120px', height: '80px', objectFit: 'cover', borderRadius: '8px', marginBottom: '0.5rem' }} />
+                      <div style={{ fontWeight: '600', color: '#374151' }}>NIC Front Side</div>
+                    </div>
+                    <div style={{
+                      background: '#f8fafc',
+                      border: '2px dashed #d1d5db',
+                      borderRadius: '12px',
+                      padding: '1rem',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
+                    }}>
+                      <img src={nicBack} alt="NIC Back" style={{ width: '120px', height: '80px', objectFit: 'cover', borderRadius: '8px', marginBottom: '0.5rem' }} />
+                      <div style={{ fontWeight: '600', color: '#374151' }}>NIC Back Side</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* University ID Images */}
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <h4 style={{ fontSize: '1rem', fontWeight: '600', color: '#374151', marginBottom: '0.75rem' }}>University ID Card</h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div style={{
+                      background: '#f8fafc',
+                      border: '2px dashed #d1d5db',
+                      borderRadius: '12px',
+                      padding: '1rem',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
+                    }}>
+                      <img src={uniIdFront} alt="University ID Front" style={{ width: '120px', height: '80px', objectFit: 'cover', borderRadius: '8px', marginBottom: '0.5rem' }} />
+                      <div style={{ fontWeight: '600', color: '#374151' }}>University ID Front</div>
+                    </div>
+                    <div style={{
+                      background: '#f8fafc',
+                      border: '2px dashed #d1d5db',
+                      borderRadius: '12px',
+                      padding: '1rem',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
+                    }}>
+                      <img src={uniIdBack} alt="University ID Back" style={{ width: '120px', height: '80px', objectFit: 'cover', borderRadius: '8px', marginBottom: '0.5rem' }} />
+                      <div style={{ fontWeight: '600', color: '#374151' }}>University ID Back</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recommendation Letter */}
+                <div>
+                  <h4 style={{ fontSize: '1rem', fontWeight: '600', color: '#374151', marginBottom: '0.75rem' }}>Recommendation Letter</h4>
+                  <div style={{
+                    background: 'linear-gradient(135deg, #eff6ff, #dbeafe)',
+                    border: '2px solid #bfdbfe',
+                    borderRadius: '12px',
+                    padding: '1.5rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      <div style={{ fontSize: '2.5rem' }}>📄</div>
+                      <div>
+                        <div style={{ fontWeight: '600', color: '#1e293b' }}>Recommendation Letter PDF</div>
+                        <div style={{ fontSize: '0.875rem', color: '#64748b' }}>From: {selectedMentor.Recommendation}</div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                      <a
+                        href={RecommendationPDF}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          background: '#2563eb',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '8px',
+                          padding: '0.5rem 1rem',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          fontSize: '0.875rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          textDecoration: 'none'
+                        }}
+                      >
+                        <span role="img" aria-label="View PDF">👁️</span> View PDF
+                      </a>
+                      <a
+                        href={RecommendationPDF}
+                        download="Recommendation_Letter.pdf"
+                        style={{
+                          background: '#10b981',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '8px',
+                          padding: '0.5rem 1rem',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          fontSize: '0.875rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          textDecoration: 'none'
+                        }}
+                      >
+                        <span role="img" aria-label="Download">📥</span> Download
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{
+                display: 'flex',
+                gap: '1rem',
+                justifyContent: 'flex-end',
+                borderTop: '1px solid #e2e8f0',
+                paddingTop: '1.5rem'
+              }}>
+                <button 
+                  onClick={() => {
+                    setShowViewModal(false);
+                    handleAcceptMentor(selectedMentor);
+                  }}
+                  style={{
+                    background: 'linear-gradient(135deg, #10b981, #059669)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '0.75rem 1.5rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    fontSize: '0.875rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  ✓ Accept Application
+                </button>
+                <button 
+                  onClick={() => {
+                    setShowViewModal(false);
+                    openRejectModal(selectedMentor);
+                  }}
+                  style={{
+                    background: '#64748b',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '0.75rem 1.5rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    fontSize: '0.875rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  ✗ Reject Application
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Reject Modal */}
       {showRejectModal && (

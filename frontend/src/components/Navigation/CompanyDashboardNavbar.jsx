@@ -95,37 +95,8 @@ export default function CompanyDashboardNavbar({ onMenuClick, sidebarExpanded })
           </div>
 
           <div className="flex items-center space-x-4">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowCalendar(true)}
-              className="p-3 rounded-xl hover:bg-neutral-silver/70 transition-all duration-200 group hover:shadow-sm"
-            >
-              <Calendar className="w-5 h-5 text-neutral-dark-grey group-hover:text-primary-600" />
-            </motion.button>
 
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowChat(true)}
-              className="relative p-3 rounded-xl hover:bg-neutral-silver/70 transition-all duration-200 group hover:shadow-sm"
-            >
-              <MessageCircle className="w-5 h-5 text-neutral-dark-grey group-hover:text-primary-600" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary-500 rounded-full flex items-center justify-center shadow-sm">
-                <span className="text-xs text-white font-bold">3</span>
-              </span>
-            </motion.button>
 
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="relative p-3 rounded-xl hover:bg-neutral-silver/70 transition-all duration-200 group hover:shadow-sm"
-            >
-              <Bell className="w-5 h-5 text-neutral-dark-grey group-hover:text-primary-600" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-error rounded-full flex items-center justify-center shadow-sm">
-                <span className="w-2 h-2 bg-white rounded-full"></span>
-              </span>
-            </motion.button>
 
             <motion.div
               whileHover={{ scale: 1.02 }}

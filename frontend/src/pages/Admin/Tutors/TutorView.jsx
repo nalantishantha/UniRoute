@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getCurrentUser } from '../../../utils/auth';
+import AdminLayout from '../../../components/common/Admin/AdminLayout';
 import {
   GraduationCap,
   Edit,
@@ -163,17 +164,23 @@ const TutorView = () => {
 
   if (loading) {
     return (
-      <div className="p-6">
+      <AdminLayout 
+        pageTitle="Loading..."
+        pageDescription="Loading tutor information"
+      >
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   if (!tutor) {
     return (
-      <div className="p-6">
+      <AdminLayout 
+        pageTitle="Tutor Not Found"
+        pageDescription="The requested tutor could not be found"
+      >
         <div className="text-center py-12">
           <AlertCircle className="mx-auto h-12 w-12 text-red-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">Tutor not found</h3>
@@ -187,12 +194,16 @@ const TutorView = () => {
             </Link>
           </div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="p-6">
+    <AdminLayout 
+      pageTitle={`${tutor.first_name} ${tutor.last_name}`}
+      pageDescription="View tutor details and information"
+    >
+      <div className="max-w-6xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
@@ -583,7 +594,8 @@ const TutorView = () => {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </AdminLayout>
   );
 };
 

@@ -140,7 +140,7 @@ const CourseDetailModal = ({ course, showModal, setShowModal, onSave }) => {
                   )}
                   <button
                     onClick={handleClose}
-                    className="p-2 hover:bg-neutral-silver rounded-lg transition-colors"
+                    className="p-2 transition-colors rounded-lg hover:bg-neutral-silver"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -150,20 +150,20 @@ const CourseDetailModal = ({ course, showModal, setShowModal, onSave }) => {
 
             {/* Content */}
             <div className="p-6 space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 {/* Course Image */}
                 <div>
-                  <label className="block text-sm font-medium text-neutral-black mb-2">
+                  <label className="block mb-2 text-sm font-medium text-neutral-black">
                     Course Thumbnail
                   </label>
                   <div className="relative">
                     <img
                       src={isEditing ? editedCourse.thumbnail : course.thumbnail}
                       alt={isEditing ? editedCourse.title : course.title}
-                      className="w-full h-64 object-cover rounded-lg"
+                      className="object-cover w-full h-64 rounded-lg"
                     />
                     {isEditing && (
-                      <div className="absolute inset-0 bg-black bg-opacity-40 rounded-lg flex items-center justify-center">
+                      <div className="absolute inset-0 flex items-center justify-center bg-black rounded-lg bg-opacity-40">
                         <Button variant="outline" className="bg-white">
                           Change Image
                         </Button>
@@ -176,7 +176,7 @@ const CourseDetailModal = ({ course, showModal, setShowModal, onSave }) => {
                 <div className="space-y-4">
                   {/* Title */}
                   <div>
-                    <label className="block text-sm font-medium text-neutral-black mb-2">
+                    <label className="block mb-2 text-sm font-medium text-neutral-black">
                       Course Title
                     </label>
                     {isEditing ? (
@@ -184,7 +184,7 @@ const CourseDetailModal = ({ course, showModal, setShowModal, onSave }) => {
                         type="text"
                         value={editedCourse.title || ""}
                         onChange={(e) => handleInputChange("title", e.target.value)}
-                        className="w-full px-4 py-2 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                        className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
                       />
                     ) : (
                       <h3 className="text-xl font-semibold text-neutral-black">
@@ -195,14 +195,14 @@ const CourseDetailModal = ({ course, showModal, setShowModal, onSave }) => {
 
                   {/* Category */}
                   <div>
-                    <label className="block text-sm font-medium text-neutral-black mb-2">
+                    <label className="block mb-2 text-sm font-medium text-neutral-black">
                       Category
                     </label>
                     {isEditing ? (
                       <select
                         value={editedCourse.category || ""}
                         onChange={(e) => handleInputChange("category", e.target.value)}
-                        className="w-full px-4 py-2 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                        className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
                       >
                         <option value="Mathematics">Mathematics</option>
                         <option value="Physics">Physics</option>
@@ -219,14 +219,14 @@ const CourseDetailModal = ({ course, showModal, setShowModal, onSave }) => {
 
                   {/* Status */}
                   <div>
-                    <label className="block text-sm font-medium text-neutral-black mb-2">
+                    <label className="block mb-2 text-sm font-medium text-neutral-black">
                       Status
                     </label>
                     {isEditing ? (
                       <select
                         value={editedCourse.status || ""}
                         onChange={(e) => handleInputChange("status", e.target.value)}
-                        className="w-full px-4 py-2 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                        className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
                       >
                         <option value="Draft">Draft</option>
                         <option value="Pending">Pending</option>
@@ -235,7 +235,7 @@ const CourseDetailModal = ({ course, showModal, setShowModal, onSave }) => {
                       </select>
                     ) : (
                       <span
-                        className={`inline - flex px - 3 py - 1 text - sm font - medium rounded - full border ${statusColors[course.status]
+                        className={`inline-flex px-3 py-1 text-sm font-medium rounded-full border ${statusColors[course.status]
                           } `}
                       >
                         {course.status}
@@ -246,7 +246,7 @@ const CourseDetailModal = ({ course, showModal, setShowModal, onSave }) => {
                   {/* Rating */}
                   {course.rating > 0 && (
                     <div>
-                      <label className="block text-sm font-medium text-neutral-black mb-2">
+                      <label className="block mb-2 text-sm font-medium text-neutral-black">
                         Rating
                       </label>
                       <div className="flex items-center space-x-2">
@@ -264,7 +264,7 @@ const CourseDetailModal = ({ course, showModal, setShowModal, onSave }) => {
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-neutral-black mb-2">
+                <label className="block mb-2 text-sm font-medium text-neutral-black">
                   Description
                 </label>
                 {isEditing ? (
@@ -272,17 +272,17 @@ const CourseDetailModal = ({ course, showModal, setShowModal, onSave }) => {
                     rows="4"
                     value={editedCourse.description || ""}
                     onChange={(e) => handleInputChange("description", e.target.value)}
-                    className="w-full px-4 py-2 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                    className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
                   />
                 ) : (
-                  <p className="text-neutral-grey leading-relaxed">
+                  <p className="leading-relaxed text-neutral-grey">
                     {course.description}
                   </p>
                 )}
               </div>
 
               {/* Course Details Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                 {/* Price */}
                 <Card>
                   <CardContent className="p-4">
@@ -295,7 +295,7 @@ const CourseDetailModal = ({ course, showModal, setShowModal, onSave }) => {
                             type="number"
                             value={editedCourse.price || ""}
                             onChange={(e) => handleInputChange("price", e.target.value)}
-                            className="w-full mt-1 px-2 py-1 border border-neutral-light-grey rounded focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                            className="w-full px-2 py-1 mt-1 border rounded border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
                           />
                         ) : (
                           <p className="font-semibold text-neutral-black">
@@ -319,7 +319,7 @@ const CourseDetailModal = ({ course, showModal, setShowModal, onSave }) => {
                             type="text"
                             value={editedCourse.duration || ""}
                             onChange={(e) => handleInputChange("duration", e.target.value)}
-                            className="w-full mt-1 px-2 py-1 border border-neutral-light-grey rounded focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                            className="w-full px-2 py-1 mt-1 border rounded border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
                           />
                         ) : (
                           <p className="font-semibold text-neutral-black">
