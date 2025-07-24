@@ -103,7 +103,7 @@ const FindMentors = () => {
                 filteredMentors.map((mentor) => (
                   <div
                     key={mentor.id}
-                    className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                    className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col h-full"
                   >
                     {/* Mentor Header */}
                     <div className="relative h-32 bg-gradient-to-r from-blue-500 to-primary-500">
@@ -156,7 +156,7 @@ const FindMentors = () => {
                       </div>
                     </div>
 
-                    <div className="p-4">
+                    <div className="p-4 flex flex-col flex-grow">
                       {/* degree */}
                       <div className="mb-4">
                         <div className="bg-gradient-to-r from-blue-100 to-blue-50 rounded-lg p-3 border border-blue-200/50">
@@ -175,7 +175,7 @@ const FindMentors = () => {
                       </p>
 
                       {/* Stats */}
-                      <div className="flex items-center justify-between mb-4 text-xs">
+                      <div className="flex items-center justify-between mb-4 text-xs flex-grow">
                         <div className="flex items-center space-x-3">
                           <div className="flex items-center space-x-1">
                             <Users className="h-3 w-3 text-blue-700" />
@@ -199,10 +199,10 @@ const FindMentors = () => {
                       </div>
 
                       {/* Connect Button */}
-                      <div className="border-t border-accent-100 pt-3">
+                      <div className="border-t border-accent-100 pt-3 mt-auto">
                         <button
                           onClick={() => handleConnect(mentor)}
-                          className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all duration-200 flex items-center justify-center space-x-2 font-medium text-sm hover:shadow-lg transform hover:-translate-y-0.5"
+                          className="w-full bg-primary-400 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-all duration-200 flex items-center justify-center space-x-2 font-medium text-sm hover:shadow-lg"
                         >
                           <MessageCircle className="h-4 w-4" />
                           <span>Connect</span>

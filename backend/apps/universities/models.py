@@ -75,3 +75,48 @@ class UniversityServices(models.Model):
     class Meta:
         managed = True
         db_table = 'university_services'
+
+
+class UniversityRequests(models.Model):
+    REQUEST_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+    
+    request_id = models.AutoField(primary_key=True)
+    
+    # University information from registration form
+    university_name = models.CharField(max_length=100)
+    contact_person_name = models.CharField(max_length=100)
+    contact_person_title = models.CharField(max_length=50, blank=True, null=True)
+    email = models.CharField(max_length=100)
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
+    password_hash = models.CharField(max_length=255)  # Store hashed password
+    
+    # University details
+    location = models.CharField(max_length=100, blank=True, null=True)
+    district = models.CharField(max_length=50, blank=True, null=True)
+    address = models.CharField(max_length=255, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    website = models.CharField(max_length=255, blank=True, null=True)
+    established_year = models.IntegerField(blank=True, null=True)
+    
+    # Request management
+    status = models.CharField(max_length=10, choices=REQUEST_STATUS_CHOICES, default='pending')
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    reviewed_at = models.DateTimeField(blank=True, null=True)
+    reviewed_by = models.ForeignKey('accounts.Users', models.DO_NOTHING, blank=True, null=True, related_name='reviewed_university_requests')
+    rejection_reason = models.TextField(blank=True, null=True)
+    
+    # Created university reference (after approval)
+    created_user = models.ForeignKey('accounts.Users', models.DO_NOTHING, blank=True, null=True, related_name='university_account')
+    created_university = models.ForeignKey('Universities', models.DO_NOTHING, blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'university_requests'
+        ordering = ['-submitted_at']
+
+    def __str__(self):
+        return f"{self.university_name} - {self.status}"

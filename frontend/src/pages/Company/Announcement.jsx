@@ -77,7 +77,7 @@ const styles = {
     margin: 0
   },
   btnAddNew: {
-    background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
+    background: ' #174A7C var(--tw-gradient-to-position)',
     color: 'white',
     border: 'none',
     padding: '0.75rem 1.5rem',
@@ -187,8 +187,8 @@ const styles = {
     height: 28,
     boxShadow: '0 2px 4px rgba(0, 0, 0, 0.06)',
     background: status === 'draft'
-      ? 'linear-gradient(135deg, #537fa5ff, #5233c1ff)'
-      : 'linear-gradient(135deg, #25deebff, #3b82f6)'
+      ? 'linear-gradient(135deg, #655c5cff, #555551ff)'
+      : ' #174A7C var(--tw-gradient-to-position)'
   }),
   actionButtons: {
     display: 'flex',
@@ -310,7 +310,7 @@ const styles = {
     outline: 'none'
   },
   newsletterBtn: {
-    background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
+    background: '#174A7C var(--tw-gradient-to-position)',
     color: 'white',
     border: 'none',
     padding: '0.75rem 1.5rem',

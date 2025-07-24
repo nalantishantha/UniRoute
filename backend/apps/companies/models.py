@@ -85,3 +85,26 @@ class CompanyEventRegistrations(models.Model):
         managed = True
         db_table = 'company_event_registrations'
 
+
+class CompanyRequests(models.Model):
+    request_id = models.AutoField(primary_key=True)
+    company_name = models.CharField(max_length=255)
+    contact_person_name = models.CharField(max_length=255)
+    contact_person_title = models.CharField(max_length=100, blank=True, null=True)
+    email = models.EmailField(max_length=100)
+    phone_number = models.CharField(max_length=50)
+    password_hash = models.CharField(max_length=255)
+    address = models.CharField(max_length=255, blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    website = models.URLField(max_length=255, blank=True, null=True)
+    industry = models.CharField(max_length=100, blank=True, null=True)
+    company_size = models.CharField(max_length=50, blank=True, null=True)  # e.g., "1-10", "11-50", "51-200", etc.
+    established_year = models.IntegerField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    request_date = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, default='pending')  # pending, approved, rejected
+    
+    class Meta:
+        managed = True
+        db_table = 'company_requests'
+

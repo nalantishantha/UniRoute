@@ -138,21 +138,20 @@
   margin: 0;
 }
 
-.btn-add-new {
-  background: linear-gradient(135deg, #10b981, #059669);
+.internship-btn-add-new {
+  background:#174A7C var(--tw-gradient-to-position);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 600;/*  */
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .btn-add-new:hover {
-  background: linear-gradient(135deg, #059669, #047857);
+  background: linear-gradient(135deg, #2e0596, #310fb6);
   transform: translateY(-2px);
 }
 
@@ -351,6 +350,18 @@
   border-top: 1px solid #f3f4f6;
 }
 
+.action-buttons-top {
+  display: flex;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.action-buttons-bottom {
+  display: flex;
+  justify-content: center;
+}
+
+/* View Button - Match Course.css exactly */
 .btn-view {
   flex: 1;
   background: transparent;
@@ -371,15 +382,16 @@
   transform: translateY(-1px);
 }
 
+/* Edit Button - Match Course.css exactly */
 .btn-edit {
   flex: 1;
-  background: linear-gradient(rgba(49, 43, 167, 0.8), rgba(177, 160, 195, 0.8));
+  background: #174A7C var(--tw-gradient-to-position);
   color: white;
   border: none;
   padding: 0.6rem 1rem;
   border-radius: 8px;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 600;/*  */
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: center;
@@ -388,6 +400,39 @@
 .btn-edit:hover {
   background: linear-gradient(rgba(4, 2, 36, 0.8), rgba(71, 79, 127, 0.8));
   transform: translateY(-1px);
+}
+
+/* Delete Button - Match Course.css exactly */
+.btn-delete-full {
+  position: absolute;
+  top: 2px;
+  left: 350px;
+  background: transparent;
+  color: rgb(255, 0, 0);
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: bold;
+  z-index: 10;
+  transition: all 0.2s ease;
+  opacity: 0.9;
+}
+
+.btn-delete-full:hover {
+  background: #dc2626;
+  transform: scale(1.1);
+  opacity: 1;
+}
+
+.btn-delete-full:before {
+  content: '✕';
+  font-weight: bold;
 }
 
 /* Statistics Section */

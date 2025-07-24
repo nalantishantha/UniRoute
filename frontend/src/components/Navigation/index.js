@@ -5,3 +5,5 @@ export { default as UniversityStudentNavbar } from './UniversityStudentNavbar';
 export { default as UniversityStudentLayout } from './UniversityStudentLayout';
 export { default as AdminNavbar } from './AdminNavbar';
 export { default as AdminLayout } from './AdminLayout';
+export { default as CounsellorLayout } from './CounsellorLayout';
+export { default as CounsellorNavbar } from './CounsellorNavbar';

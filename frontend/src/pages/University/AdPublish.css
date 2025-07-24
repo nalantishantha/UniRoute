@@ -1273,7 +1273,7 @@
 }
 
 .company-adpublish-admin-form-radio:checked + * {
-  border-color: #3b82f6;
+  border-color: #174A7C var(--tw-gradient-to-position);
   background: #eff6ff;
 }
 

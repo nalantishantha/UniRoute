@@ -18,6 +18,8 @@ import { Reports, ReportDetails } from '../pages/Admin/Reports'
 import { AdminSettings } from '../pages/Admin';
 import { RequestsList, RequestDetails } from '../pages/Admin/Requests';
 import AdvertisementRequests from '../pages/Admin/Requests/AdvertisementRequests';
+import UniversityRequests from '../pages/Admin/Requests/UniversityRequests';
+import CompanyRequests from '../pages/Admin/Requests/CompanyRequests';
 
 const AdminRoutes = () => {
   return (
@@ -89,6 +91,8 @@ const AdminRoutes = () => {
         {/* Requests Management */}
         <Route path="/requests" element={<RequestsList />} />
         <Route path="/requests/advertisements" element={<AdvertisementRequests />} />
+        <Route path="/requests/universities" element={<UniversityRequests />} />
+        <Route path="/requests/companies" element={<CompanyRequests />} />
         <Route path="/requests/advertisement/:requestId" element={<RequestDetails />} />
 
         {/* Report Management */}
