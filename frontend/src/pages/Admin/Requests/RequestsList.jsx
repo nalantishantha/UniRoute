@@ -81,11 +81,11 @@ const RequestsList = () => {
   }, []);
 
   // Mock user data
-  const user = {
-    first_name: 'John',
-    last_name: 'Admin',
-    email: 'admin@uniroute.com'
-  };
+  // const user = {
+  //   first_name: 'John',
+  //   last_name: 'Admin',
+  //   email: 'admin@uniroute.com'
+  // };
 
   const handleViewAllAds = () => {
     navigate('/admin/requests/advertisements');

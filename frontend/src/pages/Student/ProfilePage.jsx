@@ -15,11 +15,11 @@ import {
 
 const ProfilePage = () => {
   const studentData = {
-    name: "Gaja Man",
-    email: "kasun.perera@example.com",
+    name: "Kavindi Danushka",
+    email: "kavi@gmail.com",
     phone: "+94 77 123 4567",
-    district: "Colombo",
-    school: "Royal College",
+    district: "Kandy",
+    school: "Maliyadeva Girls' College",
     alStream: "Physical Science",
     alYear: "2023",
     subjects: ["Combined Mathematics", "Physics", "Chemistry"],
@@ -49,7 +49,7 @@ const ProfilePage = () => {
         {/* Profile Card */}
         <div className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden mb-8">
           {/* Profile Header */}
-          <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-12">
+          <div className="relative bg-gradient-to-r from-blue-500 to-primary-500 px-8 py-12">
             <div className="flex flex-col lg:flex-row items-center lg:items-start space-y-6 lg:space-y-0 lg:space-x-8">
               {/* Profile Image */}
               <div className="relative">
