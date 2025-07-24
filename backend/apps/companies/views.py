@@ -692,21 +692,11 @@ def approve_company_request(request, request_id):
                 )
                 
                 # Create user details
-                name_parts = company_request.contact_person_name.split()
-                first_name = name_parts[0] if name_parts else ''
-                last_name = ' '.join(name_parts[1:]) if len(name_parts) > 1 else ''
-                
                 UserDetails.objects.create(
                     user=user,
-                    first_name=first_name,
-                    last_name=last_name,
+                    full_name=company_request.contact_person_name,
                     contact_number=company_request.phone_number or '',
-                    additional_info=json.dumps({
-                        'contact_person_title': company_request.contact_person_title,
-                        'industry': company_request.industry,
-                        'company_size': company_request.company_size,
-                        'established_year': company_request.established_year
-                    }),
+                    bio=f"Contact Person: {company_request.contact_person_title or 'N/A'}, Industry: {company_request.industry or 'N/A'}, Company Size: {company_request.company_size or 'N/A'}",
                     is_verified=1,
                     updated_at=timezone.now()
                 )

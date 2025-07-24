@@ -200,7 +200,9 @@ const MentorConnection = () => {
                       <h3 className="font-display font-bold text-lg text-white leading-tight drop-shadow-md">
                         {mentor.name}
                       </h3>
-                      <p className="text-white/95 text-xs drop-shadow-sm">{mentor.title}</p>
+                      <p className="text-white/95 text-xs drop-shadow-sm">
+                        {mentor.title}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -240,6 +242,79 @@ const MentorConnection = () => {
                   <p className="text-primary-400 font-semibold text-sm pl-5">
                     {mentor.location}
                   </p>
+                </div>
+
+                {/* Reviews Section */}
+                <div className="border-t border-accent-100 pt-4">
+                  <h4 className="font-semibold text-primary-400 mb-3 flex items-center space-x-2">
+                    <Star className="h-4 w-4" />
+                    <span>Student Reviews</span>
+                  </h4>
+                  <div className="space-y-3">
+                    {/* Review 1 */}
+                    <div className="bg-blue-50 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium text-blue-900 text-sm">
+                          Saman Perera
+                        </span>
+                        <div className="flex items-center space-x-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className="h-3 w-3 text-yellow-400 fill-current"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-blue-800 text-xs leading-relaxed">
+                        "Really helpful session! Got great advice on university
+                        selection and career paths."
+                      </p>
+                    </div>
+
+                    {/* Review 2 */}
+                    <div className="bg-blue-50 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium text-blue-900 text-sm">
+                          Nimal Silva
+                        </span>
+                        <div className="flex items-center space-x-1">
+                          {[...Array(4)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className="h-3 w-3 text-yellow-400 fill-current"
+                            />
+                          ))}
+                          <Star className="h-3 w-3 text-gray-300" />
+                        </div>
+                      </div>
+                      <p className="text-blue-800 text-xs leading-relaxed">
+                        "Very knowledgeable about the engineering field.
+                        Answered all my questions clearly."
+                      </p>
+                    </div>
+
+                    {/* Review 3 */}
+                    <div className="bg-blue-50 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium text-blue-900 text-sm">
+                          Kavitha Fernando
+                        </span>
+                        <div className="flex items-center space-x-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className="h-3 w-3 text-yellow-400 fill-current"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-blue-800 text-xs leading-relaxed">
+                        "Excellent mentor! Provided practical tips for exam
+                        preparation and university applications."
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
