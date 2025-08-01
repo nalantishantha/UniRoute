@@ -593,3 +593,201 @@ def get_internship_details(request, internship_id):
         'success': False,
         'message': 'Only GET method allowed'
     }, status=405)
+
+
+# Company Request Management Functions
+@csrf_exempt
+def company_requests_list(request):
+    """Get all company registration requests"""
+    if request.method == 'GET':
+        try:
+            from .models import CompanyRequests
+            
+            # Get all pending company requests
+            requests = CompanyRequests.objects.all().order_by('-request_date')
+            
+            requests_data = []
+            for req in requests:
+                requests_data.append({
+                    'request_id': req.request_id,
+                    'company_name': req.company_name,
+                    'contact_person_name': req.contact_person_name,
+                    'contact_person_title': req.contact_person_title,
+                    'email': req.email,
+                    'phone_number': req.phone_number,
+                    'address': req.address,
+                    'city': req.city,
+                    'website': req.website,
+                    'industry': req.industry,
+                    'company_size': req.company_size,
+                    'established_year': req.established_year,
+                    'description': req.description,
+                    'request_date': req.request_date.isoformat() if req.request_date else None,
+                    'status': req.status
+                })
+            
+            return JsonResponse({
+                'success': True,
+                'requests': requests_data,
+                'total_count': len(requests_data)
+            })
+            
+        except Exception as e:
+            print(f"Error fetching company requests: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': f'Error fetching company requests: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only GET method allowed'
+    }, status=405)
+
+
+@csrf_exempt
+def approve_company_request(request, request_id):
+    """Approve a company registration request"""
+    if request.method == 'POST':
+        try:
+            from .models import CompanyRequests
+            from apps.accounts.models import Users, UserDetails, UserTypes
+            from django.contrib.auth.hashers import make_password
+            
+            # Get the company request
+            try:
+                company_request = CompanyRequests.objects.get(request_id=request_id)
+            except CompanyRequests.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Company request not found'
+                }, status=404)
+            
+            if company_request.status != 'pending':
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Company request is already {company_request.status}'
+                }, status=400)
+            
+            with transaction.atomic():
+                # Create username from company name
+                username = company_request.company_name.lower().replace(' ', '.').replace('-', '.')
+                original_username = username
+                counter = 1
+                while Users.objects.filter(username=username).exists():
+                    username = f"{original_username}{counter}"
+                    counter += 1
+                
+                # Get company user type (using ID 4 - company)
+                company_user_type = UserTypes.objects.get(type_id=4)
+                
+                # Create user account
+                user = Users.objects.create(
+                    username=username,
+                    email=company_request.email,
+                    password_hash=company_request.password_hash,  # Already hashed
+                    user_type=company_user_type,
+                    is_active=1,  # Activate the account
+                    created_at=timezone.now()
+                )
+                
+                # Create user details
+                UserDetails.objects.create(
+                    user=user,
+                    full_name=company_request.contact_person_name,
+                    contact_number=company_request.phone_number or '',
+                    bio=f"Contact Person: {company_request.contact_person_title or 'N/A'}, Industry: {company_request.industry or 'N/A'}, Company Size: {company_request.company_size or 'N/A'}",
+                    is_verified=1,
+                    updated_at=timezone.now()
+                )
+                
+                # Create company record
+                company = Companies.objects.create(
+                    name=company_request.company_name,
+                    description=company_request.description,
+                    address=company_request.address,
+                    district=company_request.city,
+                    contact_email=company_request.email,
+                    contact_phone=company_request.phone_number,
+                    website=company_request.website,
+                    created_at=timezone.now()
+                )
+                
+                # Update request status
+                company_request.status = 'approved'
+                company_request.save()
+                
+                print(f"✅ Company request {request_id} approved successfully")
+                print(f"✅ Created user: {user.username} (ID: {user.user_id})")
+                print(f"✅ Created company: {company.name} (ID: {company.company_id})")
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Company request approved successfully!',
+                    'user_id': user.user_id,
+                    'company_id': company.company_id,
+                    'username': user.username
+                })
+                
+        except Exception as e:
+            print(f"Error approving company request: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': f'Error approving company request: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only POST method allowed'
+    }, status=405)
+
+
+@csrf_exempt
+def reject_company_request(request, request_id):
+    """Reject a company registration request"""
+    if request.method == 'POST':
+        try:
+            from .models import CompanyRequests
+            
+            # Get the company request
+            try:
+                company_request = CompanyRequests.objects.get(request_id=request_id)
+            except CompanyRequests.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Company request not found'
+                }, status=404)
+            
+            if company_request.status != 'pending':
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Company request is already {company_request.status}'
+                }, status=400)
+            
+            # Get rejection reason from request body
+            data = json.loads(request.body) if request.body else {}
+            rejection_reason = data.get('reason', 'Request rejected by administrator')
+            
+            # Update request status
+            company_request.status = 'rejected'
+            company_request.save()
+            
+            print(f"✅ Company request {request_id} rejected")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Company request rejected successfully',
+                'reason': rejection_reason
+            })
+            
+        except Exception as e:
+            print(f"Error rejecting company request: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': f'Error rejecting company request: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only POST method allowed'
+    }, status=405)

@@ -65,7 +65,7 @@ const CompanyRegisterPage = () => {
         website: formData.website,
         industry: formData.industry,
         companySize: formData.companySize,
-        foundedYear: formData.foundedYear,
+        establishedYear: formData.foundedYear,
         description: formData.description
       };
 
@@ -126,7 +126,7 @@ const CompanyRegisterPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FFF3E0] to-[#FFE0B2] flex flex-col">
       {/* Header */}
-      <div className="bg-white/95 backdrop-blur-md border-b border-[#FFE0B2]">
+      <div className="bg-white/95 backdrop-blur-md border-b border-gray-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link to="/register" className="flex items-center space-x-2 text-[#F57C00] hover:text-[#E65100] transition-colors">
@@ -152,7 +152,7 @@ const CompanyRegisterPage = () => {
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-2xl w-full">
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-[#FFE0B2]">
+          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-300">
             {/* Header */}
             <div className="text-center mb-8">
               <div className="bg-[#FFF3E0] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -201,7 +201,7 @@ const CompanyRegisterPage = () => {
                     name="companyName"
                     value={formData.companyName}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 border border-[#FFE0B2] rounded-xl focus:ring-2 focus:ring-[#F57C00] focus:border-[#F57C00] transition-all bg-white"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white"
                     placeholder="Enter company name"
                     required
                     disabled={isLoading}
@@ -223,7 +223,7 @@ const CompanyRegisterPage = () => {
                       name="contactPersonName"
                       value={formData.contactPersonName}
                       onChange={handleInputChange}
-                      className="w-full pl-10 pr-4 py-3 border border-[#FFE0B2] rounded-xl focus:ring-2 focus:ring-[#F57C00] focus:border-[#F57C00] transition-all bg-white"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white"
                       placeholder="Contact person name"
                       required
                       disabled={isLoading}
@@ -243,7 +243,7 @@ const CompanyRegisterPage = () => {
                       name="contactPersonTitle"
                       value={formData.contactPersonTitle}
                       onChange={handleInputChange}
-                      className="w-full pl-10 pr-4 py-3 border border-[#FFE0B2] rounded-xl focus:ring-2 focus:ring-[#F57C00] focus:border-[#F57C00] transition-all bg-white"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white"
                       placeholder="e.g. HR Manager"
                       required
                       disabled={isLoading}
@@ -266,7 +266,7 @@ const CompanyRegisterPage = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="w-full pl-10 pr-4 py-3 border border-[#FFE0B2] rounded-xl focus:ring-2 focus:ring-[#F57C00] focus:border-[#F57C00] transition-all bg-white"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white"
                       placeholder="business@company.com"
                       required
                       disabled={isLoading}
@@ -286,7 +286,7 @@ const CompanyRegisterPage = () => {
                       name="phoneNumber"
                       value={formData.phoneNumber}
                       onChange={handleInputChange}
-                      className="w-full pl-10 pr-4 py-3 border border-[#FFE0B2] rounded-xl focus:ring-2 focus:ring-[#F57C00] focus:border-[#F57C00] transition-all bg-white"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white"
                       placeholder="077 123 4567"
                       required
                       disabled={isLoading}
@@ -309,7 +309,7 @@ const CompanyRegisterPage = () => {
                       name="address"
                       value={formData.address}
                       onChange={handleInputChange}
-                      className="w-full pl-10 pr-4 py-3 border border-[#FFE0B2] rounded-xl focus:ring-2 focus:ring-[#F57C00] focus:border-[#F57C00] transition-all bg-white"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white"
                       placeholder="Company address"
                       required
                       disabled={isLoading}
@@ -327,7 +327,7 @@ const CompanyRegisterPage = () => {
                     name="city"
                     value={formData.city}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-[#FFE0B2] rounded-xl focus:ring-2 focus:ring-[#F57C00] focus:border-[#F57C00] transition-all bg-white"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white"
                     placeholder="City"
                     required
                     disabled={isLoading}
@@ -349,7 +349,7 @@ const CompanyRegisterPage = () => {
                       name="website"
                       value={formData.website}
                       onChange={handleInputChange}
-                      className="w-full pl-10 pr-4 py-3 border border-[#FFE0B2] rounded-xl focus:ring-2 focus:ring-[#F57C00] focus:border-[#F57C00] transition-all bg-white"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white"
                       placeholder="https://www.company.com"
                       disabled={isLoading}
                     />
@@ -365,7 +365,7 @@ const CompanyRegisterPage = () => {
                     name="industry"
                     value={formData.industry}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-[#FFE0B2] rounded-xl focus:ring-2 focus:ring-[#F57C00] focus:border-[#F57C00] transition-all bg-white"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white"
                     required
                     disabled={isLoading}
                   >
@@ -390,7 +390,7 @@ const CompanyRegisterPage = () => {
                       name="companySize"
                       value={formData.companySize}
                       onChange={handleInputChange}
-                      className="w-full pl-10 pr-4 py-3 border border-[#FFE0B2] rounded-xl focus:ring-2 focus:ring-[#F57C00] focus:border-[#F57C00] transition-all bg-white"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white"
                       required
                       disabled={isLoading}
                     >
@@ -412,7 +412,7 @@ const CompanyRegisterPage = () => {
                     name="foundedYear"
                     value={formData.foundedYear}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-[#FFE0B2] rounded-xl focus:ring-2 focus:ring-[#F57C00] focus:border-[#F57C00] transition-all bg-white"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white"
                     placeholder="e.g. 2010"
                     min="1800"
                     max={new Date().getFullYear()}
@@ -434,7 +434,7 @@ const CompanyRegisterPage = () => {
                     value={formData.description}
                     onChange={handleInputChange}
                     rows={4}
-                    className="w-full pl-10 pr-4 py-3 border border-[#FFE0B2] rounded-xl focus:ring-2 focus:ring-[#F57C00] focus:border-[#F57C00] transition-all bg-white resize-none"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white resize-none"
                     placeholder="Brief description of your company, what you do, and what kind of internships/opportunities you offer..."
                     disabled={isLoading}
                   />
@@ -455,7 +455,7 @@ const CompanyRegisterPage = () => {
                       name="password"
                       value={formData.password}
                       onChange={handleInputChange}
-                      className="w-full pl-10 pr-12 py-3 border border-[#FFE0B2] rounded-xl focus:ring-2 focus:ring-[#F57C00] focus:border-[#F57C00] transition-all bg-white"
+                      className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white"
                       placeholder="Create password"
                       required
                       disabled={isLoading}
@@ -483,7 +483,7 @@ const CompanyRegisterPage = () => {
                       name="confirmPassword"
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
-                      className="w-full pl-10 pr-12 py-3 border border-[#FFE0B2] rounded-xl focus:ring-2 focus:ring-[#F57C00] focus:border-[#F57C00] transition-all bg-white"
+                      className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white"
                       placeholder="Confirm password"
                       required
                       disabled={isLoading}
@@ -509,7 +509,7 @@ const CompanyRegisterPage = () => {
                     name="agreeToTerms"
                     checked={formData.agreeToTerms}
                     onChange={handleInputChange}
-                    className="h-4 w-4 text-[#F57C00] border-[#FFE0B2] rounded focus:ring-[#F57C00] mt-0.5"
+                    className="h-4 w-4 text-[#F57C00] border-gray-300 rounded focus:ring-blue-500 mt-0.5"
                     required
                     disabled={isLoading}
                   />
@@ -532,7 +532,7 @@ const CompanyRegisterPage = () => {
                     name="receiveUpdates"
                     checked={formData.receiveUpdates}
                     onChange={handleInputChange}
-                    className="h-4 w-4 text-[#F57C00] border-[#FFE0B2] rounded focus:ring-[#F57C00] mt-0.5"
+                    className="h-4 w-4 text-[#F57C00] border-gray-300 rounded focus:ring-blue-500 mt-0.5"
                     disabled={isLoading}
                   />
                   <label htmlFor="receiveUpdates" className="text-sm text-[#717171]">

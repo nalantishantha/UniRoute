@@ -299,7 +299,7 @@ const Course = () => {
         <section className="course-section-unique">
           <div className="course-section-header-unique">
             <h2>All Courses</h2>
-            <button className="btn-add-new" onClick={handleAddNew}>
+            <button className="course-company-btn-add-new" onClick={handleAddNew}>
               + New Course
             </button>
           </div>

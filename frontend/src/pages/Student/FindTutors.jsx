@@ -152,7 +152,7 @@ const FindTutors = () => {
           {tutors.map((tutor) => (
             <div
               key={tutor.id}
-              className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+              className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col h-full"
             >
               {/* Tutor Header */}
               <div className="relative h-32 bg-gradient-to-r from-blue-500 to-primary-500">
@@ -205,7 +205,7 @@ const FindTutors = () => {
                 </div>
               </div>
 
-              <div className="p-4">
+              <div className="p-4 flex flex-col flex-grow">
                 {/* Subject Expertise */}
                 <div className="mb-4">
                   <div className="bg-gradient-to-r from-blue-100 to-primary-50 rounded-lg p-3">
@@ -238,13 +238,13 @@ const FindTutors = () => {
                 </div>
 
                 {/* Location */}
-                <div className="flex items-center space-x-1 mb-4">
+                <div className="flex items-center space-x-1 mb-4 flex-grow">
                   <MapPin className="h-3 w-3 text-primary-700" />
                   <span className="text-primary-700 text-xs">{tutor.location}</span>
                 </div>
 
                 {/* Book Session Button */}
-                <div className="border-t border-accent-100 pt-3">
+                <div className="border-t border-accent-100 pt-3 mt-auto">
                   <button 
                     onClick={() => handleBookSession(tutor)}
                     className="w-full bg-primary-400 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-all duration-200 flex items-center justify-center space-x-2 font-medium text-sm hover:shadow-lg"

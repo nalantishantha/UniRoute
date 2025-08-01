@@ -105,17 +105,20 @@
 
 /* Keep all existing edit button styles */
 .stats-edit-btn {
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
   border-radius: 8px;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 0.9rem;
   transition: all 0.3s ease;
 }
 
 .stats-edit-btn:hover {
-  background: #e5e7eb;
+  background: #f8fafc;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
 }
 
 /* Hero Edit Button */
@@ -174,17 +177,20 @@
 }
 
 .stats-edit-btn {
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
   border-radius: 8px;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 0.9rem;
   transition: all 0.3s ease;
 }
 
 .stats-edit-btn:hover {
-  background: #e5e7eb;
+  background: #f8fafc;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
 }
 
 .stat-edit-individual-btn {
@@ -220,63 +226,67 @@
 }
 
 .section-edit-btn {
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
   border-radius: 6px;
-  padding: 0.3rem 0.8rem;
-  cursor: pointer;
+  padding: 0.5rem 1rem;
   font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .section-edit-btn:hover {
-  background: #e5e7eb;
+  background: #f8fafc;
+  transform: translateY(-2px);
 }
 
 /* Action Card Edit Button */
 .action-edit-btn {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  background: rgba(255,255,255,0.9);
-  border: 1px solid #d1d5db;
+  top: 10px;
+  right: 10px;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
   border-radius: 4px;
   padding: 0.3rem 0.5rem;
   font-size: 0.7rem;
   cursor: pointer;
-  z-index: 10;
   transition: all 0.3s ease;
 }
 
 .action-edit-btn:hover {
-  background: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background: #f8fafc;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 }
 
 /* Activity Item Edit Button */
 .activity-edit-btn {
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
   border-radius: 4px;
-  padding: 0.2rem 0.5rem;
+  padding: 0.3rem 0.6rem;
   font-size: 0.7rem;
   cursor: pointer;
-  margin-left: 0.5rem;
   transition: all 0.3s ease;
 }
 
 .activity-edit-btn:hover {
-  background: #e5e7eb;
+  background: #f8fafc;
+  transform: scale(1.05);
 }
 
 /* Metric Card Edit Button */
 .metric-edit-btn {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  background: #3b82f6;
-  color: white;
-  border: none;
+  top: 10px;
+  right: 10px;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
   border-radius: 4px;
   padding: 0.3rem 0.5rem;
   font-size: 0.7rem;
@@ -285,15 +295,17 @@
 }
 
 .metric-edit-btn:hover {
-  background: #2563eb;
+  background: #f8fafc;
+  transform: scale(1.05);
 }
 
 /* Status Item Edit Button */
 .status-edit-btn {
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
   border-radius: 4px;
-  padding: 0.2rem 0.5rem;
+  padding: 0.3rem 0.6rem;
   font-size: 0.7rem;
   cursor: pointer;
   margin-left: auto;
@@ -301,7 +313,8 @@
 }
 
 .status-edit-btn:hover {
-  background: #e5e7eb;
+  background: #f8fafc;
+  transform: scale(1.05);
 }
 
 /* Update status-item to accommodate edit button */
@@ -387,7 +400,7 @@
 .stats-header h2 {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #1e293b;
+  color: #174A7C var(--tw-gradient-to-position);
   margin-bottom: 0.5rem;
 }
 
@@ -397,28 +410,67 @@
 }
 
 .stats-edit-btn {
-  background: #6366f1;
-  color: white;
-  border: none;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
   padding: 0.75rem 1.5rem;
-  border-radius: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .stats-edit-btn:hover {
-  background: #5b21b6;
+  background: #f8fafc;
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
 }
 
-.dashboard-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-  max-width: 1200px;
+
+.dashboard-stats-row-unique {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 1.5rem !important;
+  justify-content: center;
+  align-items: stretch;
+  max-width: 1400px;
   margin: 0 auto;
+}
+
+/* Unique alignment for stat cards row to match grid below */
+.dashboard-stats-align-row {
+  max-width: 100%;         /* Make it full width of the container */
+  margin-left: 0;          /* Remove side margins */
+  margin-right: 0;
+  padding-left: 2rem;      /* Match your grid-section horizontal padding */
+  padding-right: 2rem;
+  box-sizing: border-box;
+}
+
+.dashboard-stats-row-unique {
+  display: flex;
+  gap: 2.5rem;
+  justify-content: space-between;
+  align-items: stretch;
+  
+}
+
+/* Responsive: Stack on small screens */
+@media (max-width: 1100px) {
+  .dashboard-stats-row-unique {
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+  .dashboard-stats-align-row {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+
+/* Ensure stat-card flexes properly in the row */
+.dashboard-stats-row-unique .stat-card {
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .stat-card {
@@ -512,18 +564,18 @@
   position: absolute;
   top: 10px;
   right: 10px;
-  background: #f59e0b;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
   border-radius: 8px;
+  padding: 0.5rem 1rem;
   font-size: 0.8rem;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .stat-edit-individual-btn:hover {
-  background: #d97706;
+  background: #f8fafc;
   transform: scale(1.05);
 }
 
@@ -574,11 +626,11 @@
 }
 
 .section-edit-btn {
-  background: #f59e0b;
-  color: white;
-  border: none;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
+  border-radius: 6px;
   padding: 0.5rem 1rem;
-  border-radius: 8px;
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
@@ -586,7 +638,7 @@
 }
 
 .section-edit-btn:hover {
-  background: #d97706;
+  background: #f8fafc;
   transform: translateY(-2px);
 }
 
@@ -706,19 +758,19 @@
   position: absolute;
   top: 10px;
   right: 10px;
-  background: #f59e0b;
-  color: white;
-  border: none;
-  padding: 0.5rem;
-  border-radius: 8px;
-  font-size: 0.8rem;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
+  border-radius: 4px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.7rem;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .action-edit-btn:hover {
-  background: #d97706;
-  transform: scale(1.05);
+  background: #f8fafc;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 }
 
 /* Activities Section */
@@ -795,9 +847,14 @@
 }
 
 .priority-badge {
-  padding: 0.25rem 0.75rem;
+  width: 80px;              /* Fixed width */
+  height: 32px;             /* Fixed height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;               /* Remove extra padding */
   border-radius: 12px;
-  font-size: 0.7rem;
+  font-size: 0.9rem;        /* Slightly larger for visibility */
   font-weight: 600;
   text-transform: uppercase;
 }
@@ -810,18 +867,18 @@
   position: absolute;
   top: 10px;
   right: 10px;
-  background: #f59e0b;
-  color: white;
-  border: none;
-  padding: 0.3rem 0.6rem;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
   border-radius: 6px;
+  padding: 0.3rem 0.6rem;
   font-size: 0.7rem;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .activity-edit-btn:hover {
-  background: #d97706;
+  background: #f8fafc;
   transform: scale(1.05);
 }
 
@@ -891,18 +948,18 @@
   position: absolute;
   top: 10px;
   right: 10px;
-  background: #f59e0b;
-  color: white;
-  border: none;
-  padding: 0.3rem 0.6rem;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
   border-radius: 6px;
+  padding: 0.3rem 0.6rem;
   font-size: 0.7rem;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .metric-edit-btn:hover {
-  background: #d97706;
+  background: #f8fafc;
   transform: scale(1.05);
 }
 
@@ -968,19 +1025,82 @@
   position: absolute;
   top: 10px;
   right: 10px;
-  background: #f59e0b;
-  color: white;
-  border: none;
-  padding: 0.3rem 0.6rem;
+  background: white;
+  color: black;
+  border: 2px solid #3b82f6;
   border-radius: 6px;
+  padding: 0.3rem 0.6rem;
   font-size: 0.7rem;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .status-edit-btn:hover {
-  background: #d97706;
+  background: #f8fafc;
   transform: scale(1.05);
+}
+
+/* Unique section header styles for System Status and Recent Activities */
+.system-status-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1.2rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.system-status-header h3 {
+  display: flex;
+  align-items: center;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1e293b;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.system-status-header .status-indicator {
+  margin-left: 0;
+  margin-right: 1rem;
+  font-size: 1rem;
+  padding: 0.6rem 1.3rem;
+}
+
+.system-status-header .section-edit-btn {
+  margin-left: auto;
+}
+
+.recent-activities-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1.2rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.recent-activities-header h3 {
+  display: flex;
+  align-items: center;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1e293b;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.recent-activities-header .view-all-btn {
+  margin-left: 0;
+  margin-right: 1rem;
+  font-size: 1rem;
+  padding: 0.6rem 1.3rem;
+}
+
+.recent-activities-header .section-edit-btn {
+  margin-left: auto;
 }
 
 /* Enhanced Animations */

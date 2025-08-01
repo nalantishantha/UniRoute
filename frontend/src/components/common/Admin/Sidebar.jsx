@@ -81,11 +81,17 @@ const AdminSidebar = ({ isSidebarOpen, toggleSidebar, user, handleLogout }) => {
     },
     { name: "Tutors", path: "/admin/tutors", icon: UserCog, category: "users" },
     {
-      name: "Courses",
-      path: "/admin/programs",
-      icon: BookOpen,
-      category: "content",
+      name: "Counsellors",
+      path: "/admin/counsellors",
+      icon: UserCheck,
+      category: "users",
     },
+    // {
+    //   name: "Courses",
+    //   path: "/admin/programs",
+    //   icon: BookOpen,
+    //   category: "content",
+    // },
     { name: "Jobs", path: "/admin/jobs", icon: Briefcase, category: "content" },
     {
       name: "Events",
@@ -99,12 +105,12 @@ const AdminSidebar = ({ isSidebarOpen, toggleSidebar, user, handleLogout }) => {
       icon: Inbox,
       category: "Requests",
     },
-    {
-      name: "Reports",
-      path: "/admin/reports",
-      icon: FileText,
-      category: "Requests",
-    },
+    // {
+    //   name: "Reports",
+    //   path: "/admin/reports",
+    //   icon: FileText,
+    //   category: "Requests",
+    // },
     {
       name: "Settings",
       path: "/admin/settings",
@@ -117,7 +123,7 @@ const AdminSidebar = ({ isSidebarOpen, toggleSidebar, user, handleLogout }) => {
     main: { label: "Main", items: [] },
     users: { label: "User Management", items: [] },
     content: { label: "Content Management", items: [] },
-    Requests: { label: "Requests & Reports", items: [] },
+    Requests: { label: "Requests", items: [] },
     system: { label: "System", items: [] },
   };
 

@@ -2,22 +2,49 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 from django.utils import timezone
+from django.contrib.auth.hashers import make_password
 import json
-from .models import Universities, UniversityEvents
-from apps.accounts.models import Users
+from .models import Universities, UniversityEvents, Faculties, UniversityRequests
+from apps.university_programs.models import DegreePrograms, DegreeProgramDurations
+from apps.accounts.models import Users, UserDetails, UserTypes
 
 
 def universities_list(request):
-    universities = Universities.objects.all()[:10]
-    data = []
-    for uni in universities:
-        data.append({
-            'id': uni.university_id,
-            'name': uni.name,
-            'location': uni.location,
-            'district': uni.district
-        })
-    return JsonResponse({'universities': data, 'count': len(data)})
+    """Get all universities"""
+    if request.method == 'GET':
+        try:
+            universities = Universities.objects.filter(is_active=1)
+            data = []
+            for uni in universities:
+                data.append({
+                    'university_id': uni.university_id,
+                    'id': uni.university_id,  # Also include 'id' for compatibility
+                    'name': uni.name,
+                    'location': uni.location,
+                    'district': uni.district,
+                    'address': uni.address,
+                    'description': uni.description,
+                    'contact_email': uni.contact_email,
+                    'phone_number': uni.phone_number,
+                    'website': uni.website,
+                    'ugc_ranking': uni.ugc_ranking
+                })
+            
+            return JsonResponse({
+                'results': data,
+                'count': len(data)
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error fetching universities: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only GET method allowed'
+    }, status=405)
 
 
 @csrf_exempt
@@ -217,4 +244,353 @@ def delete_university_event(request, event_id):
     return JsonResponse({
         'success': False,
         'message': 'Only DELETE method allowed'
+    }, status=405)
+
+
+def faculties_list(request):
+    """Get faculties, optionally filtered by university"""
+    if request.method == 'GET':
+        try:
+            university_id = request.GET.get('university_id')
+            
+            if university_id:
+                # Filter faculties by university
+                faculties = Faculties.objects.filter(university_id=university_id, is_active=1)
+            else:
+                # Get all active faculties
+                faculties = Faculties.objects.filter(is_active=1)
+            
+            data = []
+            for faculty in faculties:
+                data.append({
+                    'faculty_id': faculty.faculty_id,
+                    'id': faculty.faculty_id,  # Also include 'id' for compatibility
+                    'name': faculty.name,
+                    'university_id': faculty.university_id,
+                    'university_name': faculty.university.name if faculty.university else None,
+                    'description': faculty.description,
+                    'contact_email': faculty.contact_email,
+                    'phone_number': faculty.phone_number
+                })
+            
+            return JsonResponse({
+                'results': data,
+                'count': len(data)
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error fetching faculties: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only GET method allowed'
+    }, status=405)
+
+
+def degree_programs_list(request):
+    """Get degree programs, optionally filtered by university or faculty"""
+    if request.method == 'GET':
+        try:
+            university_id = request.GET.get('university_id')
+            faculty_id = request.GET.get('faculty_id')
+            
+            filters = {'is_active': 1}
+            
+            if university_id:
+                filters['university_id'] = university_id
+            
+            # Note: DegreePrograms are linked to university, not faculty directly
+            # If faculty filtering is needed, we'd need to add a faculty field to DegreePrograms
+            # For now, we'll filter by university
+            
+            degree_programs = DegreePrograms.objects.filter(**filters)
+            
+            data = []
+            for program in degree_programs:
+                data.append({
+                    'degree_program_id': program.degree_program_id,
+                    'id': program.degree_program_id,  # Also include 'id' for compatibility
+                    'name': program.title,
+                    'title': program.title,
+                    'code': program.code,
+                    'university_id': program.university_id,
+                    'university_name': program.university.name if program.university else None,
+                    'description': program.description,
+                    'subject_stream_required': program.subject_stream_required,
+                    'career_paths': program.career_paths
+                })
+            
+            return JsonResponse({
+                'results': data,
+                'count': len(data)
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error fetching degree programs: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only GET method allowed'
+    }, status=405)
+
+
+def degree_program_durations_list(request):
+    """Get degree program durations, optionally filtered by degree program"""
+    if request.method == 'GET':
+        try:
+            degree_program_id = request.GET.get('degree_program_id')
+            
+            if degree_program_id:
+                # Filter durations by degree program
+                durations = DegreeProgramDurations.objects.filter(degree_program_id=degree_program_id)
+            else:
+                # Get all durations
+                durations = DegreeProgramDurations.objects.all()
+            
+            data = []
+            for duration in durations:
+                data.append({
+                    'duration_id': duration.duration_id,
+                    'id': duration.duration_id,  # Also include 'id' for compatibility
+                    'duration': f"{duration.duration_years} Years",
+                    'name': f"{duration.duration_years} Years",  # Also include 'name' for compatibility
+                    'duration_years': duration.duration_years,
+                    'degree_type': duration.degree_type,
+                    'degree_program_id': duration.degree_program_id,
+                    'degree_program_name': duration.degree_program.title if duration.degree_program else None,
+                    'description': duration.description
+                })
+            
+            return JsonResponse({
+                'results': data,
+                'count': len(data)
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error fetching durations: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only GET method allowed'
+    }, status=405)
+
+
+# Admin Functions for University Request Management
+
+def university_requests_list(request):
+    """Get university registration requests (for admin)"""
+    if request.method == 'GET':
+        try:
+            status_filter = request.GET.get('status', 'pending')  # Default to pending
+            
+            if status_filter == 'all':
+                requests = UniversityRequests.objects.all()
+            else:
+                requests = UniversityRequests.objects.filter(status=status_filter)
+            
+            data = []
+            for req in requests:
+                data.append({
+                    'request_id': req.request_id,
+                    'university_name': req.university_name,
+                    'contact_person_name': req.contact_person_name,
+                    'contact_person_title': req.contact_person_title,
+                    'email': req.email,
+                    'phone_number': req.phone_number,
+                    'location': req.location,
+                    'district': req.district,
+                    'address': req.address,
+                    'description': req.description,
+                    'website': req.website,
+                    'established_year': req.established_year,
+                    'status': req.status,
+                    'submitted_at': req.submitted_at,
+                    'reviewed_at': req.reviewed_at,
+                    'reviewed_by': req.reviewed_by.username if req.reviewed_by else None,
+                    'rejection_reason': req.rejection_reason
+                })
+            
+            return JsonResponse({
+                'results': data,
+                'count': len(data)
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error fetching university requests: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only GET method allowed'
+    }, status=405)
+
+
+@csrf_exempt
+def approve_university_request(request, request_id):
+    """Approve a university registration request (for admin)"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            admin_user_id = data.get('admin_user_id')  # Should be passed from frontend
+            ugc_ranking = data.get('ugc_ranking')  # Optional ranking assigned by admin
+            
+            # Get the request
+            try:
+                university_request = UniversityRequests.objects.get(request_id=request_id, status='pending')
+            except UniversityRequests.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'University request not found or already processed'
+                }, status=404)
+            
+            # Get admin user (optional validation)
+            admin_user = None
+            if admin_user_id:
+                try:
+                    admin_user = Users.objects.get(user_id=admin_user_id)
+                except Users.DoesNotExist:
+                    pass
+            
+            with transaction.atomic():
+                # Create username from university name
+                username = university_request.university_name.lower().replace(' ', '.').replace('-', '.')
+                original_username = username
+                counter = 1
+                while Users.objects.filter(username=username).exists():
+                    username = f"{original_username}{counter}"
+                    counter += 1
+                
+                # Get university user type (institution)
+                university_user_type = UserTypes.objects.get(type_id=11)  # Institution type
+                
+                # Create user account
+                user = Users.objects.create(
+                    username=username,
+                    email=university_request.email,
+                    password_hash=university_request.password_hash,  # Already hashed
+                    user_type=university_user_type,
+                    is_active=1,  # Activate the account
+                    created_at=timezone.now()
+                )
+                
+                # Create user details
+                name_parts = university_request.contact_person_name.split()
+                first_name = name_parts[0] if name_parts else ''
+                last_name = ' '.join(name_parts[1:]) if len(name_parts) > 1 else ''
+                
+                user_details = UserDetails.objects.create(
+                    user=user,
+                    full_name=university_request.contact_person_name,
+                    contact_number=university_request.phone_number or '',
+                    is_verified=1,  # Auto-verify approved universities
+                    updated_at=timezone.now()
+                )
+                
+                # Create university record
+                university = Universities.objects.create(
+                    name=university_request.university_name,
+                    location=university_request.location,
+                    district=university_request.district or university_request.location,
+                    address=university_request.address,
+                    description=university_request.description,
+                    contact_email=university_request.email,
+                    phone_number=university_request.phone_number,
+                    website=university_request.website,
+                    ugc_ranking=ugc_ranking,
+                    is_active=1,
+                    created_at=timezone.now()
+                )
+                
+                # Update the request status
+                university_request.status = 'approved'
+                university_request.reviewed_at = timezone.now()
+                university_request.reviewed_by = admin_user
+                university_request.created_user = user
+                university_request.created_university = university
+                university_request.save()
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': 'University request approved successfully',
+                    'university': {
+                        'university_id': university.university_id,
+                        'name': university.name,
+                        'user_id': user.user_id,
+                        'username': user.username,
+                        'email': user.email
+                    }
+                })
+                
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error approving request: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only POST method allowed'
+    }, status=405)
+
+
+@csrf_exempt
+def reject_university_request(request, request_id):
+    """Reject a university registration request (for admin)"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            admin_user_id = data.get('admin_user_id')
+            rejection_reason = data.get('rejection_reason', 'Request rejected by admin')
+            
+            # Get the request
+            try:
+                university_request = UniversityRequests.objects.get(request_id=request_id, status='pending')
+            except UniversityRequests.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'University request not found or already processed'
+                }, status=404)
+            
+            # Get admin user (optional validation)
+            admin_user = None
+            if admin_user_id:
+                try:
+                    admin_user = Users.objects.get(user_id=admin_user_id)
+                except Users.DoesNotExist:
+                    pass
+            
+            # Update the request status
+            university_request.status = 'rejected'
+            university_request.reviewed_at = timezone.now()
+            university_request.reviewed_by = admin_user
+            university_request.rejection_reason = rejection_reason
+            university_request.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'University request rejected',
+                'request_id': request_id,
+                'rejection_reason': rejection_reason
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error rejecting request: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only POST method allowed'
     }, status=405)

@@ -33,11 +33,11 @@ import {
 const StudentDashboard = () => {
   // Sample data
   const studentProfile = {
-    name: "Kasun Perera",
+    name: " Kavindi Danushka",
     alStream: "Physical Science",
     subjects: ["Combined Mathematics", "Physics", "Chemistry"],
     zScore: 1.8542,
-    district: "Colombo",
+    district: "Kandy",
     profileComplete: 85,
   };
 
@@ -131,38 +131,38 @@ const StudentDashboard = () => {
     },
   ];
 
-  const featuredMentors = [
-    {
-      id: 1,
-      name: "Dr. Samantha Silva",
-      university: "University of Colombo",
-      field: "Engineering",
-      rating: 4.9,
-      image:
-        "https://images.pexels.com/photos/5212345/pexels-photo-5212345.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop",
-      available: true,
-    },
-    {
-      id: 2,
-      name: "Prof. Nimal Fernando",
-      university: "University of Peradeniya",
-      field: "Medicine",
-      rating: 4.8,
-      image:
-        "https://images.pexels.com/photos/6749778/pexels-photo-6749778.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop",
-      available: false,
-    },
-    {
-      id: 3,
-      name: "Ms. Priya Jayawardena",
-      university: "University of Moratuwa",
-      field: "Computer Science",
-      rating: 4.9,
-      image:
-        "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop",
-      available: true,
-    },
-  ];
+  // const featuredMentors = [
+  //   {
+  //     id: 1,
+  //     name: "Dr. Samantha Silva",
+  //     university: "University of Colombo",
+  //     field: "Engineering",
+  //     rating: 4.9,
+  //     image:
+  //       "https://images.pexels.com/photos/5212345/pexels-photo-5212345.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop",
+  //     available: true,
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "Prof. Nimal Fernando",
+  //     university: "University of Peradeniya",
+  //     field: "Medicine",
+  //     rating: 4.8,
+  //     image:
+  //       "https://images.pexels.com/photos/6749778/pexels-photo-6749778.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop",
+  //     available: false,
+  //   },
+  //   {
+  //     id: 3,
+  //     name: "Ms. Priya Jayawardena",
+  //     university: "University of Moratuwa",
+  //     field: "Computer Science",
+  //     rating: 4.9,
+  //     image:
+  //       "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop",
+  //     available: true,
+  //   },
+  // ];
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-primary-100 to-white">
@@ -344,7 +344,7 @@ const StudentDashboard = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Featured Mentors */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-accent-100">
+            {/* <div className="bg-white rounded-2xl shadow-lg p-6 border border-accent-100">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-display font-semibold text-xl text-primary-400">
                   Featured Mentors
@@ -385,7 +385,7 @@ const StudentDashboard = () => {
                   </div>
                 ))}
               </div>
-            </div>
+            </div> */}
 
             {/* Upcoming Events */}
             <div className="bg-white rounded-2xl shadow-lg p-6 border border-accent-100">

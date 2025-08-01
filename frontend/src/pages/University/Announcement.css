@@ -118,7 +118,7 @@
 }
 
 .btn {
-  background: #6366f1;
+  background: #174A7C var(--tw-gradient-to-position);;
   color: white;
   border: none;
   padding: 0.6rem 1.2rem;
@@ -138,7 +138,7 @@
 }
 
 .btn:hover, .btn-primary:hover {
-  background: #5046e4;
+  background: #174A7C var(--tw-gradient-to-position);
 }
 
 .empty-msg {
@@ -219,7 +219,7 @@
 
 .view-btn.active {
   background: white;
-  color: #6366f1;
+  color:#174A7C var(--tw-gradient-to-position);
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
@@ -268,9 +268,9 @@
 }
 
 .today-btn {
-  background: #6366f1 !important;
+  background: #174A7C var(--tw-gradient-to-position);
   color: white !important;
-  border-color: #6366f1 !important;
+  border-color: #174A7C var(--tw-gradient-to-position);
 }
 
 .today-btn:hover {
@@ -326,7 +326,7 @@
 }
 
 .rbc-event {
-  background: #6366f1;
+  background: #174A7C var(--tw-gradient-to-position);
   border-radius: 4px;
   border: none;
   color: white;
@@ -336,12 +336,12 @@
 }
 
 .rbc-event:focus, .rbc-event:hover {
-  background: #5046e4;
+  background: #174A7C var(--tw-gradient-to-position);
 }
 
 .rbc-slot-selection {
   background: rgba(99, 102, 241, 0.1);
-  border: 2px solid #6366f1;
+  border: 2px solid#174A7C var(--tw-gradient-to-position);
 }
 
 .rbc-agenda-view table {
