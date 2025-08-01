@@ -52,7 +52,7 @@ const MentorConnection = () => {
         status: "Pending",
       };
 
-      const response = await fetch("/api/mentoring/sessions/", {
+      const response = await fetch("/api/students/mentoring/sessions/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

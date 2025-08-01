@@ -2,8 +2,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.mentors_list, name='mentors_list'),
-    path('sessions/', views.create_mentoring_session, name='create_mentoring_session'),
     path('requests/<int:mentor_id>/', views.MentoringRequestsView.as_view(), name='mentoring_requests'),
     path('sessions/<int:mentor_id>/', views.MentoringSessionsView.as_view(), name='mentoring_sessions'),
     path('all-sessions/<int:mentor_id>/', views.get_all_sessions, name='all_sessions'),
