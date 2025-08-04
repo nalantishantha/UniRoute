@@ -14,6 +14,8 @@ export { Profile } from "./Profile";
 
 export { PreUniCourses } from "./PreUniCourses";
 
+export { Meetings } from "./Meetings";
+
 // // Analytics
 // export {
 //   Analytics

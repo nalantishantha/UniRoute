@@ -12,6 +12,7 @@ import {
   Profile,
   Resources,
   Tutoring,
+  Meetings,
 } from "../pages/UniStudents";
 import { CalendarPage } from "../pages/UniStudents/Calendar";
 
@@ -28,6 +29,7 @@ const UniStudentRoutes = () => {
           <Route path="mentoring" element={<Mentoring />} />
           <Route path="courses" element={<PreUniCourses />} />
           <Route path="calendar" element={<CalendarPage />} />
+          <Route path="meetings" element={<Meetings />} />
           <Route path="tutoring" element={<Tutoring />} />
           <Route path="feedback" element={<Feedback />} />
           <Route path="profile" element={<Profile />} />

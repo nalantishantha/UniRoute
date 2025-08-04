@@ -16,6 +16,7 @@ import {
   X,
   ChevronRight,
   Settings,
+  Video,
 } from "lucide-react";
 import { logout, getCurrentUser } from "../../utils/auth"; // ✅ Import logout function
 
@@ -45,6 +46,7 @@ const navigation = [
     icon: FolderOpen,
   },
   { name: "Calendar", href: "/university-student/calendar", icon: Calendar },
+  { name: "Meetings", href: "/university-student/meetings", icon: Video },
   { name: "Earnings", href: "/university-student/earnings", icon: DollarSign },
   {
     name: "Feedback",
