@@ -8,6 +8,9 @@ const UploadResourcesModal = ({ showUploadModal, setShowUploadModal }) => {
   const [category, setCategory] = useState("Mathematics");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState("");
+  const [status, setStatus] = useState("Available");
+  const [author, setAuthor] = useState("");
+  const [related_course, setRelatedCourse] = useState("");
   const [isPublic, setIsPublic] = useState(true);
   const [file, setFile] = useState(null);
   const [dragActive, setDragActive] = useState(false);
@@ -45,7 +48,7 @@ const UploadResourcesModal = ({ showUploadModal, setShowUploadModal }) => {
     }
   };
 
-  // Handle form submit
+  // In handleSubmit function, after successful upload:
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) {
@@ -60,6 +63,9 @@ const UploadResourcesModal = ({ showUploadModal, setShowUploadModal }) => {
     formData.append("category", category);
     formData.append("description", description);
     formData.append("tags", JSON.stringify(tags.split(",").map(t => t.trim()).filter(Boolean)));
+    formData.append("status", status)
+    formData.append("author", author)
+    formData.append("related_course", related_course)
     formData.append("is_public", isPublic);
     formData.append("file", file);
     formData.append("uploaded_by_id", 1); // TODO: Replace with actual user ID
@@ -74,11 +80,18 @@ const UploadResourcesModal = ({ showUploadModal, setShowUploadModal }) => {
         setSuccess(true);
         // Reset form fields
         setTitle("");
-        setCategory("Mathematics");
+        setCategory("None");
         setDescription("");
         setTags("");
+        setStatus("");
+        setAuthor("");
+        setRelatedCourse("");
         setIsPublic(true);
         setFile(null);
+        // Call success callback to refresh resources
+        if (onUploadSuccess) {
+          onUploadSuccess();
+        }
         // Auto close modal after 2 seconds
         setTimeout(() => {
           setShowUploadModal(false);
@@ -92,6 +105,7 @@ const UploadResourcesModal = ({ showUploadModal, setShowUploadModal }) => {
     }
     setUploading(false);
   };
+
 
   return (
     <AnimatePresence>
@@ -197,8 +211,13 @@ const UploadResourcesModal = ({ showUploadModal, setShowUploadModal }) => {
                       onChange={e => setCategory(e.target.value)}
                       className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
                     >
+                      <option>Software Engineering</option>
+                      <option>Electronics</option>
+                      <option>Information Systems</option>
+                      <option>DSA</option>
                       <option>Mathematics</option>
                       <option>Physics</option>
+                      <option>Computer Science</option>
                       <option>Chemistry</option>
                       <option>Biology</option>
                       <option>English</option>
@@ -221,20 +240,62 @@ const UploadResourcesModal = ({ showUploadModal, setShowUploadModal }) => {
                   />
                 </div>
 
-                <div>
-                  <label className="block mb-2 text-sm font-medium text-neutral-black">
-                    Tags
-                  </label>
-                  <input
-                    type="text"
-                    value={tags}
-                    onChange={e => setTags(e.target.value)}
-                    placeholder="Add tags separated by commas (e.g., calculus, derivatives, examples)"
-                    className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
-                  />
-                  <p className="mt-1 text-xs text-neutral-grey">
-                    Tags help students find your resources more easily
-                  </p>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <label className="block mb-2 text-sm font-medium text-neutral-black">
+                      Tags
+                    </label>
+                    <input
+                      type="text"
+                      value={tags}
+                      onChange={e => setTags(e.target.value)}
+                      placeholder="Add tags separated by commas (e.g., calculus, derivatives, examples)"
+                      className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                    />
+                    <p className="mt-1 text-xs text-neutral-grey">
+                      Tags help students find your resources more easily
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block mb-2 text-sm font-medium text-neutral-black">
+                      Status
+                    </label>
+                    <select
+                      value={status}
+                      onChange={e => setStatus(e.target.value)}
+                      className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                    >
+                      <option>Available</option>
+                      <option>Premium</option>
+                      <option>Restricted</option>
+                      <option>Archieved</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <label className="block mb-2 text-sm font-medium text-neutral-black">
+                      Author
+                    </label>
+                    <input
+                      type="text"
+                      value={author}
+                      onChange={e => setAuthor(e.target.value)}
+                      className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block mb-2 text-sm font-medium text-neutral-black">
+                      Related Course
+                    </label>
+                    <input
+                      type="text"
+                      value={related_course}
+                      onChange={e => setRelatedCourse(e.target.value)}
+                      className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                    />
+                  </div>
                 </div>
 
                 <div className="flex items-center space-x-3">

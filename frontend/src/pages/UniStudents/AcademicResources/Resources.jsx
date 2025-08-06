@@ -52,6 +52,23 @@ export default function Resources() {
     }
   };
 
+  // Delete resource from backend
+  const deleteResource = async (resourceId) => {
+    try {
+      const response = await fetch(`/api/resources/${resourceId}/delete/`, {
+        method: 'DELETE',
+      });
+      const data = await response.json();
+      if (response.ok) {
+        return { success: true, message: data.message };
+      } else {
+        return { success: false, message: data.message || 'Failed to delete resource' };
+      }
+    } catch (err) {
+      return { success: false, message: 'Network error while deleting resource' };
+    }
+  };
+
   // Fetch resources on component mount
   useEffect(() => {
     fetchResources();
@@ -65,18 +82,58 @@ export default function Resources() {
     setShowDetailModal(true);
   };
 
-  const handleSaveResource = (editedResource) => {
-    console.log("Resource updated:", editedResource);
-    // Update the resource in the list
-    setResources(resources.map(resource =>
-      resource.id === editedResource.id ? editedResource : resource
-    ));
+  const handleSaveResource = async (editedResource) => {
+    try {
+      const response = await fetch(`/api/resources/${editedResource.id}/update/`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: editedResource.title,
+          description: editedResource.description,
+          category: editedResource.category,
+          status: editedResource.status,
+          author: editedResource.author,
+          related_course: editedResource.relatedCourse,
+          tags: JSON.stringify(Array.isArray(editedResource.tags) ? editedResource.tags : []),
+          file_type: editedResource.file_type,
+          file_size: editedResource.file_size,
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update the resource in the frontend state
+        setResources(resources.map(resource =>
+          resource.id === editedResource.id ? { ...resource, ...editedResource } : resource
+        ));
+        return { success: true, message: 'Resource updated successfully' };
+      } else {
+        return { success: false, message: data.message || 'Failed to update resource' };
+      }
+    } catch (error) {
+      console.error('Error updating resource:', error);
+      return { success: false, message: 'Network error while updating resource' };
+    }
   };
 
-  const handleRemoveResource = (resource) => {
-    console.log("Resource removed:", resource);
-    // Remove resource from the list
-    setResources(resources.filter(r => r.id !== resource.id));
+  const handleRemoveResource = async (resource) => {
+    try {
+      const result = await deleteResource(resource.id);
+
+      if (result.success) {
+        // Remove resource from the frontend state only if backend deletion was successful
+        setResources(resources.filter(r => r.id !== resource.id));
+        return { success: true, message: result.message };
+      } else {
+        return { success: false, message: result.message };
+      }
+    } catch (error) {
+      console.error('Error removing resource:', error);
+      return { success: false, message: 'Network error while removing resource' };
+    }
   };
 
   // Handle successful upload - refresh resources
