@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Plus,
@@ -16,71 +16,59 @@ import CoursesGrid from "./CoursesGrid";
 import CreateCourseModal from "./CreateCourseModal";
 import CourseDetailModal from "./CourseDetailModal";
 
-const courses = [
-  {
-    id: 1,
-    title: "Mathematics Foundations",
-    category: "Mathematics",
-    status: "Published",
-    enrollments: 45,
-    rating: 4.8,
-    price: 120,
-    duration: "8 weeks",
-    lastUpdated: "2024-01-15",
-    thumbnail:
-      "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400",
-    description:
-      "Complete foundation course covering algebra, geometry, and basic calculus",
-  },
-  {
-    id: 2,
-    title: "Physics for Beginners",
-    category: "Physics",
-    status: "Published",
-    enrollments: 32,
-    rating: 4.6,
-    price: 150,
-    duration: "10 weeks",
-    lastUpdated: "2024-01-10",
-    thumbnail:
-      "https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?w=400",
-    description: "Introduction to physics concepts with practical experiments",
-  },
-  {
-    id: 3,
-    title: "Chemistry Lab Techniques",
-    category: "Chemistry",
-    status: "Draft",
-    enrollments: 0,
-    rating: 0,
-    price: 180,
-    duration: "12 weeks",
-    lastUpdated: "2024-01-20",
-    thumbnail:
-      "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=400",
-    description:
-      "Hands-on chemistry laboratory techniques and safety protocols",
-  },
-  {
-    id: 4,
-    title: "Biology Essentials",
-    category: "Biology",
-    status: "Pending",
-    enrollments: 0,
-    rating: 0,
-    price: 110,
-    duration: "6 weeks",
-    lastUpdated: "2024-01-18",
-    thumbnail:
-      "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400",
-    description: "Essential biology concepts for university preparation",
-  },
-];
-
 export default function PreUniCourses() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [courses, setCourses] = useState([]);
+  const [stats, setStats] = useState({
+    total_courses: 0,
+    published: 0,
+    draft: 0,
+    pending: 0,
+    total_enrollments: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // Fetch courses from API
+  const fetchCourses = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/pre-uni-courses/');
+      const data = await response.json();
+
+      if (data.success) {
+        setCourses(data.courses);
+      } else {
+        setError('Failed to fetch courses');
+      }
+    } catch (err) {
+      setError('Failed to connect to server');
+      console.error('Error fetching courses:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch course statistics
+  const fetchStats = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/pre-uni-courses/stats/');
+      const data = await response.json();
+
+      if (data.success) {
+        setStats(data.stats);
+      }
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+    }
+  };
+
+  // Load courses and stats on component mount
+  useEffect(() => {
+    fetchCourses();
+    fetchStats();
+  }, []);
 
   const handleViewCourse = (course) => {
     setSelectedCourse(course);
@@ -94,6 +82,20 @@ export default function PreUniCourses() {
     setShowDetailModal(false);
   };
 
+  const handleCourseCreated = () => {
+    // Refresh courses and stats after creating a new course
+    fetchCourses();
+    fetchStats();
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg text-neutral-grey">Loading courses...</div>
+      </div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -102,6 +104,11 @@ export default function PreUniCourses() {
     >
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-end">
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            {error}
+          </div>
+        )}
         <Button
           size="lg"
           className="mt-4 lg:mt-0 flex items-center space-x-2"
@@ -121,7 +128,7 @@ export default function PreUniCourses() {
                 <BookOpen className="w-5 h-5 text-primary-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-neutral-black">8</p>
+                <p className="text-2xl font-bold text-neutral-black">{stats.total_courses}</p>
                 <p className="text-xs text-neutral-grey">Total Courses</p>
               </div>
             </div>
@@ -134,7 +141,7 @@ export default function PreUniCourses() {
                 <TrendingUp className="w-5 h-5 text-success" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-neutral-black">2</p>
+                <p className="text-2xl font-bold text-neutral-black">{stats.published}</p>
                 <p className="text-xs text-neutral-grey">Published</p>
               </div>
             </div>
@@ -147,7 +154,7 @@ export default function PreUniCourses() {
                 <Edit3 className="w-5 h-5 text-yellow-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-neutral-black">1</p>
+                <p className="text-2xl font-bold text-neutral-black">{stats.draft}</p>
                 <p className="text-xs text-neutral-grey">Draft</p>
               </div>
             </div>
@@ -160,7 +167,7 @@ export default function PreUniCourses() {
                 <Users className="w-5 h-5 text-info" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-neutral-black">77</p>
+                <p className="text-2xl font-bold text-neutral-black">{stats.total_enrollments}</p>
                 <p className="text-xs text-neutral-grey">Total Students</p>
               </div>
             </div>
@@ -179,6 +186,7 @@ export default function PreUniCourses() {
       <CreateCourseModal
         showCreateModal={showCreateModal}
         setShowCreateModal={setShowCreateModal}
+        onCourseCreated={handleCourseCreated}
       />
 
       {/* Course Detail Modal */}
