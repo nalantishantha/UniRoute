@@ -9,6 +9,7 @@ from .models import InternshipOpportunities
 from .models import Courses
 from .models import CompanyAnnouncement
 from apps.accounts.models import Users
+from .models import CompanyDashboardEdit
 
 
 @csrf_exempt
@@ -777,3 +778,78 @@ def delete_announcement(request, announcement_id):
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
     return JsonResponse({'success': False, 'message': 'Only DELETE method allowed'}, status=405)
+
+# dashboard edits
+
+@csrf_exempt
+def get_dashboard_edit(request):
+    """Get dashboard edit data for a company"""
+    if request.method == 'GET':
+        company_id = request.GET.get('company_id', 1)
+        try:
+            dashboard = CompanyDashboardEdit.objects.get(company_id=company_id)
+            data = {
+                'dashboard_id': dashboard.dashboard_id,
+                'company_id': dashboard.company.company_id,
+                'story_title': dashboard.story_title,
+                'story_subtitle': dashboard.story_subtitle,
+                'story_section_title': dashboard.story_section_title,
+                'story_description': dashboard.story_description,
+                'story_second_description': dashboard.story_second_description,
+                'story_image': dashboard.story_image,
+                'offers': dashboard.offers,
+                'team': dashboard.team,
+                'testimonials': dashboard.testimonials,
+                'contact_email': dashboard.contact_email,
+                'contact_phone': dashboard.contact_phone,
+                'contact_address': dashboard.contact_address,
+                'updated_at': str(dashboard.updated_at),
+            }
+            return JsonResponse({'success': True, 'dashboard': data})
+        except CompanyDashboardEdit.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Dashboard not found'}, status=404)
+    return JsonResponse({'success': False, 'message': 'Only GET method allowed'}, status=405)
+
+@csrf_exempt
+def update_dashboard_edit(request, dashboard_id):
+    """Update dashboard edit data for a company"""
+    if request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            dashboard = CompanyDashboardEdit.objects.get(dashboard_id=dashboard_id)
+            for field, value in data.items():
+                setattr(dashboard, field, value)
+            dashboard.save()
+            return JsonResponse({'success': True})
+        except CompanyDashboardEdit.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Dashboard not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    return JsonResponse({'success': False, 'message': 'Only PUT method allowed'}, status=405)
+
+@csrf_exempt
+def create_dashboard_edit(request):
+    """Create dashboard edit data for a company (first time)"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            company = Companies.objects.get(company_id=data.get('company_id', 1))
+            dashboard = CompanyDashboardEdit.objects.create(
+                company=company,
+                story_title=data.get('story_title', ''),
+                story_subtitle=data.get('story_subtitle', ''),
+                story_section_title=data.get('story_section_title', ''),
+                story_description=data.get('story_description', ''),
+                story_second_description=data.get('story_second_description', ''),
+                story_image=data.get('story_image', ''),
+                offers=data.get('offers', []),
+                team=data.get('team', []),
+                testimonials=data.get('testimonials', []),
+                contact_email=data.get('contact_email', ''),
+                contact_phone=data.get('contact_phone', ''),
+                contact_address=data.get('contact_address', ''),
+            )
+            return JsonResponse({'success': True, 'dashboard_id': dashboard.dashboard_id})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    return JsonResponse({'success': False, 'message': 'Only POST method allowed'}, status=405)

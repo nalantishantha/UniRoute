@@ -12,6 +12,7 @@ const Dashboardedit = () => {
   const [showCourseModal, setShowCourseModal] = useState(false);
   const [selectedInternship, setSelectedInternship] = useState(null);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [dashboardId, setDashboardId] = useState(null);
   const navigate = useNavigate();
 
   // Editable company info
@@ -234,6 +235,53 @@ const Dashboardedit = () => {
     ));
   };
 
+  // Save dashboard data
+  const handleSaveDashboard = async () => {
+    const data = {
+      story_title: storyContent.title,
+      story_subtitle: storyContent.subtitle,
+      story_section_title: storyContent.sectionTitle,
+      story_description: storyContent.description,
+      story_second_description: storyContent.secondDescription,
+      story_image: storyContent.image,
+      offers,
+      team: teamMembers,
+      testimonials,
+      contact_email: contactInfo.email,
+      contact_phone: contactInfo.phone,
+      contact_address: contactInfo.address,
+      announcements: recentAnnouncements, // Add this line
+    };
+    if (!dashboardId) {
+      // Create dashboard
+      const response = await fetch('/api/companies/company-dashboard-edit/create/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, company_id: 1 })
+      });
+      const result = await response.json();
+      if (result.success) {
+        setDashboardId(result.dashboard_id);
+        alert('Dashboard created!');
+      } else {
+        alert(result.message || 'Failed to create dashboard');
+      }
+    } else {
+      // Update dashboard
+      const response = await fetch(`/api/companies/company-dashboard-edit/${dashboardId}/update/`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await response.json();
+      if (result.success) {
+        alert('Dashboard updated!');
+      } else {
+        alert(result.message || 'Failed to update dashboard');
+      }
+    }
+  };
+
   // Update time every minute
   useEffect(() => {
     const timer = setInterval(() => {
@@ -259,6 +307,36 @@ const Dashboardedit = () => {
     });
   };
 
+  // Fetch dashboard data
+  useEffect(() => {
+    async function fetchDashboard() {
+      const response = await fetch('/api/companies/company-dashboard-edit/?company_id=1');
+      const result = await response.json();
+      if (result.success) {
+        const d = result.dashboard;
+        setStoryContent({
+          title: d.story_title,
+          subtitle: d.story_subtitle,
+          sectionTitle: d.story_section_title,
+          description: d.story_description,
+          secondDescription: d.story_second_description,
+          image: d.story_image
+        });
+        setOffers(d.offers);
+        setTeamMembers(d.team);
+        setTestimonials(d.testimonials);
+        setContactInfo({
+          email: d.contact_email,
+          phone: d.contact_phone,
+          address: d.contact_address
+        });
+        setRecentAnnouncements(d.announcements || []);
+        setDashboardId(d.dashboard_id);
+      }
+    }
+    fetchDashboard();
+  }, []);
+
   return (
     <div className="edit-dashboard-page">
       {/* SIDEBAR AT THE VERY TOP - OUTSIDE CONTAINER */}
@@ -280,7 +358,12 @@ const Dashboardedit = () => {
           <div className="edit-story-header">
             <button 
               className="edit-section-btn"
-              onClick={() => toggleEdit('story')}
+              onClick={() => {
+                if (isEditing.story) {
+                  handleSaveDashboard(); // <-- Save to backend
+                }
+                toggleEdit('story');
+              }}
             >
               {isEditing.story ? 'Save Story' : 'Edit Story'}
             </button>
@@ -451,42 +534,15 @@ const Dashboardedit = () => {
           <div className="edit-recent-box">
             <div className="edit-recent-box-header">
               <h4>Recent Announcements</h4>
-              <div className="edit-announcement-controls">
-                <button 
-                  className="edit-section-btn"
-                  onClick={() => toggleEdit('announcements')}
-                >
-                  {isEditing.announcements ? 'Save' : 'Edit'}
-                </button>
-                <button className="edit-view-all-link-btn" onClick={handleViewAllAnnouncements}>
-                  View All Announcements →
-                </button>
-              </div>
+              <button className="edit-view-all-link-btn" onClick={handleViewAllAnnouncements}>
+                View All Announcements →
+              </button>
             </div>
             <ul>
               {recentAnnouncements.map((announcement) => (
                 <li key={announcement.id}>
-                  {isEditing.announcements ? (
-                    <>
-                      <input
-                        type="text"
-                        value={announcement.title}
-                        onChange={(e) => updateAnnouncement(announcement.id, 'title', e.target.value)}
-                        className="edit-input-field"
-                      />
-                      <textarea
-                        value={announcement.description}
-                        onChange={(e) => updateAnnouncement(announcement.id, 'description', e.target.value)}
-                        className="edit-textarea-field"
-                        onBlur={() => saveChanges('announcements')}
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <b>{announcement.title}</b>
-                      <span>{announcement.description}</span>
-                    </>
-                  )}
+                  <b>{announcement.title}</b>
+                  <span>{announcement.description}</span>
                   <div className="edit-time-stamp">{announcement.time}</div>
                 </li>
               ))}

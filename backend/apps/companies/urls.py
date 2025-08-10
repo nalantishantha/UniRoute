@@ -40,4 +40,9 @@ urlpatterns = [
     path('company-announcements/create/', company_views.create_announcement, name='create_company_announcement'),
     path('company-announcements/<int:announcement_id>/update/', company_views.update_announcement, name='update_company_announcement'),
     path('company-announcements/<int:announcement_id>/delete/', company_views.delete_announcement, name='delete_company_announcement'),
+
+    # Company Dashboard Edits
+    path('company-dashboard-edit/', company_views.get_dashboard_edit, name='get_company_dashboard_edit'),
+    path('company-dashboard-edit/create/', company_views.create_dashboard_edit, name='create_company_dashboard_edit'),
+    path('company-dashboard-edit/<int:dashboard_id>/update/', company_views.update_dashboard_edit, name='update_company_dashboard_edit'),
 ]

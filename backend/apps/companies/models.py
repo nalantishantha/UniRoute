@@ -128,3 +128,26 @@ class CompanyAnnouncement(models.Model):
         managed = True
         db_table = 'company_announcement'
 
+
+class CompanyDashboardEdit(models.Model):
+    dashboard_id = models.AutoField(primary_key=True)
+    company = models.ForeignKey(Companies, models.DO_NOTHING)
+    story_title = models.CharField(max_length=255)
+    story_subtitle = models.TextField(blank=True, null=True)
+    story_section_title = models.CharField(max_length=255, blank=True, null=True)
+    story_description = models.TextField(blank=True, null=True)
+    story_second_description = models.TextField(blank=True, null=True)
+    story_image = models.CharField(max_length=255, blank=True, null=True)
+    offers = models.JSONField(default=list)  # List of offer dicts
+    team = models.JSONField(default=list)    # List of team member dicts
+    testimonials = models.JSONField(default=list)  # List of testimonial dicts
+    contact_email = models.CharField(max_length=100, blank=True, null=True)
+    contact_phone = models.CharField(max_length=50, blank=True, null=True)
+    contact_address = models.CharField(max_length=255, blank=True, null=True)
+    announcements = models.JSONField(default=list)  # Add this line
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        managed = True
+        db_table = 'company_dashboard_edit'
+
