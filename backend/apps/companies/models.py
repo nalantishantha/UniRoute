@@ -85,3 +85,46 @@ class CompanyEventRegistrations(models.Model):
         managed = True
         db_table = 'company_event_registrations'
 
+
+class Courses(models.Model):
+    course_id = models.AutoField(primary_key=True)
+    company = models.ForeignKey(Companies, models.DO_NOTHING)
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    category = models.CharField(max_length=100, blank=True, null=True)
+    level = models.CharField(max_length=50, blank=True, null=True)
+    duration = models.CharField(max_length=50, blank=True, null=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    instructor = models.CharField(max_length=255, blank=True, null=True)
+    prerequisites = models.CharField(max_length=255, blank=True, null=True)
+    status = models.CharField(max_length=20, blank=True, null=True)
+    enrollments = models.IntegerField(blank=True, null=True)
+    rating = models.FloatField(blank=True, null=True)
+    image = models.CharField(max_length=255, blank=True, null=True)
+    skills = models.CharField(max_length=255, blank=True, null=True)
+    start_date = models.DateField(blank=True, null=True)
+    end_date = models.DateField(blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'company_courses'
+
+
+class CompanyAnnouncement(models.Model):
+    announcement_id = models.AutoField(primary_key=True)
+    company = models.ForeignKey(Companies, models.DO_NOTHING)
+    title = models.CharField(max_length=255)
+    category = models.CharField(max_length=100)
+    priority = models.CharField(max_length=20)
+    date = models.DateField()
+    status = models.CharField(max_length=20)
+    author = models.CharField(max_length=100)
+    description = models.TextField(blank=True, null=True)
+    tags = models.CharField(max_length=255, blank=True, null=True)  # comma-separated
+    image_url = models.CharField(max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        managed = True
+        db_table = 'company_announcement'
+

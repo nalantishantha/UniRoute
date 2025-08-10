@@ -28,4 +28,16 @@ urlpatterns = [
 
      path('internships/', company_views.get_company_internships, name='get_company_internships'),
     path('internships/create/', company_views.create_internship, name='create_internship'),
+
+    # Company Courses
+    path('company-courses/', company_views.get_courses, name='get_company_courses'),
+    path('company-courses/create/', company_views.create_course, name='create_company_course'),
+    path('company-courses/<int:course_id>/update/', company_views.update_course, name='update_company_course'),
+    path('company-courses/<int:course_id>/delete/', company_views.delete_course, name='delete_company_course'),
+
+    # Company Announcements
+    path('company-announcements/', company_views.get_announcements, name='get_company_announcements'),
+    path('company-announcements/create/', company_views.create_announcement, name='create_company_announcement'),
+    path('company-announcements/<int:announcement_id>/update/', company_views.update_announcement, name='update_company_announcement'),
+    path('company-announcements/<int:announcement_id>/delete/', company_views.delete_announcement, name='delete_company_announcement'),
 ]

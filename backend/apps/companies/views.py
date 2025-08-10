@@ -6,6 +6,8 @@ from django.utils import timezone
 import json
 from .models import Companies, CompanyEvents, CompanyEventRegistrations
 from .models import InternshipOpportunities
+from .models import Courses
+from .models import CompanyAnnouncement
 from apps.accounts.models import Users
 
 
@@ -593,3 +595,185 @@ def get_internship_details(request, internship_id):
         'success': False,
         'message': 'Only GET method allowed'
     }, status=405)
+
+# courses
+
+@csrf_exempt
+def create_course(request):
+    """Create a new course"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            # Get fields from data
+            course = Courses.objects.create(
+                company_id=data.get('company_id'),
+                title=data.get('title'),
+                description=data.get('description'),
+                category=data.get('category'),
+                level=data.get('level'),
+                duration=data.get('duration'),
+                price=data.get('price'),
+                instructor=data.get('instructor'),
+                prerequisites=data.get('prerequisites'),
+                status=data.get('status'),
+                enrollments=data.get('enrollments', 0),
+                rating=data.get('rating', 0),
+                image=data.get('image'),
+                skills=data.get('skills'),
+                start_date=data.get('start_date'),
+                end_date=data.get('end_date'),
+            )
+            return JsonResponse({'success': True, 'course_id': course.course_id})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'Error creating course: {str(e)}'}, status=500)
+    
+    return JsonResponse({'success': False, 'message': 'Only POST method allowed'}, status=405)
+
+@csrf_exempt
+def get_courses(request):
+    """Get all courses for a company"""
+    if request.method == 'GET':
+        try:
+            company_id = request.GET.get('company_id')
+            courses = Courses.objects.filter(company_id=company_id)
+            data = []
+            for c in courses:
+                data.append({
+                    'course_id': c.course_id,
+                    'title': c.title,
+                    'description': c.description,
+                    'category': c.category,
+                    'level': c.level,
+                    'duration': c.duration,
+                    'price': float(c.price) if c.price else 0,
+                    'instructor': c.instructor,
+                    'prerequisites': c.prerequisites,
+                    'status': c.status,
+                    'enrollments': c.enrollments,
+                    'rating': c.rating,
+                    'image': c.image,
+                    'skills': c.skills.split(',') if c.skills else [],
+                    'start_date': str(c.start_date) if c.start_date else '',
+                    'end_date': str(c.end_date) if c.end_date else '',
+                })
+            return JsonResponse({'success': True, 'courses': data})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'Error fetching courses: {str(e)}'}, status=500)
+    
+    return JsonResponse({'success': False, 'message': 'Only GET method allowed'}, status=405)
+
+@csrf_exempt
+def update_course(request, course_id):
+    """Update a course"""
+    if request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            course = Courses.objects.get(course_id=course_id)
+            for field, value in data.items():
+                setattr(course, field, value)
+            course.save()
+            return JsonResponse({'success': True})
+        except Courses.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Course not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    return JsonResponse({'success': False, 'message': 'Only PUT method allowed'}, status=405)
+
+@csrf_exempt
+def delete_course(request, course_id):
+    """Delete a course"""
+    if request.method == 'DELETE':
+        try:
+            course = Courses.objects.get(course_id=course_id)
+            course.delete()
+            return JsonResponse({'success': True})
+        except Courses.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Course not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    return JsonResponse({'success': False, 'message': 'Only DELETE method allowed'}, status=405)
+
+# announcements
+
+@csrf_exempt
+def create_announcement(request):
+    """Create a new company announcement"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            company = Companies.objects.get(company_id=data.get('company_id', 1))  # Use actual company_id
+            announcement = CompanyAnnouncement.objects.create(
+                company=company,
+                title=data.get('title'),
+                category=data.get('category'),
+                priority=data.get('priority'),
+                date=data.get('date'),
+                status=data.get('status'),
+                author=data.get('author'),
+                description=data.get('description'),
+                tags=data.get('tags'),
+                image_url=data.get('image'),
+            )
+            return JsonResponse({'success': True, 'announcement_id': announcement.announcement_id})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    return JsonResponse({'success': False, 'message': 'Only POST method allowed'}, status=405)
+
+@csrf_exempt
+def get_announcements(request):
+    """Get all company announcements"""
+    if request.method == 'GET':
+        company_id = request.GET.get('company_id', 1)
+        announcements = CompanyAnnouncement.objects.filter(company_id=company_id)
+        data = []
+        for a in announcements:
+            data.append({
+                'announcement_id': a.announcement_id,
+                'title': a.title,
+                'category': a.category,
+                'priority': a.priority,
+                'date': str(a.date),
+                'status': a.status,
+                'author': a.author,
+                'description': a.description,
+                'tags': a.tags.split(',') if a.tags else [],
+                'image': a.image_url,
+                'created_at': str(a.created_at),
+            })
+        return JsonResponse({'success': True, 'announcements': data})
+    return JsonResponse({'success': False, 'message': 'Only GET method allowed'}, status=405)
+
+@csrf_exempt
+def update_announcement(request, announcement_id):
+    """Update a company announcement"""
+    if request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            announcement = CompanyAnnouncement.objects.get(announcement_id=announcement_id)
+            for field, value in data.items():
+                if field == 'tags':
+                    value = ','.join(value) if isinstance(value, list) else value
+                if field == 'image':
+                    field = 'image_url'
+                setattr(announcement, field, value)
+            announcement.save()
+            return JsonResponse({'success': True})
+        except CompanyAnnouncement.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Announcement not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    return JsonResponse({'success': False, 'message': 'Only PUT method allowed'}, status=405)
+
+@csrf_exempt
+def delete_announcement(request, announcement_id):
+    """Delete a company announcement"""
+    if request.method == 'DELETE':
+        try:
+            announcement = CompanyAnnouncement.objects.get(announcement_id=announcement_id)
+            announcement.delete()
+            return JsonResponse({'success': True})
+        except CompanyAnnouncement.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Announcement not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    return JsonResponse({'success': False, 'message': 'Only DELETE method allowed'}, status=405)
