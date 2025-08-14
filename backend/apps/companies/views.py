@@ -722,10 +722,10 @@ def create_announcement(request):
 
 @csrf_exempt
 def get_announcements(request):
-    """Get all company announcements"""
+    """Get all company announcements, ordered by most recent"""
     if request.method == 'GET':
         company_id = request.GET.get('company_id', 1)
-        announcements = CompanyAnnouncement.objects.filter(company_id=company_id)
+        announcements = CompanyAnnouncement.objects.filter(company_id=company_id).order_by('-date')  # Most recent first
         data = []
         for a in announcements:
             data.append({
