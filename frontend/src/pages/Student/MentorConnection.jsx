@@ -1,14 +1,12 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import StudentNavigation from "../../components/Navigation/StudentNavigation";
+import AvailableSlotBooking from "../../components/MentorAvailability/AvailableSlotBooking";
 import {
   User,
-  MessageCircle,
-  Calendar,
   Star,
   Award,
   ArrowLeft,
-  Send,
   CheckCircle,
   AlertCircle,
   GraduationCap,
@@ -20,67 +18,12 @@ const MentorConnection = () => {
   const navigate = useNavigate();
   const mentor = location.state?.mentor;
 
-  const [formData, setFormData] = useState({
-    topic: "",
-    date: "",
-    startTime: "",
-    duration: "60",
-  });
-
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const handleBookingSuccess = (data) => {
+    console.log("Booking successful:", data);
+    setIsSubmitted(true);
   };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      // Combine date and time for scheduled_at
-      const scheduledAt = `${formData.date}T${formData.startTime}:00`;
-
-      const sessionData = {
-        mentor_id: mentor.id,
-        topic: formData.topic,
-        scheduled_at: scheduledAt,
-        duration_minutes: parseInt(formData.duration),
-        status: "Pending",
-      };
-
-      const response = await fetch("/api/students/mentoring/sessions/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(sessionData),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        console.log("Mentoring session created:", result);
-        setIsSubmitted(true);
-      } else {
-        console.error("Error creating session:", result.message);
-        alert("Error creating session: " + result.message);
-      }
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      alert("Error submitting form. Please try again.");
-    }
-  };
-
-  const meetingDurations = [
-    { value: "30", label: "30 minutes" },
-    { value: "60", label: "1 hour" },
-    { value: "90", label: "1.5 hours" },
-    { value: "120", label: "2 hours" },
-  ];
 
   if (!mentor) {
     return (
@@ -326,99 +269,17 @@ const MentorConnection = () => {
               <div className="p-6">
                 <div className="mb-6">
                   <h1 className="font-display font-bold text-3xl text-blue-900 mb-2">
-                    Schedule Session with {mentor.name}
+                    Book Session with {mentor.name}
                   </h1>
                   <p className="text-blue-800">
-                    Schedule a mentoring session with {mentor.name}. Choose your
-                    preferred date, time, and meeting duration.
+                    Choose from {mentor.name}'s available time slots to schedule your mentoring session.
                   </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Meeting Details */}
-                  <div className="bg-gradient-to-r from-blue-100 to-primary-50 rounded-lg p-4">
-                    <h3 className="font-semibold text-primary-400 mb-4 flex items-center space-x-2">
-                      <MessageCircle className="h-4 w-4" />
-                      <span>Meeting Details</span>
-                    </h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-primary-400 font-medium mb-2">
-                          Meeting Topic/Description *
-                        </label>
-                        <textarea
-                          name="topic"
-                          value={formData.topic}
-                          onChange={handleInputChange}
-                          required
-                          rows={3}
-                          className="w-full px-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
-                          placeholder="Brief description of what you'd like to discuss in this mentoring session..."
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-primary-400 font-medium mb-2">
-                            Preferred Date *
-                          </label>
-                          <input
-                            type="date"
-                            name="date"
-                            value={formData.date}
-                            onChange={handleInputChange}
-                            required
-                            min={new Date().toISOString().split("T")[0]}
-                            className="w-full px-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-primary-400 font-medium mb-2">
-                            Start Time *
-                          </label>
-                          <input
-                            type="time"
-                            name="startTime"
-                            value={formData.startTime}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-primary-400 font-medium mb-2">
-                          Duration *
-                        </label>
-                        <select
-                          name="duration"
-                          value={formData.duration}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
-                        >
-                          {meetingDurations.map((duration) => (
-                            <option key={duration.value} value={duration.value}>
-                              {duration.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Submit Button */}
-                  <div className="border-t border-accent-100 pt-6">
-                    <button
-                      type="submit"
-                      className="w-full bg-primary-400 text-white px-6 py-4 rounded-lg hover:bg-primary-600 transition-all duration-200 font-medium flex items-center justify-center space-x-2 hover:shadow-lg"
-                    >
-                      <Send className="h-5 w-5" />
-                      <span>Schedule Mentoring Session</span>
-                    </button>
-                  </div>
-                </form>
+                <AvailableSlotBooking 
+                  mentorId={mentor.id} 
+                  onBookingSuccess={handleBookingSuccess}
+                />
               </div>
             </div>
           </div>

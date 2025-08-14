@@ -6,10 +6,13 @@ from django.views.decorators.http import require_http_methods
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.db import transaction
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time, date
 from django.utils import timezone
 import json
-from .models import MentoringSessions, MentoringRequests, SessionDetails, Mentors, MentoringSessionEnrollments
+from .models import (
+    MentoringSessions, MentoringRequests, SessionDetails, Mentors, 
+    MentoringSessionEnrollments, MentorAvailability, MentorAvailabilityExceptions
+)
 from apps.accounts.models import UserDetails
 from apps.students.models import Students
 
@@ -90,6 +93,80 @@ class MentoringRequestsView(View):
             expiry_date__lt=timezone.now()
         )
         expired_requests.update(status='expired')
+
+    def post(self, request, mentor_id):
+        """Create a new mentoring request"""
+        try:
+            data = json.loads(request.body)
+            
+            # Validate required fields
+            required_fields = ['topic', 'description', 'scheduled_at']
+            for field in required_fields:
+                if field not in data:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': f'{field} is required'
+                    }, status=400)
+            
+            # Check if mentor exists
+            try:
+                mentor = Mentors.objects.get(mentor_id=mentor_id)
+            except Mentors.DoesNotExist:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Mentor not found'
+                }, status=404)
+            
+            # Get the student ID from the request body or session
+            student_id = data.get('student_id') or request.session.get('student_id')
+            if not student_id:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Student ID is required. Please include student_id in the request.'
+                }, status=400)
+            
+            try:
+                student = Students.objects.get(student_id=student_id)
+            except Students.DoesNotExist:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Student not found'
+                }, status=404)
+            
+            # Parse the scheduled datetime
+            try:
+                scheduled_at = datetime.fromisoformat(data['scheduled_at'].replace('Z', '+00:00'))
+            except ValueError:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Invalid datetime format'
+                }, status=400)
+            
+            # Create the mentoring request
+            mentoring_request = MentoringRequests.objects.create(
+                student=student,
+                mentor=mentor,
+                topic=data['topic'],
+                description=data['description'],
+                preferred_time=scheduled_at,
+                session_type=data.get('session_type', 'online'),
+                urgency='normal',
+                status='pending',
+                requested_date=timezone.now(),
+                expiry_date=timezone.now() + timedelta(days=7)  # Expires in 7 days
+            )
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Mentoring request created successfully',
+                'request_id': mentoring_request.request_id
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=500)
 
 class MentoringSessionsView(View):
     @method_decorator(csrf_exempt)
@@ -529,3 +606,363 @@ def get_mentor_stats(request, mentor_id):
             'status': 'error',
             'message': str(e)
         }, status=500)
+
+
+class MentorAvailabilityView(View):
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get(self, request, mentor_id):
+        """Get mentor's availability schedule"""
+        try:
+            availability = MentorAvailability.objects.filter(
+                mentor_id=mentor_id,
+                is_active=True
+            ).order_by('day_of_week', 'start_time')
+            
+            availability_data = []
+            for avail in availability:
+                availability_data.append({
+                    'id': avail.availability_id,
+                    'day_of_week': avail.day_of_week,
+                    'day_name': avail.get_day_of_week_display(),
+                    'start_time': avail.start_time.strftime('%H:%M'),
+                    'end_time': avail.end_time.strftime('%H:%M'),
+                    'is_active': avail.is_active,
+                    'created_at': avail.created_at.isoformat() if avail.created_at else None,
+                    'updated_at': avail.updated_at.isoformat() if avail.updated_at else None
+                })
+            
+            return JsonResponse({
+                'status': 'success',
+                'availability': availability_data
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=500)
+    
+    def post(self, request, mentor_id):
+        """Add new availability slot"""
+        try:
+            data = json.loads(request.body)
+            
+            # Validate required fields
+            required_fields = ['day_of_week', 'start_time', 'end_time']
+            for field in required_fields:
+                if field not in data:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': f'{field} is required'
+                    }, status=400)
+            
+            # Check if mentor exists
+            try:
+                mentor = Mentors.objects.get(mentor_id=mentor_id)
+            except Mentors.DoesNotExist:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Mentor not found'
+                }, status=404)
+            
+            # Parse time strings
+            start_time = datetime.strptime(data['start_time'], '%H:%M').time()
+            end_time = datetime.strptime(data['end_time'], '%H:%M').time()
+            
+            # Validate time range
+            if start_time >= end_time:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Start time must be before end time'
+                }, status=400)
+            
+            # Check for overlapping availability
+            overlapping = MentorAvailability.objects.filter(
+                mentor=mentor,
+                day_of_week=data['day_of_week'],
+                is_active=True
+            ).filter(
+                Q(start_time__lt=end_time, end_time__gt=start_time)
+            )
+            
+            if overlapping.exists():
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'This time slot overlaps with existing availability'
+                }, status=400)
+            
+            # Create availability
+            availability = MentorAvailability.objects.create(
+                mentor=mentor,
+                day_of_week=data['day_of_week'],
+                start_time=start_time,
+                end_time=end_time,
+                is_active=data.get('is_active', True)
+            )
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Availability added successfully',
+                'availability': {
+                    'id': availability.availability_id,
+                    'day_of_week': availability.day_of_week,
+                    'day_name': availability.get_day_of_week_display(),
+                    'start_time': availability.start_time.strftime('%H:%M'),
+                    'end_time': availability.end_time.strftime('%H:%M'),
+                    'is_active': availability.is_active
+                }
+            })
+            
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Invalid JSON'
+            }, status=400)
+        except ValueError as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Invalid time format: {str(e)}'
+            }, status=400)
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=500)
+    
+    def put(self, request, mentor_id):
+        """Update availability slot"""
+        try:
+            data = json.loads(request.body)
+            
+            if 'availability_id' not in data:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'availability_id is required'
+                }, status=400)
+            
+            try:
+                availability = MentorAvailability.objects.get(
+                    availability_id=data['availability_id'],
+                    mentor_id=mentor_id
+                )
+            except MentorAvailability.DoesNotExist:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Availability not found'
+                }, status=404)
+            
+            # Update fields if provided
+            if 'start_time' in data:
+                availability.start_time = datetime.strptime(data['start_time'], '%H:%M').time()
+            if 'end_time' in data:
+                availability.end_time = datetime.strptime(data['end_time'], '%H:%M').time()
+            if 'is_active' in data:
+                availability.is_active = data['is_active']
+            
+            # Validate time range
+            if availability.start_time >= availability.end_time:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Start time must be before end time'
+                }, status=400)
+            
+            availability.save()
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Availability updated successfully',
+                'availability': {
+                    'id': availability.availability_id,
+                    'day_of_week': availability.day_of_week,
+                    'day_name': availability.get_day_of_week_display(),
+                    'start_time': availability.start_time.strftime('%H:%M'),
+                    'end_time': availability.end_time.strftime('%H:%M'),
+                    'is_active': availability.is_active
+                }
+            })
+            
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Invalid JSON'
+            }, status=400)
+        except ValueError as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Invalid time format: {str(e)}'
+            }, status=400)
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=500)
+    
+    def delete(self, request, mentor_id):
+        """Delete availability slot"""
+        try:
+            data = json.loads(request.body)
+            
+            if 'availability_id' not in data:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'availability_id is required'
+                }, status=400)
+            
+            try:
+                availability = MentorAvailability.objects.get(
+                    availability_id=data['availability_id'],
+                    mentor_id=mentor_id
+                )
+            except MentorAvailability.DoesNotExist:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Availability not found'
+                }, status=404)
+            
+            availability.delete()
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Availability deleted successfully'
+            })
+            
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Invalid JSON'
+            }, status=400)
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=500)
+
+
+class AvailableTimeSlotsView(View):
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get(self, request, mentor_id):
+        """Get available time slots for a mentor within the next 2 weeks"""
+        try:
+            # Get date range (next 2 weeks, with minimum 24 hours advance)
+            start_date = timezone.now().date() + timedelta(days=1)  # 24 hour minimum advance
+            end_date = start_date + timedelta(days=14)  # 2 weeks limit
+            
+            # Override dates if provided in query params
+            if 'start_date' in request.GET:
+                start_date = datetime.strptime(request.GET['start_date'], '%Y-%m-%d').date()
+            if 'end_date' in request.GET:
+                end_date = datetime.strptime(request.GET['end_date'], '%Y-%m-%d').date()
+            
+            # Ensure start date is at least 24 hours in advance
+            min_date = timezone.now().date() + timedelta(days=1)
+            if start_date < min_date:
+                start_date = min_date
+            
+            # Ensure end date is within 2 weeks
+            max_date = timezone.now().date() + timedelta(days=14)
+            if end_date > max_date:
+                end_date = max_date
+            
+            # Get mentor's regular availability
+            availability = MentorAvailability.objects.filter(
+                mentor_id=mentor_id,
+                is_active=True
+            )
+            
+            # Get mentor's exceptions
+            exceptions = MentorAvailabilityExceptions.objects.filter(
+                mentor_id=mentor_id,
+                date__gte=start_date,
+                date__lte=end_date
+            )
+            
+            # Get existing sessions (booked slots)
+            existing_sessions = MentoringSessions.objects.filter(
+                mentor_id=mentor_id,
+                scheduled_at__date__gte=start_date,
+                scheduled_at__date__lte=end_date,
+                status__in=['pending', 'scheduled']
+            )
+            
+            available_slots = []
+            current_date = start_date
+            
+            while current_date <= end_date:
+                day_of_week = current_date.weekday()
+                # Convert Python weekday (0=Monday) to our weekday (0=Sunday)
+                our_day_of_week = (day_of_week + 1) % 7
+                
+                # Get regular availability for this day
+                day_availability = availability.filter(day_of_week=our_day_of_week)
+                
+                # Check for exceptions on this date
+                day_exceptions = exceptions.filter(date=current_date)
+                
+                for avail in day_availability:
+                    # Check if this slot is affected by exceptions
+                    slot_available = True
+                    
+                    for exception in day_exceptions:
+                        if exception.exception_type == 'unavailable':
+                            # If exception covers whole day or overlaps with this slot
+                            if (not exception.start_time and not exception.end_time) or \
+                               (exception.start_time and exception.end_time and 
+                                exception.start_time <= avail.start_time and 
+                                exception.end_time >= avail.end_time):
+                                slot_available = False
+                                break
+                    
+                    if slot_available:
+                        # Generate time slots (assuming 1-hour sessions)
+                        session_duration = timedelta(hours=1)
+                        current_time = datetime.combine(current_date, avail.start_time)
+                        end_time = datetime.combine(current_date, avail.end_time)
+                        
+                        while current_time + session_duration <= end_time:
+                            slot_datetime = current_time
+                            
+                            # Check if this slot conflicts with existing sessions
+                            conflict = existing_sessions.filter(
+                                scheduled_at__date=current_date,
+                                scheduled_at__time__gte=current_time.time(),
+                                scheduled_at__time__lt=(current_time + session_duration).time()
+                            ).exists()
+                            
+                            if not conflict:
+                                available_slots.append({
+                                    'date': current_date.isoformat(),
+                                    'start_time': current_time.time().strftime('%H:%M'),
+                                    'end_time': (current_time + session_duration).time().strftime('%H:%M'),
+                                    'datetime': slot_datetime.isoformat(),
+                                    'day_name': current_date.strftime('%A'),
+                                    'formatted_date': current_date.strftime('%B %d, %Y'),
+                                    'formatted_time': current_time.time().strftime('%I:%M %p')
+                                })
+                            
+                            current_time += session_duration
+                
+                current_date += timedelta(days=1)
+            
+            # Sort slots by datetime
+            available_slots.sort(key=lambda x: x['datetime'])
+            
+            return JsonResponse({
+                'status': 'success',
+                'available_slots': available_slots,
+                'date_range': {
+                    'start_date': start_date.isoformat(),
+                    'end_date': end_date.isoformat()
+                }
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=500)
