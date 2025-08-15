@@ -200,7 +200,7 @@ const StudentDashboard = () => {
             </div>
             <div className="mt-6 md:mt-0">
               <Link
-                to="/student/profile-setup"
+                to="/student/edit-profile"
                 className="bg-accent-200 text-primary-400 px-6 py-3 rounded-xl font-semibold hover:bg-accent-300 transition-all inline-flex items-center space-x-2"
               >
                 <Edit className="h-5 w-5" />
