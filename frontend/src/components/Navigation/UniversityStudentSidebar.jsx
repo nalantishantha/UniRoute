@@ -45,6 +45,11 @@ const navigation = [
     href: "/university-student/resources",
     icon: FolderOpen,
   },
+  {
+    name: "Upload Videos",
+    href: "/university-student/upload-videos",
+    icon: Video,
+  },
   { name: "Calendar", href: "/university-student/calendar", icon: Calendar },
   { name: "Meetings", href: "/university-student/meetings", icon: Video },
   { name: "Earnings", href: "/university-student/earnings", icon: DollarSign },

@@ -18,6 +18,7 @@ import { CalendarPage } from "../pages/UniStudents/Calendar";
 
 import StudentProfile from "../pages/UniStudents/StudentProfile/StudentProfile";
 import UniStudentSettings from "../pages/UniStudents/UniStudentSettings/UniStudentSettings";
+import UploadVideosPage from "../pages/UniStudents/UploadVideosPage";
 
 const UniStudentRoutes = () => {
   return (
@@ -34,6 +35,7 @@ const UniStudentRoutes = () => {
           <Route path="feedback" element={<Feedback />} />
           <Route path="profile" element={<Profile />} />
           <Route path="resources" element={<Resources />} />
+          <Route path="upload-videos" element={<UploadVideosPage />} />
           <Route path="earnings" element={<Earnings />} />
           <Route path="settings" element={<UniStudentSettings />} />
           <Route

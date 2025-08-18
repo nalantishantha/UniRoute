@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     
     # Third party apps
     'corsheaders',  # Only one corsheaders entry
+    'rest_framework',
     
    # Your apps 
     'apps.academic_resources',
@@ -46,6 +47,7 @@ INSTALLED_APPS = [
     'apps.mentoring',
     'apps.advertisements',
     'apps.payments',
+    'apps.videos',
 ]
 
 MIDDLEWARE = [
@@ -132,6 +134,24 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Django REST Framework settings
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.MultiPartParser',
+        'rest_framework.parsers.FormParser',
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+}
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
