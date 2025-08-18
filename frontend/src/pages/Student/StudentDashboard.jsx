@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import StudentNavigation from "../../components/Navigation/StudentNavigation";
+import { getCurrentUser } from "../../utils/auth";
 import {
   GraduationCap,
   User,
@@ -22,6 +23,8 @@ import {
   Bell,
   Settings,
   LogOut,
+  Loader2,
+  AlertCircle,
   Menu,
   X,
   UserPlus,
@@ -31,17 +34,118 @@ import {
 } from "lucide-react";
 
 const StudentDashboard = () => {
-  // Sample data
-  const studentProfile = {
-    name: " Kavindi Danushka",
-    alStream: "Physical Science",
-    subjects: ["Combined Mathematics", "Physics", "Chemistry"],
-    zScore: 1.8542,
-    district: "Kandy",
-    profileComplete: 85,
+  const [studentProfile, setStudentProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchStudentProfile();
+    
+    // Listen for profile update events
+    const handleProfileUpdate = () => {
+      console.log('Dashboard: Profile updated, refreshing data...');
+      fetchStudentProfile();
+    };
+    
+    // Listen for page visibility changes
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('Dashboard: Page became visible, refreshing data...');
+        fetchStudentProfile();
+      }
+    };
+    
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('profileUpdated', handleProfileUpdate);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  const fetchStudentProfile = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const currentUser = getCurrentUser();
+      
+      if (!currentUser || !currentUser.user_id) {
+        setError('User not authenticated. Please log in.');
+        setLoading(false);
+        return;
+      }
+
+      console.log('Dashboard: Fetching profile for user:', currentUser.user_id);
+
+      const response = await fetch(`http://127.0.0.1:8000/api/students/profile/?user_id=${currentUser.user_id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Dashboard: Profile data received:', data);
+
+      if (data.success) {
+        // Process the data for dashboard display
+        const profileData = {
+          name: data.student_data.full_name || data.student_data.username || 'Student Name',
+          email: data.student_data.email,
+          alStream: data.student_data.current_stage || "Not specified",
+          subjects: [], // You can add this later from another table
+          zScore: null, // You can add this later from results table
+          district: data.student_data.district || data.student_data.location || "Not specified",
+          school: data.student_data.school || "Not specified",
+          profileImage: data.student_data.profile_picture 
+            ? (data.student_data.profile_picture.startsWith('http') 
+                ? `${data.student_data.profile_picture}?t=${Date.now()}` 
+                : `http://127.0.0.1:8000/media/${data.student_data.profile_picture}?t=${Date.now()}`)
+            : "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop",
+          // Calculate profile completion percentage
+          profileComplete: calculateProfileCompletion(data.student_data),
+          isVerified: data.student_data.is_verified,
+          joinedDate: data.student_data.created_at,
+          lastUpdated: data.student_data.updated_at,
+        };
+        
+        setStudentProfile(profileData);
+      } else {
+        setError(data.message || 'Failed to load profile data');
+      }
+    } catch (error) {
+      console.error('Dashboard: Error fetching student profile:', error);
+      setError('Failed to connect to server. Please check if the backend is running.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const quickStats = [
+  const calculateProfileCompletion = (data) => {
+    const fields = [
+      data.full_name,
+      data.email,
+      data.contact_number,
+      data.location,
+      data.bio,
+      data.profile_picture,
+      data.current_stage,
+      data.district,
+      data.school
+    ];
+    
+    const filledFields = fields.filter(field => field && field.trim() !== '').length;
+    return Math.round((filledFields / fields.length) * 100);
+  };
+
+  const quickStatss = [
     {
       label: "Profile Completion",
       value: "85%",
@@ -164,6 +268,95 @@ const StudentDashboard = () => {
   //   },
   // ];
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-r from-primary-100 to-white">
+        <StudentNavigation />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin text-primary-400 mx-auto mb-4" />
+              <p className="text-primary-400 text-lg">Loading your dashboard...</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-r from-primary-100 to-white">
+        <StudentNavigation />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
+              <AlertCircle className="h-8 w-8 text-red-600 mx-auto mb-4" />
+              <p className="text-red-600 mb-4">{error}</p>
+              <button 
+                onClick={fetchStudentProfile}
+                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // If no student profile data, show default state
+  if (!studentProfile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-r from-primary-100 to-white">
+        <StudentNavigation />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center">
+            <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-600 text-lg">No profile data available</p>
+            <Link 
+              to="/student/profile-setup"
+              className="mt-4 inline-block bg-primary-600 text-white px-6 py-2 rounded hover:bg-primary-700"
+            >
+              Set Up Profile
+            </Link>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Update quick stats with real data
+  const quickStats = [
+    {
+      label: "Profile Completion",
+      value: `${studentProfile.profileComplete}%`,
+      icon: User,
+      color: "bg-blue-500",
+    },
+    {
+      label: "Current Stage",
+      value: studentProfile.alStream,
+      icon: BookOpen,
+      color: "bg-green-500",
+    },
+    {
+      label: "District",
+      value: studentProfile.district,
+      icon: MapPin,
+      color: "bg-purple-500",
+    },
+    {
+      label: "Status",
+      value: studentProfile.isVerified ? "Verified" : "Pending",
+      icon: Award,
+      color: studentProfile.isVerified ? "bg-green-500" : "bg-orange-500",
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-primary-100 to-white">
       {/* Navigation */}
@@ -200,7 +393,7 @@ const StudentDashboard = () => {
             </div>
             <div className="mt-6 md:mt-0">
               <Link
-                to="/student/profile-setup"
+                to="/student/edit-profile"
                 className="bg-accent-200 text-primary-400 px-6 py-3 rounded-xl font-semibold hover:bg-accent-300 transition-all inline-flex items-center space-x-2"
               >
                 <Edit className="h-5 w-5" />

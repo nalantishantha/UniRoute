@@ -10,6 +10,7 @@ import FindTutors from "../pages/Student/FindTutors";
 import TutorBooking from "../pages/Student/TutorBooking";
 import NewsFeed from "../pages/Student/NewsFeed";
 import ProfilePage from "../pages/Student/ProfilePage";
+import EditProfile from "../pages/Student/EditProfile";
 import SettingsPage from "../pages/Student/SettingsPage";
 import ProfileSetup from "../pages/Student/ProfileSetup";
 import ZScoreAnalysis from "../pages/Student/ZScoreAnalysis";
@@ -32,6 +33,7 @@ const StudentRoutes = () => {
 
       {/* Profile Management */}
       <Route path="/profile" element={<ProfilePage />} />
+      <Route path="/edit-profile" element={<EditProfile />} />
       <Route path="/settings" element={<SettingsPage />} />
       <Route path="/profile-setup" element={<ProfileSetup />} />
 
