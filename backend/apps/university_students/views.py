@@ -336,3 +336,184 @@ def calculate_feedback_stats(feedback_list):
         'mentoring_count': mentoring_count,
         'tutoring_count': tutoring_count
     }
+
+
+@csrf_exempt
+def export_feedback_report(request, user_id):
+    """
+    Export feedback report as PDF for a specific university student
+    """
+    if request.method == 'GET':
+        try:
+            from django.http import HttpResponse
+            from reportlab.lib import colors
+            from reportlab.lib.pagesizes import letter, A4
+            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.lib.units import inch
+            from io import BytesIO
+            import datetime as dt
+            
+            # Get query parameters for filtering
+            service_type = request.GET.get('service_type', 'all')
+            sentiment = request.GET.get('sentiment', 'all')
+            search = request.GET.get('search', '')
+            
+            # Find university student by user_id
+            try:
+                university_student = UniversityStudents.objects.get(user_id=user_id)
+            except UniversityStudents.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'University student not found for this user'
+                }, status=404)
+            
+            feedback_list = []
+            
+            # Get mentoring feedback if requested
+            if service_type in ['all', 'mentoring']:
+                mentoring_feedback = get_mentoring_feedback(university_student, search, sentiment)
+                feedback_list.extend(mentoring_feedback)
+            
+            # Get tutoring feedback if requested  
+            if service_type in ['all', 'tutoring']:
+                tutoring_feedback = get_tutoring_feedback(university_student, search, sentiment)
+                feedback_list.extend(tutoring_feedback)
+            
+            # Sort by date (newest first)
+            feedback_list.sort(key=lambda x: x['date'], reverse=True)
+            
+            # Calculate statistics
+            stats = calculate_feedback_stats(feedback_list)
+            
+            # Create PDF
+            buffer = BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=A4)
+            story = []
+            
+            # Get styles
+            styles = getSampleStyleSheet()
+            title_style = ParagraphStyle(
+                'CustomTitle',
+                parent=styles['Heading1'],
+                fontSize=24,
+                spaceAfter=30,
+                textColor=colors.HexColor('#2563eb'),
+                alignment=1  # Center alignment
+            )
+            
+            # Add title
+            story.append(Paragraph("Feedback Report", title_style))
+            story.append(Spacer(1, 20))
+            
+            # Add report info
+            report_info = [
+                ["Report Generated:", dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")],
+                ["University Student ID:", str(university_student.university_student_id)],
+                ["Service Type Filter:", service_type.title()],
+                ["Total Feedback:", str(stats['total_feedback'])],
+                ["Average Rating:", f"{stats['average_rating']}/5"],
+            ]
+            
+            info_table = Table(report_info, colWidths=[2*inch, 3*inch])
+            info_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f3f4f6')),
+                ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+                ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 0), (-1, -1), 10),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ]))
+            
+            story.append(info_table)
+            story.append(Spacer(1, 20))
+            
+            # Add statistics summary
+            stats_data = [
+                ["Metric", "Count", "Percentage"],
+                ["Positive Feedback", str(stats['positive']), f"{(stats['positive']/stats['total_feedback']*100):.1f}%" if stats['total_feedback'] > 0 else "0%"],
+                ["Neutral Feedback", str(stats['neutral']), f"{(stats['neutral']/stats['total_feedback']*100):.1f}%" if stats['total_feedback'] > 0 else "0%"],
+                ["Negative Feedback", str(stats['negative']), f"{(stats['negative']/stats['total_feedback']*100):.1f}%" if stats['total_feedback'] > 0 else "0%"],
+                ["Mentoring Sessions", str(stats['mentoring_count']), f"{(stats['mentoring_count']/stats['total_feedback']*100):.1f}%" if stats['total_feedback'] > 0 else "0%"],
+                ["Tutoring Sessions", str(stats['tutoring_count']), f"{(stats['tutoring_count']/stats['total_feedback']*100):.1f}%" if stats['total_feedback'] > 0 else "0%"],
+            ]
+            
+            stats_table = Table(stats_data, colWidths=[2*inch, 1.5*inch, 1.5*inch])
+            stats_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2563eb')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 0), (-1, -1), 10),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f9fafb')])
+            ]))
+            
+            story.append(Paragraph("Feedback Statistics", styles['Heading2']))
+            story.append(Spacer(1, 10))
+            story.append(stats_table)
+            story.append(Spacer(1, 30))
+            
+            # Add detailed feedback
+            if feedback_list:
+                story.append(Paragraph("Detailed Feedback", styles['Heading2']))
+                story.append(Spacer(1, 10))
+                
+                feedback_data = [["Date", "Student", "Service", "Rating", "Sentiment", "Comment"]]
+                
+                for feedback in feedback_list:
+                    # Truncate long comments for the table
+                    comment = feedback['comment'][:100] + "..." if len(feedback['comment']) > 100 else feedback['comment']
+                    
+                    feedback_data.append([
+                        feedback['date'],
+                        feedback['student'],
+                        feedback['service_type'].title(),
+                        f"{feedback['rating']}/5",
+                        feedback['sentiment'].title(),
+                        comment
+                    ])
+                
+                feedback_table = Table(feedback_data, colWidths=[0.8*inch, 1.2*inch, 0.8*inch, 0.6*inch, 0.8*inch, 2.8*inch])
+                feedback_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2563eb')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 8),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                    ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f9fafb')]),
+                    ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ]))
+                
+                story.append(feedback_table)
+            else:
+                story.append(Paragraph("No feedback found for the selected criteria.", styles['Normal']))
+            
+            # Build PDF
+            doc.build(story)
+            
+            # Get PDF data
+            pdf_data = buffer.getvalue()
+            buffer.close()
+            
+            # Create response
+            response = HttpResponse(pdf_data, content_type='application/pdf')
+            filename = f"feedback_report_{user_id}_{dt.datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            
+            return response
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error generating PDF report: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only GET method allowed'
+    }, status=405)

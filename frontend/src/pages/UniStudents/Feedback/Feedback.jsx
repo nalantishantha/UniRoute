@@ -71,6 +71,21 @@ export default function Feedback() {
     }
   };
 
+  const handleExportReport = async () => {
+    try {
+      const filters = {
+        service_type: serviceTypeFilter,
+      };
+
+      await feedbackAPI.exportFeedbackReport(USER_ID, filters);
+
+      // You could add a success notification here if you have a notification system
+    } catch (err) {
+      setError(err.message || 'An error occurred while exporting the report');
+      console.error('Error exporting report:', err);
+    }
+  };
+
   const renderStars = (rating) => {
     return Array.from({ length: 5 }).map((_, index) => (
       <Star
@@ -139,7 +154,7 @@ export default function Feedback() {
             <option value="mentoring">Mentoring Only</option>
             <option value="tutoring">Tutoring Only</option>
           </select>
-          <Button variant="outline">Export Report</Button>
+          <Button variant="outline" onClick={handleExportReport}>Export Report</Button>
         </div>
       </div>
 
