@@ -301,11 +301,14 @@ def degree_programs_list(request):
             
             if university_id:
                 filters['university_id'] = university_id
-            
-            # Note: DegreePrograms are linked to university, not faculty directly
-            # If faculty filtering is needed, we'd need to add a faculty field to DegreePrograms
-            # For now, we'll filter by university
-            
+            # If faculty filter provided, include it
+            if faculty_id:
+                filters['faculty_id'] = faculty_id
+            # Allow filtering by subject stream (frontend may pass 'subject_stream')
+            subject_stream = request.GET.get('subject_stream')
+            if subject_stream:
+                # field is subject_stream_required on the model
+                filters['subject_stream_required'] = subject_stream
             degree_programs = DegreePrograms.objects.filter(**filters)
             
             data = []
@@ -318,6 +321,8 @@ def degree_programs_list(request):
                     'code': program.code,
                     'university_id': program.university_id,
                     'university_name': program.university.name if program.university else None,
+                    'faculty_id': program.faculty_id if hasattr(program, 'faculty_id') else None,
+                    'faculty_name': program.faculty.name if getattr(program, 'faculty', None) else None,
                     'description': program.description,
                     'subject_stream_required': program.subject_stream_required,
                     'career_paths': program.career_paths
