@@ -12,6 +12,7 @@ from apps.students.models import Students
 from apps.university_students.models import UniversityStudents
 from apps.universities.models import Universities, UniversityRequests
 from apps.companies.models import Companies, CompanyRequests
+from apps.pre_mentors.models import PreMentors
 
 @csrf_exempt
 def register_student(request):
@@ -173,18 +174,56 @@ def login_user(request):
                         print("User type not found")
                     
                     # Get additional info based on user type
+                    # First check if user is a pre-mentor (this takes priority over other types)
                     additional_info = {}
+                    final_user_type = user_type_name
                     
-                    if user_type_name == 'student':
-                        try:
-                            student = Students.objects.get(user=user)
-                            additional_info = {
-                                'student_id': student.student_id,
-                                # 'student_stage': student.student_stage,
-                                'school': student.school
-                            }
-                        except Students.DoesNotExist:
-                            pass
+                    # Check if user is a pre-mentor first (regardless of their user_type in Users table)
+                    try:
+                        pre_mentor = PreMentors.objects.get(user=user)
+                        uni_student = pre_mentor.university_student
+                        final_user_type = 'pre_mentor'  # Override the user type
+                        additional_info = {
+                            'pre_mentor_id': pre_mentor.pre_mentor_id,
+                            'university_student_id': uni_student.university_student_id,
+                            'university_id': uni_student.university_id,
+                            'faculty_id': uni_student.faculty_id,
+                            'degree_program_id': uni_student.degree_program_id,
+                            'year_of_study': uni_student.year_of_study,
+                            'registration_number': uni_student.registration_number,
+                            'hourly_rate': float(pre_mentor.hourly_rate) if pre_mentor.hourly_rate else 0,
+                            'total_earnings': float(pre_mentor.total_earnings),
+                            'rating': float(pre_mentor.rating) if pre_mentor.rating else 0,
+                            'total_sessions': pre_mentor.total_sessions,
+                            'is_available': pre_mentor.is_available
+                        }
+                        print(f"User is a pre-mentor with ID: {pre_mentor.pre_mentor_id}")
+                    except PreMentors.DoesNotExist:
+                        # User is not a pre-mentor, check other types
+                        if user_type_name == 'student':
+                            try:
+                                student = Students.objects.get(user=user)
+                                additional_info = {
+                                    'student_id': student.student_id,
+                                    # 'student_stage': student.student_stage,
+                                    'school': student.school
+                                }
+                            except Students.DoesNotExist:
+                                pass
+                        
+                        elif user_type_name == 'uni_student':
+                            try:
+                                uni_student = UniversityStudents.objects.get(user=user)
+                                additional_info = {
+                                    'university_student_id': uni_student.university_student_id,
+                                    'university_id': uni_student.university_id,
+                                    'faculty_id': uni_student.faculty_id,
+                                    'degree_program_id': uni_student.degree_program_id,
+                                    'year_of_study': uni_student.year_of_study,
+                                    'registration_number': uni_student.registration_number
+                                }
+                            except UniversityStudents.DoesNotExist:
+                                pass
                     
                     return JsonResponse({
                         'success': True,
@@ -195,7 +234,7 @@ def login_user(request):
                             'email': user.email,
                             'full_name': user_details.full_name if user_details else '',
                             'contact_number': user_details.contact_number if user_details else '',
-                            'user_type': user_type_name,
+                            'user_type': final_user_type,  # Use the final determined user type
                             'user_type_id': user.user_type_id,
                             **additional_info
                         }
@@ -592,6 +631,75 @@ def register_company(request):
             return JsonResponse({
                 'success': False,
                 'message': f'Registration request failed: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only POST method allowed'
+    }, status=405)
+
+
+@csrf_exempt
+def upgrade_to_pre_mentor(request):
+    """Convert a university student to a pre-mentor"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            university_student_id = data.get('university_student_id')
+            hourly_rate = data.get('hourly_rate', 0)
+            specializations = data.get('specializations', '')
+            
+            if not university_student_id:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'University student ID is required'
+                }, status=400)
+            
+            # Get university student
+            try:
+                uni_student = UniversityStudents.objects.get(university_student_id=university_student_id)
+            except UniversityStudents.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'University student not found'
+                }, status=404)
+            
+            # Check if already a pre-mentor
+            if PreMentors.objects.filter(university_student=uni_student).exists():
+                return JsonResponse({
+                    'success': False,
+                    'message': 'This university student is already a pre-mentor'
+                }, status=400)
+            
+            with transaction.atomic():
+                # Update user type to pre_mentor
+                pre_mentor_type, _ = UserTypes.objects.get_or_create(type_name='pre_mentor')
+                uni_student.user.user_type = pre_mentor_type
+                uni_student.user.save()
+                
+                # Create pre-mentor record
+                pre_mentor = PreMentors.objects.create(
+                    user=uni_student.user,
+                    university_student=uni_student,
+                    hourly_rate=hourly_rate,
+                    specializations=specializations,
+                    total_earnings=0.00,
+                    total_sessions=0,
+                    is_available=True,
+                    status='active'
+                )
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Successfully upgraded to pre-mentor',
+                    'pre_mentor_id': pre_mentor.pre_mentor_id
+                })
+                
+        except Exception as e:
+            print(f"Upgrade to pre-mentor error: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': f'Upgrade failed: {str(e)}'
             }, status=500)
     
     return JsonResponse({

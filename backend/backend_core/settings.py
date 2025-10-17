@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'apps.companies',
     'apps.tutoring',
     'apps.mentoring',
+    'apps.pre_mentors',
     'apps.advertisements',
     'apps.payments',
 ]
