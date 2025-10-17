@@ -19,7 +19,7 @@ import {
 } from "../../../components/ui/Card";
 import Button from "../../../components/ui/Button";
 
-const FeedbackList = ({ feedbackData, filterStatus }) => {
+const FeedbackList = ({ feedbackData, filterStatus, serviceTypeFilter, onRefreshData }) => {
   const [filterSentiment, setFilterSentiment] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -33,8 +33,11 @@ const FeedbackList = ({ feedbackData, filterStatus }) => {
 
   const handleReplyFeedback = (feedback, reply) => {
     // Implement reply logic here (e.g., send to backend)
-    // For now, just log
     console.log("Reply to feedback:", feedback, reply);
+    // Optionally refresh data after reply
+    if (onRefreshData) {
+      onRefreshData();
+    }
   };
 
   const filteredFeedback = feedbackData.filter((feedback) => {

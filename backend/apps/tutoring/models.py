@@ -4,6 +4,7 @@ class TutorFeedback(models.Model):
     feedback_id = models.AutoField(primary_key=True)
     tutor = models.ForeignKey('tutoring.Tutors', models.DO_NOTHING)
     user = models.ForeignKey('accounts.Users', models.DO_NOTHING)
+    rating = models.JSONField(blank=True, null=True)
     feedback = models.TextField()
     created_at = models.DateTimeField(blank=True, null=True)
 

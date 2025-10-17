@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   MessageSquare,
@@ -15,127 +15,118 @@ import {
 } from "../../../components/ui/Card";
 import Button from "../../../components/ui/Button";
 import FeedbackList from "./FeedbackList";
-
-const feedbackData = [
-  {
-    id: 1,
-    student: "Sarah Chen",
-    course: "Mathematics Foundations",
-    rating: 5,
-    sentiment: "positive",
-    comment:
-      "Alex is an amazing tutor! His explanations are clear and he's very patient. I finally understand calculus thanks to his teaching methods.",
-    date: "2024-01-20",
-    isRead: true,
-    hasReply: false,
-    avatar:
-      "https://images.unsplash.com/photo-1494790108755-2616b612b5bc?w=40&h=40&fit=crop&crop=face",
-  },
-  {
-    id: 2,
-    student: "Michael Brown",
-    course: "Physics for Beginners",
-    rating: 4,
-    sentiment: "positive",
-    comment:
-      "Great course content and Alex is very knowledgeable. Sometimes the pace is a bit fast, but overall excellent experience.",
-    date: "2024-01-18",
-    isRead: true,
-    hasReply: true,
-    avatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
-  },
-  {
-    id: 3,
-    student: "Emily Watson",
-    course: "Chemistry Lab Techniques",
-    rating: 5,
-    sentiment: "positive",
-    comment:
-      "Absolutely loved this course! The lab demonstrations were fantastic and Alex made complex concepts easy to understand.",
-    date: "2024-01-15",
-    isRead: false,
-    hasReply: false,
-    avatar:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
-  },
-  {
-    id: 4,
-    student: "John Doe",
-    course: "Biology Essentials",
-    rating: 3,
-    sentiment: "neutral",
-    comment:
-      "The course material is good but I wish there were more interactive elements. Alex is helpful when asked questions directly.",
-    date: "2024-01-12",
-    isRead: true,
-    hasReply: false,
-    avatar:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
-  },
-  {
-    id: 5,
-    student: "Lisa Johnson",
-    course: "Advanced Mathematics",
-    rating: 5,
-    sentiment: "positive",
-    comment:
-      "Best math tutor I've ever had! Alex goes above and beyond to ensure students understand the material. Highly recommend!",
-    date: "2024-01-10",
-    isRead: true,
-    hasReply: true,
-    avatar:
-      "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=40&h=40&fit=crop&crop=face",
-  },
-  {
-    id: 6,
-    student: "David Wilson",
-    course: "Physics Problem Solving",
-    rating: 2,
-    sentiment: "negative",
-    comment:
-      "The course didn't meet my expectations. Some explanations were unclear and I struggled to follow along with the examples.",
-    date: "2024-01-08",
-    isRead: false,
-    hasReply: false,
-    avatar:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face",
-  },
-];
-
-const stats = {
-  totalFeedback: feedbackData.length,
-  averageRating: 4.2,
-  unreadCount: feedbackData.filter((f) => !f.isRead).length,
-  responseRate: 85,
-  positive: feedbackData.filter((f) => f.sentiment === "positive").length,
-  neutral: feedbackData.filter((f) => f.sentiment === "neutral").length,
-  negative: feedbackData.filter((f) => f.sentiment === "negative").length,
-};
-
-const monthlyTrends = [
-  { month: "Jul", rating: 4.1, count: 8 },
-  { month: "Aug", rating: 4.3, count: 12 },
-  { month: "Sep", rating: 4.0, count: 15 },
-  { month: "Oct", rating: 4.4, count: 18 },
-  { month: "Nov", rating: 4.2, count: 16 },
-  { month: "Dec", rating: 4.2, count: 14 },
-];
+import { feedbackAPI } from "../../../utils/feedbackAPI";
+import { getCurrentUser } from "../../../utils/auth";
 
 export default function Feedback() {
   const [filterStatus, setFilterStatus] = useState("all");
+  const [serviceTypeFilter, setServiceTypeFilter] = useState("all");
+  const [feedbackData, setFeedbackData] = useState([]);
+  const [stats, setStats] = useState({
+    total_feedback: 0,
+    average_rating: 0,
+    unread_count: 0,
+    response_rate: 0,
+    positive: 0,
+    neutral: 0,
+    negative: 0,
+    mentoring_count: 0,
+    tutoring_count: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Get current user and use their user_id
+  const currentUser = getCurrentUser();
+  const USER_ID = currentUser?.user_id || 19;
+
+  useEffect(() => {
+    fetchFeedback();
+  }, [serviceTypeFilter]);
+
+  const fetchFeedback = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const filters = {
+        service_type: serviceTypeFilter,
+      };
+
+      const response = await feedbackAPI.getFeedback(USER_ID, filters);
+
+      if (response.success) {
+        setFeedbackData(response.feedback || []);
+        setStats(response.stats || stats);
+      } else {
+        setError(response.message || 'Failed to fetch feedback');
+      }
+    } catch (err) {
+      setError(err.message || 'An error occurred while fetching feedback');
+      console.error('Error fetching feedback:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const renderStars = (rating) => {
     return Array.from({ length: 5 }).map((_, index) => (
       <Star
         key={index}
         className={`w-4 h-4 ${index < rating
-            ? "text-warning fill-current"
-            : "text-neutral-light-grey"
+          ? "text-warning fill-current"
+          : "text-neutral-light-grey"
           }`}
       />
     ));
   };
+
+  const monthlyTrends = [
+    { month: "Jul", rating: 4.1, count: 8 },
+    { month: "Aug", rating: 4.3, count: 12 },
+    { month: "Sep", rating: 4.0, count: 15 },
+    { month: "Oct", rating: 4.4, count: 18 },
+    { month: "Nov", rating: 4.2, count: 16 },
+    { month: "Dec", rating: 4.2, count: 14 },
+  ];
+
+  if (loading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex items-center justify-center min-h-96"
+      >
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+          <p className="mt-4 text-neutral-grey">Loading feedback...</p>
+        </div>
+      </motion.div>
+    );
+  }
+
+  if (error) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-6"
+      >
+        <Card>
+          <CardContent className="p-12 text-center">
+            <MessageSquare className="w-12 h-12 text-error mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-neutral-black mb-2">
+              Error Loading Feedback
+            </h3>
+            <p className="text-neutral-grey mb-4">{error}</p>
+            <Button onClick={fetchFeedback} variant="outline">
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
@@ -146,6 +137,15 @@ export default function Feedback() {
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-end">
         <div className="flex items-center space-x-3 mt-4 lg:mt-0">
+          <select
+            value={serviceTypeFilter}
+            onChange={(e) => setServiceTypeFilter(e.target.value)}
+            className="px-4 py-2 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+          >
+            <option value="all">All Services</option>
+            <option value="mentoring">Mentoring Only</option>
+            <option value="tutoring">Tutoring Only</option>
+          </select>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
@@ -169,10 +169,10 @@ export default function Feedback() {
                   Total Feedback
                 </p>
                 <p className="text-2xl font-bold text-neutral-black mt-2">
-                  {stats.totalFeedback}
+                  {stats.total_feedback}
                 </p>
                 <p className="text-sm text-neutral-grey mt-1">
-                  {stats.unreadCount} unread
+                  {stats.unread_count} unread
                 </p>
               </div>
               <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
@@ -191,10 +191,10 @@ export default function Feedback() {
                 </p>
                 <div className="flex items-center space-x-2 mt-2">
                   <p className="text-2xl font-bold text-neutral-black">
-                    {stats.averageRating}
+                    {stats.average_rating}
                   </p>
                   <div className="flex">
-                    {renderStars(Math.round(stats.averageRating))}
+                    {renderStars(Math.round(stats.average_rating))}
                   </div>
                 </div>
               </div>
@@ -213,9 +213,9 @@ export default function Feedback() {
                   Response Rate
                 </p>
                 <p className="text-2xl font-bold text-neutral-black mt-2">
-                  {stats.responseRate}%
+                  {stats.response_rate}%
                 </p>
-                <p className="text-sm text-success mt-1">+5% this month</p>
+                <p className="text-sm text-success mt-1">Active engagement</p>
               </div>
               <div className="w-12 h-12 bg-success/20 rounded-xl flex items-center justify-center">
                 <TrendingUp className="w-6 h-6 text-success" />
@@ -285,6 +285,8 @@ export default function Feedback() {
       <FeedbackList
         feedbackData={feedbackData}
         filterStatus={filterStatus}
+        serviceTypeFilter={serviceTypeFilter}
+        onRefreshData={fetchFeedback}
       />
     </motion.div>
   );
