@@ -28,6 +28,7 @@ import AdPublish from "./pages/Company/AdPublish";
 // Route groups
 import AdminRoutes from "./routes/AdminRoutes";
 import UniStudentRoutes from "./routes/UniStudentRoutes";
+import PreMentorRoutes from "./routes/PreMentorRoutes";
 import StudentRoutes from "./routes/StudentRoutes";
 import { companyRoutes } from "./routes/CompanyRoutes";
 import { universityRoutes } from "./routes/UniversityRoutes";
@@ -62,6 +63,9 @@ function App() {
           <Route path="/university-student/*" element={<UniStudentRoutes />} />
           <Route path="/unistudent/*" element={<UniStudentRoutes />} />
 
+          {/* Pre-Mentor Routes */}
+          <Route path="/pre-mentor/*" element={<PreMentorRoutes />} />
+
           {/* Admin Routes */}
           <Route path="/admin/*" element={<AdminRoutes />} />
 
@@ -85,7 +89,7 @@ function App() {
           {/* Test Routes */}
           <Route path="/test/mentor-availability" element={<MentorAvailabilityTest />} />
         </Routes>
-    </RouteGuard>
+      </RouteGuard>
     </Router >
   );
 }
