@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Star, 
-  TrendingUp, 
-  Users, 
-  CheckCircle, 
-  Clock, 
+import {
+  Star,
+  TrendingUp,
+  Users,
+  CheckCircle,
+  Clock,
   AlertCircle,
   X,
   LogOut
@@ -139,7 +139,7 @@ export default function MentorRequestNotice({ itemVariants }) {
       // Can apply
       return {
         title: "Ready to Become a Mentor?",
-        message: "Take your tutoring to the next level! Apply to become a mentor and gain access to more students, advanced features, and higher earning potential.",
+        message: "Take your tutoring to the next level! Apply to become a mentor and make a meaningful impact by guiding more students, accessing advanced features",
         icon: Star,
         iconColor: "text-secondary",
         bgColor: "from-secondary/10 to-warning/5",
@@ -167,7 +167,7 @@ export default function MentorRequestNotice({ itemVariants }) {
             {/* Close button */}
             <button
               onClick={() => setShowNotice(false)}
-              className="absolute top-4 right-4 p-1 rounded-full hover:bg-white/20 transition-colors"
+              className="absolute p-1 transition-colors rounded-full top-4 right-4 hover:bg-white/20"
             >
               <X className="w-4 h-4 text-neutral-grey hover:text-neutral-black" />
             </button>
@@ -180,45 +180,45 @@ export default function MentorRequestNotice({ itemVariants }) {
 
               {/* Content */}
               <div className="flex-1">
-                <h3 className="text-lg font-bold text-neutral-black mb-2">
+                <h3 className="mb-2 text-lg font-bold text-neutral-black">
                   {content.title}
                 </h3>
-                <p className="text-neutral-grey mb-4 leading-relaxed">
+                <p className="mb-4 leading-relaxed text-neutral-grey">
                   {content.message}
                 </p>
 
                 {/* Benefits list for eligible users or celebration for approved users */}
                 {content.showButton && content.buttonAction === 'apply' && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+                  <div className="grid grid-cols-1 gap-3 mb-6 md:grid-cols-3">
                     <div className="flex items-center space-x-2">
                       <TrendingUp className="w-4 h-4 text-success" />
-                      <span className="text-sm text-neutral-black font-medium">Higher Earnings</span>
+                      <span className="text-sm font-medium text-neutral-black">Great Work</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Users className="w-4 h-4 text-info" />
-                      <span className="text-sm text-neutral-black font-medium">More Students</span>
+                      <span className="text-sm font-medium text-neutral-black">More Students</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Star className="w-4 h-4 text-warning" />
-                      <span className="text-sm text-neutral-black font-medium">Advanced Features</span>
+                      <span className="text-sm font-medium text-neutral-black">Advanced Features</span>
                     </div>
                   </div>
                 )}
 
                 {/* Celebration features for approved mentors */}
                 {content.showButton && content.buttonAction === 'logout' && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+                  <div className="grid grid-cols-1 gap-3 mb-6 md:grid-cols-3">
                     <div className="flex items-center space-x-2">
                       <CheckCircle className="w-4 h-4 text-success" />
-                      <span className="text-sm text-neutral-black font-medium">Full Mentor Access</span>
+                      <span className="text-sm font-medium text-neutral-black">Full Mentor Access</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Users className="w-4 h-4 text-success" />
-                      <span className="text-sm text-neutral-black font-medium">Mentor Dashboard</span>
+                      <span className="text-sm font-medium text-neutral-black">Mentor Dashboard</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <TrendingUp className="w-4 h-4 text-success" />
-                      <span className="text-sm text-neutral-black font-medium">Enhanced Features</span>
+                      <span className="text-sm font-medium text-neutral-black">Enhanced Features</span>
                     </div>
                   </div>
                 )}
@@ -231,13 +231,13 @@ export default function MentorRequestNotice({ itemVariants }) {
                     onClick={handleButtonClick}
                     disabled={submitting}
                     className={`font-semibold px-6 py-3 rounded-xl hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 ${content.buttonAction === 'logout'
-                        ? 'bg-gradient-to-r from-success to-green-600 text-white'
-                        : 'bg-gradient-to-r from-secondary to-warning text-neutral-black'
+                      ? 'bg-gradient-to-r from-success to-green-600 text-white'
+                      : 'bg-gradient-to-r from-secondary to-warning text-neutral-black'
                       }`}
                   >
                     {submitting ? (
                       <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                        <div className="w-4 h-4 border-2 border-current rounded-full border-t-transparent animate-spin"></div>
                         <span>{content.buttonAction === 'logout' ? 'Logging out...' : 'Submitting...'}</span>
                       </div>
                     ) : (
@@ -251,10 +251,9 @@ export default function MentorRequestNotice({ itemVariants }) {
 
                 {/* Status indicator for applications */}
                 {mentorStatus?.has_applied && mentorStatus?.applied_at && (
-                  <div className={`flex items-center space-x-2 ${
-                    mentorStatus.approved === 1 ? 'text-success' : 
+                  <div className={`flex items-center space-x-2 ${mentorStatus.approved === 1 ? 'text-success' :
                     mentorStatus.approved === 0 ? 'text-warning' : 'text-error'
-                  }`}>
+                    }`}>
                     <Clock className="w-4 h-4" />
                     <span className="text-sm font-medium">
                       Applied on {new Date(mentorStatus.applied_at).toLocaleDateString()}

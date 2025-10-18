@@ -9,25 +9,33 @@ const RouteGuard = ({ children }) => {
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+
     const checkRouteAccess = () => {
+      if (!isMounted) return;
+
+      setIsChecking(true);
+      setIsAuthorized(false);
+
       const currentPath = location.pathname;
-      
+
       // Define protected routes and their required user types
       const protectedRoutes = {
-        '/admin': 'admin',
-        '/university-student': 'uni_student',
-        '/student': 'student',
-        '/university': 'institution',
-        '/company': 'company'
+        '/admin': ['admin'],
+        '/university-student': ['uni_student', 'mentor'],
+        '/unistudent': ['uni_student', 'mentor'], // Alternative route
+        '/student': ['student'],
+        '/university': ['institution'],
+        '/company': ['company']
       };
 
       // Check if current route is protected
-      const protectedRoute = Object.keys(protectedRoutes).find(route => 
+      const protectedRoute = Object.keys(protectedRoutes).find(route =>
         currentPath.startsWith(route)
       );
 
       if (protectedRoute) {
-        const requiredUserType = protectedRoutes[protectedRoute];
+        const requiredUserTypes = protectedRoutes[protectedRoute];
         const user = getCurrentUser();
         const logoutTimestamp = localStorage.getItem('logout_timestamp');
 
@@ -35,11 +43,13 @@ const RouteGuard = ({ children }) => {
         if (logoutTimestamp) {
           const logoutTime = parseInt(logoutTimestamp);
           const currentTime = Date.now();
-          
+
           if (currentTime - logoutTime < 3600000) { // Within 1 hour
             console.log('Recent logout detected, blocking access to:', currentPath);
             clearAuth();
-            navigate('/login', { replace: true });
+            if (isMounted) {
+              navigate('/login', { replace: true });
+            }
             return;
           }
         }
@@ -47,26 +57,37 @@ const RouteGuard = ({ children }) => {
         // Check authentication
         if (!user) {
           console.log('No authenticated user, blocking access to:', currentPath);
-          navigate('/login', { replace: true });
+          if (isMounted) {
+            navigate('/login', { replace: true });
+          }
           return;
         }
 
         // Check user type authorization
-        if (user.user_type !== requiredUserType) {
-          console.log(`Unauthorized access attempt. Required: ${requiredUserType}, Current: ${user.user_type}`);
-          navigate('/login', { replace: true });
+        if (!requiredUserTypes.includes(user.user_type)) {
+          console.log(`Unauthorized access attempt. Required: ${requiredUserTypes.join(' or ')}, Current: ${user.user_type}`);
+          if (isMounted) {
+            navigate('/login', { replace: true });
+          }
           return;
         }
 
         console.log(`Access granted to ${currentPath} for user type: ${user.user_type}`);
       }
 
-      setIsAuthorized(true);
-      setIsChecking(false);
+      if (isMounted) {
+        setIsAuthorized(true);
+        setIsChecking(false);
+      }
     };
 
-    // Check on every route change
-    checkRouteAccess();
+    // Add a small delay to prevent flickering
+    const timeoutId = setTimeout(checkRouteAccess, 10);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
   }, [location.pathname, navigate]);
 
   // Show loading while checking
