@@ -1,23 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Star,
-  TrendingUp,
-  Users,
-  CheckCircle,
-  Clock,
+import { 
+  Star, 
+  TrendingUp, 
+  Users, 
+  CheckCircle, 
+  Clock, 
   AlertCircle,
   X,
   LogOut
 } from 'lucide-react';
 import { Card, CardContent } from '../ui/Card';
 import { logout } from '../../utils/auth';
+import MentorApplicationForm from './MentorApplicationForm';
 
 export default function MentorRequestNotice({ itemVariants }) {
   const [mentorStatus, setMentorStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showNotice, setShowNotice] = useState(true);
+  const [showApplicationForm, setShowApplicationForm] = useState(false);
 
   useEffect(() => {
     checkMentorStatus();
@@ -46,38 +48,19 @@ export default function MentorRequestNotice({ itemVariants }) {
     }
   };
 
-  const handleRequestMentor = async () => {
-    try {
-      setSubmitting(true);
-      const user = JSON.parse(localStorage.getItem('user'));
+  const handleRequestMentor = () => {
+    setShowApplicationForm(true);
+  };
 
-      const response = await fetch('http://localhost:8000/api/pre-mentors/request-mentor/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          user_id: user.user_id
-        }),
-      });
+  const handleApplicationSuccess = async (result) => {
+    setShowApplicationForm(false);
+    // Refresh mentor status after successful application
+    await checkMentorStatus();
+    alert('Success! Your mentor application has been submitted and is now pending university approval.');
+  };
 
-      const result = await response.json();
-
-      if (result.success) {
-        // Refresh status after successful submission
-        await checkMentorStatus();
-
-        // Show success message
-        alert('Success! Your mentor application has been submitted and is now pending university approval.');
-      } else {
-        alert(result.message || 'Failed to submit mentor application');
-      }
-    } catch (error) {
-      console.error('Error submitting mentor request:', error);
-      alert('Failed to submit mentor application. Please try again.');
-    } finally {
-      setSubmitting(false);
-    }
+  const handleCloseApplication = () => {
+    setShowApplicationForm(false);
   };
 
   const handleLogoutAndRedirect = async () => {
@@ -115,7 +98,7 @@ export default function MentorRequestNotice({ itemVariants }) {
 
   // Show different content based on application status
   const getNoticeContent = () => {
-    if (mentorStatus?.has_applied && mentorStatus?.approved) {
+    if (mentorStatus?.has_applied && mentorStatus?.approved === 1) {
       // Application approved - user is now a mentor
       return {
         title: "🎉 Congratulations! You Are Now a Mentor!",
@@ -128,7 +111,7 @@ export default function MentorRequestNotice({ itemVariants }) {
         buttonText: "Logout & Login as Mentor",
         buttonAction: "logout"
       };
-    } else if (mentorStatus?.has_applied && !mentorStatus?.approved) {
+    } else if (mentorStatus?.has_applied && mentorStatus?.approved === 0) {
       // Application pending
       return {
         title: "Mentor Application Pending",
@@ -138,6 +121,19 @@ export default function MentorRequestNotice({ itemVariants }) {
         bgColor: "from-warning/10 to-warning/5",
         borderColor: "border-warning/20",
         showButton: false
+      };
+    } else if (mentorStatus?.has_applied && mentorStatus?.approved === -1) {
+      // Application rejected - can reapply
+      return {
+        title: "Application Update Required",
+        message: "Your previous mentor application was not approved. Please review your application and submit an updated version.",
+        icon: AlertCircle,
+        iconColor: "text-error",
+        bgColor: "from-error/10 to-error/5",
+        borderColor: "border-error/20",
+        showButton: true,
+        buttonText: "Reapply to Become a Mentor",
+        buttonAction: "apply"
       };
     } else {
       // Can apply
@@ -253,9 +249,12 @@ export default function MentorRequestNotice({ itemVariants }) {
                   </motion.button>
                 )}
 
-                {/* Status indicator for pending applications */}
-                {mentorStatus?.has_applied && !mentorStatus?.approved && (
-                  <div className="flex items-center space-x-2 text-warning">
+                {/* Status indicator for applications */}
+                {mentorStatus?.has_applied && mentorStatus?.applied_at && (
+                  <div className={`flex items-center space-x-2 ${
+                    mentorStatus.approved === 1 ? 'text-success' : 
+                    mentorStatus.approved === 0 ? 'text-warning' : 'text-error'
+                  }`}>
                     <Clock className="w-4 h-4" />
                     <span className="text-sm font-medium">
                       Applied on {new Date(mentorStatus.applied_at).toLocaleDateString()}
@@ -266,6 +265,15 @@ export default function MentorRequestNotice({ itemVariants }) {
             </div>
           </CardContent>
         </Card>
+
+        {/* Mentor Application Form Modal */}
+        {showApplicationForm && (
+          <MentorApplicationForm
+            isOpen={showApplicationForm}
+            onClose={handleCloseApplication}
+            onSubmit={handleApplicationSuccess}
+          />
+        )}
       </motion.div>
     </AnimatePresence>
   );
