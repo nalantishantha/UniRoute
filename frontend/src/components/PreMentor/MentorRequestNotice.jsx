@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Star, 
-  TrendingUp, 
-  Users, 
-  CheckCircle, 
-  Clock, 
+import {
+  Star,
+  TrendingUp,
+  Users,
+  CheckCircle,
+  Clock,
   AlertCircle,
   X,
   LogOut
@@ -50,7 +50,7 @@ export default function MentorRequestNotice({ itemVariants }) {
     try {
       setSubmitting(true);
       const user = JSON.parse(localStorage.getItem('user'));
-      
+
       const response = await fetch('http://localhost:8000/api/pre-mentors/request-mentor/', {
         method: 'POST',
         headers: {
@@ -66,7 +66,7 @@ export default function MentorRequestNotice({ itemVariants }) {
       if (result.success) {
         // Refresh status after successful submission
         await checkMentorStatus();
-        
+
         // Show success message
         alert('Success! Your mentor application has been submitted and is now pending university approval.');
       } else {
@@ -84,7 +84,7 @@ export default function MentorRequestNotice({ itemVariants }) {
     try {
       setSubmitting(true);
       const user = JSON.parse(localStorage.getItem('user'));
-      
+
       if (user) {
         await logout(user.user_id);
         // After logout, user will be redirected to login page
@@ -234,11 +234,10 @@ export default function MentorRequestNotice({ itemVariants }) {
                     whileTap={{ scale: 0.98 }}
                     onClick={handleButtonClick}
                     disabled={submitting}
-                    className={`font-semibold px-6 py-3 rounded-xl hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 ${
-                      content.buttonAction === 'logout' 
-                        ? 'bg-gradient-to-r from-success to-green-600 text-white' 
+                    className={`font-semibold px-6 py-3 rounded-xl hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 ${content.buttonAction === 'logout'
+                        ? 'bg-gradient-to-r from-success to-green-600 text-white'
                         : 'bg-gradient-to-r from-secondary to-warning text-neutral-black'
-                    }`}
+                      }`}
                   >
                     {submitting ? (
                       <div className="flex items-center space-x-2">

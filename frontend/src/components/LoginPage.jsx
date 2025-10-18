@@ -253,8 +253,8 @@ const LoginPage = () => {
               {message.text && (
                 <div
                   className={`mb-6 p-4 rounded-xl flex items-center space-x-3 ${message.type === "success"
-                      ? "bg-[#81C784]/10 border border-[#81C784]/20"
-                      : "bg-[#E57373]/10 border border-[#E57373]/20"
+                    ? "bg-[#81C784]/10 border border-[#81C784]/20"
+                    : "bg-[#E57373]/10 border border-[#E57373]/20"
                     }`}
                 >
                   {message.type === "success" ? (
@@ -264,8 +264,8 @@ const LoginPage = () => {
                   )}
                   <span
                     className={`text-sm font-medium ${message.type === "success"
-                        ? "text-[#81C784]"
-                        : "text-[#E57373]"
+                      ? "text-[#81C784]"
+                      : "text-[#E57373]"
                       }`}
                   >
                     {message.text}
@@ -367,8 +367,8 @@ const LoginPage = () => {
                   type="submit"
                   disabled={isLoading}
                   className={`w-full py-3 px-4 rounded-xl font-semibold focus:ring-2 focus:ring-[#1D5D9B] focus:outline-none transition-all transform hover:-translate-y-0.5 hover:shadow-lg ${isLoading
-                      ? "bg-[#B0B0B0] cursor-not-allowed text-white"
-                      : "bg-[#1D5D9B] hover:bg-[#174A7C] text-white"
+                    ? "bg-[#B0B0B0] cursor-not-allowed text-white"
+                    : "bg-[#1D5D9B] hover:bg-[#174A7C] text-white"
                     }`}
                 >
                   {isLoading ? (
