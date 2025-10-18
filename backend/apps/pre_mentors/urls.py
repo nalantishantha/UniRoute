@@ -10,4 +10,6 @@ urlpatterns = [
     path('settings/', views.pre_mentor_settings, name='pre_mentor_settings'),
     path('request-mentor/', views.request_mentor_status, name='request_mentor_status'),
     path('mentor-status/', views.check_mentor_status, name='check_mentor_status'),
+    path('mentor-application-data/', views.get_mentor_application_data, name='get_mentor_application_data'),
+    path('submit-mentor-application/', views.submit_mentor_application, name='submit_mentor_application'),
 ]

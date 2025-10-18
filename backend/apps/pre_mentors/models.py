@@ -4,14 +4,18 @@ class PreMentors(models.Model):
     pre_mentor_id = models.AutoField(primary_key=True)
     user = models.ForeignKey('accounts.Users', models.DO_NOTHING)
     university_student = models.ForeignKey('university_students.UniversityStudents', models.DO_NOTHING)
-    experience_years = models.IntegerField(blank=True, null=True)
-    specializations = models.TextField(blank=True, null=True)  # JSON field to store specializations
-    hourly_rate = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    total_earnings = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    rating = models.DecimalField(max_digits=3, decimal_places=2, blank=True, null=True)
-    total_sessions = models.IntegerField(default=0)
-    is_available = models.BooleanField(default=True)
     status = models.CharField(max_length=20, default='active')
+    
+    # New fields for mentor application system
+    mentor = models.ForeignKey('mentoring.Mentors', models.SET_NULL, blank=True, null=True, help_text='Reference to associated mentor record')
+    applied = models.IntegerField(default=0, help_text='0=not applied, 1=applied')
+    recommendation = models.TextField(blank=True, null=True, help_text='Recommendation text from application form')
+    skills = models.TextField(blank=True, null=True, help_text='Skills and expertise from application form')
+    nic_photo = models.CharField(max_length=255, blank=True, null=True, help_text='Path to NIC photo file')
+    student_id_photo = models.CharField(max_length=255, blank=True, null=True, help_text='Path to Student ID photo file')
+    recommendation_letter = models.CharField(max_length=255, blank=True, null=True, help_text='Path to recommendation letter file')
+    application_date = models.DateTimeField(blank=True, null=True, help_text='Date when application was submitted')
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
