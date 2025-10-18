@@ -179,6 +179,7 @@ export const initializeSessionGuard = () => {
     
     const isProtectedRoute = currentPath.startsWith('/admin') || 
                            currentPath.startsWith('/university-student') || 
+                           currentPath.startsWith('/pre-mentor') ||
                            currentPath.startsWith('/student') || 
                            currentPath.startsWith('/university') || 
                            currentPath.startsWith('/company');
@@ -217,8 +218,16 @@ export const initializeSessionGuard = () => {
         return;
       }
       
-      if (currentPath.startsWith('/university-student') && user.user_type !== 'uni_student') {
-        console.log('Non-university-student trying to access university student route, redirecting');
+      if (currentPath.startsWith('/university-student') && 
+          user.user_type !== 'uni_student' && 
+          user.user_type !== 'mentor') {
+        console.log('Non-university-student/mentor trying to access university student route, redirecting');
+        window.location.replace('/login');
+        return;
+      }
+      
+      if (currentPath.startsWith('/pre-mentor') && user.user_type !== 'pre_mentor') {
+        console.log('Non-pre-mentor trying to access pre-mentor route, redirecting');
         window.location.replace('/login');
         return;
       }
