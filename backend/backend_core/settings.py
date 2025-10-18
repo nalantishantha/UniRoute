@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'apps.pre_mentors',
     'apps.advertisements',
     'apps.payments',
+    'apps.pre_university_courses',
 ]
 
 MIDDLEWARE = [
