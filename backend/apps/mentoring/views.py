@@ -9,9 +9,37 @@ from django.db import transaction
 from datetime import datetime, timedelta, time, date
 from django.utils import timezone
 import json
+
+
+def parse_request_json(request):
+    """Safely parse request body to JSON/dict.
+
+    Accepts bytes, str, empty bodies, or already-parsed dicts. Returns {} on empty.
+    """
+    try:
+        body = request.body
+        if not body:
+            return {}
+        # If Django already decoded body to str/bytes, handle both
+        if isinstance(body, bytes):
+            body = body.decode('utf-8')
+        if isinstance(body, str):
+            body = body.strip()
+            if not body:
+                return {}
+            return json.loads(body)
+        # If it's already a dict-like object
+        if isinstance(body, dict):
+            return body
+        # Fallback
+        return json.loads(body)
+    except Exception:
+        # Don't raise here; callers will validate required fields and return errors
+        return {}
 from .models import (
     MentoringSessions, MentoringRequests, SessionDetails, Mentors, 
-    MentoringSessionEnrollments, MentorAvailability, MentorAvailabilityExceptions
+    MentoringSessionEnrollments, MentorAvailability, MentorAvailabilityExceptions,
+    MentoringFeedback
 )
 from apps.accounts.models import UserDetails
 from apps.students.models import Students
@@ -97,7 +125,7 @@ class MentoringRequestsView(View):
     def post(self, request, mentor_id):
         """Create a new mentoring request"""
         try:
-            data = json.loads(request.body)
+            data = parse_request_json(request)
             
             # Validate required fields
             required_fields = ['topic', 'description', 'scheduled_at']
@@ -257,7 +285,7 @@ class MentoringSessionsView(View):
 def accept_request(request, request_id):
     """Accept a mentoring request and create a session"""
     try:
-        data = json.loads(request.body)
+        data = parse_request_json(request)
         scheduled_datetime = data.get('scheduled_datetime')
         location = data.get('location', '')
         meeting_link = data.get('meeting_link', '')
@@ -325,7 +353,7 @@ def accept_request(request, request_id):
 def decline_request(request, request_id):
     """Decline a mentoring request"""
     try:
-        data = json.loads(request.body)
+        data = parse_request_json(request)
         reason = data.get('reason', '')
         
         if not reason:
@@ -368,7 +396,7 @@ def decline_request(request, request_id):
 def cancel_session(request, session_id):
     """Cancel a scheduled session"""
     try:
-        data = json.loads(request.body)
+        data = parse_request_json(request)
         reason = data.get('reason', '')
         
         session = MentoringSessions.objects.get(session_id=session_id)
@@ -416,7 +444,7 @@ def cancel_session(request, session_id):
 def reschedule_session(request, session_id):
     """Reschedule a session"""
     try:
-        data = json.loads(request.body)
+        data = parse_request_json(request)
         new_datetime = data.get('new_datetime')
         location = data.get('location', '')
         meeting_link = data.get('meeting_link', '')
@@ -470,7 +498,7 @@ def reschedule_session(request, session_id):
 def complete_session(request, session_id):
     """Mark a session as completed"""
     try:
-        data = json.loads(request.body)
+        data = parse_request_json(request)
         completion_notes = data.get('completion_notes', '')
         
         session = MentoringSessions.objects.get(session_id=session_id)
@@ -608,6 +636,69 @@ def get_mentor_stats(request, mentor_id):
         }, status=500)
 
 
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_mentor_feedback(request, mentor_id):
+    """Retrieve feedback entries for a mentor from mentoring_feedback table, matched by session -> mentor"""
+    try:
+        # Ensure feedbacks returned belong to sessions whose mentor_id matches the requested mentor_id
+        feedback_qs = MentoringFeedback.objects.filter(session__mentor_id=mentor_id).select_related(
+            'student__user', 'session__mentor'
+        ).order_by('-submitted_at')
+
+        feedbacks = []
+        for f in feedback_qs:
+            # Confirm session and mentor linkage
+            session = getattr(f, 'session', None)
+            if not session or getattr(session, 'mentor_id', None) != int(mentor_id):
+                # Skip any feedback not tied to this mentor's sessions
+                continue
+
+            # Resolve student name safely
+            try:
+                student_user = f.student.user
+                user_details = getattr(student_user, 'userdetails', None)
+                student_name = user_details.full_name if user_details else student_user.username
+            except Exception:
+                student_name = 'Student'
+
+            # Normalize rating to a numeric value when possible
+            rating_value = None
+            try:
+                if isinstance(f.rating, (int, float)):
+                    rating_value = float(f.rating)
+                elif isinstance(f.rating, dict) and 'value' in f.rating:
+                    rating_value = float(f.rating.get('value') or 0)
+                elif isinstance(f.rating, list) and len(f.rating) > 0:
+                    # If rating stored as array of numbers, average them
+                    nums = [float(x) for x in f.rating if isinstance(x, (int, float))]
+                    rating_value = sum(nums) / len(nums) if nums else None
+            except Exception:
+                rating_value = None
+
+            feedbacks.append({
+                'id': f.feedback_id,
+                'mentor_id': session.mentor_id if session else None,
+                'session_id': session.session_id if session else None,
+                'student_id': f.student.student_id if hasattr(f.student, 'student_id') else None,
+                'student': student_name,
+                'rating': f.rating,
+                'rating_value': rating_value,
+                'feedback': f.feedback,
+                'submitted_at': f.submitted_at.isoformat() if f.submitted_at else None,
+            })
+
+        return JsonResponse({
+            'status': 'success',
+            'feedbacks': feedbacks
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
+
+
 class MentorAvailabilityView(View):
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
@@ -648,7 +739,7 @@ class MentorAvailabilityView(View):
     def post(self, request, mentor_id):
         """Add new availability slot"""
         try:
-            data = json.loads(request.body)
+            data = parse_request_json(request)
             
             # Validate required fields
             required_fields = ['day_of_week', 'start_time', 'end_time']
@@ -735,7 +826,7 @@ class MentorAvailabilityView(View):
     def put(self, request, mentor_id):
         """Update availability slot"""
         try:
-            data = json.loads(request.body)
+            data = parse_request_json(request)
             
             if 'availability_id' not in data:
                 return JsonResponse({
@@ -803,7 +894,7 @@ class MentorAvailabilityView(View):
     def delete(self, request, mentor_id):
         """Delete availability slot"""
         try:
-            data = json.loads(request.body)
+            data = parse_request_json(request)
             
             if 'availability_id' not in data:
                 return JsonResponse({
