@@ -1,5 +1,5 @@
 // API utility functions for feedback
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = 'http://127.0.0.1:8000/api';
 
 export const feedbackAPI = {
   // Get feedback for a specific university student
