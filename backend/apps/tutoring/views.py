@@ -7,6 +7,9 @@ import json
 from .models import Tutors, TutoringSessions, TutorSubjects, TutorRatings, TutorFeedback
 from apps.accounts.models import Users, UserDetails
 from apps.students.models import Students
+from django.views.decorators.http import require_http_methods
+from django.utils.dateparse import parse_datetime
+from datetime import datetime, timedelta
 
 
 @csrf_exempt
@@ -418,3 +421,101 @@ def get_subjects(request):
         'success': False,
         'message': 'Only GET method allowed'
     }, status=405)
+
+
+@csrf_exempt
+def get_available_slots(request, tutor_id):
+    """Return a list of available slots for the tutor. This is a lightweight implementation
+    intended to provide parity with the mentoring API used by the frontend.
+    """
+    if request.method != 'GET':
+        return JsonResponse({'status': 'error', 'message': 'Only GET allowed'}, status=405)
+
+    try:
+        # Simple availability: next 7 days, 3 slots per day (10:00, 14:00, 18:00)
+        slots = []
+        now = datetime.utcnow()
+        for d in range(0, 7):
+            day = now + timedelta(days=d)
+            date_str = day.date().isoformat()
+            for h in (10, 14, 18):
+                dt = datetime(day.year, day.month, day.day, h, 0)
+                # Do not include past slots
+                if dt < now:
+                    continue
+                slots.append({
+                    'date': date_str,
+                    'start_time': dt.time().isoformat(),
+                    'datetime': dt.isoformat() + 'Z',
+                    'formatted_time': dt.strftime('%I:%M %p'),
+                })
+
+        return JsonResponse({'status': 'success', 'available_slots': slots})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(['POST'])
+def create_tutoring_request(request, tutor_id):
+    """Create a tutoring request (mirrors mentoring request flow).
+    Expects JSON: { student_id, topic, scheduled_at, session_type, description }
+    If valid, create a TutoringSessions record with status 'pending' and return request id.
+    """
+    try:
+        data = json.loads(request.body)
+
+        required_fields = ['topic', 'scheduled_at']
+        for f in required_fields:
+            if f not in data:
+                return JsonResponse({'status': 'error', 'message': f'{f} is required'}, status=400)
+
+        # Validate tutor
+        try:
+            tutor = Tutors.objects.get(tutor_id=tutor_id)
+        except Tutors.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Tutor not found'}, status=404)
+
+        # Validate student
+        student_id = data.get('student_id')
+        if not student_id:
+            return JsonResponse({'status': 'error', 'message': 'Student ID is required'}, status=400)
+        try:
+            student = Students.objects.get(student_id=student_id)
+        except Students.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Student not found'}, status=404)
+
+        # Parse datetime
+        try:
+            scheduled_at = parse_datetime(data['scheduled_at'])
+            if scheduled_at is None:
+                # try basic iso
+                scheduled_at = datetime.fromisoformat(data['scheduled_at'].replace('Z', '+00:00'))
+        except Exception:
+            return JsonResponse({'status': 'error', 'message': 'Invalid datetime format'}, status=400)
+
+        # Try to pick a subject (optional)
+        subject = None
+        subject_id = data.get('subject_id')
+        if subject_id:
+            try:
+                from apps.student_results.models import AlSubjects
+                subject = AlSubjects.objects.get(subject_id=subject_id)
+            except Exception:
+                subject = None
+
+        # Create tutoring session with status 'pending' so tutor can accept/confirm
+        session = TutoringSessions.objects.create(
+            tutor=tutor,
+            subject=subject if subject is not None else None,
+            scheduled_at=scheduled_at,
+            duration_minutes=data.get('duration_minutes', 60),
+            status='pending',
+            description=data.get('description', ''),
+            created_at=timezone.now()
+        )
+
+        return JsonResponse({'status': 'success', 'message': 'Tutoring request created', 'session_id': session.session_id})
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)

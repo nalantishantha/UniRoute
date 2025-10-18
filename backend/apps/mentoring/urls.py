@@ -11,6 +11,7 @@ urlpatterns = [
     path('sessions/<int:session_id>/reschedule/', views.reschedule_session, name='reschedule_session'),
     path('sessions/<int:session_id>/complete/', views.complete_session, name='complete_session'),
     path('stats/<int:mentor_id>/', views.get_mentor_stats, name='mentor_stats'),
+    path('feedback/<int:mentor_id>/', views.get_mentor_feedback, name='mentor_feedback'),
     
     # Availability management
     path('availability/<int:mentor_id>/', views.MentorAvailabilityView.as_view(), name='mentor_availability'),

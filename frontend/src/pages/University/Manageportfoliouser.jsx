@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import UniversityUserSidebar from '../../components/Navigation/UniversityUsersidebar'; // CHANGED: Import UniversityUserSidebar
 import UniversityNavbar from '../../components/Navigation/UniversityNavbar';
 import Footer from '../../components/Footer';
@@ -9,19 +9,47 @@ import colomboHero from '../../assets/university-image-colombo.jpg';
 const Manageportfoliouser = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // CHANGED: Rename from isSidebarExpanded to isSidebarOpen
 
-  // University data
-  const universityInfo = {
-    name: "University of Colombo",
-    established: "1921",
-    motto: "Excellence Through Knowledge",
-    location: "Colombo, Sri Lanka",
-    type: "Public Research University",
-    chancellor: "Prof. Lakshman Dissanayake",
-    vicechancellor: "Prof. H.D. Karunaratne",
-    students: "12,000+",
-    faculty: "800+",
-    campuses: "3"
-  };
+  const [universityInfo, setUniversityInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchUniversity = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // If a specific id is provided via query string, use that
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+
+        let url = '/api/universities/';
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`Failed to fetch universities (status ${res.status})`);
+        const data = await res.json();
+
+        const results = data.results || data || [];
+        if (id) {
+          const found = results.find(u => String(u.university_id || u.id) === String(id));
+          if (found) {
+            setUniversityInfo(found);
+            return;
+          }
+        }
+
+        // Fallback: pick the first active university
+        if (results.length > 0) setUniversityInfo(results[0]);
+        else setUniversityInfo(null);
+      } catch (err) {
+        console.error('Error fetching university data', err);
+        setError(err.message || String(err));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUniversity();
+  }, []);
 
   const achievements = [
     {
@@ -156,6 +184,15 @@ const Manageportfoliouser = () => {
 
   return (
     <div className="portfolio-page">
+      {loading && (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-400"></div>
+          <p className="mt-4 text-primary-300">Loading university data...</p>
+        </div>
+      )}
+      {error && (
+        <div className="text-center py-8 text-red-600">{error}</div>
+      )}
       {/* SIDEBAR AT THE VERY TOP - OUTSIDE CONTAINER */}
       <UniversityUserSidebar 
         isOpen={isSidebarOpen}
@@ -177,18 +214,18 @@ const Manageportfoliouser = () => {
             <div className="hero-overlay"></div>
           </div>
           <div className="hero-content">
-            <h1 className="university-name">{universityInfo.name}</h1>
+            <h1 className="university-name">{universityInfo ? universityInfo.name : 'University'}</h1>
             <div className="hero-stats">
               <div className="hero-stat">
-                <span className="stat-number">{universityInfo.established}</span>
+                <span className="stat-number">{universityInfo ? universityInfo.established : ''}</span>
                 <span className="stat-label">Established</span>
               </div>
               <div className="hero-stat">
-                <span className="stat-number">{universityInfo.students}</span>
+                <span className="stat-number">{universityInfo ? universityInfo.students : ''}</span>
                 <span className="stat-label">Students</span>
               </div>
               <div className="hero-stat">
-                <span className="stat-number">{universityInfo.faculty}</span>
+                <span className="stat-number">{universityInfo ? universityInfo.faculty : ''}</span>
                 <span className="stat-label">Faculty</span>
               </div>
             </div>
@@ -204,23 +241,23 @@ const Manageportfoliouser = () => {
           <div className="overview-grid">
             <div className="overview-card">
               <h3>📍 Location</h3>
-              <p>{universityInfo.location}</p>
+              <p>{universityInfo ? universityInfo.location : ''}</p>
             </div>
             <div className="overview-card">
               <h3>🏫 Type</h3>
-              <p>{universityInfo.type}</p>
+              <p>{universityInfo ? universityInfo.type : ''}</p>
             </div>
             <div className="overview-card">
               <h3>👨‍💼 Chancellor</h3>
-              <p>{universityInfo.chancellor}</p>
+              <p>{universityInfo ? universityInfo.chancellor : ''}</p>
             </div>
             <div className="overview-card">
               <h3>👨‍🎓 Vice Chancellor</h3>
-              <p>{universityInfo.vicechancellor}</p>
+              <p>{universityInfo ? universityInfo.vicechancellor : ''}</p>
             </div>
             <div className="overview-card">
               <h3>🏢 Campuses</h3>
-              <p>{universityInfo.campuses}</p>
+              <p>{universityInfo ? universityInfo.campuses : ''}</p>
             </div>
             <div className="overview-card">
               <h3>🎯 Focus</h3>
