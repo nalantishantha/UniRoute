@@ -60,6 +60,9 @@ const LoginPage = () => {
         case "uni_student":
           navigate("/university-student/dashboard", { replace: true });
           break;
+        case "mentor":
+          navigate("/university-student/dashboard", { replace: true });
+          break;
         case "pre_mentor":
           navigate("/pre-mentor/dashboard", { replace: true });
           break;
@@ -151,6 +154,9 @@ const LoginPage = () => {
               window.location.replace("/student/home");
               break;
             case "uni_student":
+              window.location.replace("/university-student/dashboard");
+              break;
+            case "mentor":
               window.location.replace("/university-student/dashboard");
               break;
             case "pre_mentor":

@@ -9,4 +9,5 @@ urlpatterns = [
     path('login/', views.login_user, name='login'),
     path('logout/', views.logout_user, name='logout_user'),
     path('upgrade-to-pre-mentor/', views.upgrade_to_pre_mentor, name='upgrade_to_pre_mentor'),
+    path('user-state/', views.get_user_state, name='get_user_state'),
 ]
