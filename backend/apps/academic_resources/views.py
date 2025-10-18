@@ -1,7 +1,10 @@
 import json
+import os
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse, Http404
 from django.utils import timezone
+from django.conf import settings
+from django.shortcuts import get_object_or_404
 from .models import AcademicResource
 from apps.accounts.models import Users
 
@@ -67,6 +70,52 @@ def get_resources(request):
                     'type': resource.file_type.lower() if resource.file_type else 'document',
                 })
             return JsonResponse({'success': True, 'resources': resource_list})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    return JsonResponse({'success': False, 'message': 'Only GET method allowed'}, status=405)
+
+@csrf_exempt
+def download_resource(request, resource_id):
+    if request.method == 'GET':
+        try:
+            # Get the resource
+            resource = get_object_or_404(AcademicResource, id=resource_id)
+            
+            # Check if file exists
+            if not resource.file or not os.path.exists(resource.file.path):
+                raise Http404("File not found")
+            
+            # Increment download count atomically to prevent race conditions
+            AcademicResource.objects.filter(id=resource_id).update(downloads=resource.downloads + 1)
+            
+            # Get file details
+            file_path = resource.file.path
+            filename = os.path.basename(file_path)
+            file_size = os.path.getsize(file_path)
+            
+            # Determine content type
+            content_type = resource.file_type or 'application/octet-stream'
+            
+            # Read file content and create response
+            with open(file_path, 'rb') as file:
+                response = HttpResponse(file.read(), content_type=content_type)
+                
+                # Set proper headers for download
+                response['Content-Disposition'] = f'attachment; filename="{filename}"'
+                response['Content-Length'] = file_size
+                response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+                response['Pragma'] = 'no-cache'
+                response['Expires'] = '0'
+                
+                # Add CORS headers for frontend requests
+                response['Access-Control-Allow-Origin'] = 'http://localhost:5174'
+                response['Access-Control-Allow-Methods'] = 'GET'
+                response['Access-Control-Allow-Headers'] = 'Accept, Content-Type'
+                
+                return response
+                
+        except AcademicResource.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Resource not found'}, status=404)
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
     return JsonResponse({'success': False, 'message': 'Only GET method allowed'}, status=405)

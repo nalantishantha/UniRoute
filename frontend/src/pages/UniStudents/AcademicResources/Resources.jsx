@@ -29,7 +29,7 @@ export default function Resources() {
   const fetchResources = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/resources/");
+      const response = await fetch("http://127.0.0.1:8000/api/resources/");
       const data = await response.json();
       if (response.ok) {
         setResources(data.resources || []);
