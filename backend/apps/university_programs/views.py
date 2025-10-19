@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Max
 import json
-from .models import DegreePrograms, DegreeProgramZScores
+from .models import DegreePrograms, DegreeProgramZScores, DegreeProgramDurations
 from apps.universities.models import Universities, Faculties
 
 
@@ -130,6 +130,90 @@ def analyze_zscore(request):
             return JsonResponse({
                 'success': False,
                 'message': f'Error analyzing Z-score: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only GET method allowed'
+    }, status=405)
+
+
+def get_all_programs(request):
+    """
+    Get all degree programs with their details for program matching page
+    """
+    if request.method == 'GET':
+        try:
+            # Get query parameters for filtering
+            search_term = request.GET.get('search', '').strip()
+            category = request.GET.get('category', 'all')
+            
+            # Start with active programs
+            programs_query = DegreePrograms.objects.filter(is_active=1).select_related(
+                'university', 'faculty'
+            )
+            
+            # Apply category filter based on subject_stream_required
+            # Category now directly maps to subject_stream_required values
+            if category != 'all':
+                programs_query = programs_query.filter(subject_stream_required=category)
+            
+            # Apply search filter
+            if search_term:
+                from django.db.models import Q
+                programs_query = programs_query.filter(
+                    Q(title__icontains=search_term) |
+                    Q(description__icontains=search_term) |
+                    Q(university__name__icontains=search_term) |
+                    Q(faculty__name__icontains=search_term)
+                )
+            
+            # Build response
+            programs_list = []
+            
+            for program in programs_query:
+                # Get duration information
+                duration_info = DegreeProgramDurations.objects.filter(
+                    degree_program=program
+                ).first()
+                
+                # Get the most recent z-score (from any district)
+                recent_zscore = DegreeProgramZScores.objects.filter(
+                    degree_program=program
+                ).order_by('-year', '-z_score').first()
+                
+                # Use subject_stream_required directly as category
+                program_category = program.subject_stream_required or 'Other'
+                
+                programs_list.append({
+                    'id': program.degree_program_id,
+                    'name': program.title,
+                    'code': program.code,
+                    'university': program.university.name if program.university else None,
+                    'university_id': program.university.university_id if program.university else None,
+                    'faculty': program.faculty.name if program.faculty else None,
+                    'faculty_id': program.faculty.faculty_id if program.faculty else None,
+                    'duration': f"{duration_info.duration_years} years" if duration_info else "N/A",
+                    'duration_years': duration_info.duration_years if duration_info else None,
+                    'degree_type': duration_info.degree_type if duration_info else None,
+                    'zScoreRequired': float(recent_zscore.z_score) if recent_zscore else None,
+                    'description': program.description,
+                    'careerProspects': program.career_paths.split(',') if program.career_paths else [],
+                    'syllabus_url': program.syllabus_url,
+                    'category': program_category,
+                    'subject_stream_required': program.subject_stream_required,
+                })
+            
+            return JsonResponse({
+                'success': True,
+                'programs': programs_list,
+                'total': len(programs_list)
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error fetching programs: {str(e)}'
             }, status=500)
     
     return JsonResponse({
