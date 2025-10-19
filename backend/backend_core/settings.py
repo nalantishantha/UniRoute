@@ -128,9 +128,16 @@ CORS_ALLOW_CREDENTIALS = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'static'
 
-# Media files
+# Media files (uploads)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# File upload settings
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
+
+# Security: Allowed file extensions (optional, for additional security)
+ALLOWED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

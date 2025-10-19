@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { MessageSquare } from "lucide-react";
 import { useChatContext } from "../../context/ChatContext";
 
@@ -16,7 +16,8 @@ import {
   Settings,
   UserCircle,
 } from "lucide-react";
-import { logout, getCurrentUser } from "../../utils/auth"; // ✅ Import logout function
+import { logout, getCurrentUser } from "../../utils/auth";
+import { fetchUniversityStudentProfile } from "../../utils/universityStudentApi";
 import { cn } from "../../utils/cn";
 import Chat from "../UniStudents/Chat";
 import CompactCalendar from "../UniStudents/CompactCalendar";
@@ -26,16 +27,37 @@ export default function TopNavigation({ onMenuClick }) {
   const [showChat, setShowChat] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [user, setUser] = useState(null); // ✅ Add user state
+  const [user, setUser] = useState(null);
+  const [profileData, setProfileData] = useState(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const location = useLocation();
+  const navigate = useNavigate();
 
-  // ✅ Get current user on component mount
+  // Fetch current user and complete profile data on component mount
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    setUser(currentUser);
+    const loadUserProfile = async () => {
+      const currentUser = getCurrentUser();
+      setUser(currentUser);
+
+      if (currentUser && currentUser.user_id) {
+        setIsLoadingProfile(true);
+        const profileResponse = await fetchUniversityStudentProfile(
+          currentUser.user_id
+        );
+
+        if (profileResponse.success) {
+          setProfileData(profileResponse.data);
+        } else {
+          console.error("Failed to fetch profile:", profileResponse.error);
+        }
+        setIsLoadingProfile(false);
+      }
+    };
+
+    loadUserProfile();
   }, []);
 
-  // ✅ Handle logout with confirmation
+  // Handle logout with confirmation
   const handleLogout = async () => {
     if (window.confirm("Are you sure you want to logout?")) {
       await logout();
@@ -187,12 +209,16 @@ export default function TopNavigation({ onMenuClick }) {
               </div>
               <div className="hidden sm:block">
                 <p className="text-sm font-semibold text-neutral-black group-hover:text-primary-700">
-                  {user
-                    ? `${user.first_name} ${user.last_name || ""}`.trim()
-                    : "University Student"}
+                  {isLoadingProfile
+                    ? "Loading..."
+                    : profileData?.fullName ||
+                      user?.full_name ||
+                      "University Student"}
                 </p>
                 <p className="text-xs font-medium text-neutral-grey">
-                  {user?.university || "Student Mentor"}
+                  {isLoadingProfile
+                    ? "..."
+                    : profileData?.university || "Student Mentor"}
                 </p>
               </div>
               <ChevronDown
@@ -221,16 +247,23 @@ export default function TopNavigation({ onMenuClick }) {
                       </div>
                       <div className="flex-1">
                         <h3 className="font-semibold text-neutral-black">
-                          {user
-                            ? `${user.first_name} ${user.last_name || ""
-                              }`.trim()
-                            : "University Student"}
+                          {isLoadingProfile
+                            ? "Loading..."
+                            : profileData?.fullName ||
+                              user?.full_name ||
+                              "University Student"}
                         </h3>
                         <p className="text-sm text-neutral-grey">
-                          {user?.email || "student@university.edu"}
+                          {isLoadingProfile
+                            ? "..."
+                            : profileData?.email ||
+                              user?.email ||
+                              "student@university.edu"}
                         </p>
                         <p className="text-xs text-neutral-grey">
-                          {user?.university || "University Student"}
+                          {isLoadingProfile
+                            ? "..."
+                            : profileData?.university || "University"}
                         </p>
                       </div>
                     </div>
@@ -242,27 +275,37 @@ export default function TopNavigation({ onMenuClick }) {
                       <div className="flex justify-between">
                         <span className="text-neutral-grey">Student ID:</span>
                         <span className="font-medium text-neutral-black">
-                          {user?.student_id || "N/A"}
+                          {isLoadingProfile
+                            ? "..."
+                            : profileData?.registrationNumber || "N/A"}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-neutral-grey">Program:</span>
                         <span className="font-medium text-neutral-black">
-                          {user?.program || "Computer Science"}
+                          {isLoadingProfile
+                            ? "..."
+                            : profileData?.degreeProgram || "N/A"}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-neutral-grey">Year:</span>
                         <span className="font-medium text-neutral-black">
-                          {user?.year || "3rd Year"}
+                          {isLoadingProfile
+                            ? "..."
+                            : profileData?.yearOfStudy
+                            ? `${profileData.yearOfStudy}${
+                                profileData.yearOfStudy === 1
+                                  ? "st"
+                                  : profileData.yearOfStudy === 2
+                                  ? "nd"
+                                  : profileData.yearOfStudy === 3
+                                  ? "rd"
+                                  : "th"
+                              } Year`
+                            : "N/A"}
                         </span>
                       </div>
-                      {/* <div className="flex justify-between">
-                        <span className="text-neutral-grey">Status:</span>
-                        <span className="inline-flex items-center px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full">
-                          Active
-                        </span>
-                      </div> */}
                     </div>
                   </div>
 
@@ -271,8 +314,7 @@ export default function TopNavigation({ onMenuClick }) {
                     <button
                       onClick={() => {
                         setShowUserDropdown(false);
-                        // Navigate to profile page
-                        window.location.href = "/university-student/profile";
+                        navigate("/university-student/profile");
                       }}
                       className="flex items-center w-full px-4 py-2 space-x-3 text-sm transition-colors duration-200 text-neutral-black hover:bg-neutral-silver/50"
                     >
@@ -283,8 +325,7 @@ export default function TopNavigation({ onMenuClick }) {
                     <button
                       onClick={() => {
                         setShowUserDropdown(false);
-                        // Navigate to settings page
-                        window.location.href = "/university-student/settings";
+                        navigate("/university-student/settings");
                       }}
                       className="flex items-center w-full px-4 py-2 space-x-3 text-sm transition-colors duration-200 text-neutral-black hover:bg-neutral-silver/50"
                     >
