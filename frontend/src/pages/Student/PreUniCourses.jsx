@@ -40,7 +40,7 @@ const PreUniCourses = () => {
           <p className="text-primary-400">Video lessons and short courses to help you prepare for university entrance and improve your Z-score.</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-accent-100 mb-6">
+        {/* <div className="bg-white rounded-2xl shadow-lg p-6 border border-accent-100 mb-6">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="font-semibold text-primary-400">Featured Video Lessons</h2>
@@ -50,7 +50,7 @@ const PreUniCourses = () => {
               <Link to="/student/z-score-analysis" className="inline-flex items-center px-3 py-2 bg-primary-600 text-white rounded-lg text-sm">Analyze Z-Score</Link>
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {sampleVideos.map((v) => (
