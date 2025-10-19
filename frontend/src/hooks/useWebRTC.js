@@ -220,6 +220,11 @@ export const useWebRTC = (roomId, userId, userRole, websocketUrl) => {
 
         ws.onopen = () => {
             console.log('WebSocket connected');
+            
+            // Mark as connected
+            setIsConnected(true);
+            setIsConnecting(false);
+            isConnectingRef.current = false;
 
             // Join the room
             ws.send(JSON.stringify({
@@ -288,11 +293,15 @@ export const useWebRTC = (roomId, userId, userRole, websocketUrl) => {
         ws.onerror = (error) => {
             console.error('WebSocket error:', error);
             setError('WebSocket connection error');
+            setIsConnecting(false);
+            isConnectingRef.current = false;
         };
 
         ws.onclose = () => {
             console.log('WebSocket disconnected');
             setIsConnected(false);
+            setIsConnecting(false);
+            isConnectingRef.current = false;
         };
 
         websocketRef.current = ws;
