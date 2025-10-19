@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import UniversitySidebar from '../../components/Navigation/UniversitySidebar';
 import UniversityNavbar from '../../components/Navigation/UniversityNavbar';
 import Footer from '../../components/Footer';
@@ -11,130 +11,74 @@ import uniIdBack from '../../assets/ID-back-EN.png';
 // Path to the real PDF in public folder
 const RecommendationPDF = '/Letter.pdf';
 
-// Mock data for mentor requests
-const initialMentorRequests = [
-  {
-    id: 1,
-    name: ' Sarah Amarasingha',
-    email: 'ucsccmb22000@gmail.com',
-    phone: '070-3144967',
-    education: 'Undergraduate Computer Science, MIT',
-    Recommendation : 'Pro Sandun Rangana of university colombo',
-    bio: 'Experienced software engineer with expertise in machine learning and artificial intelligence.',
-    skills: ['Python', 'Machine Learning', 'React', 'Node.js', 'AI/ML','Marketing'],
-    profileImage: '/api/placeholder/100/100',
-    requestDate: '2024-01-15',
-    specialization: 'Computer Science & AI',
-    Year: '4th year',
-    Registrationnumber: '22000771',
-    status: 'pending'
-
-  },
-  {
-    "id": 2,
-    "name": "Nimal Perera",
-    "email": "ucscmb21001@cmb.ac.lk",
-    "phone": "071-2345678",
-    "education": "Undergraduate in Computer Science, University of Colombo",
-    "Recommendation": "Prof. Kamal Gunawardena of University of Colombo",
-    "bio": "Passionate about AI and software development with experience in university research projects.",
-    "skills": ["Python", "Java", "Machine Learning", "Web Development", "Database Management"],
-    "profileImage": "/api/placeholder/100/100",
-    "requestDate": "2024-02-10",
-    "specialization": "Artificial Intelligence",
-    "Year": "3rd year",
-    "Registrationnumber": '22000761',
-    "status": "approved"
-  },
-  {
-    "id": 3,
-    "name": "Samanthi Silva",
-    "email": "ucscmb21045@cmb.ac.lk",
-    "phone": "072-3456789",
-    "education": "Undergraduate in Information Systems, University of Colombo",
-    "Recommendation": "Dr. Priyantha Fernando of University of Colombo",
-    "bio": "Interested in data science and business analytics, with hands-on experience in Python and SQL.",
-    "skills": ["Python", "SQL", "Data Analysis", "Statistics", "UI/UX Design"],
-    "profileImage": "/api/placeholder/100/100",
-    "requestDate": "2024-01-25",
-    "specialization": "Data Science",
-    "Year": "2nd year",
-    "Registrationnumber": '22000761',
-    "status": "pending"
-    
-  },
-];
-
-// Mock data for active mentors
-const initialActiveMentors = [
-  {
-    id: 101,
-    name: 'Kasuni Gunawardhana',
-    email: 'kasuni.gunawardhana@tech.com',
-    specialization: 'Software Engineering',
-    experience: '1 years',
-    students: 12,
-    rating: 4.8,
-    profileImage: 'https://randomuser.me/api/portraits/men/11.jpg',
-    joinDate: '2023-09-15'
-  },
-  {
-    id: 102,
-    name: 'Lisitha Dissanayake',
-    email: 'lisitha.dissanayake@business.com',
-    specialization: 'Digital Marketing',
-    experience: '2 years',
-    students: 8,
-    rating: 4.9,
-    profileImage: '/api/placeholder/100/100',
-    joinDate: '2023-08-20'
-  }
-];
+import { fetchMentorRequests, fetchActiveMentors, acceptMentor, rejectMentor } from '../../services/universityMentorApi';
 
 const Mentoruni = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [mentorRequests, setMentorRequests] = useState(initialMentorRequests);
-  const [activeMentors, setActiveMentors] = useState(initialActiveMentors);
+  const [mentorRequests, setMentorRequests] = useState([]);
+  const [activeMentors, setActiveMentors] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedMentor, setSelectedMentor] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
   const [activeTab, setActiveTab] = useState('requests');
+  const universityId = 1; // TODO: get from auth/context
 
-  const handleAcceptMentor = (mentor) => {
-    // Move mentor from requests to active mentors
-    const newActiveMentor = {
-      ...mentor,
-      students: 0,
-      rating: 0,
-      joinDate: new Date().toISOString().split('T')[0]
-    };
-    
-    setActiveMentors(prev => [...prev, newActiveMentor]);
-    setMentorRequests(prev => prev.filter(req => req.id !== mentor.id));
-    
-    // Show success message (in real app, send email to mentor)
-    alert(`✅ Mentor request accepted! Success message sent to ${mentor.name}`);
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const [reqRes, actRes] = await Promise.all([
+        fetchMentorRequests(universityId),
+        fetchActiveMentors(universityId),
+      ]);
+      if (!mounted) return;
+      // Debug logs for troubleshooting
+      try { console.log('[Mentor] requests response:', reqRes); } catch {}
+      try { console.log('[Mentor] active response:', actRes); } catch {}
+      if (reqRes?.success) {
+        const list = reqRes.requests || reqRes.data || reqRes.mentor_requests || [];
+        setMentorRequests(Array.isArray(list) ? list : []);
+      }
+      if (actRes?.success) {
+        const list = actRes.active_mentors || actRes.mentors || actRes.data || [];
+        setActiveMentors(Array.isArray(list) ? list : []);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  const handleAcceptMentor = async (reqItem) => {
+    const res = await acceptMentor(reqItem.pre_mentor_id);
+    if (res?.success) {
+      // Move to active list by refetching
+      const [reqRes, actRes] = await Promise.all([
+        fetchMentorRequests(universityId),
+        fetchActiveMentors(universityId),
+      ]);
+      if (reqRes?.success) setMentorRequests(reqRes.requests);
+      if (actRes?.success) setActiveMentors(actRes.active_mentors);
+    } else {
+      alert(res?.message || 'Failed to accept mentor');
+    }
   };
 
-  const handleRejectMentor = () => {
+  const handleRejectMentor = async () => {
     if (!selectedRequest || !rejectReason.trim()) return;
-    
-    // Remove mentor from requests
-    setMentorRequests(prev => prev.filter(req => req.id !== selectedRequest.id));
-    
-    // Show rejection message (in real app, send email to mentor)
-    alert(`❌ Mentor request rejected. Rejection reason sent to ${selectedRequest.name}: "${rejectReason}"`);
-    
-    // Reset modal
-    setShowRejectModal(false);
-    setSelectedRequest(null);
-    setRejectReason('');
+    const res = await rejectMentor(selectedRequest.pre_mentor_id, rejectReason);
+    if (res?.success) {
+      const reqRes = await fetchMentorRequests(universityId);
+      if (reqRes?.success) setMentorRequests(reqRes.requests);
+      setShowRejectModal(false);
+      setSelectedRequest(null);
+      setRejectReason('');
+    } else {
+      alert(res?.message || 'Failed to reject mentor');
+    }
   };
 
-  const openRejectModal = (mentor) => {
-    setSelectedRequest(mentor);
+  const openRejectModal = (reqItem) => {
+    setSelectedRequest(reqItem);
     setShowRejectModal(true);
   };
 
@@ -275,7 +219,7 @@ const Mentoruni = () => {
                 minHeight: '420px' // Ensures grid height stays consistent
               }}>
                 {mentorRequests.map(mentor => (
-                  <div key={mentor.id} style={{
+                  <div key={mentor.pre_mentor_id || mentor.mentor_id} style={{
                     background: '#f9fafb',
                     border: '1px solid #e5e7eb',
                     borderRadius: '12px',
@@ -315,8 +259,8 @@ const Mentoruni = () => {
                         overflow: 'hidden'
                       }}>
                         <img 
-                          src={`https://randomuser.me/api/portraits/${mentor.id % 2 === 0 ? 'men' : 'women'}/${(mentor.id % 50) + 1}.jpg`}
-                          alt={mentor.name}
+                          src={`https://randomuser.me/api/portraits/${(mentor.mentor_id % 2 === 0) ? 'men' : 'women'}/${(mentor.mentor_id % 50) + 1}.jpg`}
+                          alt={mentor.mentor_name}
                           style={{
                             width: '100%',
                             height: '100%',
@@ -331,13 +275,13 @@ const Mentoruni = () => {
                           color: '#1e293b',
                           margin: '0 0 0.5rem 0',
                           lineHeight: '1.3'
-                        }}>{mentor.name}</h3>
+                        }}>{mentor.mentor_name}</h3>
                         <p style={{
                           color: '#64748b',
                           fontSize: '0.9rem',
                           margin: '0',
                           fontWeight: '500'
-                        }}>{mentor.specialization}</p>
+                        }}>{mentor.expertise || 'N/A'}</p>
                       </div>
                     </div>
 
@@ -352,19 +296,19 @@ const Mentoruni = () => {
                     }}>
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <strong style={{ marginBottom: '0.25rem' }}>Registration:</strong>
-                        <span style={{ color: '#64748b' }}>{mentor.Registrationnumber}</span>
+                        <span style={{ color: '#64748b' }}>{(mentor.form_data && mentor.form_data.registration_number) || 'N/A'}</span>
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <strong style={{ marginBottom: '0.25rem' }}>Year:</strong>
-                        <span style={{ color: '#64748b' }}>{mentor.Year}</span>
+                        <span style={{ color: '#64748b' }}>{(mentor.form_data && mentor.form_data.year_of_study) || 'N/A'}</span>
                       </div>
                       <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', marginTop: '0.5rem' }}>
                         <strong style={{ marginBottom: '0.25rem' }}>Education:</strong>
-                        <span style={{ color: '#64748b' }}>{mentor.education}</span>
+                        <span style={{ color: '#64748b' }}>{mentor.education || 'N/A'}</span>
                       </div>
                       <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', marginTop: '0.5rem' }}>
                         <strong style={{ marginBottom: '0.25rem' }}>Email:</strong>
-                        <span style={{ color: '#64748b' }}>{mentor.email}</span>
+                        <span style={{ color: '#64748b' }}>{mentor.email || 'N/A'}</span>
                       </div>
                     </div>
 
@@ -389,7 +333,7 @@ const Mentoruni = () => {
                         gap: '0.5rem',
                         alignItems: 'center'
                       }}>
-                        {mentor.skills.map((skill, index) => (
+                        {(mentor.form_data?.skills || []).map((skill, index) => (
                           <span key={index} style={{
                             background: '#eff6ff',
                             color: '#2563eb',
@@ -505,7 +449,7 @@ const Mentoruni = () => {
                 minHeight: '320px' // Ensures grid height stays consistent
               }}>
                 {activeMentors.map(mentor => (
-                  <div key={mentor.id} style={{
+                  <div key={mentor.mentor_id} style={{
                     background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
                     border: '2px solid #e2e8f0',
                     borderRadius: '16px',
@@ -554,8 +498,8 @@ const Mentoruni = () => {
                         overflow: 'hidden'
                       }}>
                         <img 
-                          src={`https://randomuser.me/api/portraits/${mentor.id % 2 === 0 ? 'men' : 'women'}/${(mentor.id % 50) + 10}.jpg`}
-                          alt={mentor.name}
+                          src={`https://randomuser.me/api/portraits/${(mentor.mentor_id % 2 === 0) ? 'men' : 'women'}/${(mentor.mentor_id % 50) + 10}.jpg`}
+                          alt={mentor.mentor_name}
                           style={{
                             width: '100%',
                             height: '100%',
@@ -569,13 +513,13 @@ const Mentoruni = () => {
                           fontWeight: '700',
                           color: '#1e293b',
                           margin: '0 0 0.25rem 0'
-                        }}>{mentor.name}</h3>
+                        }}>{mentor.mentor_name}</h3>
                         <p style={{
                           color: '#2563eb',
                           fontSize: '0.9rem',
                           margin: '0',
                           fontWeight: '600'
-                        }}>{mentor.specialization}</p>
+                        }}>{mentor.expertise || 'N/A'}</p>
                       </div>
                     </div>
 
@@ -599,7 +543,7 @@ const Mentoruni = () => {
                           fontWeight: '800',
                           color: '#1d4ed8',
                           marginBottom: '0.25rem'
-                        }}>{mentor.students}</div>
+                        }}>{mentor.students || 0}</div>
                         <div style={{
                           fontSize: '0.75rem',
                           color: '#64748b',
@@ -642,9 +586,9 @@ const Mentoruni = () => {
                       marginBottom: '1.5rem',
                       border: '1px solid #e2e8f0'
                     }}>
-                      <div style={{ marginBottom: '0.5rem' }}><strong style={{ color: '#1e293b' }}>Email:</strong> {mentor.email}</div>
-                      <div style={{ marginBottom: '0.5rem' }}><strong style={{ color: '#1e293b' }}>Experience:</strong> {mentor.experience}</div>
-                      <div><strong style={{ color: '#1e293b' }}>Joined:</strong> {mentor.joinDate}</div>
+                      <div style={{ marginBottom: '0.5rem' }}><strong style={{ color: '#1e293b' }}>Email:</strong> {mentor.email || 'N/A'}</div>
+                      <div style={{ marginBottom: '0.5rem' }}><strong style={{ color: '#1e293b' }}>Expertise:</strong> {mentor.expertise || 'N/A'}</div>
+                      <div><strong style={{ color: '#1e293b' }}>Joined:</strong> {mentor.created_at ? new Date(mentor.created_at).toLocaleDateString() : 'N/A'}</div>
                     </div>
 
                     {/* Status Badge and Delete Button */}
@@ -673,7 +617,7 @@ const Mentoruni = () => {
                         ✓ Active Mentor
                       </div>
                       <button
-                        onClick={() => setActiveMentors(prev => prev.filter(m => m.id !== mentor.id))}
+                        onClick={() => setActiveMentors(prev => prev.filter(m => (m.mentor_id || m.id) !== mentor.mentor_id))}
                         style={{
                           background: '#ef4444',
                           color: 'white',
@@ -788,7 +732,7 @@ const Mentoruni = () => {
                     margin: '0 0 0.5rem 0',
                     color: '#1e293b',
                     lineHeight: '1.2'
-                  }}>{selectedMentor.name}</h2>
+                  }}>{selectedMentor.mentor_name || selectedMentor.name}</h2>
                   <div style={{
                     display: 'flex',
                     flexWrap: 'wrap',
@@ -803,7 +747,7 @@ const Mentoruni = () => {
                       fontSize: '0.75rem',
                       fontWeight: '500',
                       border: '1px solid #dbeafe'
-                    }}>{selectedMentor.specialization}</span>
+                    }}>{selectedMentor.expertise || (selectedMentor.form_data?.specialization) || 'N/A'}</span>
                     <span style={{
                       background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)',
                       color: '#16a34a',
@@ -870,12 +814,12 @@ const Mentoruni = () => {
                   borderRadius: '12px',
                   border: '1px solid #e2e8f0'
                 }}>
-                  <div><strong>Registration Number:</strong> {selectedMentor.Registrationnumber}</div>
-                  <div><strong>Academic Year:</strong> {selectedMentor.Year}</div>
-                  <div><strong>Email:</strong> {selectedMentor.email}</div>
-                  <div><strong>Phone:</strong> {selectedMentor.phone}</div>
-                  <div style={{ gridColumn: '1 / -1' }}><strong>Education:</strong> {selectedMentor.education}</div>
-                  <div style={{ gridColumn: '1 / -1' }}><strong>Recommendation:</strong> {selectedMentor.Recommendation}</div>
+                  <div><strong>Registration Number:</strong> {selectedMentor.form_data?.registration_number || 'N/A'}</div>
+                  <div><strong>Academic Year:</strong> {selectedMentor.form_data?.year_of_study || 'N/A'}</div>
+                  <div><strong>Email:</strong> {selectedMentor.email || 'N/A'}</div>
+                  <div><strong>Phone:</strong> {selectedMentor.form_data?.phone || 'N/A'}</div>
+                  <div style={{ gridColumn: '1 / -1' }}><strong>Education:</strong> {selectedMentor.education || 'N/A'}</div>
+                  <div style={{ gridColumn: '1 / -1' }}><strong>Recommendation:</strong> {selectedMentor.form_data?.recommendation_from || 'N/A'}</div>
                 </div>
               </div>
 
@@ -896,14 +840,14 @@ const Mentoruni = () => {
                   border: '1px solid #e2e8f0',
                   marginBottom: '1rem'
                 }}>
-                  <p style={{ lineHeight: '1.6', margin: '0', color: '#374151' }}>{selectedMentor.bio}</p>
+                  <p style={{ lineHeight: '1.6', margin: '0', color: '#374151' }}>{selectedMentor.bio || selectedMentor.form_data?.bio || 'No bio provided.'}</p>
                 </div>
                 <div style={{
                   display: 'flex',
                   flexWrap: 'wrap',
                   gap: '0.5rem'
                 }}>
-                  {selectedMentor.skills.map((skill, index) => (
+                  {(selectedMentor.form_data?.skills || []).map((skill, index) => (
                     <span key={index} style={{
                       background: '#174A7C var(--tw-gradient-to-position)',
                       color: 'white',
@@ -1009,7 +953,7 @@ const Mentoruni = () => {
                       <div style={{ fontSize: '2.5rem' }}>📄</div>
                       <div>
                         <div style={{ fontWeight: '600', color: '#1e293b' }}>Recommendation Letter PDF</div>
-                        <div style={{ fontSize: '0.875rem', color: '#64748b' }}>From: {selectedMentor.Recommendation}</div>
+                        <div style={{ fontSize: '0.875rem', color: '#64748b' }}>From: {selectedMentor.form_data?.recommendation_from || 'N/A'}</div>
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: '0.75rem' }}>

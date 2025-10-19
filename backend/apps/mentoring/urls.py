@@ -11,4 +11,10 @@ urlpatterns = [
     
     # Mentors
     path('mentors/', views.get_mentors, name='get_mentors'),
+
+    # University Mentor Admin
+    path('university/mentor-requests/', views.university_mentor_requests, name='university_mentor_requests'),
+    path('university/active-mentors/', views.university_active_mentors, name='university_active_mentors'),
+    path('university/mentor-requests/<int:pre_mentor_id>/accept/', views.accept_pre_mentor, name='accept_pre_mentor'),
+    path('university/mentor-requests/<int:pre_mentor_id>/reject/', views.reject_pre_mentor, name='reject_pre_mentor'),
 ]

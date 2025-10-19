@@ -151,3 +151,29 @@ class CompanyDashboardEdit(models.Model):
         managed = True
         db_table = 'company_dashboard_edit'
 
+
+class CompanyAd(models.Model):
+    ad_id = models.AutoField(primary_key=True)
+    company = models.ForeignKey(Companies, models.DO_NOTHING)
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    category = models.CharField(max_length=100)
+    target_audience = models.CharField(max_length=100)
+    budget = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    duration = models.IntegerField()  # days
+    ad_type = models.CharField(max_length=50)
+    image_url = models.CharField(max_length=255, blank=True, null=True)
+    video_url = models.CharField(max_length=255, blank=True, null=True)
+    website_url = models.CharField(max_length=255, blank=True, null=True)
+    contact_email = models.CharField(max_length=100)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    keywords = models.CharField(max_length=255, blank=True, null=True)
+    status = models.CharField(max_length=20, default='pending')  # pending, active, completed
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        managed = True
+        db_table = 'company_ads'
+

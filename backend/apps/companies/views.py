@@ -10,6 +10,12 @@ from .models import Courses
 from .models import CompanyAnnouncement
 from apps.accounts.models import Users
 from .models import CompanyDashboardEdit
+from .models import CompanyAd
+from decimal import Decimal
+from datetime import datetime
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from django.conf import settings
 
 
 @csrf_exempt
@@ -18,7 +24,7 @@ def create_company_event(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            
+
             # Get required fields
             company_id = data.get('company_id')
             title = data.get('title')
@@ -33,14 +39,14 @@ def create_company_event(request):
             registration_deadline = data.get('registration_deadline')
             contact_email = data.get('contact_email', '')
             contact_phone = data.get('contact_phone', '')
-            
+
             # Validation
             if not all([company_id, title, event_type, event_date]):
                 return JsonResponse({
                     'success': False,
                     'message': 'Company ID, title, event type, and event date are required'
                 }, status=400)
-            
+
             # Check if company exists
             try:
                 company = Companies.objects.get(company_id=company_id)
@@ -49,7 +55,7 @@ def create_company_event(request):
                     'success': False,
                     'message': 'Company not found'
                 }, status=404)
-            
+
             # Create the event
             with transaction.atomic():
                 event = CompanyEvents.objects.create(
@@ -68,7 +74,7 @@ def create_company_event(request):
                     contact_phone=contact_phone,
                     created_at=timezone.now()
                 )
-                
+
                 return JsonResponse({
                     'success': True,
                     'message': 'Company event created successfully',
@@ -80,13 +86,13 @@ def create_company_event(request):
                         'company_name': company.name
                     }
                 })
-                
+
         except Exception as e:
             return JsonResponse({
                 'success': False,
                 'message': f'Error creating event: {str(e)}'
             }, status=500)
-    
+
     return JsonResponse({
         'success': False,
         'message': 'Only POST method allowed'
@@ -99,12 +105,13 @@ def get_company_events(request):
     if request.method == 'GET':
         try:
             company_id = request.GET.get('company_id')
-            
+
             if company_id:
-                events = CompanyEvents.objects.filter(company_id=company_id, is_active=True)
+                events = CompanyEvents.objects.filter(
+                    company_id=company_id, is_active=True)
             else:
                 events = CompanyEvents.objects.filter(is_active=True)
-            
+
             events_data = []
             for event in events:
                 events_data.append({
@@ -125,18 +132,18 @@ def get_company_events(request):
                     'contact_phone': event.contact_phone,
                     'created_at': event.created_at
                 })
-            
+
             return JsonResponse({
                 'success': True,
                 'events': events_data
             })
-            
+
         except Exception as e:
             return JsonResponse({
                 'success': False,
                 'message': f'Error fetching events: {str(e)}'
             }, status=500)
-    
+
     return JsonResponse({
         'success': False,
         'message': 'Only GET method allowed'
@@ -149,26 +156,27 @@ def register_for_company_event(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            
+
             event_id = data.get('event_id')
             user_id = data.get('user_id')
             notes = data.get('notes', '')
-            
+
             if not all([event_id, user_id]):
                 return JsonResponse({
                     'success': False,
                     'message': 'Event ID and User ID are required'
                 }, status=400)
-            
+
             # Check if event exists
             try:
-                event = CompanyEvents.objects.get(event_id=event_id, is_active=True)
+                event = CompanyEvents.objects.get(
+                    event_id=event_id, is_active=True)
             except CompanyEvents.DoesNotExist:
                 return JsonResponse({
                     'success': False,
                     'message': 'Event not found'
                 }, status=404)
-            
+
             # Check if user exists
             try:
                 user = Users.objects.get(user_id=user_id)
@@ -177,14 +185,14 @@ def register_for_company_event(request):
                     'success': False,
                     'message': 'User not found'
                 }, status=404)
-            
+
             # Check if user is already registered
             if CompanyEventRegistrations.objects.filter(event=event, user=user).exists():
                 return JsonResponse({
                     'success': False,
                     'message': 'User is already registered for this event'
                 }, status=400)
-            
+
             # Check if event is full
             if event.max_participants:
                 current_registrations = CompanyEventRegistrations.objects.filter(
@@ -195,7 +203,7 @@ def register_for_company_event(request):
                         'success': False,
                         'message': 'Event is full'
                     }, status=400)
-            
+
             # Create registration
             with transaction.atomic():
                 registration = CompanyEventRegistrations.objects.create(
@@ -204,7 +212,7 @@ def register_for_company_event(request):
                     registration_date=timezone.now(),
                     notes=notes
                 )
-                
+
                 return JsonResponse({
                     'success': True,
                     'message': 'Successfully registered for the event',
@@ -215,13 +223,13 @@ def register_for_company_event(request):
                         'registration_date': registration.registration_date
                     }
                 })
-                
+
         except Exception as e:
             return JsonResponse({
                 'success': False,
                 'message': f'Error registering for event: {str(e)}'
             }, status=500)
-    
+
     return JsonResponse({
         'success': False,
         'message': 'Only POST method allowed'
@@ -234,7 +242,7 @@ def update_company_event(request, event_id):
     if request.method == 'PUT':
         try:
             data = json.loads(request.body)
-            
+
             try:
                 event = CompanyEvents.objects.get(event_id=event_id)
             except CompanyEvents.DoesNotExist:
@@ -242,7 +250,7 @@ def update_company_event(request, event_id):
                     'success': False,
                     'message': 'Event not found'
                 }, status=404)
-            
+
             # Update fields if provided
             if 'title' in data:
                 event.title = data['title']
@@ -270,9 +278,9 @@ def update_company_event(request, event_id):
                 event.contact_phone = data['contact_phone']
             if 'is_active' in data:
                 event.is_active = data['is_active']
-            
+
             event.save()
-            
+
             return JsonResponse({
                 'success': True,
                 'message': 'Event updated successfully',
@@ -283,13 +291,13 @@ def update_company_event(request, event_id):
                     'event_date': event.event_date
                 }
             })
-            
+
         except Exception as e:
             return JsonResponse({
                 'success': False,
                 'message': f'Error updating event: {str(e)}'
             }, status=500)
-    
+
     return JsonResponse({
         'success': False,
         'message': 'Only PUT method allowed'
@@ -308,28 +316,29 @@ def delete_company_event(request, event_id):
                     'success': False,
                     'message': 'Event not found'
                 }, status=404)
-            
+
             # Soft delete by setting is_active to False
             event.is_active = False
             event.save()
-            
+
             return JsonResponse({
                 'success': True,
                 'message': 'Event deleted successfully'
             })
-            
+
         except Exception as e:
             return JsonResponse({
                 'success': False,
                 'message': f'Error deleting event: {str(e)}'
             }, status=500)
-    
+
     return JsonResponse({
         'success': False,
         'message': 'Only DELETE method allowed'
     }, status=405)
 
 # internships
+
 
 @csrf_exempt
 def create_internship(request):
@@ -404,21 +413,23 @@ def create_internship(request):
         'message': 'Only POST method allowed'
     }, status=405)
 
+
 @csrf_exempt
 def get_company_internships(request):
     """Get internships for a specific company"""
     if request.method == 'GET':
         try:
             company_id = request.GET.get('company_id')
-            
+
             if not company_id:
                 return JsonResponse({
                     'success': False,
                     'message': 'Company ID is required'
                 }, status=400)
-            
-            internships = InternshipOpportunities.objects.filter(company_id=company_id)
-            
+
+            internships = InternshipOpportunities.objects.filter(
+                company_id=company_id)
+
             internships_data = []
             for internship in internships:
                 internships_data.append({
@@ -437,18 +448,18 @@ def get_company_internships(request):
                     'image_url': internship.image_url,
                     'created_at': internship.created_at
                 })
-            
+
             return JsonResponse({
                 'success': True,
                 'internships': internships_data
             })
-            
+
         except Exception as e:
             return JsonResponse({
                 'success': False,
                 'message': f'Error fetching internships: {str(e)}'
             }, status=500)
-    
+
     return JsonResponse({
         'success': False,
         'message': 'Only GET method allowed'
@@ -461,15 +472,16 @@ def update_internship(request, internship_id):
     if request.method == 'PUT':
         try:
             data = json.loads(request.body)
-            
+
             try:
-                internship = InternshipOpportunities.objects.get(internship_id=internship_id)
+                internship = InternshipOpportunities.objects.get(
+                    internship_id=internship_id)
             except InternshipOpportunities.DoesNotExist:
                 return JsonResponse({
                     'success': False,
                     'message': 'Internship not found'
                 }, status=404)
-            
+
             # Update fields if provided
             if 'title' in data:
                 internship.title = data['title']
@@ -491,9 +503,9 @@ def update_internship(request, internship_id):
                 internship.contact_phone = data['contact_phone']
             if 'image_url' in data:
                 internship.image_url = data['image_url']
-            
+
             internship.save()
-            
+
             return JsonResponse({
                 'success': True,
                 'message': 'Internship updated successfully',
@@ -505,13 +517,13 @@ def update_internship(request, internship_id):
                     'end_date': internship.end_date
                 }
             })
-            
+
         except Exception as e:
             return JsonResponse({
                 'success': False,
                 'message': f'Error updating internship: {str(e)}'
             }, status=500)
-    
+
     return JsonResponse({
         'success': False,
         'message': 'Only PUT method allowed'
@@ -524,27 +536,28 @@ def delete_internship(request, internship_id):
     if request.method == 'DELETE':
         try:
             try:
-                internship = InternshipOpportunities.objects.get(internship_id=internship_id)
+                internship = InternshipOpportunities.objects.get(
+                    internship_id=internship_id)
             except InternshipOpportunities.DoesNotExist:
                 return JsonResponse({
                     'success': False,
                     'message': 'Internship not found'
                 }, status=404)
-            
+
             # Delete the internship
             internship.delete()
-            
+
             return JsonResponse({
                 'success': True,
                 'message': 'Internship deleted successfully'
             })
-            
+
         except Exception as e:
             return JsonResponse({
                 'success': False,
                 'message': f'Error deleting internship: {str(e)}'
             }, status=500)
-    
+
     return JsonResponse({
         'success': False,
         'message': 'Only DELETE method allowed'
@@ -557,13 +570,14 @@ def get_internship_details(request, internship_id):
     if request.method == 'GET':
         try:
             try:
-                internship = InternshipOpportunities.objects.get(internship_id=internship_id)
+                internship = InternshipOpportunities.objects.get(
+                    internship_id=internship_id)
             except InternshipOpportunities.DoesNotExist:
                 return JsonResponse({
                     'success': False,
                     'message': 'Internship not found'
                 }, status=404)
-            
+
             internship_data = {
                 'internship_id': internship.internship_id,
                 'company_id': internship.company.company_id,
@@ -580,24 +594,25 @@ def get_internship_details(request, internship_id):
                 'image_url': internship.image_url,
                 'created_at': internship.created_at
             }
-            
+
             return JsonResponse({
                 'success': True,
                 'internship': internship_data
             })
-            
+
         except Exception as e:
             return JsonResponse({
                 'success': False,
                 'message': f'Error fetching internship details: {str(e)}'
             }, status=500)
-    
+
     return JsonResponse({
         'success': False,
         'message': 'Only GET method allowed'
     }, status=405)
 
 # courses
+
 
 @csrf_exempt
 def create_course(request):
@@ -627,8 +642,9 @@ def create_course(request):
             return JsonResponse({'success': True, 'course_id': course.course_id})
         except Exception as e:
             return JsonResponse({'success': False, 'message': f'Error creating course: {str(e)}'}, status=500)
-    
+
     return JsonResponse({'success': False, 'message': 'Only POST method allowed'}, status=405)
+
 
 @csrf_exempt
 def get_courses(request):
@@ -660,8 +676,9 @@ def get_courses(request):
             return JsonResponse({'success': True, 'courses': data})
         except Exception as e:
             return JsonResponse({'success': False, 'message': f'Error fetching courses: {str(e)}'}, status=500)
-    
+
     return JsonResponse({'success': False, 'message': 'Only GET method allowed'}, status=405)
+
 
 @csrf_exempt
 def update_course(request, course_id):
@@ -680,6 +697,7 @@ def update_course(request, course_id):
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
     return JsonResponse({'success': False, 'message': 'Only PUT method allowed'}, status=405)
 
+
 @csrf_exempt
 def delete_course(request, course_id):
     """Delete a course"""
@@ -696,13 +714,15 @@ def delete_course(request, course_id):
 
 # announcements
 
+
 @csrf_exempt
 def create_announcement(request):
     """Create a new company announcement"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            company = Companies.objects.get(company_id=data.get('company_id', 1))  # Use actual company_id
+            company = Companies.objects.get(company_id=data.get(
+                'company_id', 1))  # Use actual company_id
             announcement = CompanyAnnouncement.objects.create(
                 company=company,
                 title=data.get('title'),
@@ -720,12 +740,14 @@ def create_announcement(request):
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
     return JsonResponse({'success': False, 'message': 'Only POST method allowed'}, status=405)
 
+
 @csrf_exempt
 def get_announcements(request):
     """Get all company announcements, ordered by most recent"""
     if request.method == 'GET':
         company_id = request.GET.get('company_id', 1)
-        announcements = CompanyAnnouncement.objects.filter(company_id=company_id).order_by('-date')  # Most recent first
+        announcements = CompanyAnnouncement.objects.filter(
+            company_id=company_id).order_by('-date')  # Most recent first
         data = []
         for a in announcements:
             data.append({
@@ -744,16 +766,19 @@ def get_announcements(request):
         return JsonResponse({'success': True, 'announcements': data})
     return JsonResponse({'success': False, 'message': 'Only GET method allowed'}, status=405)
 
+
 @csrf_exempt
 def update_announcement(request, announcement_id):
     """Update a company announcement"""
     if request.method == 'PUT':
         try:
             data = json.loads(request.body)
-            announcement = CompanyAnnouncement.objects.get(announcement_id=announcement_id)
+            announcement = CompanyAnnouncement.objects.get(
+                announcement_id=announcement_id)
             for field, value in data.items():
                 if field == 'tags':
-                    value = ','.join(value) if isinstance(value, list) else value
+                    value = ','.join(value) if isinstance(
+                        value, list) else value
                 if field == 'image':
                     field = 'image_url'
                 setattr(announcement, field, value)
@@ -765,12 +790,14 @@ def update_announcement(request, announcement_id):
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
     return JsonResponse({'success': False, 'message': 'Only PUT method allowed'}, status=405)
 
+
 @csrf_exempt
 def delete_announcement(request, announcement_id):
     """Delete a company announcement"""
     if request.method == 'DELETE':
         try:
-            announcement = CompanyAnnouncement.objects.get(announcement_id=announcement_id)
+            announcement = CompanyAnnouncement.objects.get(
+                announcement_id=announcement_id)
             announcement.delete()
             return JsonResponse({'success': True})
         except CompanyAnnouncement.DoesNotExist:
@@ -780,6 +807,7 @@ def delete_announcement(request, announcement_id):
     return JsonResponse({'success': False, 'message': 'Only DELETE method allowed'}, status=405)
 
 # dashboard edits
+
 
 @csrf_exempt
 def get_dashboard_edit(request):
@@ -810,13 +838,15 @@ def get_dashboard_edit(request):
             return JsonResponse({'success': False, 'message': 'Dashboard not found'}, status=404)
     return JsonResponse({'success': False, 'message': 'Only GET method allowed'}, status=405)
 
+
 @csrf_exempt
 def update_dashboard_edit(request, dashboard_id):
     """Update dashboard edit data for a company"""
     if request.method == 'PUT':
         try:
             data = json.loads(request.body)
-            dashboard = CompanyDashboardEdit.objects.get(dashboard_id=dashboard_id)
+            dashboard = CompanyDashboardEdit.objects.get(
+                dashboard_id=dashboard_id)
             for field, value in data.items():
                 setattr(dashboard, field, value)
             dashboard.save()
@@ -827,20 +857,23 @@ def update_dashboard_edit(request, dashboard_id):
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
     return JsonResponse({'success': False, 'message': 'Only PUT method allowed'}, status=405)
 
+
 @csrf_exempt
 def create_dashboard_edit(request):
     """Create dashboard edit data for a company (first time)"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            company = Companies.objects.get(company_id=data.get('company_id', 1))
+            company = Companies.objects.get(
+                company_id=data.get('company_id', 1))
             dashboard = CompanyDashboardEdit.objects.create(
                 company=company,
                 story_title=data.get('story_title', ''),
                 story_subtitle=data.get('story_subtitle', ''),
                 story_section_title=data.get('story_section_title', ''),
                 story_description=data.get('story_description', ''),
-                story_second_description=data.get('story_second_description', ''),
+                story_second_description=data.get(
+                    'story_second_description', ''),
                 story_image=data.get('story_image', ''),
                 offers=data.get('offers', []),
                 team=data.get('team', []),
@@ -853,3 +886,146 @@ def create_dashboard_edit(request):
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
     return JsonResponse({'success': False, 'message': 'Only POST method allowed'}, status=405)
+
+# ads
+
+
+@csrf_exempt
+def create_company_ad(request):
+    """Create a new company advertisement"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+
+            company_id = data.get('company_id')
+            if not company_id:
+                return JsonResponse({'success': False, 'message': 'company_id is required'}, status=400)
+
+            try:
+                company = Companies.objects.get(company_id=company_id)
+            except Companies.DoesNotExist:
+                return JsonResponse({'success': False, 'message': 'Company not found'}, status=404)
+
+            def parse_date(val):
+                if not val:
+                    return None
+                if isinstance(val, str):
+                    return datetime.fromisoformat(val).date()
+                return val
+
+            ad = CompanyAd.objects.create(
+                company=company,
+                title=data.get('title', '').strip(),
+                description=data.get('description', '').strip(),
+                category=data.get('category', ''),
+                target_audience=data.get('target_audience', ''),
+                budget=Decimal(str(data.get('budget', 0) or 0)),
+                duration=int(data.get('duration', 0) or 0),
+                ad_type=data.get('ad_type', ''),
+                image_url=data.get('image_url', ''),
+                video_url=data.get('video_url', ''),
+                website_url=data.get('website_url', ''),
+                contact_email=data.get('contact_email', ''),
+                start_date=parse_date(data.get('start_date')),
+                end_date=parse_date(data.get('end_date')),
+                keywords=data.get('keywords', ''),
+                status='pending'
+            )
+            return JsonResponse({'success': True, 'ad_id': ad.ad_id})
+        except ValueError as ve:
+            return JsonResponse({'success': False, 'message': f'Invalid value: {ve}'}, status=400)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    return JsonResponse({'success': False, 'message': 'Only POST method allowed'}, status=405)
+
+
+@csrf_exempt
+def get_company_ads(request):
+    """Get all ads for a company"""
+    if request.method == 'GET':
+        company_id = request.GET.get('company_id')
+        ads = CompanyAd.objects.filter(
+            company_id=company_id).order_by('-created_at')
+        data = []
+        for ad in ads:
+            data.append({
+                'ad_id': ad.ad_id,
+                'title': ad.title,
+                'description': ad.description,
+                'category': ad.category,
+                'target_audience': ad.target_audience,
+                'budget': float(ad.budget) if ad.budget else 0,
+                'duration': ad.duration,
+                'ad_type': ad.ad_type,
+                'image_url': ad.image_url,
+                'video_url': ad.video_url,
+                'website_url': ad.website_url,
+                'contact_email': ad.contact_email,
+                'start_date': str(ad.start_date),
+                'end_date': str(ad.end_date),
+                'keywords': ad.keywords,
+                'status': ad.status,
+                'created_at': str(ad.created_at),
+                'updated_at': str(ad.updated_at),
+            })
+        return JsonResponse({'success': True, 'ads': data})
+    return JsonResponse({'success': False, 'message': 'Only GET method allowed'}, status=405)
+
+
+@csrf_exempt
+def update_company_ad(request, ad_id):
+    """Update an existing company ad"""
+    if request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            ad = CompanyAd.objects.get(ad_id=ad_id)
+            for field, value in data.items():
+                setattr(ad, field, value)
+            ad.save()
+            return JsonResponse({'success': True})
+        except CompanyAd.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Ad not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    return JsonResponse({'success': False, 'message': 'Only PUT method allowed'}, status=405)
+
+
+@csrf_exempt
+def delete_company_ad(request, ad_id):
+    """Delete a company ad"""
+    if request.method == 'DELETE':
+        try:
+            ad = CompanyAd.objects.get(ad_id=ad_id)
+            ad.delete()
+            return JsonResponse({'success': True})
+        except CompanyAd.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Ad not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    return JsonResponse({'success': False, 'message': 'Only DELETE method allowed'}, status=405)
+
+
+@csrf_exempt
+def upload_ad_media(request):
+    """Simple dev helper to accept image/video via multipart/form-data and return a local URL.
+    In production, you should store in cloud storage and return the CDN URL.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Only POST method allowed'}, status=405)
+
+    try:
+        file_obj = request.FILES.get('file')
+        if not file_obj:
+            return JsonResponse({'success': False, 'message': 'No file provided'}, status=400)
+
+        # Save under media/ad_uploads/
+        folder = 'ad_uploads'
+        path = default_storage.save(
+            f"{folder}/{timezone.now().strftime('%Y%m%d%H%M%S')}_{file_obj.name}",
+            ContentFile(file_obj.read())
+        )
+        url = f"{settings.MEDIA_URL}{path}"
+        abs_url = request.build_absolute_uri(url)
+        return JsonResponse({'success': True, 'url': abs_url})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
