@@ -35,6 +35,7 @@ const VideoCall = ({ roomId, userId, userRole, onEndCall }) => {
   const screenStreamRef = useRef(null);
   const controlsTimeoutRef = useRef(null);
   const containerRef = useRef(null);
+  const hasConnectedRef = useRef(false);
 
   // Get WebSocket URL from environment or use default
   const websocketUrl = `ws://localhost:8000/ws/video-call/${roomId}/`;
@@ -51,14 +52,17 @@ const VideoCall = ({ roomId, userId, userRole, onEndCall }) => {
     disconnect,
   } = useWebRTC(roomId, userId, userRole, websocketUrl);
 
-  // Connect on mount
+  // Connect on mount (only once)
   useEffect(() => {
-    connect();
+    if (!hasConnectedRef.current) {
+      hasConnectedRef.current = true;
+      connect();
+    }
 
     return () => {
       disconnect();
     };
-  }, []);
+  }, [connect, disconnect]);
 
   // Update local video element
   useEffect(() => {
@@ -223,11 +227,25 @@ const VideoCall = ({ roomId, userId, userRole, onEndCall }) => {
             <div className="w-32 h-32 rounded-full bg-gray-700 flex items-center justify-center mb-4">
               <User size={64} />
             </div>
-            <p className="text-xl">
-              {isConnecting
-                ? "Connecting..."
-                : "Waiting for other participant..."}
-            </p>
+            {isConnecting ? (
+              <>
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white mb-4"></div>
+                <p className="text-xl">Connecting to room...</p>
+              </>
+            ) : (
+              <>
+                <p className="text-xl mb-2">
+                  {userRole === "student"
+                    ? "Waiting for mentor to join..."
+                    : "Waiting for student to join..."}
+                </p>
+                <p className="text-sm text-gray-400 max-w-md text-center">
+                  {userRole === "student"
+                    ? "Your mentor will join shortly. Please wait while they connect to the session."
+                    : "The student will join shortly. Your video will start once they connect."}
+                </p>
+              </>
+            )}
             {connectionState && (
               <p className="text-sm text-gray-400 mt-2">
                 Connection: {connectionState}

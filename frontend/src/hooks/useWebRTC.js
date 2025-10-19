@@ -29,6 +29,7 @@ export const useWebRTC = (roomId, userId, userRole, websocketUrl) => {
     const localStreamRef = useRef(null);
     const remoteStreamRef = useRef(null);
     const iceCandidatesQueue = useRef([]);
+    const isConnectingRef = useRef(false); // Prevent duplicate connections
 
     // Initialize local media stream
     const initializeLocalStream = useCallback(async () => {
@@ -233,8 +234,18 @@ export const useWebRTC = (roomId, userId, userRole, websocketUrl) => {
             console.log('WebSocket message:', data.type);
 
             switch (data.type) {
+                case 'user_connected':
+                    console.log('Successfully connected to room');
+                    // This is sent when we first connect
+                    break;
+
                 case 'user_joined':
                     console.log('User joined:', data.role, data.user_id);
+                    // Update remote user info
+                    setRemoteUser({
+                        user_id: data.user_id,
+                        role: data.role
+                    });
                     // If we're the first user and someone joins, create offer
                     if (data.participant_count === 2 && userRole === 'mentor') {
                         setTimeout(() => createOffer(), 1000);
@@ -255,7 +266,7 @@ export const useWebRTC = (roomId, userId, userRole, websocketUrl) => {
 
                 case 'user_left':
                 case 'user_disconnected':
-                    console.log('User left:', data.role, data.user_id);
+                    console.log('User left:', data.role || 'unknown', data.user_id || 'unknown');
                     setRemoteUser(null);
                     if (remoteStreamRef.current) {
                         remoteStreamRef.current.getTracks().forEach(track => track.stop());
@@ -290,7 +301,14 @@ export const useWebRTC = (roomId, userId, userRole, websocketUrl) => {
 
     // Connect to room
     const connect = useCallback(async () => {
+        // Prevent duplicate connections
+        if (isConnectingRef.current || websocketRef.current) {
+            console.log('Already connecting or connected, skipping...');
+            return;
+        }
+
         try {
+            isConnectingRef.current = true;
             setError(null);
             setIsConnecting(true);
 
@@ -307,6 +325,7 @@ export const useWebRTC = (roomId, userId, userRole, websocketUrl) => {
             console.error('Error connecting:', err);
             setError('Failed to connect to video call');
             setIsConnecting(false);
+            isConnectingRef.current = false;
         }
     }, [initializeLocalStream, createPeerConnection, initializeWebSocket]);
 
@@ -350,6 +369,7 @@ export const useWebRTC = (roomId, userId, userRole, websocketUrl) => {
         setIsConnected(false);
         setIsConnecting(false);
         setRemoteUser(null);
+        isConnectingRef.current = false; // Reset connection flag
     }, [userId, userRole]);
 
     // Cleanup on unmount
