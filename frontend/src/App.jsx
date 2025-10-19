@@ -16,6 +16,9 @@ import Universities from "./components/Universities";
 // Test pages
 import MentorAvailabilityTest from "./pages/Test/MentorAvailabilityTest";
 
+// Video Call
+import VideoCallPage from "./pages/VideoCall/VideoCallPage";
+
 // Layouts
 import { StudentLayout, UniversityStudentLayout } from "./components/Navigation";
 
@@ -81,6 +84,9 @@ function App() {
 
           {/*Counsellor Routes */}
           <Route path="/counsellor/*" element={<CounsellorRoutes />} />
+
+          {/* Video Call Route - Standalone for all user types */}
+          <Route path="/video-call" element={<VideoCallPage />} />
 
           {/* Test Routes */}
           <Route path="/test/mentor-availability" element={<MentorAvailabilityTest />} />
