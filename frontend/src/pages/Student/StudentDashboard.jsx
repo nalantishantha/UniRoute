@@ -377,12 +377,6 @@ const StudentDashboard = () => {
               <div className="flex items-center space-x-4">
                 <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2">
                   <div className="text-lg font-bold">
-                    {studentProfile.zScore}
-                  </div>
-                  <div className="text-primary-100 text-sm">Your Z-Score</div>
-                </div>
-                <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2">
-                  <div className="text-lg font-bold">
                     {studentProfile.profileComplete}%
                   </div>
                   <div className="text-primary-100 text-sm">
@@ -392,19 +386,21 @@ const StudentDashboard = () => {
               </div>
             </div>
             <div className="mt-6 md:mt-0">
-              <Link
-                to="/student/edit-profile"
-                className="bg-accent-200 text-primary-400 px-6 py-3 rounded-xl font-semibold hover:bg-accent-300 transition-all inline-flex items-center space-x-2"
-              >
-                <Edit className="h-5 w-5" />
-                <span>Complete Profile</span>
-              </Link>
+              {studentProfile.profileComplete < 100 && (
+                <Link
+                  to="/student/edit-profile"
+                  className="bg-accent-200 text-primary-400 px-6 py-3 rounded-xl font-semibold hover:bg-accent-300 transition-all inline-flex items-center space-x-2"
+                >
+                  <Edit className="h-5 w-5" />
+                  <span>Complete Profile</span>
+                </Link>
+              )}
             </div>
           </div>
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {quickStats.map((stat, index) => {
             const IconComponent = stat.icon;
             return (
@@ -426,7 +422,7 @@ const StudentDashboard = () => {
               </div>
             );
           })}
-        </div>
+        </div> */}
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
