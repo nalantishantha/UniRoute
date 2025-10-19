@@ -12,6 +12,8 @@ const variants = {
     "bg-gradient-to-r from-error to-red-500 hover:from-red-500 hover:to-red-600 text-white shadow-error/30",
   warning:
     "bg-gradient-to-r from-warning to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-neutral-black shadow-warning/30",
+  destructive:
+    "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-red-200/50",
   outline:
     "border-2 border-primary-500 text-primary-600 hover:bg-primary-50 bg-transparent",
   ghost:
@@ -19,6 +21,7 @@ const variants = {
 };
 
 const sizes = {
+  xs: "px-2 py-1 text-xs",
   sm: "px-3 py-1.5 text-sm",
   md: "px-4 py-2 text-sm",
   lg: "px-6 py-3 text-base",

@@ -211,10 +211,7 @@ export default function CalendarPage() {
     >
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-neutral-black">Calendar & Availability</h1>
-          <p className="text-neutral-grey mt-1">Manage your availability and view scheduled sessions</p>
-        </div>
+        <div></div>
         <div className="flex items-center space-x-3 mt-4 lg:mt-0">
           <Button variant="outline" size="lg">
             <Filter className="w-4 h-4 mr-2" />
@@ -388,11 +385,14 @@ export default function CalendarPage() {
                   >
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="font-medium text-neutral-black">
-                        {new Date(availability.date).toLocaleDateString("en-US", {
-                          weekday: "short",
-                          month: "short",
-                          day: "numeric",
-                        })}
+                        {new Date(availability.date).toLocaleDateString(
+                          "en-US",
+                          {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                          }
+                        )}
                       </h4>
                       <div className="flex items-center space-x-2">
                         <Button size="sm" variant="ghost">

@@ -32,6 +32,7 @@ import {
 import Button from "../../../components/ui/Button";
 import { useChatContext } from "../../../context/ChatContext";
 import { mentoringAPI } from "../../../utils/mentoringAPI";
+import { joinMentoringVideoCall } from "../../../utils/videoCallAPI";
 import {
   DeclineModal,
   CancelSessionModal,
@@ -43,7 +44,7 @@ export default function Mentoring() {
   const navigate = useNavigate();
   const { openChat } = useChatContext();
   const [activeTab, setActiveTab] = useState("requests");
-  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("pending");
   const [searchTerm, setSearchTerm] = useState("");
 
   // Data states
@@ -62,6 +63,8 @@ export default function Mentoring() {
   // Loading states
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [completingSessionId, setCompletingSessionId] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
 
   // Modal states
   const [declineModal, setDeclineModal] = useState({
@@ -260,8 +263,23 @@ export default function Mentoring() {
     });
   };
 
+  const handleJoinVideoCall = async (sessionId) => {
+    try {
+      setError(null);
+      // Join video call - opens in new window
+      await joinMentoringVideoCall(sessionId, MENTOR_ID, "mentor");
+    } catch (err) {
+      console.error("Error joining video call:", err);
+      setError("Failed to join video call. Please try again.");
+    }
+  };
+
   const handleAcceptRequest = (request) => {
-    setAcceptModal({ isOpen: true, request });
+    // Add mentor_id to the request object
+    setAcceptModal({
+      isOpen: true,
+      request: { ...request, mentor_id: MENTOR_ID },
+    });
   };
 
   const handleDeclineRequest = (requestId) => {
@@ -277,17 +295,32 @@ export default function Mentoring() {
   };
 
   const handleCompleteSession = async (sessionId) => {
+    if (
+      !window.confirm(
+        "Are you sure you want to mark this session as completed?"
+      )
+    ) {
+      return;
+    }
+
     try {
-      setActionLoading(true);
+      setCompletingSessionId(sessionId);
+      setError(null);
+
       await mentoringAPI.completeSession(
         sessionId,
         "Session completed successfully"
       );
+
+      // Show success message
+      setSuccessMessage("Session marked as complete successfully!");
+      setTimeout(() => setSuccessMessage(null), 3000);
+
       await fetchData(); // Refresh data
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Failed to mark session as complete");
     } finally {
-      setActionLoading(false);
+      setCompletingSessionId(null);
     }
   };
 
@@ -308,8 +341,13 @@ export default function Mentoring() {
   const confirmDeclineRequest = async (reason) => {
     try {
       setActionLoading(true);
-      await mentoringAPI.declineRequest(declineModal.requestId, reason);
+      // Handle decline from either DeclineModal or AcceptModal
+      const requestId = declineModal.requestId || acceptModal.request?.id;
+      if (requestId) {
+        await mentoringAPI.declineRequest(requestId, reason);
+      }
       setDeclineModal({ isOpen: false, requestId: null });
+      setAcceptModal({ isOpen: false, request: null });
       await fetchData(); // Refresh data
     } catch (err) {
       setError(err.message);
@@ -399,6 +437,32 @@ export default function Mentoring() {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* Success Message Display */}
+      {successMessage && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+        >
+          <Card className="border-success/30 bg-success/10">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="w-5 h-5 text-success" />
+                  <p className="text-success font-medium">{successMessage}</p>
+                </div>
+                <button
+                  onClick={() => setSuccessMessage(null)}
+                  className="text-success hover:text-success/80 transition-colors"
+                >
+                  <XCircle className="w-5 h-5" />
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       )}
 
       {/* Stats Cards */}
@@ -719,17 +783,18 @@ export default function Mentoring() {
                                           Location: {request.location}
                                         </p>
                                       )}
-                                      {request.meeting_link && (
-                                        <p className="text-sm text-neutral-grey">
-                                          <a
-                                            href={request.meeting_link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-primary-600 hover:underline"
-                                          >
-                                            Join Meeting
-                                          </a>
-                                        </p>
+                                      {request.session_type === "online" && (
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          onClick={() =>
+                                            handleJoinVideoCall(request.id)
+                                          }
+                                          className="mt-2"
+                                        >
+                                          <Video className="w-4 h-4 mr-1" />
+                                          Join Video Meeting
+                                        </Button>
                                       )}
                                     </div>
                                     <div className="flex items-center space-x-2">
@@ -858,33 +923,38 @@ export default function Mentoring() {
                                   <MessageSquare className="w-4 h-4 mr-1" />
                                   Message
                                 </Button>
-                                {session.session_type === "online" &&
-                                  session.meeting_link && (
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() =>
-                                        window.open(
-                                          session.meeting_link,
-                                          "_blank"
-                                        )
-                                      }
-                                    >
-                                      <Video className="w-4 h-4 mr-1" />
-                                      Join Meeting
-                                    </Button>
-                                  )}
+                                {session.session_type === "online" && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() =>
+                                      handleJoinVideoCall(session.id)
+                                    }
+                                  >
+                                    <Video className="w-4 h-4 mr-1" />
+                                    Join Video Meeting
+                                  </Button>
+                                )}
                                 <Button
                                   size="sm"
                                   variant="outline"
                                   onClick={() =>
                                     handleCompleteSession(session.id)
                                   }
-                                  disabled={actionLoading}
+                                  disabled={completingSessionId === session.id}
                                   className="text-success hover:bg-success/10"
                                 >
-                                  <CheckCircle className="w-4 h-4 mr-1" />
-                                  Mark Complete
+                                  {completingSessionId === session.id ? (
+                                    <>
+                                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-success mr-1"></div>
+                                      Marking Complete...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <CheckCircle className="w-4 h-4 mr-1" />
+                                      Mark Complete
+                                    </>
+                                  )}
                                 </Button>
                               </div>
                               <div className="flex items-center space-x-2">
@@ -1066,6 +1136,7 @@ export default function Mentoring() {
         isOpen={acceptModal.isOpen}
         onClose={() => setAcceptModal({ isOpen: false, request: null })}
         onConfirm={confirmAcceptRequest}
+        onDecline={(reason) => confirmDeclineRequest(reason)}
         loading={actionLoading}
         request={acceptModal.request}
       />
@@ -1076,6 +1147,7 @@ export default function Mentoring() {
         onConfirm={confirmRescheduleSession}
         loading={actionLoading}
         session={rescheduleModal.session}
+        mentorId={MENTOR_ID}
       />
     </motion.div>
   );

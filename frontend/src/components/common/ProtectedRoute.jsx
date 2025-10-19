@@ -10,24 +10,27 @@ const ProtectedRoute = ({ children, requiredUserType = null, redirectTo = '/logi
   useEffect(() => {
     // Initialize session guard on component mount
     initializeSessionGuard();
-    
+
     const checkAuth = () => {
       try {
         const user = getCurrentUser();
-        
+
         if (!user) {
           console.log('No user found, redirecting to login');
           navigate(redirectTo, { replace: true });
           return;
         }
-        
+
         // Check if user type matches requirement
-        if (requiredUserType && user.user_type !== requiredUserType) {
-          console.warn(`Access denied. Required: ${requiredUserType}, Current: ${user.user_type}`);
-          navigate(redirectTo, { replace: true });
-          return;
+        if (requiredUserType) {
+          const allowedTypes = Array.isArray(requiredUserType) ? requiredUserType : [requiredUserType];
+          if (!allowedTypes.includes(user.user_type)) {
+            console.warn(`Access denied. Required: ${allowedTypes.join(' or ')}, Current: ${user.user_type}`);
+            navigate(redirectTo, { replace: true });
+            return;
+          }
         }
-        
+
         console.log('User authenticated:', user.email, 'Type:', user.user_type);
         setIsAuthorized(true);
       } catch (error) {

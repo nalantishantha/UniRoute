@@ -283,18 +283,12 @@ class MentoringSessionsView(View):
 @csrf_exempt
 @require_http_methods(["POST"])
 def accept_request(request, request_id):
-    """Accept a mentoring request and create a session"""
+    """Accept a mentoring request and create a session using the student's preferred time"""
     try:
         data = parse_request_json(request)
         scheduled_datetime = data.get('scheduled_datetime')
         location = data.get('location', '')
         meeting_link = data.get('meeting_link', '')
-        
-        if not scheduled_datetime:
-            return JsonResponse({
-                'status': 'error',
-                'message': 'Scheduled datetime is required'
-            }, status=400)
         
         with transaction.atomic():
             # Get the mentoring request
@@ -306,8 +300,34 @@ def accept_request(request, request_id):
                     'message': 'Request is not in pending status'
                 }, status=400)
             
-            # Parse the scheduled datetime
-            scheduled_dt = datetime.fromisoformat(scheduled_datetime.replace('Z', '+00:00'))
+            # Use the student's preferred time if scheduled_datetime is not provided
+            if scheduled_datetime:
+                scheduled_dt = datetime.fromisoformat(scheduled_datetime.replace('Z', '+00:00'))
+            else:
+                # Parse preferred_time from the request
+                # The preferred_time should be a datetime string
+                try:
+                    scheduled_dt = datetime.fromisoformat(str(mentoring_request.preferred_time).replace('Z', '+00:00'))
+                except (ValueError, AttributeError):
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': 'Invalid preferred time format in the request'
+                    }, status=400)
+            
+            # Check for conflicts with existing scheduled sessions
+            mentor = mentoring_request.mentor
+            session_end = scheduled_dt + timedelta(hours=1)  # 1 hour session
+            
+            conflicting_sessions = MentoringSessions.objects.filter(
+                mentor=mentor,
+                status='scheduled',
+                scheduled_at__lt=session_end,
+                scheduled_at__gte=scheduled_dt - timedelta(hours=1)
+            ).exists()
+            
+            if conflicting_sessions:
+                # Log warning but still allow scheduling
+                print(f"Warning: Potential conflict detected for mentor {mentor.mentor_id} at {scheduled_dt}")
             
             # Update the request status
             mentoring_request.status = 'scheduled'
@@ -318,7 +338,7 @@ def accept_request(request, request_id):
                 mentor=mentoring_request.mentor,
                 topic=mentoring_request.topic,
                 scheduled_at=scheduled_dt,
-                duration_minutes=60,  # Default duration
+                duration_minutes=60,  # Default duration (1 hour)
                 status='scheduled'
             )
             
@@ -332,8 +352,9 @@ def accept_request(request, request_id):
             
             return JsonResponse({
                 'status': 'success',
-                'message': 'Request accepted successfully',
-                'session_id': session.session_id
+                'message': 'Request accepted and session scheduled successfully',
+                'session_id': session.session_id,
+                'scheduled_at': scheduled_dt.isoformat()
             })
             
     except MentoringRequests.DoesNotExist:
@@ -442,7 +463,7 @@ def cancel_session(request, session_id):
 @csrf_exempt
 @require_http_methods(["POST"])
 def reschedule_session(request, session_id):
-    """Reschedule a session"""
+    """Reschedule a session to a new time, checking for conflicts"""
     try:
         data = parse_request_json(request)
         new_datetime = data.get('new_datetime')
@@ -466,19 +487,47 @@ def reschedule_session(request, session_id):
         # Parse the new datetime
         new_dt = datetime.fromisoformat(new_datetime.replace('Z', '+00:00'))
         
+        # Check if the new time is the same as the current time
+        if session.scheduled_at == new_dt:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'The new time is the same as the current session time'
+            }, status=400)
+        
+        # Check for conflicts with other scheduled sessions (excluding current session)
+        mentor = session.mentor
+        session_end = new_dt + timedelta(hours=1)  # 1 hour session
+        
+        conflicting_sessions = MentoringSessions.objects.filter(
+            mentor=mentor,
+            status='scheduled',
+            scheduled_at__lt=session_end,
+            scheduled_at__gte=new_dt - timedelta(hours=1)
+        ).exclude(session_id=session_id).exists()
+        
+        if conflicting_sessions:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'This time slot conflicts with another scheduled session'
+            }, status=400)
+        
         with transaction.atomic():
+            # Update the session with the new datetime (this frees up the old slot)
             session.scheduled_at = new_dt
             session.save()
             
             # Update session details
             session_details, created = SessionDetails.objects.get_or_create(session=session)
-            session_details.location = location
-            session_details.meeting_link = meeting_link
+            if location:
+                session_details.location = location
+            if meeting_link:
+                session_details.meeting_link = meeting_link
             session_details.save()
         
         return JsonResponse({
             'status': 'success',
-            'message': 'Session rescheduled successfully'
+            'message': 'Session rescheduled successfully',
+            'new_scheduled_at': new_dt.isoformat()
         })
         
     except MentoringSessions.DoesNotExist:
@@ -940,9 +989,21 @@ class AvailableTimeSlotsView(View):
     def get(self, request, mentor_id):
         """Get available time slots for a mentor within the next 2 weeks"""
         try:
-            # Get date range (next 2 weeks, with minimum 24 hours advance)
-            start_date = timezone.now().date() + timedelta(days=1)  # 24 hour minimum advance
-            end_date = start_date + timedelta(days=14)  # 2 weeks limit
+            # Get optional exclude_session_id parameter (for rescheduling)
+            exclude_session_id = request.GET.get('exclude_session_id')
+            
+            # Get current time for filtering past slots
+            now = timezone.now()
+            
+            # Get date range - start from today for rescheduling, tomorrow for new bookings
+            if exclude_session_id:
+                # For rescheduling, allow today's future slots
+                start_date = now.date()
+            else:
+                # For new bookings, require 24 hours advance notice
+                start_date = now.date() + timedelta(days=1)
+            
+            end_date = now.date() + timedelta(days=14)  # 2 weeks from today
             
             # Override dates if provided in query params
             if 'start_date' in request.GET:
@@ -950,13 +1011,12 @@ class AvailableTimeSlotsView(View):
             if 'end_date' in request.GET:
                 end_date = datetime.strptime(request.GET['end_date'], '%Y-%m-%d').date()
             
-            # Ensure start date is at least 24 hours in advance
-            min_date = timezone.now().date() + timedelta(days=1)
-            if start_date < min_date:
-                start_date = min_date
+            # Ensure start date is not in the past
+            if start_date < now.date():
+                start_date = now.date()
             
-            # Ensure end date is within 2 weeks
-            max_date = timezone.now().date() + timedelta(days=14)
+            # Ensure end date is within 2 weeks from today
+            max_date = now.date() + timedelta(days=14)
             if end_date > max_date:
                 end_date = max_date
             
@@ -973,13 +1033,19 @@ class AvailableTimeSlotsView(View):
                 date__lte=end_date
             )
             
-            # Get existing sessions (booked slots)
-            existing_sessions = MentoringSessions.objects.filter(
+            # Get existing sessions (booked slots), excluding the session being rescheduled
+            existing_sessions_query = MentoringSessions.objects.filter(
                 mentor_id=mentor_id,
                 scheduled_at__date__gte=start_date,
                 scheduled_at__date__lte=end_date,
                 status__in=['pending', 'scheduled']
             )
+            
+            # Exclude the current session if rescheduling
+            if exclude_session_id:
+                existing_sessions_query = existing_sessions_query.exclude(session_id=exclude_session_id)
+            
+            existing_sessions = existing_sessions_query
             
             available_slots = []
             current_date = start_date
@@ -1016,14 +1082,29 @@ class AvailableTimeSlotsView(View):
                         end_time = datetime.combine(current_date, avail.end_time)
                         
                         while current_time + session_duration <= end_time:
-                            slot_datetime = current_time
+                            # Make slot_datetime timezone-aware for proper comparison
+                            slot_datetime = timezone.make_aware(current_time)
+                            slot_end = slot_datetime + session_duration
+                            
+                            # Skip past time slots (must be at least current time or later)
+                            if slot_datetime <= now:
+                                current_time += session_duration
+                                continue
                             
                             # Check if this slot conflicts with existing sessions
-                            conflict = existing_sessions.filter(
-                                scheduled_at__date=current_date,
-                                scheduled_at__time__gte=current_time.time(),
-                                scheduled_at__time__lt=(current_time + session_duration).time()
-                            ).exists()
+                            # A conflict occurs if there's overlap between slot and existing session
+                            conflict = False
+                            for session in existing_sessions:
+                                session_start = session.scheduled_at
+                                # Ensure session_start is timezone-aware
+                                if timezone.is_naive(session_start):
+                                    session_start = timezone.make_aware(session_start)
+                                session_end = session_start + timedelta(hours=1)
+                                
+                                # Check for overlap: slot starts before session ends AND slot ends after session starts
+                                if slot_datetime < session_end and slot_end > session_start:
+                                    conflict = True
+                                    break
                             
                             if not conflict:
                                 available_slots.append({
