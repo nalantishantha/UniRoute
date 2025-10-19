@@ -24,7 +24,8 @@ import {
   Eye,
   Clock,
   X,
-  User
+  User,
+  AlertCircle
 } from 'lucide-react';
 import AdminLayout from '../../components/common/Admin/AdminLayout';
 
@@ -46,181 +47,170 @@ const AdminDashboard = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  // Add user distribution data for pie chart
-  const userDistributionData = [
-    { name: 'Students', value: 3200, color: '#81C784' },
-    { name: 'University Students', value: 1156, color: '#75C2F6' },
-    { name: 'Mentors', value: 420, color: '#F4D160' },
-    { name: 'Tutors', value: 310, color: '#4C7FB1' },
-    { name: 'Universities', value: 37, color: '#1D5D9B' },
-    { name: 'Companies', value: 61, color: '#E57373' }
-  ];
+  // State for dashboard data
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Stats data matching your original design
-  const stats = [
-    {
-      section: 'USER MANAGEMENT',
-      cards: [
-        {
-          title: 'Total Users',
-          value: '4,847',
-          description: 'All registered users',
-          change: '+12.3%',
-          changeType: 'positive',
-          icon: Users,
-          iconBg: 'bg-[#1D5D9B]',
-          link: '/admin/users'
-        },
-        {
-          title: 'Students',
-          value: '3,200',
-          description: 'High school students',
-          change: '+8.7%',
-          changeType: 'positive',
-          icon: GraduationCap,
-          iconBg: 'bg-[#81C784]',
-          link: '/admin/students'
-        },
-        {
-          title: 'University Students',
-          value: '1,156',
-          description: 'Currently enrolled',
-          change: '+15.2%',
-          changeType: 'positive',
-          icon: School,
-          iconBg: 'bg-[#75C2F6]',
-          link: '/admin/university-students'
-        },
-        {
-          title: 'Mentors',
-          value: '420',
-          description: 'Active mentors',
-          change: '+6.8%',
-          changeType: 'positive',
-          icon: UserCheck,
-          iconBg: 'bg-[#F4D160]',
-          link: '/admin/mentors'
-        }
-      ]
-    },
-    {
-      section: 'INSTITUTION MANAGEMENT',
-      cards: [
-        {
-          title: 'Tutors',
-          value: '310',
-          description: 'Verified tutors',
-          change: '+4.2%',
-          changeType: 'positive',
-          icon: UserCog,
-          iconBg: 'bg-[#4C7FB1]',
-          link: '/admin/tutors'
-        },
-        {
-          title: 'Universities',
-          value: '37',
-          description: 'Partner institutions',
-          change: '+2',
-          changeType: 'positive',
-          icon: School,
-          iconBg: 'bg-[#75C2F6]',
-          link: '/admin/universities'
-        },
-        {
-          title: 'Companies',
-          value: '61',
-          description: 'Corporate partners',
-          change: '+11',
-          changeType: 'positive',
-          icon: Building2,
-          iconBg: 'bg-[#F4D160]',
-          link: '/admin/companies'
-        },
-        {
-          title: 'Active Programs',
-          value: '156',
-          description: 'Available programs',
-          change: '+4',
-          changeType: 'positive',
-          icon: BookOpen,
-          iconBg: 'bg-[#E7F3FB]',
-          link: '/admin/programs'
-        }
-      ]
+  // Fetch dashboard statistics
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:8000/api/administration/dashboard/statistics/');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch dashboard data');
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setDashboardData(data.statistics);
+        setError(null);
+      } else {
+        throw new Error(data.message || 'Failed to fetch dashboard data');
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error('Dashboard data fetch error:', err);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  // Sample chart data
-  const userGrowthData = [
-    { month: 'Jan', users: 1200, students: 800, universityStudents: 300 },
-    { month: 'Feb', users: 1500, students: 1000, universityStudents: 400 },
-    { month: 'Mar', users: 1800, students: 1200, universityStudents: 500 },
-    { month: 'Apr', users: 2200, students: 1500, universityStudents: 600 },
-    { month: 'May', users: 2800, students: 1900, universityStudents: 750 },
-    { month: 'Jun', users: 3200, students: 2200, universityStudents: 850 }
-  ];
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
-  const revenueData = [
-    { month: 'Jan', revenue: 15000 },
-    { month: 'Feb', revenue: 18000 },
-    { month: 'Mar', revenue: 22000 },
-    { month: 'Apr', revenue: 25000 },
-    { month: 'May', revenue: 30000 },
-    { month: 'Jun', revenue: 35000 }
-  ];
+  // Generate stats data from real dashboard data
+  const getStatsData = () => {
+    if (!dashboardData) return [];
+    
+    return [
+      {
+        section: 'USER MANAGEMENT',
+        cards: [
+          {
+            title: 'Total Users',
+            value: dashboardData.total_users?.toLocaleString() || '0',
+            description: 'All registered users',
+            change: `${dashboardData.users_growth >= 0 ? '+' : ''}${dashboardData.users_growth}%`,
+            changeType: dashboardData.users_growth >= 0 ? 'positive' : 'negative',
+            icon: Users,
+            iconBg: 'bg-[#1D5D9B]',
+            link: '/admin/users'
+          },
+          {
+            title: 'Students',
+            value: dashboardData.total_students?.toLocaleString() || '0',
+            description: 'High school students',
+            change: `${dashboardData.students_growth >= 0 ? '+' : ''}${dashboardData.students_growth}%`,
+            changeType: dashboardData.students_growth >= 0 ? 'positive' : 'negative',
+            icon: GraduationCap,
+            iconBg: 'bg-[#81C784]',
+            link: '/admin/students'
+          },
+          {
+            title: 'University Students',
+            value: dashboardData.total_university_students?.toLocaleString() || '0',
+            description: 'Currently enrolled',
+            change: `${dashboardData.university_students_growth >= 0 ? '+' : ''}${dashboardData.university_students_growth}%`,
+            changeType: dashboardData.university_students_growth >= 0 ? 'positive' : 'negative',
+            icon: School,
+            iconBg: 'bg-[#75C2F6]',
+            link: '/admin/university-students'
+          },
+          {
+            title: 'Mentors',
+            value: dashboardData.total_mentors?.toLocaleString() || '0',
+            description: 'Active mentors',
+            change: `${dashboardData.mentors_growth >= 0 ? '+' : ''}${dashboardData.mentors_growth}%`,
+            changeType: dashboardData.mentors_growth >= 0 ? 'positive' : 'negative',
+            icon: UserCheck,
+            iconBg: 'bg-[#F4D160]',
+            link: '/admin/mentors'
+          }
+        ]
+      },
+      {
+        section: 'INSTITUTION MANAGEMENT',
+        cards: [
+          {
+            title: 'Tutors',
+            value: dashboardData.total_tutors?.toLocaleString() || '0',
+            description: 'Verified tutors',
+            change: `${dashboardData.tutors_growth >= 0 ? '+' : ''}${dashboardData.tutors_growth}%`,
+            changeType: dashboardData.tutors_growth >= 0 ? 'positive' : 'negative',
+            icon: UserCog,
+            iconBg: 'bg-[#4C7FB1]',
+            link: '/admin/tutors'
+          },
+          {
+            title: 'Universities',
+            value: dashboardData.total_universities?.toString() || '0',
+            description: 'Partner institutions',
+            change: dashboardData.universities_growth >= 0 ? `+${dashboardData.universities_growth}` : dashboardData.universities_growth.toString(),
+            changeType: dashboardData.universities_growth >= 0 ? 'positive' : 'negative',
+            icon: School,
+            iconBg: 'bg-[#75C2F6]',
+            link: '/admin/universities'
+          },
+          {
+            title: 'Companies',
+            value: dashboardData.total_companies?.toString() || '0',
+            description: 'Corporate partners',
+            change: dashboardData.companies_growth >= 0 ? `+${dashboardData.companies_growth}` : dashboardData.companies_growth.toString(),
+            changeType: dashboardData.companies_growth >= 0 ? 'positive' : 'negative',
+            icon: Building2,
+            iconBg: 'bg-[#F4D160]',
+            link: '/admin/companies'
+          },
+          {
+            title: 'Active Programs',
+            value: dashboardData.total_programs?.toString() || '0',
+            description: 'Available programs',
+            change: dashboardData.programs_growth >= 0 ? `+${dashboardData.programs_growth}` : dashboardData.programs_growth.toString(),
+            changeType: dashboardData.programs_growth >= 0 ? 'positive' : 'negative',
+            icon: BookOpen,
+            iconBg: 'bg-[#E7F3FB]',
+            link: '/admin/programs'
+          }
+        ]
+      }
+    ];
+  };
 
-  const activityData = [
-    { date: 'Jan 1', registrations: 60, logins: 320 },
-    { date: 'Jan 2', registrations: 70, logins: 380 },
-    { date: 'Jan 3', registrations: 55, logins: 420 },
-    { date: 'Jan 4', registrations: 80, logins: 360 },
-    { date: 'Jan 5', registrations: 90, logins: 480 },
-    { date: 'Jan 6', registrations: 85, logins: 390 },
-    { date: 'Jan 7', registrations: 75, logins: 310 }
-  ];
+  const stats = getStatsData();
 
-  const recentActivities = [
-    {
-      id: 1,
-      user: 'Sarah Silva',
-      action: 'registered as University Student',
-      time: '2 minutes ago',
-      date: '2024-01-07',
-      performedBy: 'user'
-    },
-    {
-      id: 2,
-      user: 'John Mentor',
-      action: 'approved as Mentor',
-      time: '15 minutes ago',
-      date: '2024-01-07',
-      performedBy: 'admin'
-    },
-    {
-      id: 3,
-      user: 'Google Inc.',
-      action: 'registered as Company Partner',
-      time: '1 hour ago',
-      date: '2024-01-07',
-      performedBy: 'user'
-    },
-    {
-      id: 4,
-      user: 'University of Moratuwa',
-      action: 'added new Engineering program',
-      time: '2 hours ago',
-      date: '2024-01-07',
-      performedBy: 'user'
-    },
-    {
-      id: 5,
-      user: 'Alex Tutor',
-      action: 'created new Mathematics course',
-      time: '3 hours ago',
-      date: '2024-01-07',
-      performedBy: 'user'
+  // Get chart data from dashboard data
+  const getChartData = () => {
+    if (!dashboardData) {
+      return {
+        userGrowthData: [],
+        revenueData: [],
+        activityData: [],
+        userDistributionData: [],
+        recentActivities: []
+      };
     }
-  ];
+
+    // Generate revenue data based on user growth (mock calculation)
+    const revenueData = dashboardData.user_growth_data?.map((item, index) => ({
+      month: item.month,
+      revenue: Math.max(item.users * 10 + 15000 + (index * 2000), 15000)
+    })) || [];
+
+    return {
+      userGrowthData: dashboardData.user_growth_data || [],
+      revenueData,
+      activityData: dashboardData.daily_activity || [],
+      userDistributionData: dashboardData.user_distribution || [],
+      recentActivities: dashboardData.recent_activities || []
+    };
+  };
+
+  const chartData = getChartData();
 
   // Helper functions
   const handleGeneratePDF = () => {
@@ -286,6 +276,42 @@ const AdminDashboard = () => {
            currentDate.getFullYear() === today.getFullYear();
   };
 
+  // Loading and error states
+  if (loading) {
+    return (
+      <AdminLayout pageTitle="Dashboard" pageDescription="Welcome back, Admin!">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1D5D9B]"></div>
+          <span className="ml-3 text-[#717171]">Loading dashboard...</span>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <AdminLayout pageTitle="Dashboard" pageDescription="Welcome back, Admin!">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <div className="text-red-400 mr-3">
+              <AlertCircle className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-red-800">Error loading dashboard</h3>
+              <p className="text-sm text-red-700 mt-1">{error}</p>
+              <button
+                onClick={fetchDashboardData}
+                className="mt-2 text-sm bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded transition-colors"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
   return (
     <AdminLayout pageTitle="Dashboard" pageDescription="Welcome back, Admin!">
       <div className="space-y-6">
@@ -345,7 +371,7 @@ const AdminDashboard = () => {
               </div>
             </div>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={userGrowthData}>
+              <LineChart data={chartData.userGrowthData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E7F3FB" />
                 <XAxis dataKey="month" stroke="#717171" />
                 <YAxis stroke="#717171" />
@@ -368,7 +394,7 @@ const AdminDashboard = () => {
               </div>
             </div>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={revenueData}>
+              <BarChart data={chartData.revenueData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E7F3FB" />
                 <XAxis dataKey="month" stroke="#717171" />
                 <YAxis stroke="#717171" />
@@ -390,7 +416,7 @@ const AdminDashboard = () => {
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={userDistributionData}
+                  data={chartData.userDistributionData}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -399,7 +425,7 @@ const AdminDashboard = () => {
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {userDistributionData.map((entry, index) => (
+                  {chartData.userDistributionData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
@@ -419,7 +445,7 @@ const AdminDashboard = () => {
             </div>
           </div>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={activityData}>
+            <BarChart data={chartData.activityData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#E7F3FB" />
               <XAxis dataKey="date" stroke="#717171" />
               <YAxis stroke="#717171" />
@@ -442,7 +468,7 @@ const AdminDashboard = () => {
               </Link>
             </div>
             <div className="space-y-4">
-              {recentActivities.slice(0, 5).map((activity) => (
+              {chartData.recentActivities.slice(0, 5).map((activity) => (
                 <div key={activity.id} className="flex items-start space-x-3">
                   <div className="bg-[#E7F3FB] p-2 rounded-lg">
                     <User className="h-4 w-4 text-[#1D5D9B]" />
@@ -513,19 +539,19 @@ const AdminDashboard = () => {
           <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
             <div className="text-center">
               <p className="text-sm text-[#717171] mb-1">Today's Revenue</p>
-              <p className="text-2xl font-bold text-[#1D5D9B]">$4100</p>
+              <p className="text-2xl font-bold text-[#1D5D9B]">${dashboardData?.today_revenue?.toLocaleString() || '0'}</p>
             </div>
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
             <div className="text-center">
               <p className="text-sm text-[#717171] mb-1">Registrations</p>
-              <p className="text-2xl font-bold text-[#1D5D9B]">55</p>
+              <p className="text-2xl font-bold text-[#1D5D9B]">{dashboardData?.today_registrations || '0'}</p>
             </div>
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
             <div className="text-center">
               <p className="text-sm text-[#717171] mb-1">Logins</p>
-              <p className="text-2xl font-bold text-[#1D5D9B]">320</p>
+              <p className="text-2xl font-bold text-[#1D5D9B]">{dashboardData?.today_logins || '0'}</p>
             </div>
           </div>
         </div>

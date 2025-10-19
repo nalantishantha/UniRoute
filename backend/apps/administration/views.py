@@ -2,14 +2,20 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.db import transaction
 from django.utils import timezone
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Sum
 from django.core.paginator import Paginator
 import json
+from datetime import datetime, timedelta
 
 from apps.accounts.models import Users, UserDetails, UserTypes
 from apps.companies.models import Companies, InternshipOpportunities
 from apps.advertisements.models import AdBookings, Advertisements, AdSpaces
 from apps.universities.models import Universities
+from apps.students.models import Students
+from apps.university_students.models import UniversityStudents
+from apps.tutoring.models import Tutors
+from apps.mentoring.models import Mentors
+from apps.university_programs.models import DegreePrograms
 from .models import Report, ReportCategory, ReportAction
 from django.contrib.auth.hashers import check_password, make_password
 
@@ -1032,3 +1038,194 @@ def reject_advertisement_request(request, booking_id):
             }, status=500)
     
     return JsonResponse({'success': False, 'message': 'Only POST method allowed'}, status=405)
+
+
+@csrf_exempt
+def get_dashboard_statistics(request):
+    """Get comprehensive dashboard statistics for admin panel"""
+    if request.method == 'GET':
+        try:
+            # Get current date for time-based calculations
+            now = timezone.now()
+            thirty_days_ago = now - timedelta(days=30)
+            last_month_start = (now.replace(day=1) - timedelta(days=1)).replace(day=1)
+            current_month_start = now.replace(day=1)
+            
+            # User Management Statistics
+            total_users = Users.objects.count()
+            last_month_users = Users.objects.filter(created_at__lt=current_month_start).count()
+            users_growth = ((total_users - last_month_users) / last_month_users * 100) if last_month_users > 0 else 0
+            
+            # Students (high school)
+            total_students = Students.objects.count()
+            last_month_students = Students.objects.filter(user__created_at__lt=current_month_start).count()
+            students_growth = ((total_students - last_month_students) / last_month_students * 100) if last_month_students > 0 else 0
+            
+            # University Students
+            total_university_students = UniversityStudents.objects.count()
+            last_month_uni_students = UniversityStudents.objects.filter(user__created_at__lt=current_month_start).count()
+            uni_students_growth = ((total_university_students - last_month_uni_students) / last_month_uni_students * 100) if last_month_uni_students > 0 else 0
+            
+            # Mentors
+            total_mentors = Mentors.objects.count()
+            last_month_mentors = Mentors.objects.filter(user__created_at__lt=current_month_start).count()
+            mentors_growth = ((total_mentors - last_month_mentors) / last_month_mentors * 100) if last_month_mentors > 0 else 0
+            
+            # Institution Management Statistics
+            # Tutors
+            total_tutors = Tutors.objects.count()
+            last_month_tutors = Tutors.objects.filter(user__created_at__lt=current_month_start).count()
+            tutors_growth = ((total_tutors - last_month_tutors) / last_month_tutors * 100) if last_month_tutors > 0 else 0
+            
+            # Universities
+            total_universities = Universities.objects.count()
+            last_month_universities = Universities.objects.filter(created_at__lt=current_month_start).count()
+            universities_growth = total_universities - last_month_universities
+            
+            # Companies
+            total_companies = Companies.objects.count()
+            last_month_companies = Companies.objects.filter(created_at__lt=current_month_start).count()
+            companies_growth = total_companies - last_month_companies
+            
+            # Active Programs
+            total_programs = DegreePrograms.objects.filter(is_active=1).count()
+            last_month_programs = DegreePrograms.objects.filter(
+                is_active=1,
+                created_at__lt=current_month_start
+            ).count()
+            programs_growth = total_programs - last_month_programs
+            
+            # User Growth Data for Charts (last 6 months)
+            user_growth_data = []
+            for i in range(6):
+                month_start = (now.replace(day=1) - timedelta(days=30*i)).replace(day=1)
+                month_end = (month_start + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+                
+                users_count = Users.objects.filter(created_at__lte=month_end).count()
+                students_count = Students.objects.filter(user__created_at__lte=month_end).count()
+                uni_students_count = UniversityStudents.objects.filter(user__created_at__lte=month_end).count()
+                
+                user_growth_data.insert(0, {
+                    'month': month_start.strftime('%b'),
+                    'users': users_count,
+                    'students': students_count,
+                    'universityStudents': uni_students_count
+                })
+            
+            # User Distribution for Pie Chart
+            user_distribution = [
+                {'name': 'Students', 'value': total_students, 'color': '#81C784'},
+                {'name': 'University Students', 'value': total_university_students, 'color': '#75C2F6'},
+                {'name': 'Mentors', 'value': total_mentors, 'color': '#F4D160'},
+                {'name': 'Tutors', 'value': total_tutors, 'color': '#4C7FB1'},
+                {'name': 'Universities', 'value': total_universities, 'color': '#1D5D9B'},
+                {'name': 'Companies', 'value': total_companies, 'color': '#E57373'}
+            ]
+            
+            # Daily Activity for last 7 days
+            daily_activity = []
+            for i in range(7):
+                day = now - timedelta(days=i)
+                day_start = day.replace(hour=0, minute=0, second=0, microsecond=0)
+                day_end = day_start + timedelta(days=1)
+                
+                registrations = Users.objects.filter(
+                    created_at__gte=day_start,
+                    created_at__lt=day_end
+                ).count()
+                
+                # For logins, we'll use a mock calculation based on user activity
+                # In a real system, you'd track login events
+                logins = min(registrations * 15 + 200, 500)  # Mock data
+                
+                daily_activity.insert(0, {
+                    'date': day.strftime('%b %d'),
+                    'registrations': registrations,
+                    'logins': logins
+                })
+            
+            # Recent Activities
+            recent_users = Users.objects.select_related('user_type').order_by('-created_at')[:5]
+            recent_activities = []
+            
+            for user in recent_users:
+                time_diff = now - user.created_at
+                if time_diff.total_seconds() < 3600:  # Less than 1 hour
+                    time_ago = f"{int(time_diff.total_seconds() // 60)} minutes ago"
+                elif time_diff.total_seconds() < 86400:  # Less than 1 day
+                    time_ago = f"{int(time_diff.total_seconds() // 3600)} hours ago"
+                else:
+                    time_ago = f"{time_diff.days} days ago"
+                
+                activity_text = "registered as User"
+                if user.user_type.type_name == 'student':
+                    activity_text = "registered as Student"
+                elif user.user_type.type_name == 'uni_student':
+                    activity_text = "registered as University Student"
+                elif user.user_type.type_name == 'mentor':
+                    activity_text = "registered as Mentor"
+                elif user.user_type.type_name == 'tutor':
+                    activity_text = "registered as Tutor"
+                elif user.user_type.type_name == 'university':
+                    activity_text = "registered as University"
+                elif user.user_type.type_name == 'company':
+                    activity_text = "registered as Company"
+                
+                recent_activities.append({
+                    'id': user.user_id,
+                    'user': user.username,
+                    'action': activity_text,
+                    'time': time_ago,
+                    'date': user.created_at.strftime('%Y-%m-%d'),
+                    'performedBy': 'user'
+                })
+            
+            # Today's stats
+            today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            today_registrations = Users.objects.filter(created_at__gte=today_start).count()
+            today_logins = min(today_registrations * 20 + 320, 500)  # Mock data
+            today_revenue = min(today_registrations * 150 + 3500, 5000)  # Mock data
+            
+            return JsonResponse({
+                'success': True,
+                'statistics': {
+                    # User Management Stats
+                    'total_users': total_users,
+                    'users_growth': round(users_growth, 1),
+                    'total_students': total_students,
+                    'students_growth': round(students_growth, 1),
+                    'total_university_students': total_university_students,
+                    'university_students_growth': round(uni_students_growth, 1),
+                    'total_mentors': total_mentors,
+                    'mentors_growth': round(mentors_growth, 1),
+                    
+                    # Institution Management Stats
+                    'total_tutors': total_tutors,
+                    'tutors_growth': round(tutors_growth, 1),
+                    'total_universities': total_universities,
+                    'universities_growth': universities_growth,
+                    'total_companies': total_companies,
+                    'companies_growth': companies_growth,
+                    'total_programs': total_programs,
+                    'programs_growth': programs_growth,
+                    
+                    # Chart Data
+                    'user_growth_data': user_growth_data,
+                    'user_distribution': user_distribution,
+                    'daily_activity': daily_activity,
+                    'recent_activities': recent_activities,
+                    
+                    # Today's Stats
+                    'today_revenue': today_revenue,
+                    'today_registrations': today_registrations,
+                    'today_logins': today_logins
+                }
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Failed to fetch dashboard statistics: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({'success': False, 'message': 'Only GET method allowed'}, status=405)

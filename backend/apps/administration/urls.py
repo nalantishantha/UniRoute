@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .additional_views import get_all_users, get_all_students, get_all_university_students, get_all_universities
 
 urlpatterns = [
     path('admin/details/', views.get_admin_details, name='get_admin_details'),
@@ -26,4 +27,13 @@ urlpatterns = [
     path('advertisement-requests/', views.get_advertisement_requests, name='get_advertisement_requests'),
     path('advertisement-requests/<int:booking_id>/approve/', views.approve_advertisement_request, name='approve_advertisement_request'),
     path('advertisement-requests/<int:booking_id>/reject/', views.reject_advertisement_request, name='reject_advertisement_request'),
+    
+    # Dashboard statistics
+    path('dashboard/statistics/', views.get_dashboard_statistics, name='get_dashboard_statistics'),
+    
+    # Admin management endpoints
+    path('users/', get_all_users, name='get_all_users'),
+    path('students/', get_all_students, name='get_all_students'),
+    path('university-students/', get_all_university_students, name='get_all_university_students'),
+    path('universities/', get_all_universities, name='get_all_universities'),
 ]
