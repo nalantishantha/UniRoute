@@ -439,7 +439,7 @@ const StudentDashboard = () => {
             <p className="text-primary-300 text-sm mb-4">
               Assess your A/L performance and university eligibility
             </p>
-            <div className="flex items-center justify-between">
+            {/* <div className="flex items-center justify-between">
               <div>
                 <p className="text-primary-300 text-xs">Current Z-Score</p>
                 <p className="text-2xl font-bold text-primary-400">
@@ -451,7 +451,7 @@ const StudentDashboard = () => {
                   View Analysis
                 </span>
               </div>
-            </div>
+            </div> */}
           </Link>
 
           <Link
