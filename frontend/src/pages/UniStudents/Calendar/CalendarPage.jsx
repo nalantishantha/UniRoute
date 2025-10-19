@@ -23,6 +23,7 @@ import {
 import Button from "../../../components/ui/Button";
 import Calendar from "../../../components/ui/Calendar";
 import AvailabilityManager from "../../../components/MentorAvailability/AvailabilityManager";
+import TutoringAvailabilityManager from "../../../components/TutoringAvailability/TutoringAvailabilityManager";
 import { mentoringAPI } from "../../../utils/mentoringAPI";
 
 const mockAvailableDates = [
@@ -100,9 +101,79 @@ export default function CalendarPage() {
   const [bookedDates] = useState(mockBookedDates);
   const [events] = useState(mockEvents);
   const [activeTab, setActiveTab] = useState("calendar");
+  const [tutorId, setTutorId] = useState(null);
   
-  // Get mentor ID from auth context or props - for now using mock
-  const mentorId = 1; // Replace with actual mentor ID from auth
+  // Get user ID from localStorage
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const mentorId = user.mentor_id || 1; // For mentoring availability
+  
+  // Debug: Log user data
+  console.log('CalendarPage - User from localStorage:', user);
+  console.log('CalendarPage - User keys:', Object.keys(user));
+  
+  // Fetch tutor_id for the logged-in university student
+  useEffect(() => {
+    const fetchTutorId = async () => {
+      try {
+        // Check if user object is empty
+        if (!user || Object.keys(user).length === 0) {
+          console.error('❌ No user data in localStorage');
+          setTutorId(null);
+          return;
+        }
+        
+        console.log('Fetching tutor ID for user:', {
+          user_id: user.user_id,
+          university_student_id: user.university_student_id,
+          student_id: user.student_id
+        });
+        
+        // First check if tutor_id is already in user object
+        if (user.tutor_id) {
+          console.log('✓ Found tutor_id in user object:', user.tutor_id);
+          setTutorId(user.tutor_id);
+          return;
+        }
+        
+        // Otherwise, fetch from API using university_student_id
+        if (user.university_student_id || user.student_id) {
+          console.log('Fetching tutors from API...');
+          const response = await fetch(`http://localhost:8000/api/tutoring/tutors/`);
+          const data = await response.json();
+          console.log('API Response:', data);
+          
+          if (data.success && data.tutors) {
+            // Find tutor matching this university student
+            const myTutor = data.tutors.find(
+              t => t.university_student_id === (user.university_student_id || user.student_id)
+            );
+            if (myTutor) {
+              console.log('✓ Found matching tutor:', myTutor.tutor_id);
+              setTutorId(myTutor.tutor_id);
+            } else {
+              console.warn('⚠️ No tutor found for this university student');
+              console.log('Available tutors:', data.tutors.map(t => ({
+                tutor_id: t.tutor_id,
+                university_student_id: t.university_student_id
+              })));
+              setTutorId(null);
+            }
+          } else {
+            console.error('❌ API returned no tutors');
+            setTutorId(null);
+          }
+        } else {
+          console.error('❌ No university_student_id or student_id in user object');
+          setTutorId(null);
+        }
+      } catch (error) {
+        console.error('❌ Failed to fetch tutor ID:', error);
+        setTutorId(null);
+      }
+    };
+    fetchTutorId();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleDateSelect = (date) => {
     setSelectedDate(date);
@@ -424,7 +495,33 @@ export default function CalendarPage() {
       {/* Availability Management Tab */}
       {activeTab === "availability" && (
         <div className="space-y-6">
-          <AvailabilityManager mentorId={mentorId} />
+          {/* Mentoring Availability Section */}
+          <div>
+            <h2 className="text-xl font-bold text-neutral-black mb-4">Mentoring Availability</h2>
+            <p className="text-neutral-grey mb-4">
+              Manage your one-time mentoring session availability. Students can book individual sessions with you.
+            </p>
+            <AvailabilityManager mentorId={mentorId} />
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-neutral-light-grey my-8"></div>
+
+          {/* Tutoring Availability Section */}
+          <div>
+            <h2 className="text-xl font-bold text-neutral-black mb-4">Tutoring Availability (Recurring)</h2>
+            <p className="text-neutral-grey mb-4">
+              Manage your recurring weekly tutoring slots. Students can book regular tutoring sessions that repeat every week.
+            </p>
+            {tutorId ? (
+              <TutoringAvailabilityManager tutorId={tutorId} />
+            ) : (
+              <div className="text-center py-8">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-400 mb-4"></div>
+                <p className="text-neutral-grey">Loading tutor information...</p>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </motion.div>

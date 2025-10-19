@@ -40,7 +40,27 @@ const FindTutors = () => {
   }, []);
 
   const handleBookSession = (tutor) => {
-    navigate("/student/tutor-booking", { state: { tutor } });
+    // Normalize tutor object to match expected structure in TutorBooking page
+    const normalizedTutor = {
+      tutor_id: tutor.tutor_id,
+      id: tutor.tutor_id, // For backward compatibility
+      name: tutor.full_name || tutor.tutor_name || tutor.username,
+      full_name: tutor.full_name || tutor.username,
+      username: tutor.username,
+      image: tutor.profile_picture || '',
+      title: tutor.bio || '',
+      university: tutor.university || '',
+      location: tutor.location || tutor.contact_number || '',
+      hourlyRate: tutor.hourly_rate || 'Rs. 2000-3000',
+      expertise: tutor.expertise || '',
+      description: tutor.bio || tutor.expertise || '',
+      rating: tutor.rating || 0,
+      experience: tutor.years_experience || '2+ years',
+      students: tutor.students || tutor.count || 0,
+      reviews: tutor.reviews || 0,
+    };
+    
+    navigate("/student/tutor-booking", { state: { tutor: normalizedTutor } });
   };
 
   return (
@@ -114,7 +134,7 @@ const FindTutors = () => {
                     <div className="flex items-center space-x-3">
                       <img src={tutor.profile_picture || tutor.image || ''} alt={tutor.tutor_name || tutor.name || tutor.full_name || ''} className="w-12 h-12 rounded-full object-cover border-2 border-white/50 shadow-lg" />
                       <div className="flex-1">
-                        <h3 className="font-display font-bold text-lg text-white leading-tight drop-shadow-md">{tutor.tutor_name || tutor.name || tutor.full_name || tutor.username}</h3>
+                        <h3 className="font-display font-bold text-lg text-white leading-tight drop-shadow-md">{tutor.full_name || tutor.tutor_name || tutor.name || tutor.username}</h3>
                         <p className="text-white/95 text-sm mb-2 font-semibold drop-shadow-sm">{tutor.bio || tutor.title || ''}</p>
                         <div className="flex items-center space-x-1 mb-1">
                           <Briefcase className="h-3 w-3 text-white/90" />

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import StudentNavigation from "../../components/Navigation/StudentNavigation";
-import AvailableSlotBooking from "../../components/MentorAvailability/AvailableSlotBooking";
+import TutoringSlotBooking from "../../components/TutoringAvailability/TutoringSlotBooking";
 import { ArrowLeft, CheckCircle, AlertCircle, Star, Award, MapPin, Users } from "lucide-react";
 
 const TutorBooking = () => {
@@ -178,8 +178,12 @@ const TutorBooking = () => {
                   </p>
                 </div>
 
-                {/* Use available-slot booking UI to match mentor flow */}
-                <AvailableSlotBooking mentorId={tutor.id} mentorName={tutor.name} onBookingSuccess={() => setIsSubmitted(true)} />
+                {/* Use recurring tutoring slot booking */}
+                <TutoringSlotBooking 
+                  tutorId={tutor.tutor_id} 
+                  tutorName={tutor.full_name || tutor.tutor_name || tutor.name || tutor.username} 
+                  onBookingSuccess={() => setIsSubmitted(true)} 
+                />
               </div>
             </div>
           </div>
