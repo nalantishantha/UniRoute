@@ -43,7 +43,7 @@ export default function Mentoring() {
   const navigate = useNavigate();
   const { openChat } = useChatContext();
   const [activeTab, setActiveTab] = useState("requests");
-  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("pending");
   const [searchTerm, setSearchTerm] = useState("");
 
   // Data states

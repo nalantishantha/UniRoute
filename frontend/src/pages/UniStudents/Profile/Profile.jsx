@@ -544,12 +544,12 @@ export default function Profile() {
                             "Location not specified"}
                         </span>
                       </div>
-                      <div className="flex items-center space-x-1">
+                      {/* <div className="flex items-center space-x-1">
                         <Calendar className="w-4 h-4" />
                         <span>
                           Joined {formData.personal.joinDate || "N/A"}
                         </span>
-                      </div>
+                      </div> */}
                     </div>
 
                     {/* University Info */}
