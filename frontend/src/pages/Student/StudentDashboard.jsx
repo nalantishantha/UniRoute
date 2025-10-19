@@ -283,7 +283,7 @@ const StudentDashboard = () => {
   };
 
   // Fetch mentoring requests grouped by status from student endpoint
-  const [mentoringGrouped, setMentoringGrouped] = useState({ pending: [], accepted: [], completed: [] });
+  const [mentoringGrouped, setMentoringGrouped] = useState({ pending: [], accepted: [], declined: [], completed: [] });
   const [upcomingSessions, setUpcomingSessions] = useState([]);
 
   const fetchGroupedMentoringRequests = async (studentId) => {
@@ -296,10 +296,16 @@ const StudentDashboard = () => {
       }
       const payload = await res.json();
       if (payload && payload.success) {
+        // prefer explicit declined list from backend; otherwise infer from completed items
+        const declinedFromPayload = Array.isArray(payload.declined) ? payload.declined : [];
+        const completedFromPayload = Array.isArray(payload.completed) ? payload.completed : [];
+        const inferredDeclined = declinedFromPayload.length > 0 ? declinedFromPayload : completedFromPayload.filter((x) => x.status === 'declined' || x.decline_reason);
+
         setMentoringGrouped({
           pending: Array.isArray(payload.pending) ? payload.pending : [],
           accepted: Array.isArray(payload.accepted) ? payload.accepted : [],
-          completed: Array.isArray(payload.completed) ? payload.completed : [],
+          declined: inferredDeclined,
+          completed: completedFromPayload,
         });
 
         // Merge accepted mentoring requests into recent activities (keep existing seed items)
@@ -708,6 +714,29 @@ const StudentDashboard = () => {
                     </div>
                   ))}
                 </div>
+
+                  <div className="mb-4">
+                    <h4 className="font-medium text-primary-400 mb-2">Declined Requests</h4>
+                    {mentoringGrouped.declined.length === 0 && (
+                      <p className="text-sm text-primary-300 mb-2">No declined requests</p>
+                    )}
+                    {mentoringGrouped.declined.map((r) => (
+                      <div key={`declined-${r.id}`} className="flex items-start space-x-4 p-3 bg-accent-50 rounded-xl mb-2">
+                        <div className="p-2 rounded-full bg-white text-red-500">
+                          <X className="h-5 w-5" />
+                        </div>
+                        <div className="flex-1">
+                          <h5 className="text-primary-400 font-medium">{r.mentor || 'Mentor'}</h5>
+                          <p className="text-sm text-primary-300">{r.subject}</p>
+                          <p className="text-xs text-primary-300">{r.preferred_time || (r.created_at ? new Date(r.created_at).toLocaleString() : '')}</p>
+                          {r.decline_reason && (
+                            <p className="text-xs text-red-500 mt-1">Reason: {r.decline_reason}</p>
+                          )}
+                        </div>
+                        <div className="text-sm text-red-600 font-semibold">Declined</div>
+                      </div>
+                    ))}
+                  </div>
 
                 <div className="mb-4">
                   <h4 className="font-medium text-primary-400 mb-2">Completed Requests</h4>
