@@ -74,7 +74,6 @@ export const logout = async () => {
     // Clear browser history
     if (window.history.length > 1) {
       window.history.pushState(null, null, '/login');
-      window.history.pushState(null, null, '/login');
     }
 
     // Still redirect to login
@@ -199,10 +198,7 @@ export const initializeSessionGuard = () => {
 
     const isProtectedRoute = currentPath.startsWith('/admin') ||
       currentPath.startsWith('/university-student') ||
-<<<<<<< HEAD
       currentPath.startsWith('/pre-mentor') ||
-=======
->>>>>>> origin/UR-4
       currentPath.startsWith('/student') ||
       currentPath.startsWith('/university') ||
       currentPath.startsWith('/company');
@@ -234,7 +230,6 @@ export const initializeSessionGuard = () => {
         return;
       }
 
-<<<<<<< HEAD
       // Define route access rules
       const routeAccess = {
         '/admin': ['admin'],
@@ -256,38 +251,6 @@ export const initializeSessionGuard = () => {
           window.location.replace('/login');
           return;
         }
-=======
-      // Check route-specific access
-      if (currentPath.startsWith('/admin') && user.user_type !== 'admin') {
-        console.log('Non-admin trying to access admin route, redirecting');
-        window.location.replace('/login');
-        return;
-      }
-
-      if (currentPath.startsWith('/university-student') && user.user_type !== 'uni_student') {
-        console.log('Non-university-student trying to access university student route, redirecting');
-        window.location.replace('/login');
-        return;
-      }
-
-      if (currentPath.startsWith('/student') && user.user_type !== 'student') {
-        console.log('Non-student trying to access student route, redirecting. User type:', user.user_type, 'Path:', currentPath);
-        clearAuth();
-        window.location.replace('/login');
-        return;
-      }
-
-      if (currentPath.startsWith('/university') && user.user_type !== 'institution') {
-        console.log('Non-institution trying to access university route, redirecting');
-        window.location.replace('/login');
-        return;
-      }
-
-      if (currentPath.startsWith('/company') && user.user_type !== 'company') {
-        console.log('Non-company trying to access company route, redirecting');
-        window.location.replace('/login');
-        return;
->>>>>>> origin/UR-4
       }
     }
   };
