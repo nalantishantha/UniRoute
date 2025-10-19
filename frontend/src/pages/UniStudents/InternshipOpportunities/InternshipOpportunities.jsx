@@ -90,8 +90,10 @@ const InternshipOpportunities = () => {
 
   // Handle viewing internship details
   const handleViewDetails = (internship) => {
+    console.log('handleViewDetails called with:', internship?.title);
     setSelectedInternship(internship);
     setIsModalOpen(true);
+    console.log('Modal state updated - isOpen: true');
   };
 
   // Handle closing modal
