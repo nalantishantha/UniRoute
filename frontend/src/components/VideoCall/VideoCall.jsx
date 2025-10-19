@@ -38,7 +38,8 @@ const VideoCall = ({ roomId, userId, userRole, onEndCall }) => {
   const hasConnectedRef = useRef(false);
 
   // Get WebSocket URL from environment or use default
-  const websocketUrl = `ws://localhost:8000/ws/video-call/${roomId}/`;
+  const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000';
+  const websocketUrl = `${WS_URL}/ws/video-call/${roomId}/`;
 
   const {
     localStream,

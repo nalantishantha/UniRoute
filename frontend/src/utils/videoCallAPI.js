@@ -2,7 +2,7 @@
  * Video Call API utilities
  */
 
-const API_BASE_URL = 'http://localhost:8000/api/mentoring';
+const API_BASE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/mentoring`;
 
 export const videoCallAPI = {
     /**

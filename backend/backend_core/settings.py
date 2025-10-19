@@ -19,6 +19,10 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 # Convert comma-separated string to list
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='').split(',')
 
+# Allow ngrok domains for testing (add your ngrok URLs here)
+if DEBUG or not ALLOWED_HOSTS or ALLOWED_HOSTS == ['']:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.ngrok-free.app', '.ngrok.io']
+
 # Application definition
 INSTALLED_APPS = [
     'daphne',  # Must be first for channels
@@ -135,6 +139,12 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # React dev server
     "http://127.0.0.1:5173",
     "http://localhost:3000",  # Alternative React port
+]
+
+# Allow all ngrok origins for testing
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.ngrok-free\.app$",
+    r"^https://.*\.ngrok\.io$",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
