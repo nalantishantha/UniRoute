@@ -8,6 +8,7 @@ from apps.students.models import Students
 from django.utils import timezone
 from datetime import timedelta
 from apps.mentoring.models import Mentors, MentoringSessions, MentoringSessionEnrollments, MentoringRequests
+from apps.universities.models import UniversityAnnouncements
 from .models import Students
 import json
 
@@ -444,5 +445,47 @@ def create_mentoring_session(request):
     return JsonResponse({
         'success': False,
         'message': 'Only POST method allowed'
+    }, status=405)
+
+
+def get_published_announcements(request):
+    """
+    Get all published university announcements for news feed (Student perspective)
+    """
+    if request.method == 'GET':
+        try:
+            # Get only published announcements, ordered by newest first
+            announcements = UniversityAnnouncements.objects.filter(
+                announcement_type='published'
+            ).select_related('university').order_by('-created_at')
+            
+            data = []
+            for announcement in announcements:
+                data.append({
+                    'announcement_id': announcement.announcement_id,
+                    'title': announcement.title,
+                    'message': announcement.message,
+                    'university_name': announcement.university.name if announcement.university else 'Unknown University',
+                    'university_id': announcement.university.university_id if announcement.university else None,
+                    'created_at': announcement.created_at.isoformat() if announcement.created_at else None,
+                    'valid_from': announcement.valid_from.isoformat() if announcement.valid_from else None,
+                    'valid_to': announcement.valid_to.isoformat() if announcement.valid_to else None,
+                })
+            
+            return JsonResponse({
+                'success': True,
+                'announcements': data,
+                'count': len(data)
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error fetching announcements: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only GET method allowed'
     }, status=405)
 

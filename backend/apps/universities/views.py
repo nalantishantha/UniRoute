@@ -472,39 +472,6 @@ def universities_detailed_list(request):
     }, status=405)
 
 
-def universities_quick_stats(request):
-    """Return quick aggregated counts for the UniversityGuide banner"""
-    if request.method == 'GET':
-        try:
-            from apps.students.models import Students
-            from apps.university_programs.models import DegreePrograms
-            # total active universities
-            universities_count = Universities.objects.filter(is_active=1).count()
-            # total faculties
-            faculties_count = Faculties.objects.filter(is_active=1).count()
-            # total degree programs
-            degree_programs_count = DegreePrograms.objects.count()
-            # total students (all rows in students table)
-            students_count = Students.objects.count()
-
-            return JsonResponse({
-                'success': True,
-                'stats': {
-                    'universities_count': universities_count,
-                    'faculties_count': faculties_count,
-                    'degree_programs_count': degree_programs_count,
-                    'students_count': students_count,
-                }
-            })
-        except Exception as e:
-            return JsonResponse({
-                'success': False,
-                'message': str(e)
-            }, status=500)
-
-    return JsonResponse({'success': False, 'message': 'Only GET method allowed'}, status=405)
-
-
 # Admin Functions for University Request Management
 
 def university_requests_list(request):
