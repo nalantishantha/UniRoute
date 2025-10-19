@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { 
   Building2, Plus, Search, Filter, Eye, Edit, Trash2, 
   MapPin, Mail, Phone, Globe, Calendar, ChevronLeft, 
@@ -8,7 +7,6 @@ import {
 import { companiesAPI } from '../../../utils/companiesAPI';
 
 const CompaniesList = () => {
-  const navigate = useNavigate();
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -120,10 +118,7 @@ const CompaniesList = () => {
                 <p className="text-gray-600">Manage partner companies and recruitment relationships</p>
               </div>
             </div>
-            <button 
-              onClick={() => navigate('/admin/companies/new')}
-              className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            >
+            <button className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
               <Plus className="w-4 h-4" />
               <span>Add Company</span>
             </button>
@@ -294,14 +289,12 @@ const CompaniesList = () => {
                   <td className="py-4 px-4">
                     <div className="flex items-center justify-center space-x-2">
                       <button 
-                        onClick={() => navigate(`/admin/companies/${company.company_id}`)}
                         className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded"
                         title="View Details"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
                       <button 
-                        onClick={() => navigate(`/admin/companies/${company.company_id}/edit`)}
                         className="p-1 text-green-600 hover:text-green-800 hover:bg-green-50 rounded"
                         title="Edit Company"
                       >

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getCurrentUser } from '../../../utils/auth';
+import { studentsAPI } from '../../../utils/studentsAPI';
 import {
   GraduationCap,
   Edit,
@@ -19,7 +20,8 @@ import {
   UserX,
   AlertCircle,
   CheckCircle,
-  Award
+  Award,
+  Loader2
 } from 'lucide-react';
 import AdminLayout from '../../../components/common/Admin/AdminLayout';
 
@@ -28,44 +30,23 @@ const StudentView = () => {
   const navigate = useNavigate();
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [actionLoading, setActionLoading] = useState({ delete: false, status: false });
 
-  // Mock student data
-  const mockStudent = {
-    id: 1,
-    first_name: 'Kasun',
-    last_name: 'Silva',
-    email: 'kasun.silva@gmail.com',
-    contact_number: '0771234567',
-    student_stage: 'A/L',
-    school: 'Royal College, Colombo',
-    district: 'Colombo',
-    grade: '12',
-    stream: 'Physical Science',
-    preferred_subjects: ['Physics', 'Chemistry', 'Combined Mathematics'],
-    is_active: true,
-    created_at: '2024-01-15T10:30:00Z',
-    last_login: '2024-07-01T14:20:00Z',
-    activity_log: [
-      {
-        id: 1,
-        action: 'Profile Updated',
-        timestamp: '2024-07-01T14:20:00Z',
-        details: 'Updated academic information'
-      },
-      {
-        id: 2,
-        action: 'Login',
-        timestamp: '2024-07-01T14:15:00Z',
-        details: 'Logged in from mobile app'
-      },
-      {
-        id: 3,
-        action: 'Subject Selection',
-        timestamp: '2024-06-28T10:30:00Z',
-        details: 'Updated preferred subjects'
-      }
-    ]
+  // Fetch student data from API
+  const fetchStudent = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await studentsAPI.getStudentById(id);
+      setStudent(response.student);
+    } catch (err) {
+      setError(err.message || 'Failed to fetch student details');
+      console.error('Error fetching student:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -75,34 +56,107 @@ const StudentView = () => {
       return;
     }
 
-    // Simulate API call
-    setTimeout(() => {
-      setStudent(mockStudent);
-      setLoading(false);
-    }, 1000);
+    if (id) {
+      fetchStudent();
+    }
   }, [id, navigate]);
 
-  const handleDeleteStudent = () => {
-    if (window.confirm('Are you sure you want to delete this student? This action cannot be undone.')) {
-      setMessage({ type: 'success', text: 'Student deleted successfully!' });
+  const handleDeleteStudent = async () => {
+    const studentName = getDisplayName(student.full_name, student.email);
+    
+    // Enhanced confirmation dialog
+    const confirmMessage = `Are you sure you want to permanently delete ${studentName}?\n\nThis action will:\n- Remove the student's account\n- Delete all associated data\n- Cannot be undone\n\nType "DELETE" to confirm:`;
+    
+    const confirmation = window.prompt(confirmMessage);
+    
+    if (confirmation !== 'DELETE') {
+      if (confirmation !== null) { // User didn't cancel
+        setMessage({ 
+          type: 'error', 
+          text: 'Delete operation cancelled. You must type "DELETE" to confirm.' 
+        });
+        setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+      }
+      return;
+    }
+
+    try {
+      setActionLoading(prev => ({ ...prev, delete: true }));
+      setMessage({ type: '', text: '' });
+      
+      await studentsAPI.deleteStudent(student.student_id);
+      
+      setMessage({ 
+        type: 'success', 
+        text: `${studentName} has been permanently deleted. Redirecting...` 
+      });
+      
       setTimeout(() => {
         navigate('/admin/students');
-      }, 1500);
+      }, 2000);
+      
+    } catch (err) {
+      setMessage({ 
+        type: 'error', 
+        text: `Failed to delete ${studentName}: ${err.message}` 
+      });
+      console.error('Delete error:', err);
+      
+      // Clear error message after 5 seconds
+      setTimeout(() => setMessage({ type: '', text: '' }), 5000);
+    } finally {
+      setActionLoading(prev => ({ ...prev, delete: false }));
     }
   };
 
-  const handleToggleStatus = () => {
+  const handleToggleStatus = async () => {
+    const studentName = getDisplayName(student.full_name, student.email);
     const action = student.is_active ? 'deactivate' : 'activate';
-    if (window.confirm(`Are you sure you want to ${action} this student?`)) {
+    const actionPast = student.is_active ? 'deactivated' : 'activated';
+    
+    // Enhanced confirmation for deactivation
+    let confirmMessage;
+    if (student.is_active) {
+      confirmMessage = `Deactivate ${studentName}?\n\nThis will:\n- Prevent student from logging in\n- Hide their profile from searches\n- Suspend their access to the platform\n\nYou can reactivate them later.`;
+    } else {
+      confirmMessage = `Activate ${studentName}?\n\nThis will:\n- Allow student to log in\n- Make their profile visible\n- Restore their platform access`;
+    }
+    
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      setActionLoading(prev => ({ ...prev, status: true }));
+      setMessage({ type: '', text: '' });
+      
+      await studentsAPI.updateStudentStatus(student.student_id, !student.is_active);
       setStudent(prev => ({ ...prev, is_active: !prev.is_active }));
+      
       setMessage({ 
         type: 'success', 
-        text: `Student ${action}d successfully!` 
+        text: `${studentName} has been ${actionPast} successfully.` 
       });
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+      
+    } catch (err) {
+      setMessage({ 
+        type: 'error', 
+        text: `Failed to ${action} ${studentName}: ${err.message}` 
+      });
+      console.error(`${action} error:`, err);
+      
+      // Clear error message after 5 seconds
+      setTimeout(() => setMessage({ type: '', text: '' }), 5000);
+    } finally {
+      setActionLoading(prev => ({ ...prev, status: false }));
     }
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
@@ -111,6 +165,7 @@ const StudentView = () => {
   };
 
   const formatDateTime = (dateString) => {
+    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -120,18 +175,54 @@ const StudentView = () => {
     });
   };
 
-  // if (loading) {
-  //   return (
-  //     <AdminLayout pageTitle="Student Details" pageDescription="Loading student information">
-  //       <div className="flex items-center justify-center h-64">
-  //         <div className="text-center">
-  //           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-  //           <p className="text-gray-600">Loading student details...</p>
-  //         </div>
-  //       </div>
-  //     </AdminLayout>
-  //   );
-  // }
+  // Get display name from full_name or fallback to email
+  const getDisplayName = (fullName, email) => {
+    if (fullName && fullName.trim()) {
+      return fullName;
+    }
+    return email ? email.split('@')[0] : 'N/A';
+  };
+
+  if (loading) {
+    return (
+      <AdminLayout pageTitle="Student Details" pageDescription="Loading student information">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading student details...</p>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <AdminLayout pageTitle="Error" pageDescription="Failed to load student information">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Student</h2>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <div className="space-x-4">
+              <button
+                onClick={fetchStudent}
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                Try Again
+              </button>
+              <Link
+                to="/admin/students"
+                className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+              >
+                Back to Students
+              </Link>
+            </div>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   if (!student) {
     return (
@@ -156,7 +247,7 @@ const StudentView = () => {
   return (
     <AdminLayout 
       pageTitle="Student Details" 
-      pageDescription={`View and manage ${student.first_name} ${student.last_name}'s information`}
+      pageDescription={`View and manage ${getDisplayName(student.full_name, student.email)}'s information`}
     >
       <div className="max-w-7xl mx-auto">
         {/* Action Buttons */}
@@ -170,7 +261,7 @@ const StudentView = () => {
           </Link>
           <div className="flex items-center space-x-3">
             <Link
-              to={`/admin/students/${student.id}/edit`}
+              to={`/admin/students/${student.student_id}/edit`}
               className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center space-x-2"
             >
               <Edit className="h-4 w-4" />
@@ -178,21 +269,44 @@ const StudentView = () => {
             </Link>
             <button
               onClick={handleToggleStatus}
+              disabled={actionLoading.status}
               className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
-                student.is_active
-                  ? 'bg-orange-500 text-white hover:bg-orange-600'
-                  : 'bg-green-500 text-white hover:bg-green-600'
+                actionLoading.status
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : student.is_active
+                    ? 'bg-orange-500 text-white hover:bg-orange-600'
+                    : 'bg-green-500 text-white hover:bg-green-600'
               }`}
             >
-              {student.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
-              <span>{student.is_active ? 'Deactivate' : 'Activate'}</span>
+              {actionLoading.status ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : student.is_active ? (
+                <UserX className="h-4 w-4" />
+              ) : (
+                <UserCheck className="h-4 w-4" />
+              )}
+              <span>
+                {actionLoading.status 
+                  ? 'Processing...' 
+                  : student.is_active ? 'Deactivate' : 'Activate'
+                }
+              </span>
             </button>
             <button
               onClick={handleDeleteStudent}
-              className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center space-x-2"
+              disabled={actionLoading.delete}
+              className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
+                actionLoading.delete
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-red-500 text-white hover:bg-red-600'
+              }`}
             >
-              <Trash2 className="h-4 w-4" />
-              <span>Delete</span>
+              {actionLoading.delete ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+              <span>{actionLoading.delete ? 'Deleting...' : 'Delete'}</span>
             </button>
           </div>
         </div>
@@ -225,12 +339,12 @@ const StudentView = () => {
                   <GraduationCap className="h-10 w-10 text-blue-600" />
                 </div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-1">
-                  {student.first_name} {student.last_name}
+                  {getDisplayName(student.full_name, student.email)}
                 </h2>
                 <p className="text-gray-600 mb-3">{student.email}</p>
                 <div className="flex justify-center mb-4">
                   <span className="inline-flex px-3 py-1 text-sm font-medium rounded-full bg-blue-100 text-blue-800">
-                    {student.student_stage} Student
+                    {student.current_stage} Student
                   </span>
                 </div>
                 <div className="flex justify-center">
@@ -253,22 +367,28 @@ const StudentView = () => {
                   </div>
                   <div className="flex items-center space-x-3">
                     <Phone className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-900">{student.contact_number}</span>
+                    <span className="text-sm text-gray-900">{student.contact_number || 'Not provided'}</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <User className="h-4 w-4 text-gray-400" />
+                    <span className="text-sm text-gray-900">{student.username}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <Calendar className="h-4 w-4 text-gray-400" />
                     <span className="text-sm text-gray-900">Joined {formatDate(student.created_at)}</span>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <Clock className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-900">Last login {formatDateTime(student.last_login)}</span>
-                  </div>
+                  {student.updated_at && (
+                    <div className="flex items-center space-x-3">
+                      <Clock className="h-4 w-4 text-gray-400" />
+                      <span className="text-sm text-gray-900">Last updated {formatDateTime(student.updated_at)}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Student Details & Activity */}
+          {/* Student Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Academic Details */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -278,77 +398,81 @@ const StudentView = () => {
                   <School className="h-4 w-4 text-gray-400" />
                   <div>
                     <p className="text-sm font-medium text-gray-900">School</p>
-                    <p className="text-sm text-gray-600">{student.school}</p>
+                    <p className="text-sm text-gray-600">{student.school || 'Not specified'}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
                   <MapPin className="h-4 w-4 text-gray-400" />
                   <div>
                     <p className="text-sm font-medium text-gray-900">District</p>
-                    <p className="text-sm text-gray-600">{student.district}</p>
+                    <p className="text-sm text-gray-600">{student.district || 'Not specified'}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
                   <Award className="h-4 w-4 text-gray-400" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Stage</p>
-                    <p className="text-sm text-gray-600">{student.student_stage}</p>
+                    <p className="text-sm font-medium text-gray-900">Current Stage</p>
+                    <p className="text-sm text-gray-600">{student.current_stage}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <BookOpen className="h-4 w-4 text-gray-400" />
+                  <User className="h-4 w-4 text-gray-400" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Stream</p>
-                    <p className="text-sm text-gray-600">{student.stream}</p>
+                    <p className="text-sm font-medium text-gray-900">Gender</p>
+                    <p className="text-sm text-gray-600">{student.gender || 'Not specified'}</p>
                   </div>
                 </div>
               </div>
-              <div className="mt-4">
-                <p className="text-sm font-medium text-gray-900 mb-2">Preferred Subjects</p>
-                <div className="flex flex-wrap gap-2">
-                  {student.preferred_subjects.map((subject, index) => (
-                    <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                      {subject}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Activity Log */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
-              <div className="space-y-4">
-                {student.activity_log.map((activity) => (
-                  <div key={activity.id} className="flex items-start space-x-3">
-                    <div className="bg-blue-100 p-2 rounded-lg">
-                      <Activity className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">{activity.action}</p>
-                      <p className="text-sm text-gray-600">{activity.details}</p>
-                      <p className="text-xs text-gray-500 mt-1">{formatDateTime(activity.timestamp)}</p>
+              {student.location && (
+                <div className="mt-4">
+                  <div className="flex items-center space-x-3">
+                    <MapPin className="h-4 w-4 text-gray-400" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Location</p>
+                      <p className="text-sm text-gray-600">{student.location}</p>
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
+              {student.bio && (
+                <div className="mt-4">
+                  <p className="text-sm font-medium text-gray-900 mb-2">Bio</p>
+                  <p className="text-sm text-gray-600">{student.bio}</p>
+                </div>
+              )}
             </div>
 
-            {/* Student Statistics */}
+            {/* Account Information */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Student Statistics</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">12</div>
-                  <div className="text-sm text-gray-600">Total Logins</div>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Account Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">User ID</p>
+                  <p className="text-sm text-gray-600">{student.user_id}</p>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">5</div>
-                  <div className="text-sm text-gray-600">Courses Enrolled</div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Student ID</p>
+                  <p className="text-sm text-gray-600">{student.student_id}</p>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-purple-600">14</div>
-                  <div className="text-sm text-gray-600">Days Active</div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Account Status</p>
+                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                    student.is_active 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {student.is_active ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Verification Status</p>
+                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                    student.is_verified 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {student.is_verified ? 'Verified' : 'Pending Verification'}
+                  </span>
                 </div>
               </div>
             </div>

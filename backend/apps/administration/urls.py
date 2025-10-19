@@ -1,6 +1,13 @@
 from django.urls import path
 from . import views
-from .additional_views import get_all_users, get_all_students, get_all_university_students, get_all_universities
+from .additional_views import (
+    get_all_users, get_all_students, get_all_university_students, get_all_universities,
+    update_student_status, delete_student, get_student_details,
+    update_university_student_status, delete_university_student, get_university_student_details,
+    update_university_student, get_university_details, update_university_status, 
+    delete_university, update_university, create_university,
+    get_all_companies, get_company_details, update_company, delete_company, create_company
+)
 
 urlpatterns = [
     path('admin/details/', views.get_admin_details, name='get_admin_details'),
@@ -34,6 +41,23 @@ urlpatterns = [
     # Admin management endpoints
     path('users/', get_all_users, name='get_all_users'),
     path('students/', get_all_students, name='get_all_students'),
+    path('students/<int:student_id>/', get_student_details, name='get_student_details'),
+    path('students/<int:student_id>/status/', update_student_status, name='update_student_status'),
+    path('students/<int:student_id>/delete/', delete_student, name='delete_student'),
     path('university-students/', get_all_university_students, name='get_all_university_students'),
+    path('university-students/<int:university_student_id>/', get_university_student_details, name='get_university_student_details'),
+    path('university-students/<int:university_student_id>/update/', update_university_student, name='update_university_student'),
+    path('university-students/<int:university_student_id>/status/', update_university_student_status, name='update_university_student_status'),
+    path('university-students/<int:university_student_id>/delete/', delete_university_student, name='delete_university_student'),
     path('universities/', get_all_universities, name='get_all_universities'),
+    path('universities/create/', create_university, name='create_university'),
+    path('universities/<int:university_id>/', get_university_details, name='get_university_details'),
+    path('universities/<int:university_id>/update/', update_university, name='update_university'),
+    path('universities/<int:university_id>/status/', update_university_status, name='update_university_status'),
+    path('universities/<int:university_id>/delete/', delete_university, name='delete_university'),
+    path('companies/', get_all_companies, name='get_all_companies'),
+    path('companies/create/', create_company, name='create_company'),
+    path('companies/<int:company_id>/', get_company_details, name='get_company_details'),
+    path('companies/<int:company_id>/update/', update_company, name='update_company'),
+    path('companies/<int:company_id>/delete/', delete_company, name='delete_company'),
 ]
