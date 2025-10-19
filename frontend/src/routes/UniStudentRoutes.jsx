@@ -7,6 +7,7 @@ import {
   Dashboard,
   Earnings,
   Feedback,
+  InternshipOpportunities,
   Mentoring,
   PreUniCourses,
   Profile,
@@ -32,6 +33,7 @@ const UniStudentRoutes = () => {
           <Route path="feedback" element={<Feedback />} />
           <Route path="profile" element={<Profile />} />
           <Route path="resources" element={<Resources />} />
+          <Route path="internships" element={<InternshipOpportunities />} />
           <Route path="earnings" element={<Earnings />} />
           <Route path="settings" element={<UniStudentSettings />} />
           <Route
