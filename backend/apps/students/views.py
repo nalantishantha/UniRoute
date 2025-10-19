@@ -13,6 +13,82 @@ from .models import Students
 import json
 
 
+def get_student_mentoring_requests_grouped(request):
+    """
+    Returns mentoring requests for a student grouped into three lists:
+    - pending: status == 'pending'
+    - accepted: status == 'scheduled'
+    - completed: status in ['completed', 'declined']
+
+    Expects query param `user_id` (Users.user_id). This is intentionally
+    separate from session enrollments and focuses on MentoringRequests table.
+    """
+    if request.method != 'GET':
+        return JsonResponse({'success': False, 'message': 'Only GET allowed'}, status=405)
+
+    user_id = request.GET.get('user_id')
+    if not user_id:
+        return JsonResponse({'success': False, 'message': 'user_id query parameter is required'}, status=400)
+
+    try:
+        try:
+            student = Students.objects.get(user__user_id=user_id)
+        except Students.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Student not found for given user_id'}, status=404)
+
+        pending = []
+        accepted = []
+        completed = []
+
+        qs = MentoringRequests.objects.select_related('mentor', 'mentor__user').filter(student=student)
+        for r in qs:
+            status = (getattr(r, 'status', '') or '').lower()
+            entry = {
+                'id': getattr(r, 'request_id', r.id if hasattr(r, 'id') else None),
+                'mentor': None,
+                'subject': getattr(r, 'topic', None) or getattr(r, 'description', None) or '',
+                'preferred_time': getattr(r, 'preferred_time', None) or getattr(r, 'requested_date', None) or None,
+                'status': getattr(r, 'status', '') or '',
+                'created_at': getattr(r, 'created_at', None),
+            }
+            try:
+                mentor_obj = getattr(r, 'mentor', None)
+                if mentor_obj:
+                    # Try to get a friendly name
+                    ud = None
+                    try:
+                        ud = UserDetails.objects.get(user=mentor_obj.user)
+                    except Exception:
+                        ud = None
+                    if ud and getattr(ud, 'full_name', None):
+                        entry['mentor'] = ud.full_name
+                    elif hasattr(mentor_obj, 'full_name'):
+                        entry['mentor'] = mentor_obj.full_name
+                    elif hasattr(mentor_obj, 'name'):
+                        entry['mentor'] = mentor_obj.name
+                    elif hasattr(mentor_obj, 'user') and hasattr(mentor_obj.user, 'username'):
+                        entry['mentor'] = mentor_obj.user.username
+            except Exception:
+                entry['mentor'] = None
+
+            if status == 'pending':
+                pending.append(entry)
+            elif status == 'scheduled':
+                accepted.append(entry)
+            elif status in ['completed', 'declined']:
+                completed.append(entry)
+            else:
+                # Treat unknown statuses conservatively as pending
+                pending.append(entry)
+
+        return JsonResponse({'success': True, 'pending': pending, 'accepted': accepted, 'completed': completed})
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'success': False, 'message': f'Error retrieving mentoring requests: {str(e)}'}, status=500)
+
+
 def students_list(request):
     with connection.cursor() as cursor:
         cursor.execute("SELECT student_id, user_id, current_stage, district, school FROM students LIMIT 10")

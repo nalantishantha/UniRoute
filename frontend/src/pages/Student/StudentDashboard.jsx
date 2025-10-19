@@ -10,6 +10,7 @@ import {
   Star,
   MapPin,
   Clock,
+  Check,
   TrendingUp,
   Search,
   Filter,
@@ -35,6 +36,7 @@ import {
 
 const StudentDashboard = () => {
   const [studentProfile, setStudentProfile] = useState(null);
+  const [recentActivities, setRecentActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -94,7 +96,7 @@ const StudentDashboard = () => {
       const data = await response.json();
       console.log('Dashboard: Profile data received:', data);
 
-      if (data.success) {
+  if (data.success) {
         // Process the data for dashboard display
         const profileData = {
           name: data.student_data.full_name || data.student_data.username || 'Student Name',
@@ -117,6 +119,14 @@ const StudentDashboard = () => {
         };
         
         setStudentProfile(profileData);
+
+        // After profile is set, fetch mentoring sessions for this student
+        try {
+          const currentUserId = currentUser.user_id;
+          fetchGroupedMentoringRequests(currentUserId);
+        } catch (e) {
+          console.warn('Dashboard: failed to fetch mentoring sessions', e);
+        }
       } else {
         setError(data.message || 'Failed to load profile data');
       }
@@ -171,69 +181,123 @@ const StudentDashboard = () => {
       color: "bg-orange-500",
     },
   ];
+  // Seed recent activities with static entries; mentoring sessions will be merged in when fetched
+  useEffect(() => {
+    setRecentActivities([
+      {
+        id: 'seed-1',
+        type: "mentor",
+        title: "New message from Dr. Samantha Silva",
+        description: "Regarding your engineering career path inquiry",
+        time: "2 hours ago",
+        icon: MessageCircle,
+        color: "text-blue-500",
+      },
+      {
+        id: 'seed-2',
+        type: "news",
+        title: "University of Colombo announces new programs",
+        description: "New Engineering Faculty to open in 2025",
+        time: "1 day ago",
+        icon: Newspaper,
+        color: "text-green-500",
+      },
+      {
+        id: 'seed-3',
+        type: "recommendation",
+        title: "New degree recommendation available",
+        description: "Bachelor of Computer Science - University of Moratuwa",
+        time: "2 days ago",
+        icon: Star,
+        color: "text-purple-500",
+      },
+      {
+        id: 'seed-4',
+        type: "tutor",
+        title: "Tutor session completed",
+        description: "Combined Mathematics with Mr. Kamal Perera",
+        time: "3 days ago",
+        icon: BookMarked,
+        color: "text-orange-500",
+      },
+    ]);
+  }, []);
 
-  const recentActivity = [
-    {
-      id: 1,
-      type: "mentor",
-      title: "New message from Dr. Samantha Silva",
-      description: "Regarding your engineering career path inquiry",
-      time: "2 hours ago",
-      icon: MessageCircle,
-      color: "text-blue-500",
-    },
-    {
-      id: 2,
-      type: "news",
-      title: "University of Colombo announces new programs",
-      description: "New Engineering Faculty to open in 2025",
-      time: "1 day ago",
-      icon: Newspaper,
-      color: "text-green-500",
-    },
-    {
-      id: 3,
-      type: "recommendation",
-      title: "New degree recommendation available",
-      description: "Bachelor of Computer Science - University of Moratuwa",
-      time: "2 days ago",
-      icon: Star,
-      color: "text-purple-500",
-    },
-    {
-      id: 4,
-      type: "tutor",
-      title: "Tutor session completed",
-      description: "Combined Mathematics with Mr. Kamal Perera",
-      time: "3 days ago",
-      icon: BookMarked,
-      color: "text-orange-500",
-    },
-  ];
+  // Fetch accepted mentoring sessions for the student and merge into recent activities
+  const fetchAcceptedMentoringSessions = async (studentId) => {
+    if (!studentId) return;
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/api/mentoring/sessions/?student_id=${studentId}`);
+      if (!res.ok) {
+        console.warn('Dashboard: mentoring sessions endpoint returned', res.status);
+        return;
+      }
+      const payload = await res.json();
+      const sessions = Array.isArray(payload.sessions) ? payload.sessions : payload || [];
 
-  const upcomingEvents = [
-    {
-      id: 1,
-      title: "Virtual Career Fair 2024",
-      date: "Jan 20-22, 2024",
-      type: "Career Event",
-      participants: "100+ Companies",
-    },
-    {
-      id: 2,
-      title: "University Open Day - UoC",
-      date: "Feb 5, 2024",
-      type: "University Event",
-      participants: "All Faculties",
-    },
-    {
-      id: 3,
-      title: "STEM Scholarship Applications",
-      date: "Feb 15, 2024",
-      type: "Scholarship",
-      participants: "500 Scholarships",
-    },
-  ];
+      // Filter accepted sessions and map to recent activity items
+      const accepted = sessions.filter((s) => {
+        // handle different backend field names conservatively
+        return s.status === 'accepted' || s.is_accepted === true || s.state === 'accepted';
+      }).map((s) => ({
+        id: `ment-${s.id}`,
+        type: 'mentor',
+        title: s.mentor && (s.mentor.full_name || s.mentor.name) ? `Mentor ${s.mentor.full_name || s.mentor.name} accepted your session` : 'Mentor accepted your session',
+        description: s.subject || s.topic || s.note || (s.mentor ? `Session with ${s.mentor.full_name || s.mentor.name}` : ''),
+        time: s.scheduled_time || s.start_time || s.date || 'Scheduled',
+        icon: UserPlus || MessageCircle,
+        color: 'text-green-500',
+      }));
+
+      if (accepted.length > 0) {
+        // Prepend accepted mentoring sessions to recent activities
+        setRecentActivities((prev) => [...accepted, ...prev]);
+      }
+    } catch (err) {
+      console.warn('Dashboard: error fetching mentoring sessions', err);
+    }
+  };
+
+  // Fetch mentoring requests grouped by status from student endpoint
+  const [mentoringGrouped, setMentoringGrouped] = useState({ pending: [], accepted: [], completed: [] });
+
+  const fetchGroupedMentoringRequests = async (studentId) => {
+    if (!studentId) return;
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/api/students/mentoring/requests-grouped/?user_id=${studentId}`);
+      if (!res.ok) {
+        console.warn('Dashboard: mentoring requests grouped endpoint returned', res.status);
+        return;
+      }
+      const payload = await res.json();
+      if (payload && payload.success) {
+        setMentoringGrouped({
+          pending: Array.isArray(payload.pending) ? payload.pending : [],
+          accepted: Array.isArray(payload.accepted) ? payload.accepted : [],
+          completed: Array.isArray(payload.completed) ? payload.completed : [],
+        });
+
+        // Merge accepted mentoring requests into recent activities (keep existing seed items)
+        const acceptedItems = (Array.isArray(payload.accepted) ? payload.accepted : []).map((r) => ({
+          id: `req-${r.id}`,
+          type: 'mentor',
+          title: r.mentor ? `${r.mentor} accepted your request` : 'Mentor accepted your request',
+          description: r.subject || 'Mentoring request',
+          time: r.preferred_time || (r.created_at ? new Date(r.created_at).toLocaleString() : 'Scheduled'),
+          icon: UserPlus,
+          color: 'text-green-500',
+        }));
+
+        if (acceptedItems.length > 0) {
+          setRecentActivities((prev) => [...acceptedItems, ...prev]);
+        }
+      }
+    } catch (err) {
+      console.warn('Dashboard: error fetching grouped mentoring requests', err);
+    }
+  };
+
+  // upcomingEvents removed; sidebar will show a compact Recent Activities list instead
 
   // const featuredMentors = [
   //   {
@@ -506,14 +570,75 @@ const StudentDashboard = () => {
             <div className="bg-white rounded-2xl shadow-lg p-6 border border-accent-100">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="font-display font-semibold text-2xl text-primary-400">
-                  Recent Activity
+                  Your sessions and activities
                 </h2>
                 <button className="text-accent-300 hover:text-accent-400 transition-colors">
                   <ChevronRight className="h-5 w-5" />
                 </button>
               </div>
               <div className="space-y-4">
-                {recentActivity.map((activity) => {
+                {/* Mentoring Requests grouped by status */}
+                <div className="mb-4">
+                  <h4 className="font-medium text-primary-400 mb-2">Pending Requests</h4>
+                  {mentoringGrouped.pending.length === 0 && (
+                    <p className="text-sm text-primary-300 mb-2">No pending requests</p>
+                  )}
+                  {mentoringGrouped.pending.map((r) => (
+                    <div key={`pending-${r.id}`} className="flex items-start space-x-4 p-3 bg-accent-50 rounded-xl mb-2">
+                      <div className="p-2 rounded-full bg-white text-yellow-500">
+                        <Clock className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1">
+                        <h5 className="text-primary-400 font-medium">{r.mentor || 'Mentor'}</h5>
+                        <p className="text-sm text-primary-300">{r.subject}</p>
+                        <p className="text-xs text-primary-300">{r.preferred_time || (r.created_at ? new Date(r.created_at).toLocaleString() : '')}</p>
+                      </div>
+                      <div className="text-sm text-yellow-600 font-semibold">Pending</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mb-4">
+                  <h4 className="font-medium text-primary-400 mb-2">Accepted Requests</h4>
+                  {mentoringGrouped.accepted.length === 0 && (
+                    <p className="text-sm text-primary-300 mb-2">No accepted requests</p>
+                  )}
+                  {mentoringGrouped.accepted.map((r) => (
+                    <div key={`accepted-${r.id}`} className="flex items-start space-x-4 p-3 bg-accent-50 rounded-xl mb-2">
+                      <div className="p-2 rounded-full bg-white text-green-500">
+                        <Check className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1">
+                        <h5 className="text-primary-400 font-medium">{r.mentor || 'Mentor'}</h5>
+                        <p className="text-sm text-primary-300">{r.subject}</p>
+                        <p className="text-xs text-primary-300">{r.preferred_time || (r.created_at ? new Date(r.created_at).toLocaleString() : '')}</p>
+                      </div>
+                      <div className="text-sm text-green-600 font-semibold">Accepted</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mb-4">
+                  <h4 className="font-medium text-primary-400 mb-2">Completed Requests</h4>
+                  {mentoringGrouped.completed.length === 0 && (
+                    <p className="text-sm text-primary-300 mb-2">No completed requests</p>
+                  )}
+                  {mentoringGrouped.completed.map((r) => (
+                    <div key={`completed-${r.id}`} className="flex items-start space-x-4 p-3 bg-accent-50 rounded-xl mb-2">
+                      <div className="p-2 rounded-full bg-white text-gray-500">
+                        <Check className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1">
+                        <h5 className="text-primary-400 font-medium">{r.mentor || 'Mentor'}</h5>
+                        <p className="text-sm text-primary-300">{r.subject}</p>
+                        <p className="text-xs text-primary-300">{r.preferred_time || (r.created_at ? new Date(r.created_at).toLocaleString() : '')}</p>
+                      </div>
+                      <div className="text-sm text-gray-600 font-semibold">Completed</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* {recentActivities.map((activity) => {
                   const IconComponent = activity.icon;
                   return (
                     <div
@@ -538,7 +663,7 @@ const StudentDashboard = () => {
                       </div>
                     </div>
                   );
-                })}
+                })} */}
               </div>
             </div>
           </div>
@@ -593,38 +718,35 @@ const StudentDashboard = () => {
             <div className="bg-white rounded-2xl shadow-lg p-6 border border-accent-100">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-display font-semibold text-xl text-primary-400">
-                  Upcoming Events
+                  Recent Activities
                 </h3>
                 <Link
-                  to="/student/news"
+                  to="/student/activity"
                   className="text-accent-300 hover:text-accent-400 transition-colors text-sm"
                 >
                   View All
                 </Link>
               </div>
               <div className="space-y-3">
-                {upcomingEvents.map((event) => (
+                {recentActivities.slice(0, 5).map((activity) => (
                   <div
-                    key={event.id}
+                    key={`side-${activity.id}`}
                     className="p-3 border border-accent-100 rounded-xl hover:bg-accent-50 transition-colors cursor-pointer"
                   >
-                    <h4 className="font-medium text-primary-400 text-sm mb-1">
-                      {event.title}
-                    </h4>
-                    <div className="flex items-center space-x-2 text-xs text-primary-300 mb-1">
-                      <Calendar className="h-3 w-3" />
-                      <span>{event.date}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-accent-300">
-                        {event.type}
-                      </span>
-                      <span className="text-xs text-primary-300">
-                        {event.participants}
-                      </span>
+                    <div className="flex items-start space-x-3">
+                      <div className={`p-2 rounded-full bg-white ${activity.color}`}>
+                        <activity.icon className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-primary-400 text-sm mb-1">{activity.title}</h4>
+                        <p className="text-xs text-primary-300">{activity.time}</p>
+                      </div>
                     </div>
                   </div>
                 ))}
+                {recentActivities.length === 0 && (
+                  <p className="text-sm text-primary-300">No recent activity</p>
+                )}
               </div>
             </div>
           </div>
