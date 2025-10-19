@@ -60,9 +60,11 @@ const VideoCall = ({ roomId, userId, userRole, onEndCall }) => {
     }
 
     return () => {
+      // Only disconnect when the component truly unmounts (user closes the window)
       disconnect();
     };
-  }, [connect, disconnect]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array - only run once on mount/unmount
 
   // Update local video element
   useEffect(() => {
