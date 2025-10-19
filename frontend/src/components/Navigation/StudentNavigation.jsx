@@ -1,76 +1,98 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logoWhite from "../../assets/logoWhite.png";
-import { Bell, User, Settings, LogOut, Clock, ExternalLink, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { MessageSquare } from "lucide-react";
+
+import {
+  Bell,
+  User,
+  Settings,
+  LogOut,
+  Clock,
+  ExternalLink,
+  X,
+} from "lucide-react";
 import { logout } from "../../utils/auth"; // ✅ Import logout function
+import { useChatContext } from "../../context/ChatContext";
+import Chat from "../UniStudents/Chat";
 
 const StudentNavigation = () => {
   const location = useLocation();
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationRef = useRef(null);
+  const { isChatOpen, toggleChat } = useChatContext();
 
   // Sample system alerts data
   const systemAlerts = [
     {
       id: 1,
       title: "Profile Update Required",
-      summary: "Please update your academic information to get better university recommendations.",
+      summary:
+        "Please update your academic information to get better university recommendations.",
       time: "1 hour ago",
       category: "Profile",
       isRead: false,
-      link: "/student/profile"
+      link: "/student/profile",
     },
     {
       id: 2,
       title: "Application Deadline Reminder",
-      summary: "University application deadline is approaching in 15 days. Complete your applications now.",
+      summary:
+        "University application deadline is approaching in 15 days. Complete your applications now.",
       time: "3 hours ago",
       category: "Deadline",
       isRead: false,
-      link: "/student/applications"
+      link: "/student/applications",
     },
     {
       id: 3,
       title: "Z-Score Calculation Updated",
-      summary: "Your Z-Score has been recalculated based on latest AL results. Check your new score.",
+      summary:
+        "Your Z-Score has been recalculated based on latest AL results. Check your new score.",
       time: "1 day ago",
       category: "Academic",
       isRead: true,
-      link: "/student/z-score"
+      link: "/student/z-score",
     },
     {
       id: 4,
       title: "New Mentor Request",
-      summary: "A senior student has accepted your mentorship request. Start your session now.",
+      summary:
+        "A senior student has accepted your mentorship request. Start your session now.",
       time: "2 days ago",
       category: "Mentorship",
       isRead: true,
-      link: "/student/mentors"
+      link: "/student/mentors",
     },
     {
       id: 5,
       title: "System Maintenance Notice",
-      summary: "Scheduled maintenance on Sunday 2:00 AM - 4:00 AM. Some features may be unavailable.",
+      summary:
+        "Scheduled maintenance on Sunday 2:00 AM - 4:00 AM. Some features may be unavailable.",
       time: "3 days ago",
       category: "System",
       isRead: true,
-      link: "/student/dashboard"
-    }
+      link: "/student/dashboard",
+    },
   ];
 
-  const unreadCount = systemAlerts.filter(alert => !alert.isRead).length;
+  const unreadCount = systemAlerts.filter((alert) => !alert.isRead).length;
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target)
+      ) {
         setShowNotifications(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -97,7 +119,7 @@ const StudentNavigation = () => {
 
   // ✅ Handle logout with confirmation
   const handleLogout = async () => {
-    if (window.confirm('Are you sure you want to logout?')) {
+    if (window.confirm("Are you sure you want to logout?")) {
       await logout();
     }
   };
@@ -158,7 +180,7 @@ const StudentNavigation = () => {
 
           <div className="hidden md:flex items-center space-x-4">
             <div className="relative" ref={notificationRef}>
-              <button 
+              <button
                 onClick={() => setShowNotifications(!showNotifications)}
                 className="text-white/90 hover:text-primary-100 transition-colors relative"
               >
@@ -189,7 +211,7 @@ const StudentNavigation = () => {
                       {unreadCount} unread notifications
                     </p>
                   </div>
-                  
+
                   <div className="max-h-80 overflow-y-auto">
                     {systemAlerts.map((alert) => (
                       <Link
@@ -197,14 +219,18 @@ const StudentNavigation = () => {
                         to={alert.link}
                         onClick={() => setShowNotifications(false)}
                         className={`block p-4 border-b border-blue-100 hover:bg-blue-50 transition-colors ${
-                          !alert.isRead ? 'bg-blue-25' : ''
+                          !alert.isRead ? "bg-blue-25" : ""
                         }`}
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex-1">
-                            <h4 className={`font-medium text-sm ${
-                              !alert.isRead ? 'text-blue-900' : 'text-blue-800'
-                            }`}>
+                            <h4
+                              className={`font-medium text-sm ${
+                                !alert.isRead
+                                  ? "text-blue-900"
+                                  : "text-blue-800"
+                              }`}
+                            >
                               {alert.title}
                             </h4>
                             <p className="text-blue-700 text-xs mt-1 leading-relaxed">
@@ -215,10 +241,14 @@ const StudentNavigation = () => {
                             <div className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0 mt-1 ml-2"></div>
                           )}
                         </div>
-                        
+
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-2">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(alert.category)}`}>
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(
+                                alert.category
+                              )}`}
+                            >
                               {alert.category}
                             </span>
                             <div className="flex items-center space-x-1 text-blue-600">
@@ -231,7 +261,7 @@ const StudentNavigation = () => {
                       </Link>
                     ))}
                   </div>
-                  
+
                   <div className="p-4 border-t border-blue-200 bg-blue-50">
                     <Link
                       to="/student/dashboard"
@@ -264,6 +294,21 @@ const StudentNavigation = () => {
             >
               <Settings className="h-6 w-6" />
             </Link>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={toggleChat}
+              className="relative p-2 transition-colors duration-200 rounded-lg text-primary-400 hover:text-primary-600 hover:bg-primary-50"
+            >
+              <MessageSquare className="w-5 h-5" />
+              <span className="absolute flex items-center justify-center w-4 h-4 text-xs text-white bg-green-500 rounded-full -top-1 -right-1">
+                2
+              </span>
+            </motion.button>
+
+            <Chat isOpen={isChatOpen} onClose={toggleChat} />
+
             <Link
               to="/student/dashboard"
               className={
@@ -291,10 +336,10 @@ const StudentNavigation = () => {
               Dashboard
             </Link>
           </div>
-          </div>
         </div>
-      </nav>
-    );
-  };
+      </div>
+    </nav>
+  );
+};
 
 export default StudentNavigation;

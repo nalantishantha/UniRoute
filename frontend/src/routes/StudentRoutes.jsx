@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { ChatProvider } from "../context/ChatContext";
 
 // Import Student components from the pages/Student directory
 import StudentHome from "../pages/Student/StudentHome";
@@ -24,43 +25,51 @@ import SuccessStories from "../pages/Student/SuccessStories";
 
 const StudentRoutes = () => {
   return (
-    <Routes>
-      {/* Student Home - Landing page for students */}
-      <Route path="/home" element={<StudentHome />} />
+    <ChatProvider>
+      <Routes>
+        {/* Student Home - Landing page for students */}
+        <Route path="/home" element={<StudentHome />} />
 
-      {/* Student Dashboard */}
-      <Route path="/dashboard" element={<StudentDashboard />} />
+        {/* Student Dashboard */}
+        <Route path="/dashboard" element={<StudentDashboard />} />
 
-      {/* Profile Management */}
-      <Route path="/profile" element={<ProfilePage />} />
-      <Route path="/edit-profile" element={<EditProfile />} />
-      <Route path="/settings" element={<SettingsPage />} />
-      <Route path="/profile-setup" element={<ProfileSetup />} />
+        {/* Profile Management */}
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/edit-profile" element={<EditProfile />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/profile-setup" element={<ProfileSetup />} />
 
-      {/* Academic Services */}
-      <Route path="/z-score-analysis" element={<ZScoreAnalysis />} />
-      <Route path="/program-matching" element={<ProgramMatching />} />
-      <Route path="/university-guide" element={<UniversityGuide />} />
+        {/* Academic Services */}
+        <Route path="/z-score-analysis" element={<ZScoreAnalysis />} />
+        <Route path="/program-matching" element={<ProgramMatching />} />
+        <Route path="/university-guide" element={<UniversityGuide />} />
 
-      {/* Support Services */}
-      <Route path="/mentors" element={<FindMentors />} />
-      <Route path="/mentor-connection" element={<MentorConnection />} />
-      <Route path="/tutors" element={<FindTutors />} />
-      <Route path="/tutor-booking" element={<TutorBooking />} />
-      <Route path="/career-counseling" element={<CareerCounseling />} />
-      <Route path="/counseling" element={<CareerCounseling />} />
-      <Route path="/book-counseling-service/:serviceId" element={<BookCounselingService />} />
-      <Route path="/book-counselor-session/:counselorId" element={<BookCounselorSession />} />
+        {/* Support Services */}
+        <Route path="/mentors" element={<FindMentors />} />
+        <Route path="/mentor-connection" element={<MentorConnection />} />
+        <Route path="/tutors" element={<FindTutors />} />
+        <Route path="/tutor-booking" element={<TutorBooking />} />
+        <Route path="/career-counseling" element={<CareerCounseling />} />
+        <Route path="/counseling" element={<CareerCounseling />} />
+        <Route
+          path="/book-counseling-service/:serviceId"
+          element={<BookCounselingService />}
+        />
+        <Route
+          path="/book-counselor-session/:counselorId"
+          element={<BookCounselorSession />}
+        />
 
-      {/* Information & Resources */}
-      <Route path="/news" element={<NewsFeed />} />
-      <Route path="/scholarship-info" element={<ScholarshipInfo />} />
-      <Route path="/success-stories" element={<SuccessStories />} />
+        {/* Information & Resources */}
+        <Route path="/news" element={<NewsFeed />} />
+        <Route path="/scholarship-info" element={<ScholarshipInfo />} />
+        <Route path="/success-stories" element={<SuccessStories />} />
 
-      {/* Redirect /student to /student/home */}
-      <Route path="/" element={<Navigate to="/student/home" replace />} />
-      <Route path="" element={<Navigate to="/student/home" replace />} />
-    </Routes>
+        {/* Redirect /student to /student/home */}
+        <Route path="/" element={<Navigate to="/student/home" replace />} />
+        <Route path="" element={<Navigate to="/student/home" replace />} />
+      </Routes>
+    </ChatProvider>
   );
 };
 
