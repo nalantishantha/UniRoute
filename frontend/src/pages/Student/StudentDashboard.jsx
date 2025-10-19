@@ -427,18 +427,31 @@ const StudentDashboard = () => {
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Link
-            to="/student/profile-setup"
+            to="/student/z-score-analysis"
             className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 border border-accent-100 group"
           >
             <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors">
-              <UserPlus className="h-6 w-6 text-blue-600" />
+              <TrendingUp className="h-6 w-6 text-blue-600" />
             </div>
             <h3 className="font-display font-semibold text-lg text-primary-400 mb-2">
-              Setup Profile
+              Z-Score Analysis
             </h3>
-            <p className="text-primary-300 text-sm">
-              Add your A/L results and career interests
+            <p className="text-primary-300 text-sm mb-4">
+              Assess your A/L performance and university eligibility
             </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-primary-300 text-xs">Current Z-Score</p>
+                <p className="text-2xl font-bold text-primary-400">
+                  {studentProfile.zScore ?? 'N/A'}
+                </p>
+              </div>
+              <div className="self-center">
+                <span className="inline-flex items-center px-3 py-2 bg-primary-600 text-white rounded-xl text-sm">
+                  View Analysis
+                </span>
+              </div>
+            </div>
           </Link>
 
           <Link

@@ -140,6 +140,12 @@ const StudentNavigation = () => {
               Mentors
             </Link>
             <Link
+              to="/student/pre-uni-courses"
+              className={getLinkClass("/student/pre-uni-courses")}
+            >
+              Pre-Uni Courses
+            </Link>
+            <Link
               to="/student/tutors"
               className={getLinkClass("/student/tutors")}
             >
