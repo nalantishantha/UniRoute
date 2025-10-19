@@ -42,13 +42,13 @@ const StudentDashboard = () => {
 
   useEffect(() => {
     fetchStudentProfile();
-    
+
     // Listen for profile update events
     const handleProfileUpdate = () => {
       console.log('Dashboard: Profile updated, refreshing data...');
       fetchStudentProfile();
     };
-    
+
     // Listen for page visibility changes
     const handleVisibilityChange = () => {
       if (!document.hidden) {
@@ -62,10 +62,10 @@ const StudentDashboard = () => {
         }
       }
     };
-    
+
     window.addEventListener('profileUpdated', handleProfileUpdate);
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    
+
     // Cleanup
     return () => {
       window.removeEventListener('profileUpdated', handleProfileUpdate);
@@ -95,9 +95,9 @@ const StudentDashboard = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const currentUser = getCurrentUser();
-      
+
       if (!currentUser || !currentUser.user_id) {
         setError('User not authenticated. Please log in.');
         setLoading(false);
@@ -120,7 +120,7 @@ const StudentDashboard = () => {
       const data = await response.json();
       console.log('Dashboard: Profile data received:', data);
 
-  if (data.success) {
+      if (data.success) {
         // Process the data for dashboard display
         const profileData = {
           name: data.student_data.full_name || data.student_data.username || 'Student Name',
@@ -130,10 +130,10 @@ const StudentDashboard = () => {
           zScore: null, // You can add this later from results table
           district: data.student_data.district || data.student_data.location || "Not specified",
           school: data.student_data.school || "Not specified",
-          profileImage: data.student_data.profile_picture 
-            ? (data.student_data.profile_picture.startsWith('http') 
-                ? `${data.student_data.profile_picture}?t=${Date.now()}` 
-                : `http://127.0.0.1:8000/media/${data.student_data.profile_picture}?t=${Date.now()}`)
+          profileImage: data.student_data.profile_picture
+            ? (data.student_data.profile_picture.startsWith('http')
+              ? `${data.student_data.profile_picture}?t=${Date.now()}`
+              : `http://127.0.0.1:8000/media/${data.student_data.profile_picture}?t=${Date.now()}`)
             : "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop",
           // Calculate profile completion percentage
           profileComplete: calculateProfileCompletion(data.student_data),
@@ -141,7 +141,7 @@ const StudentDashboard = () => {
           joinedDate: data.student_data.created_at,
           lastUpdated: data.student_data.updated_at,
         };
-        
+
         setStudentProfile(profileData);
 
         // After profile is set, fetch mentoring sessions for this student
@@ -174,7 +174,7 @@ const StudentDashboard = () => {
       data.district,
       data.school
     ];
-    
+
     const filledFields = fields.filter(field => field && field.trim() !== '').length;
     return Math.round((filledFields / fields.length) * 100);
   };
@@ -427,11 +427,11 @@ const StudentDashboard = () => {
     return (
       <div className="min-h-screen bg-gradient-to-r from-primary-100 to-white">
         <StudentNavigation />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
-              <Loader2 className="h-8 w-8 animate-spin text-primary-400 mx-auto mb-4" />
-              <p className="text-primary-400 text-lg">Loading your dashboard...</p>
+              <Loader2 className="w-8 h-8 mx-auto mb-4 animate-spin text-primary-400" />
+              <p className="text-lg text-primary-400">Loading your dashboard...</p>
             </div>
           </div>
         </main>
@@ -444,14 +444,14 @@ const StudentDashboard = () => {
     return (
       <div className="min-h-screen bg-gradient-to-r from-primary-100 to-white">
         <StudentNavigation />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="text-center">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
-              <AlertCircle className="h-8 w-8 text-red-600 mx-auto mb-4" />
-              <p className="text-red-600 mb-4">{error}</p>
-              <button 
+            <div className="max-w-md p-6 mx-auto border border-red-200 rounded-lg bg-red-50">
+              <AlertCircle className="w-8 h-8 mx-auto mb-4 text-red-600" />
+              <p className="mb-4 text-red-600">{error}</p>
+              <button
                 onClick={fetchStudentProfile}
-                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                className="px-4 py-2 text-white bg-red-600 rounded hover:bg-red-700"
               >
                 Try Again
               </button>
@@ -467,13 +467,13 @@ const StudentDashboard = () => {
     return (
       <div className="min-h-screen bg-gradient-to-r from-primary-100 to-white">
         <StudentNavigation />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="text-center">
-            <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 text-lg">No profile data available</p>
-            <Link 
+            <User className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+            <p className="text-lg text-gray-600">No profile data available</p>
+            <Link
               to="/student/profile-setup"
-              className="mt-4 inline-block bg-primary-600 text-white px-6 py-2 rounded hover:bg-primary-700"
+              className="inline-block px-6 py-2 mt-4 text-white rounded bg-primary-600 hover:bg-primary-700"
             >
               Set Up Profile
             </Link>
@@ -517,23 +517,23 @@ const StudentDashboard = () => {
       <StudentNavigation />
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
         {/* Welcome Section */}
-        <div className="bg-gradient-to-r from-primary-400 to-primary-600 rounded-2xl p-8 text-white mb-8">
+        <div className="p-8 mb-8 text-white bg-gradient-to-r from-primary-400 to-primary-600 rounded-2xl">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="font-display font-bold text-3xl mb-2">
+              <h1 className="mb-2 text-3xl font-bold font-display">
                 Welcome back, {studentProfile.name}!
               </h1>
-              <p className="text-primary-100 mb-4">
+              <p className="mb-4 text-primary-100">
                 Ready to explore your university options?
               </p>
               <div className="flex items-center space-x-4">
-                <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2">
+                <div className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-xl">
                   <div className="text-lg font-bold">
                     {studentProfile.profileComplete}%
                   </div>
-                  <div className="text-primary-100 text-sm">
+                  <div className="text-sm text-primary-100">
                     Profile Complete
                   </div>
                 </div>
@@ -543,9 +543,9 @@ const StudentDashboard = () => {
               {studentProfile.profileComplete < 100 && (
                 <Link
                   to="/student/edit-profile"
-                  className="bg-accent-200 text-primary-400 px-6 py-3 rounded-xl font-semibold hover:bg-accent-300 transition-all inline-flex items-center space-x-2"
+                  className="inline-flex items-center px-6 py-3 space-x-2 font-semibold transition-all bg-accent-200 text-primary-400 rounded-xl hover:bg-accent-300"
                 >
-                  <Edit className="h-5 w-5" />
+                  <Edit className="w-5 h-5" />
                   <span>Complete Profile</span>
                 </Link>
               )}
@@ -554,23 +554,23 @@ const StudentDashboard = () => {
         </div>
 
         {/* Quick Stats */}
-        {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* <div className="grid grid-cols-1 gap-6 mb-8 md:grid-cols-2 lg:grid-cols-4">
           {quickStats.map((stat, index) => {
             const IconComponent = stat.icon;
             return (
               <div
                 key={index}
-                className="bg-white rounded-2xl shadow-lg p-6 border border-accent-100"
+                className="p-6 bg-white border shadow-lg rounded-2xl border-accent-100"
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-primary-300 text-sm">{stat.label}</p>
+                    <p className="text-sm text-primary-300">{stat.label}</p>
                     <p className="text-2xl font-bold text-primary-400">
                       {stat.value}
                     </p>
                   </div>
                   <div className={`${stat.color} p-3 rounded-xl`}>
-                    <IconComponent className="h-6 w-6 text-white" />
+                    <IconComponent className="w-6 h-6 text-white" />
                   </div>
                 </div>
               </div>
@@ -579,29 +579,29 @@ const StudentDashboard = () => {
         </div> */}
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 gap-6 mb-8 md:grid-cols-2 lg:grid-cols-4">
           <Link
             to="/student/z-score-analysis"
-            className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 border border-accent-100 group"
+            className="p-6 transition-all transform bg-white border shadow-lg rounded-2xl hover:shadow-xl hover:-translate-y-1 border-accent-100 group"
           >
-            <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors">
-              <TrendingUp className="h-6 w-6 text-blue-600" />
+            <div className="flex items-center justify-center w-12 h-12 mb-4 transition-colors bg-blue-100 rounded-full group-hover:bg-blue-200">
+              <TrendingUp className="w-6 h-6 text-blue-600" />
             </div>
-            <h3 className="font-display font-semibold text-lg text-primary-400 mb-2">
+            <h3 className="mb-2 text-lg font-semibold font-display text-primary-400">
               Z-Score Analysis
             </h3>
-            <p className="text-primary-300 text-sm mb-4">
+            <p className="mb-4 text-sm text-primary-300">
               Assess your A/L performance and university eligibility
             </p>
             {/* <div className="flex items-center justify-between">
               <div>
-                <p className="text-primary-300 text-xs">Current Z-Score</p>
+                <p className="text-xs text-primary-300">Current Z-Score</p>
                 <p className="text-2xl font-bold text-primary-400">
                   {studentProfile.zScore ?? 'N/A'}
                 </p>
               </div>
               <div className="self-center">
-                <span className="inline-flex items-center px-3 py-2 bg-primary-600 text-white rounded-xl text-sm">
+                <span className="inline-flex items-center px-3 py-2 text-sm text-white bg-primary-600 rounded-xl">
                   View Analysis
                 </span>
               </div>
@@ -610,121 +610,121 @@ const StudentDashboard = () => {
 
           <Link
             to="/student/mentors"
-            className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 border border-accent-100 group"
+            className="p-6 transition-all transform bg-white border shadow-lg rounded-2xl hover:shadow-xl hover:-translate-y-1 border-accent-100 group"
           >
-            <div className="bg-purple-100 w-12 h-12 rounded-full flex items-center justify-center mb-4 group-hover:bg-purple-200 transition-colors">
-              <Users className="h-6 w-6 text-purple-600" />
+            <div className="flex items-center justify-center w-12 h-12 mb-4 transition-colors bg-purple-100 rounded-full group-hover:bg-purple-200">
+              <Users className="w-6 h-6 text-purple-600" />
             </div>
-            <h3 className="font-display font-semibold text-lg text-primary-400 mb-2">
+            <h3 className="mb-2 text-lg font-semibold font-display text-primary-400">
               Find Mentors
             </h3>
-            <p className="text-primary-300 text-sm">
+            <p className="text-sm text-primary-300">
               Connect with university graduates and professionals
             </p>
           </Link>
 
           <Link
             to="/student/tutors"
-            className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 border border-accent-100 group"
+            className="p-6 transition-all transform bg-white border shadow-lg rounded-2xl hover:shadow-xl hover:-translate-y-1 border-accent-100 group"
           >
-            <div className="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mb-4 group-hover:bg-green-200 transition-colors">
-              <BookMarked className="h-6 w-6 text-green-600" />
+            <div className="flex items-center justify-center w-12 h-12 mb-4 transition-colors bg-green-100 rounded-full group-hover:bg-green-200">
+              <BookMarked className="w-6 h-6 text-green-600" />
             </div>
-            <h3 className="font-display font-semibold text-lg text-primary-400 mb-2">
+            <h3 className="mb-2 text-lg font-semibold font-display text-primary-400">
               Find Tutors
             </h3>
-            <p className="text-primary-300 text-sm">
+            <p className="text-sm text-primary-300">
               Get help with your studies from qualified tutors
             </p>
           </Link>
 
           <Link
             to="/student/news"
-            className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 border border-accent-100 group"
+            className="p-6 transition-all transform bg-white border shadow-lg rounded-2xl hover:shadow-xl hover:-translate-y-1 border-accent-100 group"
           >
-            <div className="bg-orange-100 w-12 h-12 rounded-full flex items-center justify-center mb-4 group-hover:bg-orange-200 transition-colors">
-              <Newspaper className="h-6 w-6 text-orange-600" />
+            <div className="flex items-center justify-center w-12 h-12 mb-4 transition-colors bg-orange-100 rounded-full group-hover:bg-orange-200">
+              <Newspaper className="w-6 h-6 text-orange-600" />
             </div>
-            <h3 className="font-display font-semibold text-lg text-primary-400 mb-2">
+            <h3 className="mb-2 text-lg font-semibold font-display text-primary-400">
               News Feed
             </h3>
-            <p className="text-primary-300 text-sm">
+            <p className="text-sm text-primary-300">
               Stay updated with university news and announcements
             </p>
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Recent Activity */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-accent-100">
+            <div className="p-6 bg-white border shadow-lg rounded-2xl border-accent-100">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="font-display font-semibold text-2xl text-primary-400">
+                <h2 className="text-2xl font-semibold font-display text-primary-400">
                   Your sessions and activities
                 </h2>
-                <button className="text-accent-300 hover:text-accent-400 transition-colors">
-                  <ChevronRight className="h-5 w-5" />
+                <button className="transition-colors text-accent-300 hover:text-accent-400">
+                  <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
               <div className="space-y-4">
                 {/* Upcoming sessions removed from main card; they are merged into Recent Activities sidebar */}
                 {/* Mentoring Requests grouped by status */}
                 <div className="mb-4">
-                  <h4 className="font-medium text-primary-400 mb-2">Pending Requests</h4>
+                  <h4 className="mb-2 font-medium text-primary-400">Pending Requests</h4>
                   {mentoringGrouped.pending.length === 0 && (
-                    <p className="text-sm text-primary-300 mb-2">No pending requests</p>
+                    <p className="mb-2 text-sm text-primary-300">No pending requests</p>
                   )}
                   {mentoringGrouped.pending.map((r) => (
-                    <div key={`pending-${r.id}`} className="flex items-start space-x-4 p-3 bg-accent-50 rounded-xl mb-2">
-                      <div className="p-2 rounded-full bg-white text-yellow-500">
-                        <Clock className="h-5 w-5" />
+                    <div key={`pending-${r.id}`} className="flex items-start p-3 mb-2 space-x-4 bg-accent-50 rounded-xl">
+                      <div className="p-2 text-yellow-500 bg-white rounded-full">
+                        <Clock className="w-5 h-5" />
                       </div>
                       <div className="flex-1">
-                        <h5 className="text-primary-400 font-medium">{r.mentor || 'Mentor'}</h5>
+                        <h5 className="font-medium text-primary-400">{r.mentor || 'Mentor'}</h5>
                         <p className="text-sm text-primary-300">{r.subject}</p>
                         <p className="text-xs text-primary-300">{r.preferred_time || (r.created_at ? new Date(r.created_at).toLocaleString() : '')}</p>
                       </div>
-                      <div className="text-sm text-yellow-600 font-semibold">Pending</div>
+                      <div className="text-sm font-semibold text-yellow-600">Pending</div>
                     </div>
                   ))}
                 </div>
 
                 <div className="mb-4">
-                  <h4 className="font-medium text-primary-400 mb-2">Accepted Requests</h4>
+                  <h4 className="mb-2 font-medium text-primary-400">Accepted Requests</h4>
                   {mentoringGrouped.accepted.length === 0 && (
-                    <p className="text-sm text-primary-300 mb-2">No accepted requests</p>
+                    <p className="mb-2 text-sm text-primary-300">No accepted requests</p>
                   )}
                   {mentoringGrouped.accepted.map((r) => (
-                    <div key={`accepted-${r.id}`} className="flex items-start space-x-4 p-3 bg-accent-50 rounded-xl mb-2">
-                      <div className="p-2 rounded-full bg-white text-green-500">
-                        <Check className="h-5 w-5" />
+                    <div key={`accepted-${r.id}`} className="flex items-start p-3 mb-2 space-x-4 bg-accent-50 rounded-xl">
+                      <div className="p-2 text-green-500 bg-white rounded-full">
+                        <Check className="w-5 h-5" />
                       </div>
                       <div className="flex-1">
-                        <h5 className="text-primary-400 font-medium">{r.mentor || 'Mentor'}</h5>
+                        <h5 className="font-medium text-primary-400">{r.mentor || 'Mentor'}</h5>
                         <p className="text-sm text-primary-300">{r.subject}</p>
                         <p className="text-xs text-primary-300">{r.preferred_time || (r.created_at ? new Date(r.created_at).toLocaleString() : '')}</p>
                       </div>
-                      <div className="text-sm text-green-600 font-semibold">Accepted</div>
+                      <div className="text-sm font-semibold text-green-600">Accepted</div>
                     </div>
                   ))}
                 </div>
 
                 <div className="mb-4">
-                  <h4 className="font-medium text-primary-400 mb-2">Completed Requests</h4>
+                  <h4 className="mb-2 font-medium text-primary-400">Completed Requests</h4>
                   {mentoringGrouped.completed.length === 0 && (
-                    <p className="text-sm text-primary-300 mb-2">No completed requests</p>
+                    <p className="mb-2 text-sm text-primary-300">No completed requests</p>
                   )}
                   {mentoringGrouped.completed.map((r) => (
-                    <div key={`completed-${r.id}`} className="flex items-start space-x-4 p-3 bg-accent-50 rounded-xl mb-2">
-                      <div className="p-2 rounded-full bg-white text-gray-500">
-                        <Check className="h-5 w-5" />
+                    <div key={`completed-${r.id}`} className="flex items-start p-3 mb-2 space-x-4 bg-accent-50 rounded-xl">
+                      <div className="p-2 text-gray-500 bg-white rounded-full">
+                        <Check className="w-5 h-5" />
                       </div>
                       <div className="flex-1">
-                        <h5 className="text-primary-400 font-medium">{r.mentor || 'Mentor'}</h5>
+                        <h5 className="font-medium text-primary-400">{r.mentor || 'Mentor'}</h5>
                         <p className="text-sm text-primary-300">{r.subject}</p>
                         <p className="text-xs text-primary-300">{r.preferred_time || (r.created_at ? new Date(r.created_at).toLocaleString() : '')}</p>
                       </div>
-                      <div className="text-sm text-gray-600 font-semibold">Completed</div>
+                      <div className="text-sm font-semibold text-gray-600">Completed</div>
                     </div>
                   ))}
                 </div>
@@ -734,18 +734,18 @@ const StudentDashboard = () => {
                   return (
                     <div
                       key={activity.id}
-                      className="flex items-start space-x-4 p-4 bg-accent-50 rounded-xl hover:bg-accent-100 transition-colors cursor-pointer"
+                      className="flex items-start p-4 space-x-4 transition-colors cursor-pointer bg-accent-50 rounded-xl hover:bg-accent-100"
                     >
                       <div
                         className={`p-2 rounded-full bg-white ${activity.color}`}
                       >
-                        <IconComponent className="h-5 w-5" />
+                        <IconComponent className="w-5 h-5" />
                       </div>
                       <div className="flex-1">
                         <h3 className="font-medium text-primary-400">
                           {activity.title}
                         </h3>
-                        <p className="text-sm text-primary-300 mb-1">
+                        <p className="mb-1 text-sm text-primary-300">
                           {activity.description}
                         </p>
                         <p className="text-xs text-primary-300">
@@ -762,14 +762,14 @@ const StudentDashboard = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Featured Mentors */}
-            {/* <div className="bg-white rounded-2xl shadow-lg p-6 border border-accent-100">
+            {/* <div className="p-6 bg-white border shadow-lg rounded-2xl border-accent-100">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-display font-semibold text-xl text-primary-400">
+                <h3 className="text-xl font-semibold font-display text-primary-400">
                   Featured Mentors
                 </h3>
                 <Link
                   to="/student/mentors"
-                  className="text-accent-300 hover:text-accent-400 transition-colors text-sm"
+                  className="text-sm transition-colors text-accent-300 hover:text-accent-400"
                 >
                   View All
                 </Link>
@@ -778,20 +778,20 @@ const StudentDashboard = () => {
                 {featuredMentors.map((mentor) => (
                   <div
                     key={mentor.id}
-                    className="flex items-center space-x-3 p-3 rounded-xl hover:bg-accent-50 transition-colors cursor-pointer"
+                    className="flex items-center p-3 space-x-3 transition-colors cursor-pointer rounded-xl hover:bg-accent-50"
                   >
                     <img
                       src={mentor.image}
                       alt={mentor.name}
-                      className="w-12 h-12 rounded-full object-cover"
+                      className="object-cover w-12 h-12 rounded-full"
                     />
                     <div className="flex-1">
-                      <h4 className="font-medium text-primary-400 text-sm">
+                      <h4 className="text-sm font-medium text-primary-400">
                         {mentor.name}
                       </h4>
                       <p className="text-xs text-primary-300">{mentor.field}</p>
                       <div className="flex items-center space-x-1">
-                        <Star className="h-3 w-3 text-accent-300 fill-current" />
+                        <Star className="w-3 h-3 fill-current text-accent-300" />
                         <span className="text-xs">{mentor.rating}</span>
                       </div>
                     </div>
@@ -806,9 +806,9 @@ const StudentDashboard = () => {
             </div> */}
 
             {/* Upcoming Events */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-accent-100">
+            <div className="p-6 bg-white border shadow-lg rounded-2xl border-accent-100">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-display font-semibold text-xl text-primary-400">
+                <h3 className="text-xl font-semibold font-display text-primary-400">
                   Upcoming Sessions
                 </h3>
               </div>
@@ -816,17 +816,17 @@ const StudentDashboard = () => {
                 {upcomingSessions.length === 0 && (
                   <p className="text-sm text-primary-300">No upcoming mentoring sessions</p>
                 )}
-                {upcomingSessions.slice(0,5).map((s) => (
+                {upcomingSessions.slice(0, 5).map((s) => (
                   <div
                     key={`side-up-${s.id}`}
-                    className="p-3 border border-accent-100 rounded-xl hover:bg-accent-50 transition-colors cursor-pointer"
+                    className="p-3 transition-colors border cursor-pointer border-accent-100 rounded-xl hover:bg-accent-50"
                   >
                     <div className="flex items-start space-x-3">
                       <div className={`p-2 rounded-full bg-white text-blue-500`}>
-                        <Calendar className="h-4 w-4" />
+                        <Calendar className="w-4 h-4" />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-medium text-primary-400 text-sm mb-1">{`Upcoming Mentoring Session with ${s.mentor || 'Mentor'}`}</h4>
+                        <h4 className="mb-1 text-sm font-medium text-primary-400">{`Upcoming Mentoring Session with ${s.mentor || 'Mentor'}`}</h4>
                         <p className="text-xs text-primary-300">{s.session_date ? new Date(s.session_date).toLocaleString() : (s.scheduled_at ? new Date(s.scheduled_at).toLocaleString() : '')}</p>
                       </div>
                     </div>

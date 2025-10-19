@@ -418,27 +418,6 @@ export default function Mentoring() {
             </div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-neutral-grey">
-                  Average Rating
-                </p>
-                <div className="flex items-center mt-2 space-x-2">
-                  <p className="text-2xl font-bold text-neutral-black">
-                    {dynamicStats.averageRating}
-                  </p>
-                  <Star className="w-5 h-5 fill-current text-warning" />
-                </div>
-              </div>
-              <div className="flex items-center justify-center w-12 h-12 bg-warning/20 rounded-xl">
-                <Star className="w-6 h-6 text-yellow-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Tabs */}

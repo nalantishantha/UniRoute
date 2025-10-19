@@ -30,12 +30,6 @@ const navigation = [
   },
   { name: "Mentoring", href: "/counsellor/mentoring", icon: Users },
   { name: "Calendar", href: "/counsellor/calendar", icon: Calendar },
-  { name: "Earnings", href: "/counsellor/earnings", icon: DollarSign },
-  {
-    name: "Feedback",
-    href: "/counsellor/feedback",
-    icon: MessageSquare,
-  },
   { name: "Profile", href: "/counsellor/profile", icon: User },
   { name: "Settings", href: "/counsellor/settings", icon: Settings },
 ];

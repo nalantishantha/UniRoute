@@ -86,31 +86,45 @@ export const isAuthenticated = () => {
   const user = localStorage.getItem('user');
   const logoutTimestamp = localStorage.getItem('logout_timestamp');
 
+  console.log('isAuthenticated check - user:', user ? 'exists' : 'null', 'logout_timestamp:', logoutTimestamp);
+
   // If there's a recent logout timestamp, user is not authenticated
   if (logoutTimestamp) {
     const logoutTime = parseInt(logoutTimestamp);
     const currentTime = Date.now();
+    const timeDiff = currentTime - logoutTime;
+
+    console.log('Logout timestamp found - age:', Math.floor(timeDiff / 60000), 'minutes');
 
     // Clear logout timestamp after 1 hour to allow fresh logins
-    if (currentTime - logoutTime > 3600000) {
+    if (timeDiff > 3600000) {
+      console.log('Old logout timestamp, removing it');
       localStorage.removeItem('logout_timestamp');
     } else if (user) {
       // User data exists but there's a recent logout, clear it
+      console.log('Recent logout detected with user data, clearing auth');
       clearAuth();
       return false;
     }
   }
 
-  return user !== null;
+  const isAuth = user !== null;
+  console.log('isAuthenticated result:', isAuth);
+  return isAuth;
 };
 
 export const getCurrentUser = () => {
+  // First check if user data exists before calling isAuthenticated
+  const userData = localStorage.getItem('user');
+  
   // Check if user is authenticated first
   if (!isAuthenticated()) {
+    console.log('getCurrentUser: not authenticated');
     return null;
   }
 
   const user = localStorage.getItem('user');
+  console.log('getCurrentUser: returning user data');
   return user ? JSON.parse(user) : null;
 };
 
@@ -201,7 +215,8 @@ export const initializeSessionGuard = () => {
       currentPath.startsWith('/pre-mentor') ||
       currentPath.startsWith('/student') ||
       currentPath.startsWith('/university') ||
-      currentPath.startsWith('/company');
+      currentPath.startsWith('/company') ||
+      currentPath.startsWith('/counsellor');
 
     if (isProtectedRoute) {
       const user = getCurrentUser();
@@ -215,19 +230,27 @@ export const initializeSessionGuard = () => {
         const currentTime = Date.now();
 
         if (currentTime - logoutTime < 3600000) { // Within 1 hour of logout
-          console.log('Recent logout detected, redirecting to login');
+          console.log('Recent logout detected in session guard, redirecting to login');
           clearAuth();
           window.location.replace('/login');
           return;
+        } else {
+          // Remove old logout timestamp
+          console.log('Removing old logout timestamp from session guard');
+          localStorage.removeItem('logout_timestamp');
         }
       }
 
       // If no user or invalid user type for the route
       if (!user) {
-        console.log('No authenticated user, redirecting to login');
+        console.log('Session guard: No authenticated user found, redirecting to login');
+        console.log('  localStorage user:', localStorage.getItem('user') ? 'exists' : 'null');
+        console.log('  isAuthenticated():', isAuthenticated());
         clearAuth();
         window.location.replace('/login');
         return;
+      } else {
+        console.log('Session guard: User found:', user.user_type, 'for path:', currentPath);
       }
 
       // Define route access rules
@@ -238,7 +261,8 @@ export const initializeSessionGuard = () => {
         '/pre-mentor': ['pre_mentor'],
         '/student': ['student'],
         '/university': ['institution'],
-        '/company': ['company']
+        '/company': ['company'],
+        '/counsellor': ['counsellor']
       };
 
       // Check route-specific access

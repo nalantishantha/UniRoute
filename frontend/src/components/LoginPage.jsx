@@ -72,7 +72,7 @@ const LoginPage = () => {
         case 'company':
           navigate('/company/dashboard-edit', { replace: true });
           break;
-        case 'counselor':
+        case 'counsellor':
           navigate('/counsellor/dashboard', { replace: true });
           break;
         default:
@@ -127,24 +127,37 @@ const LoginPage = () => {
           text: "Login successful! Welcome back!",
         });
 
-        // Clear any previous logout timestamp
+        console.log('Login successful, clearing old auth data and setting new data...');
+
+        // Clear any previous logout timestamp first - this is critical
         localStorage.removeItem('logout_timestamp');
+        console.log('Cleared logout timestamp');
 
         // Clear any existing auth data first
         localStorage.removeItem('user');
         localStorage.removeItem('authToken');
         localStorage.removeItem('refreshToken');
         sessionStorage.clear();
+        console.log('Cleared old auth data');
 
         // Set new authentication data
         localStorage.setItem("user", JSON.stringify(data.user));
+        console.log('Set new user data:', data.user.user_type);
 
         // Set login timestamp for session management
         localStorage.setItem('login_timestamp', Date.now().toString());
+        console.log('Set login timestamp');
 
         setTimeout(() => {
+          // Double-check that logout timestamp is cleared and user data is set
+          localStorage.removeItem('logout_timestamp');
+          if (!localStorage.getItem('user')) {
+            console.log('Re-setting user data after timeout');
+            localStorage.setItem("user", JSON.stringify(data.user));
+          }
+
           const userType = data.user.user_type;
-          console.log("User type:", userType);
+          console.log("User type for redirect:", userType);
 
           switch (userType) {
             case "admin":
@@ -167,6 +180,9 @@ const LoginPage = () => {
               break;
             case 'company':
               window.location.replace('/company/dashboard-edit');
+              break;
+            case 'counsellor':
+              window.location.replace('/counsellor/dashboard');
               break;
             default:
               window.location.replace("/student/home");
