@@ -33,6 +33,7 @@ import Button from "../../../components/ui/Button";
 import { useChatContext } from "../../../context/ChatContext";
 import { mentoringAPI } from "../../../utils/mentoringAPI";
 import { joinMentoringVideoCall } from "../../../utils/videoCallAPI";
+import { getCurrentUser } from "../../../utils/auth";
 import {
   DeclineModal,
   CancelSessionModal,
@@ -266,8 +267,14 @@ export default function Mentoring() {
   const handleJoinVideoCall = async (sessionId) => {
     try {
       setError(null);
+      // Get the current user's user_id (not mentor_id)
+      const currentUser = getCurrentUser();
+      if (!currentUser || !currentUser.user_id) {
+        setError("Please log in to join the video call");
+        return;
+      }
       // Join video call - opens in new window
-      await joinMentoringVideoCall(sessionId, MENTOR_ID, "mentor");
+      await joinMentoringVideoCall(sessionId, currentUser.user_id, "mentor");
     } catch (err) {
       console.error("Error joining video call:", err);
       setError("Failed to join video call. Please try again.");
