@@ -4,6 +4,7 @@ import StatsCards from "./StatsCards";
 import RecentActivities from "./RecentActivities";
 import UpcomingSessions from "./UpcomingSessions";
 import PerformanceMetrics from "./PerformanceMetrics";
+import InternshipAds from "./InternshipAds";
 import MentorRequestNotice from "../../../components/PreMentor/MentorRequestNotice";
 
 export default function PreMentorDashboard() {
@@ -117,6 +118,9 @@ export default function PreMentorDashboard() {
         {/* Upcoming Sessions */}
         <UpcomingSessions itemVariants={itemVariants} dashboardData={dashboardData} />
       </div>
+
+      {/* Internship Opportunities */}
+      <InternshipAds itemVariants={itemVariants} />
 
       {/* Performance Metrics */}
       <PerformanceMetrics itemVariants={itemVariants} dashboardData={dashboardData} />

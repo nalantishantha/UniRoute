@@ -12,6 +12,7 @@ import {
   X,
   ChevronRight,
   Settings,
+  Briefcase,
 } from "lucide-react";
 import { logout, getCurrentUser } from "../../utils/auth";
 import { cn } from "../../utils/cn";
@@ -27,6 +28,11 @@ const navigation = [
     name: "Tutoring",
     href: "/pre-mentor/tutoring",
     icon: GraduationCap,
+  },
+  {
+    name: "Internships",
+    href: "/pre-mentor/internships",
+    icon: Briefcase,
   },
   {
     name: "Earnings",

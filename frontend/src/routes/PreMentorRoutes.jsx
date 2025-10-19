@@ -7,6 +7,7 @@ import {
   PreMentorProfile,
   PreMentorSettings,
 } from "../pages/PreMentor";
+import PreMentorInternshipOpportunities from "../pages/PreMentor/InternshipOpportunities/PreMentorInternshipOpportunities";
 
 const PreMentorRoutes = () => {
   return (
@@ -14,6 +15,7 @@ const PreMentorRoutes = () => {
       <Route path="/" element={<PreMentorLayout />}>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<PreMentorDashboard />} />
+        <Route path="internships" element={<PreMentorInternshipOpportunities />} />
         <Route path="profile" element={<PreMentorProfile />} />
         <Route path="settings" element={<PreMentorSettings />} />
       </Route>

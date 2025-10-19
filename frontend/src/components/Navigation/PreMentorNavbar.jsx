@@ -41,6 +41,8 @@ export default function PreMentorNavbar({ onMenuClick }) {
         return "Dashboard";
       case "/pre-mentor/tutoring":
         return "Tutoring";
+      case "/pre-mentor/internships":
+        return "Internships";
       case "/pre-mentor/earnings":
         return "Earnings";
       case "/pre-mentor/profile":
@@ -64,6 +66,8 @@ export default function PreMentorNavbar({ onMenuClick }) {
         return "Track your tutoring progress and manage activities";
       case "/pre-mentor/tutoring":
         return "Manage your tutoring sessions and students";
+      case "/pre-mentor/internships":
+        return "Explore new internship opportunities";
       case "/pre-mentor/earnings":
         return "View your earnings and payment history";
       case "/pre-mentor/profile":
