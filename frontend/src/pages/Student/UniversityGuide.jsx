@@ -35,6 +35,8 @@ const UniversityGuide = () => {
   const [universities, setUniversities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [programsModal, setProgramsModal] = useState({ open: false, programs: [], universityName: '' });
+  const [quickStats, setQuickStats] = useState(null);
+  const [loadingStats, setLoadingStats] = useState(true);
 
   // Normalize program / title strings to Title Case (e.g. "INFORMATION COMMUNICATION TECHNOLOGY" -> "Information Communication Technology")
   const normalizeTitle = (input) => {
@@ -96,6 +98,30 @@ const UniversityGuide = () => {
     return () => {
       mounted = false;
     };
+  }, []);
+  
+  useEffect(() => {
+    let mounted = true;
+    setLoadingStats(true);
+    fetch('/api/universities/quick-stats/')
+      .then(res => res.json())
+      .then(data => {
+        if (!mounted) return;
+        if (data?.success && data.stats) {
+          setQuickStats(data.stats);
+        } else {
+          setQuickStats(null);
+        }
+      })
+      .catch(err => {
+        console.error('Failed to fetch quick stats', err);
+        setQuickStats(null);
+      })
+      .finally(() => {
+        if (mounted) setLoadingStats(false);
+      });
+
+    return () => { mounted = false };
   }, []);
 
   const universityTypes = [
@@ -419,25 +445,19 @@ const UniversityGuide = () => {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-900 mb-2">17</div>
-              <div className="text-blue-800">National Universities</div>
+              <div className="text-3xl font-bold text-blue-900 mb-2">{loadingStats ? '—' : (quickStats?.universities_count ?? 0)}</div>
+              <div className="text-blue-800">Universities</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-900 mb-2">
-                20+
-              </div>
-              <div className="text-blue-800">Private Universities</div>
+              <div className="text-3xl font-bold text-blue-900 mb-2">{loadingStats ? '—' : (quickStats?.faculties_count ?? 0)}</div>
+              <div className="text-blue-800">Faculties</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-900 mb-2">
-                120,000+
-              </div>
+              <div className="text-3xl font-bold text-blue-900 mb-2">{loadingStats ? '—' : (quickStats?.students_count ?? 0).toLocaleString()}</div>
               <div className="text-blue-800">University Students</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-900 mb-2">
-                500+
-              </div>
+              <div className="text-3xl font-bold text-blue-900 mb-2">{loadingStats ? '—' : (quickStats?.degree_programs_count ?? 0)}</div>
               <div className="text-blue-800">Degree Programs</div>
             </div>
           </div>

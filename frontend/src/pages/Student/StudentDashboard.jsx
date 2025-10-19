@@ -377,12 +377,6 @@ const StudentDashboard = () => {
               <div className="flex items-center space-x-4">
                 <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2">
                   <div className="text-lg font-bold">
-                    {studentProfile.zScore}
-                  </div>
-                  <div className="text-primary-100 text-sm">Your Z-Score</div>
-                </div>
-                <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2">
-                  <div className="text-lg font-bold">
                     {studentProfile.profileComplete}%
                   </div>
                   <div className="text-primary-100 text-sm">
@@ -392,19 +386,21 @@ const StudentDashboard = () => {
               </div>
             </div>
             <div className="mt-6 md:mt-0">
-              <Link
-                to="/student/edit-profile"
-                className="bg-accent-200 text-primary-400 px-6 py-3 rounded-xl font-semibold hover:bg-accent-300 transition-all inline-flex items-center space-x-2"
-              >
-                <Edit className="h-5 w-5" />
-                <span>Complete Profile</span>
-              </Link>
+              {studentProfile.profileComplete < 100 && (
+                <Link
+                  to="/student/edit-profile"
+                  className="bg-accent-200 text-primary-400 px-6 py-3 rounded-xl font-semibold hover:bg-accent-300 transition-all inline-flex items-center space-x-2"
+                >
+                  <Edit className="h-5 w-5" />
+                  <span>Complete Profile</span>
+                </Link>
+              )}
             </div>
           </div>
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {quickStats.map((stat, index) => {
             const IconComponent = stat.icon;
             return (
@@ -426,23 +422,36 @@ const StudentDashboard = () => {
               </div>
             );
           })}
-        </div>
+        </div> */}
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Link
-            to="/student/profile-setup"
+            to="/student/z-score-analysis"
             className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 border border-accent-100 group"
           >
             <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors">
-              <UserPlus className="h-6 w-6 text-blue-600" />
+              <TrendingUp className="h-6 w-6 text-blue-600" />
             </div>
             <h3 className="font-display font-semibold text-lg text-primary-400 mb-2">
-              Setup Profile
+              Z-Score Analysis
             </h3>
-            <p className="text-primary-300 text-sm">
-              Add your A/L results and career interests
+            <p className="text-primary-300 text-sm mb-4">
+              Assess your A/L performance and university eligibility
             </p>
+            {/* <div className="flex items-center justify-between">
+              <div>
+                <p className="text-primary-300 text-xs">Current Z-Score</p>
+                <p className="text-2xl font-bold text-primary-400">
+                  {studentProfile.zScore ?? 'N/A'}
+                </p>
+              </div>
+              <div className="self-center">
+                <span className="inline-flex items-center px-3 py-2 bg-primary-600 text-white rounded-xl text-sm">
+                  View Analysis
+                </span>
+              </div>
+            </div> */}
           </Link>
 
           <Link

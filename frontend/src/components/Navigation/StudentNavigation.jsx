@@ -145,14 +145,20 @@ const StudentNavigation = () => {
             >
               Tutors
             </Link>
-            <Link to="/student/news" className={getLinkClass("/student/news")}>
-              News
+            <Link
+              to="/student/pre-uni-courses"
+              className={getLinkClass("/student/pre-uni-courses")}
+            >
+              Pre-Uni Courses
             </Link>
             <Link
               to="/student/career-counseling"
               className={getLinkClass("/student/career-counseling")}
             >
               Counseling
+            </Link>
+            <Link to="/student/news" className={getLinkClass("/student/news")}>
+              News
             </Link>
           </div>
 
@@ -284,12 +290,17 @@ const StudentNavigation = () => {
           </div>
 
           <div className="md:hidden">
-            <Link
-              to="/student/dashboard"
-              className="bg-primary-200 text-primary-800 px-4 py-2 rounded-lg text-sm font-medium hover:bg-white transition-colors duration-200"
-            >
-              Dashboard
-            </Link>
+            <div className="flex space-x-2 items-center">
+              <Link to="/student/university-guide" className="text-white/90 hover:text-primary-100 px-3 py-2 rounded text-sm transition-colors">Universities</Link>
+              <Link to="/student/mentors" className="text-white/90 hover:text-primary-100 px-3 py-2 rounded text-sm transition-colors">Mentors</Link>
+              <Link to="/student/tutors" className="text-white/90 hover:text-primary-100 px-3 py-2 rounded text-sm transition-colors">Tutors</Link>
+              <Link to="/student/pre-uni-courses" className="text-white/90 hover:text-primary-100 px-3 py-2 rounded text-sm transition-colors">Pre-Uni</Link>
+              <Link to="/student/career-counseling" className="text-white/90 hover:text-primary-100 px-3 py-2 rounded text-sm transition-colors">Counseling</Link>
+              <Link to="/student/news" className="text-white/90 hover:text-primary-100 px-3 py-2 rounded text-sm transition-colors">News</Link>
+              <Link to="/about" className="text-white/90 hover:text-primary-100 px-3 py-2 rounded text-sm transition-colors">About</Link>
+              <Link to="/contact" className="text-white/90 hover:text-primary-100 px-3 py-2 rounded text-sm transition-colors">Contact</Link>
+              <Link to="/student/dashboard" className="bg-primary-200 text-primary-800 px-4 py-2 rounded-lg text-sm font-medium hover:bg-white transition-colors duration-200">Dashboard</Link>
+            </div>
           </div>
           </div>
         </div>
