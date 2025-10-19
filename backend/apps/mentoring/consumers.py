@@ -110,9 +110,9 @@ class VideoCallConsumer(AsyncWebsocketConsumer):
         # Add participant to database
         await self.add_participant(self.room_id, self.user_id, self.role)
         
-        # Update room status if needed
-        participant_count = await self.get_participant_count(self.room_id)
-        print(f"📊 Participant count after join: {participant_count}")
+        # Update room status if needed - use ONLINE participant count
+        participant_count = await self.get_online_participant_count(self.room_id)
+        print(f"📊 Online participant count after join: {participant_count}")
         
         if participant_count >= 2:
             await self.update_room_status(self.room_id, 'active')
