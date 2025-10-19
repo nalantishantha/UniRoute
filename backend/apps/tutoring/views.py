@@ -922,9 +922,8 @@ def create_tutoring_booking(request):
             
             booking = TutoringBooking.objects.create(**booking_data)
             
-            # Calculate payment amount
-            # Base rate per session (this should come from tutor's pricing)
-            base_rate = Decimal('2000.00')  # Rs. 2000 per session - should be dynamic
+            # Calculate payment amount using tutor's hourly rate
+            base_rate = booking.tutor.hourly_rate  # Dynamic rate from tutor profile
             
             if payment_type == 'monthly':
                 amount = base_rate * 4 * Decimal('0.95')  # 5% discount
@@ -972,21 +971,33 @@ def confirm_tutoring_booking_payment(request, booking_id):
             }, status=400)
         
         # Validate payment data
-        required_payment_fields = ['amount', 'payment_method', 'transaction_id']
+        required_payment_fields = ['amount', 'payment_method']
         for field in required_payment_fields:
             if field not in data:
                 return JsonResponse({'status': 'error', 'message': f'{field} is required'}, status=400)
         
         with transaction.atomic():
             # Create payment record
-            payment = TutoringPayments.objects.create(
-                student=booking.student,
-                session=None,  # This is for recurring booking, not single session
-                amount=Decimal(str(data['amount'])),
-                payment_method=data['payment_method'],
-                paid_at=timezone.now(),
-                created_at=timezone.now()
-            )
+            payment_data = {
+                'student': booking.student,
+                'booking': booking,
+                'amount': Decimal(str(data['amount'])),
+                'payment_method': data['payment_method'],
+                'paid_at': timezone.now(),
+                'created_at': timezone.now()
+            }
+            
+            # Add optional card payment details if provided
+            if data.get('card_type'):
+                payment_data['card_type'] = data['card_type']
+            if data.get('card_holder_name'):
+                payment_data['card_holder_name'] = data['card_holder_name']
+            if data.get('card_last_four'):
+                payment_data['card_last_four'] = data['card_last_four']
+            if data.get('transaction_id'):
+                payment_data['transaction_id'] = data['transaction_id']
+            
+            payment = TutoringPayments.objects.create(**payment_data)
             
             # Update booking status to confirmed
             booking.status = 'confirmed'

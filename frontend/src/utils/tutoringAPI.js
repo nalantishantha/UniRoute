@@ -114,18 +114,37 @@ export const tutoringAPI = {
 
     // Create a recurring tutoring booking
     createBooking: async (bookingData) => {
-        const response = await fetch(`${API_BASE_URL}/tutoring/bookings/create/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(bookingData),
-        });
-        const data = await response.json();
-        if (data.status !== 'success') {
-            throw new Error(data.message || 'Failed to create booking');
+        try {
+            const response = await fetch(`${API_BASE_URL}/tutoring/bookings/create/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(bookingData),
+            });
+            
+            if (!response.ok) {
+                // Try to get error message from response
+                try {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `Server error: ${response.status}`);
+                } catch {
+                    throw new Error(`Server error: ${response.status} - ${response.statusText}`);
+                }
+            }
+            
+            const data = await response.json();
+            if (data.status !== 'success') {
+                throw new Error(data.message || 'Failed to create booking');
+            }
+            return data;
+        } catch (error) {
+            // More specific error messages
+            if (error.message.includes('Failed to fetch')) {
+                throw new Error('Cannot connect to server. Please check if the backend is running.');
+            }
+            throw error;
         }
-        return data;
     },
 
     // Confirm payment for a booking
