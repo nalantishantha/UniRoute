@@ -1,0 +1,14 @@
+# ngrok configuration for UniRoute video calling
+# This allows multiple tunnels with one ngrok command
+
+version: "2"
+authtoken: YOUR_AUTH_TOKEN_HERE
+
+tunnels:
+  backend:
+    proto: http
+    addr: 8000
+    
+  frontend:
+    proto: http
+    addr: 5173

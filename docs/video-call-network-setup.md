@@ -3,9 +3,11 @@
 ## Understanding the Architecture
 
 ### Current Problem
+
 When you use `localhost:5173` or `localhost:8000`, these URLs only work on the **same computer** that's running the servers. Other laptops on your network cannot access "localhost" because it refers to their own local machine, not your server.
 
 ### The Solution
+
 Use your **main laptop's local network IP address** instead of "localhost" so other devices can connect.
 
 ---
@@ -50,12 +52,14 @@ Use your **main laptop's local network IP address** instead of "localhost" so ot
 
 ### Key Components:
 
-1. **Django Backend (Port 8000)**: 
+1. **Django Backend (Port 8000)**:
+
    - REST API for room management
    - WebSocket server for signaling (offer/answer/ICE candidates)
    - Database for storing room and participant info
 
 2. **React Frontend (Port 5173)**:
+
    - User interface for video calls
    - WebRTC peer connection management
    - Camera/microphone access
@@ -129,11 +133,11 @@ Or update `vite.config.js`:
 ```javascript
 export default defineConfig({
   server: {
-    host: '0.0.0.0',  // Listen on all interfaces
+    host: "0.0.0.0", // Listen on all interfaces
     port: 5173,
   },
   // ... rest of config
-})
+});
 ```
 
 ### Step 5: Update Frontend API URLs
@@ -151,7 +155,7 @@ const websocketUrl = `ws://192.168.1.100:8000/ws/video-call/${roomId}/`;
 Or better, use environment variables:
 
 ```javascript
-const API_HOST = import.meta.env.VITE_API_HOST || 'localhost';
+const API_HOST = import.meta.env.VITE_API_HOST || "localhost";
 const websocketUrl = `ws://${API_HOST}:8000/ws/video-call/${roomId}/`;
 ```
 
@@ -160,11 +164,13 @@ const websocketUrl = `ws://${API_HOST}:8000/ws/video-call/${roomId}/`;
 Now on **Laptop 1** (Mentor) and **Laptop 2** (Student), use your main laptop's IP:
 
 **Mentor (Laptop 1)**:
+
 ```
 http://192.168.1.100:5173/video-call?session_id=116&user_id=19&role=mentor
 ```
 
 **Student (Laptop 2)**:
+
 ```
 http://192.168.1.100:5173/video-call?session_id=116&user_id=20&role=student
 ```
@@ -230,6 +236,7 @@ The server is **NO LONGER INVOLVED** - it only helped set up the connection.
 ### Problem: "Cannot connect to http://192.168.1.100:5173"
 
 **Solutions**:
+
 1. Verify your IP address hasn't changed: `ipconfig getifaddr en0`
 2. Check that Vite is running with `--host 0.0.0.0`
 3. Check firewall settings
@@ -238,6 +245,7 @@ The server is **NO LONGER INVOLVED** - it only helped set up the connection.
 ### Problem: "WebSocket connection failed"
 
 **Solutions**:
+
 1. Check Django is running with `0.0.0.0:8000`
 2. Verify CORS settings include your IP address
 3. Check WebSocket URL uses correct IP address
@@ -246,6 +254,7 @@ The server is **NO LONGER INVOLVED** - it only helped set up the connection.
 ### Problem: "Video doesn't show up"
 
 **Solutions**:
+
 1. Grant camera/microphone permissions in browser
 2. Check browser console for WebRTC errors
 3. Verify both users are connected (check Django logs)
@@ -257,7 +266,7 @@ The server is **NO LONGER INVOLVED** - it only helped set up the connection.
 
 - [ ] Find main laptop's IP address
 - [ ] Update `ALLOWED_HOSTS` in Django settings
-- [ ] Update `CORS_ALLOWED_ORIGINS` in Django settings  
+- [ ] Update `CORS_ALLOWED_ORIGINS` in Django settings
 - [ ] Start Django with `python manage.py runserver 0.0.0.0:8000`
 - [ ] Start Vite with `npm run dev -- --host 0.0.0.0`
 - [ ] Update WebSocket URLs to use IP address
@@ -269,16 +278,19 @@ The server is **NO LONGER INVOLVED** - it only helped set up the connection.
 ## 🎓 Summary
 
 **Why localhost doesn't work**:
+
 - `localhost` = "this computer only"
 - Each laptop has its own "localhost"
 - Can't reach servers on another computer
 
 **Why IP address works**:
+
 - `192.168.1.100` = specific computer on the network
 - All devices on same WiFi can reach it
 - Acts as a "shared server" for all laptops
 
 **How video call works**:
+
 1. Both browsers connect to YOUR main laptop's servers (via IP)
 2. Server coordinates WebRTC connection setup (signaling)
 3. Browsers establish DIRECT peer-to-peer connection
