@@ -277,30 +277,6 @@ def login_user(request):
                     redirect_path = get_redirect_path(final_user_type)
                     dashboard_type = get_dashboard_type(final_user_type)
                     
-                    elif user_type_name == 'uni_student':
-                        try:
-                            from apps.university_students.models import UniversityStudents
-                            uni_student = UniversityStudents.objects.get(user=user)
-                            additional_info = {
-                                'university_student_id': uni_student.university_student_id,
-                                'registration_number': uni_student.registration_number,
-                                'university_id': uni_student.university_id,
-                                'faculty_id': uni_student.faculty_id,
-                                'year_of_study': uni_student.year_of_study
-                            }
-                            
-                            # Check if this university student is also a tutor
-                            try:
-                                from apps.tutoring.models import Tutors
-                                tutor = Tutors.objects.get(university_student_id=uni_student.university_student_id)
-                                additional_info['tutor_id'] = tutor.tutor_id
-                                print(f"User is also a tutor with ID: {tutor.tutor_id}")
-                            except Tutors.DoesNotExist:
-                                pass
-                                
-                        except Exception as e:
-                            print(f"Error fetching university student info: {e}")
-                            pass
                     
                     return JsonResponse({
                         'success': True,
