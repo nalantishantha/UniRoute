@@ -1,68 +1,117 @@
-import React, { useState } from 'react';
-import CompanySidebar from '../../components/Navigation/CompanySidebar'; // CHANGED: Import CompanySidebar
-import CompanyDashboardNavbar from '../../components/Navigation/CompanyDashboardNavbar';
-import './AdPublish.css';
+import React, { useState, useEffect } from "react";
+import CompanySidebar from "../../components/Navigation/CompanySidebar"; // CHANGED: Import CompanySidebar
+import CompanyDashboardNavbar from "../../components/Navigation/CompanyDashboardNavbar";
+import "./AdPublish.css";
+import {
+  uploadAdMedia,
+  payForCompanyAd,
+  listCompanyAds,
+} from "../../services/adService";
 
 const AdPublish = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // CHANGED: Rename from isSidebarExpanded to isSidebarOpen
   const [currentStep, setCurrentStep] = useState(1);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  
+
   // Form Data
   const [adData, setAdData] = useState({
-    title: '',
-    description: '',
-    category: 'Technology',
-    targetAudience: 'All Students',
-    budget: '',
-    duration: '7',
-    adType: 'banner',
-    imageUrl: '',
-    websiteUrl: '',
-    company: '',
-    contactEmail: '',
-    startDate: '',
-    endDate: '',
-    keywords: '',
-    agreeTerms: false
+    title: "",
+    description: "",
+    category: "Technology",
+    targetAudience: "All Students",
+    budget: "",
+    duration: "7",
+    adType: "banner",
+    imageUrl: "",
+    websiteUrl: "",
+    company: "",
+    contactEmail: "",
+    startDate: "",
+    endDate: "",
+    keywords: "",
+    agreeTerms: false,
   });
 
   // Payment Data
   const [paymentData, setPaymentData] = useState({
-    paymentMethod: 'credit-card',
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-    cardName: '',
-    email: '',
-    billingAddress: ''
+    paymentMethod: "credit-card",
+    cardNumber: "",
+    expiryDate: "",
+    cvv: "",
+    cardName: "",
+    email: "",
+    billingAddress: "",
   });
 
   const [videoFile, setVideoFile] = useState(null);
-  const [videoPreview, setVideoPreview] = useState('');
+  const [videoPreview, setVideoPreview] = useState("");
+  const [ads, setAds] = useState([]);
+  const yourCompanyId = 1; // Replace with actual company ID from context or props
 
-  const categories = ['Technology', 'Education', 'Healthcare', 'Finance', 'Marketing', 'Business', 'Other'];
-  const audiences = ['All Students', 'Undergraduate', 'Graduate', 'Faculty', 'Alumni'];
-  const adTypes = [
-    { id: 'banner', name: 'Banner Ad', price: 50, description: 'Display banner on homepage' },
-    { id: 'featured', name: 'Featured Listing', price: 100, description: 'Highlighted in search results' },
-    { id: 'sponsored', name: 'Sponsored Content', price: 150, description: 'Native advertising content' },
-    { id: 'premium', name: 'Premium Placement', price: 200, description: 'Top placement across site' }
+  const categories = [
+    "Technology",
+    "Education",
+    "Healthcare",
+    "Finance",
+    "Marketing",
+    "Business",
+    "Other",
   ];
+  const audiences = [
+    "All Students",
+    "Undergraduate",
+    "Graduate",
+    "Faculty",
+    "Alumni",
+  ];
+  const adTypes = [
+    {
+      id: "banner",
+      name: "Banner Ad",
+      price: 50,
+      description: "Display banner on homepage",
+    },
+    {
+      id: "featured",
+      name: "Featured Listing",
+      price: 100,
+      description: "Highlighted in search results",
+    },
+    {
+      id: "sponsored",
+      name: "Sponsored Content",
+      price: 150,
+      description: "Native advertising content",
+    },
+    {
+      id: "premium",
+      name: "Premium Placement",
+      price: 200,
+      description: "Top placement across site",
+    },
+  ];
+
+  useEffect(() => {
+    async function fetchAds() {
+      const result = await listCompanyAds(yourCompanyId);
+      if (result.success) setAds(result.ads);
+    }
+    fetchAds();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setAdData(prev => ({
+    setAdData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const handlePaymentChange = (e) => {
     const { name, value } = e.target;
-    setPaymentData(prev => ({
+    setPaymentData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -75,7 +124,7 @@ const AdPublish = () => {
   };
 
   const calculateTotal = () => {
-    const selectedAdType = adTypes.find(type => type.id === adData.adType);
+    const selectedAdType = adTypes.find((type) => type.id === adData.adType);
     const basePrice = selectedAdType ? selectedAdType.price : 0;
     const duration = parseInt(adData.duration) || 1;
     const subtotal = basePrice * duration;
@@ -87,37 +136,152 @@ const AdPublish = () => {
     setShowPaymentModal(true);
   };
 
-  const handlePayment = (e) => {
+  const handlePayment = async (e) => {
     e.preventDefault();
-    // Process payment logic here
-    alert('Payment processed successfully! Your ad will be reviewed and published within 24 hours.');
+    const { total } = calculateTotal();
+    const adPayload = {
+      company_id: yourCompanyId,
+      title: adData.title,
+      description: adData.description,
+      category: adData.category,
+      target_audience: adData.targetAudience,
+      budget: total,
+      duration: parseInt(adData.duration),
+      ad_type: adData.adType,
+      image_url: adData.imageUrl,
+      video_url: videoPreview,
+      website_url: adData.websiteUrl,
+      contact_email: adData.contactEmail,
+      start_date: adData.startDate,
+      end_date: adData.endDate,
+      keywords: adData.keywords,
+    };
+
+    const paymentPayload = {
+      payment_method: paymentData.paymentMethod,
+      email: paymentData.email,
+      amount: total,
+    };
+
+    const res = await payForCompanyAd(adPayload, paymentPayload);
+    if (res.success) {
+      setShowPaymentModal(false);
+      // reset form minimal
+      setAdData((prev) => ({
+        ...prev,
+        title: "",
+        description: "",
+        imageUrl: "",
+        websiteUrl: "",
+        contactEmail: "",
+        startDate: "",
+        endDate: "",
+        keywords: "",
+        agreeTerms: false,
+      }));
+      setVideoFile(null);
+      setVideoPreview("");
+      // refresh ads
+      const latest = await listCompanyAds(yourCompanyId);
+      if (latest.success) setAds(latest.ads);
+      alert("Payment processed and ad created successfully.");
+    } else {
+      alert(res.message || "Payment failed.");
+    }
   };
-  
+
   const { subtotal, tax, total } = calculateTotal();
 
-  const handleVideoUpload = (e) => {
+  const handleVideoUpload = async (e) => {
     const file = e.target.files[0];
-    if (file && file.type.startsWith('video/')) {
+    if (file && file.type.startsWith("video/")) {
       setVideoFile(file);
-      const videoUrl = URL.createObjectURL(file);
-      setVideoPreview(videoUrl);
-      setAdData(prev => ({ ...prev, videoUrl }));
+      // upload to backend to get a served URL
+      const result = await uploadAdMedia(file);
+      if (result.success) {
+        setVideoPreview(result.url);
+        setAdData((prev) => ({ ...prev, videoUrl: result.url }));
+      } else {
+        const blobUrl = URL.createObjectURL(file);
+        setVideoPreview(blobUrl);
+        setAdData((prev) => ({ ...prev, videoUrl: blobUrl }));
+      }
     }
   };
 
   const removeVideo = () => {
     setVideoFile(null);
-    setVideoPreview('');
-    setAdData(prev => ({ ...prev, videoUrl: '' }));
+    setVideoPreview("");
+    setAdData((prev) => ({ ...prev, videoUrl: "" }));
+  };
+
+  const handlePublishAd = async () => {
+    const adPayload = {
+      company_id: yourCompanyId, // must be a valid company ID from your database
+      title: adData.title,
+      description: adData.description,
+      category: adData.category,
+      target_audience: adData.targetAudience,
+      budget: calculateTotal().total,
+      duration: parseInt(adData.duration),
+      ad_type: adData.adType,
+      image_url: adData.imageUrl,
+      video_url: videoPreview,
+      website_url: adData.websiteUrl,
+      contact_email: adData.contactEmail,
+      start_date: adData.startDate,
+      end_date: adData.endDate,
+      keywords: adData.keywords,
+    };
+    const response = await fetch("/api/companies/company-ads/create/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(adPayload),
+    });
+    const result = await response.json();
+    if (result.success) {
+      alert("Ad published successfully!");
+      // Optionally, redirect or reset form
+    } else {
+      alert("Failed to publish ad. Please try again.");
+    }
+  };
+
+  const handleUpdateAd = async (adId, updatedAdData) => {
+    const response = await fetch(`/api/companies/company-ads/${adId}/update/`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedAdData),
+    });
+    const result = await response.json();
+    if (result.success) {
+      alert("Ad updated successfully!");
+      // Optionally, refresh ads list
+      // fetchAds();
+    } else {
+      alert(result.message || "Failed to update ad");
+    }
+  };
+
+  const handleDeleteAd = async (adId) => {
+    const response = await fetch(`/api/companies/company-ads/${adId}/delete/`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    });
+    const result = await response.json();
+    if (result.success) {
+      alert("Ad deleted successfully!");
+      // Refresh the ads list after deletion
+      setAds((prevAds) => prevAds.filter((ad) => ad.ad_id !== adId));
+    } else {
+      alert("Failed to delete ad. Please try again.");
+    }
   };
 
   return (
     <div className="ad-publish-page">
       {/* SIDEBAR AT THE VERY TOP - OUTSIDE CONTAINER */}
-      <CompanySidebar 
-        isOpen={isSidebarOpen}
-        setIsOpen={setIsSidebarOpen}
-      />
+      <CompanySidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
       {/* NAVBAR */}
       <CompanyDashboardNavbar
@@ -126,22 +290,34 @@ const AdPublish = () => {
       />
 
       {/* MAIN CONTENT */}
-      <main className={`ad-publish-main ${isSidebarOpen ? 'sidebar-expanded' : 'sidebar-collapsed'}`}>
+      <main
+        className={`ad-publish-main ${
+          isSidebarOpen ? "sidebar-expanded" : "sidebar-collapsed"
+        }`}
+      >
         {/* Content Layout */}
         <div className="ad-publish-content">
           {/* Main Form */}
           <div className="form-container">
             {/* Progress Steps */}
             <div className="progress-steps">
-              <div className={`step ${currentStep >= 1 ? 'active' : ''} ${currentStep > 1 ? 'completed' : ''}`}>
+              <div
+                className={`step ${currentStep >= 1 ? "active" : ""} ${
+                  currentStep > 1 ? "completed" : ""
+                }`}
+              >
                 <div className="step-number">1</div>
                 <div className="step-label">Ad Details</div>
               </div>
-              <div className={`step ${currentStep >= 2 ? 'active' : ''} ${currentStep > 2 ? 'completed' : ''}`}>
+              <div
+                className={`step ${currentStep >= 2 ? "active" : ""} ${
+                  currentStep > 2 ? "completed" : ""
+                }`}
+              >
                 <div className="step-number">2</div>
                 <div className="step-label">Targeting & Budget</div>
               </div>
-              <div className={`step ${currentStep >= 3 ? 'active' : ''}`}>
+              <div className={`step ${currentStep >= 3 ? "active" : ""}`}>
                 <div className="step-number">3</div>
                 <div className="step-label">Review & Publish</div>
               </div>
@@ -151,7 +327,9 @@ const AdPublish = () => {
             {currentStep === 1 && (
               <div className="form-section">
                 <h2>📝 Create Your Advertisement</h2>
-                <p className="section-description">Provide the basic information about your advertisement</p>
+                <p className="section-description">
+                  Provide the basic information about your advertisement
+                </p>
 
                 <div className="form-group">
                   <label>Ad Title *</label>
@@ -201,52 +379,69 @@ const AdPublish = () => {
                     className="form-select"
                     required
                   >
-                    {categories.map(category => (
-                      <option key={category} value={category}>{category}</option>
+                    {categories.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
                     ))}
                   </select>
                 </div>
 
                 <div className="form-group">
                   <label>📷 Advertisement Media</label>
-                  
+
                   {/* Image Upload Section */}
                   <div className="company-adpublish-media-upload-container">
-                    <h4 className="company-adpublish-media-title">📸 Upload Image</h4>
+                    <h4 className="company-adpublish-media-title">
+                      📸 Upload Image
+                    </h4>
                     <div className="company-adpublish-image-upload-area">
                       {adData.imageUrl ? (
                         <div className="company-adpublish-image-preview">
-                          <img src={adData.imageUrl} alt="Advertisement preview" />
-                          <button 
-                            type="button" 
-                            className="company-adpublish-remove-media-btn" 
-                            onClick={() => setAdData(prev => ({ ...prev, imageUrl: '' }))}
+                          <img
+                            src={adData.imageUrl}
+                            alt="Advertisement preview"
+                          />
+                          <button
+                            type="button"
+                            className="company-adpublish-remove-media-btn"
+                            onClick={() =>
+                              setAdData((prev) => ({ ...prev, imageUrl: "" }))
+                            }
                             title="Remove Image"
                           >
                             ×
                           </button>
                         </div>
                       ) : (
-                        <div className="company-adpublish-default-image">
-                          
-                        </div>
+                        <div className="company-adpublish-default-image"></div>
                       )}
-                      
+
                       <input
                         type="file"
                         accept="image/*"
-                        onChange={(e) => {
-                          // In real implementation, upload file and get URL
+                        onChange={async (e) => {
                           const file = e.target.files[0];
                           if (file) {
-                            const imageUrl = URL.createObjectURL(file);
-                            setAdData(prev => ({ ...prev, imageUrl }));
+                            const result = await uploadAdMedia(file);
+                            if (result.success) {
+                              setAdData((prev) => ({
+                                ...prev,
+                                imageUrl: result.url,
+                              }));
+                            } else {
+                              const imageUrl = URL.createObjectURL(file);
+                              setAdData((prev) => ({ ...prev, imageUrl }));
+                            }
                           }
                         }}
                         className="company-adpublish-file-input"
                         id="imageUpload"
                       />
-                      <label htmlFor="imageUpload" className="company-adpublish-upload-btn">
+                      <label
+                        htmlFor="imageUpload"
+                        className="company-adpublish-upload-btn"
+                      >
                         Choose Image
                       </label>
                     </div>
@@ -254,20 +449,22 @@ const AdPublish = () => {
 
                   {/* Video Upload Section */}
                   <div className="company-adpublish-media-upload-container">
-                    <h4 className="company-adpublish-media-title">🎥 Upload Video</h4>
+                    <h4 className="company-adpublish-media-title">
+                      🎥 Upload Video
+                    </h4>
                     <div className="company-adpublish-video-upload-area">
                       {videoPreview ? (
                         <div className="company-adpublish-video-preview">
-                          <video 
-                            src={videoPreview} 
-                            controls 
+                          <video
+                            src={videoPreview}
+                            controls
                             className="company-adpublish-preview-video"
                           >
                             Your browser does not support the video tag.
                           </video>
-                          <button 
-                            type="button" 
-                            className="company-adpublish-remove-media-btn" 
+                          <button
+                            type="button"
+                            className="company-adpublish-remove-media-btn"
                             onClick={removeVideo}
                             title="Remove Video"
                           >
@@ -277,12 +474,14 @@ const AdPublish = () => {
                       ) : (
                         <div className="company-adpublish-default-video">
                           <div className="company-adpublish-video-placeholder">
-                            <div className="company-adpublish-video-icon">🎥</div>
+                            <div className="company-adpublish-video-icon">
+                              🎥
+                            </div>
                             <p>No video selected</p>
                           </div>
                         </div>
                       )}
-                      
+
                       <input
                         type="file"
                         accept="video/*"
@@ -290,7 +489,10 @@ const AdPublish = () => {
                         className="company-adpublish-file-input"
                         id="videoUpload"
                       />
-                      <label htmlFor="videoUpload" className="company-adpublish-upload-btn">
+                      <label
+                        htmlFor="videoUpload"
+                        className="company-adpublish-upload-btn"
+                      >
                         Choose Video
                       </label>
                     </div>
@@ -328,16 +530,22 @@ const AdPublish = () => {
             {currentStep === 2 && (
               <div className="form-section">
                 <h2>🎯 Targeting & Budget</h2>
-                <p className="section-description">Choose your target audience and set your advertising budget</p>
+                <p className="section-description">
+                  Choose your target audience and set your advertising budget
+                </p>
 
                 <div className="form-group">
                   <label>Ad Type *</label>
                   <div className="ad-type-grid">
-                    {adTypes.map(type => (
-                      <div 
+                    {adTypes.map((type) => (
+                      <div
                         key={type.id}
-                        className={`ad-type-option ${adData.adType === type.id ? 'selected' : ''}`}
-                        onClick={() => setAdData(prev => ({ ...prev, adType: type.id }))}
+                        className={`ad-type-option ${
+                          adData.adType === type.id ? "selected" : ""
+                        }`}
+                        onClick={() =>
+                          setAdData((prev) => ({ ...prev, adType: type.id }))
+                        }
                       >
                         <div className="ad-type-header">
                           <h4>{type.name}</h4>
@@ -350,7 +558,7 @@ const AdPublish = () => {
                           value={type.id}
                           checked={adData.adType === type.id}
                           onChange={handleInputChange}
-                          style={{ display: 'none' }}
+                          style={{ display: "none" }}
                         />
                       </div>
                     ))}
@@ -366,8 +574,10 @@ const AdPublish = () => {
                     className="form-select"
                     required
                   >
-                    {audiences.map(audience => (
-                      <option key={audience} value={audience}>{audience}</option>
+                    {audiences.map((audience) => (
+                      <option key={audience} value={audience}>
+                        {audience}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -430,8 +640,13 @@ const AdPublish = () => {
                 <div className="budget-summary">
                   <h4>💰 Cost Breakdown</h4>
                   <div className="cost-item">
-                    <span>Ad Type: {adTypes.find(t => t.id === adData.adType)?.name}</span>
-                    <span>${adTypes.find(t => t.id === adData.adType)?.price}/day</span>
+                    <span>
+                      Ad Type:{" "}
+                      {adTypes.find((t) => t.id === adData.adType)?.name}
+                    </span>
+                    <span>
+                      ${adTypes.find((t) => t.id === adData.adType)?.price}/day
+                    </span>
                   </div>
                   <div className="cost-item">
                     <span>Duration: {adData.duration} days</span>
@@ -453,7 +668,9 @@ const AdPublish = () => {
             {currentStep === 3 && (
               <div className="form-section">
                 <h2>✅ Review Your Advertisement</h2>
-                <p className="section-description">Review your ad details before publishing</p>
+                <p className="section-description">
+                  Review your ad details before publishing
+                </p>
 
                 <div className="review-section">
                   <div className="review-group">
@@ -475,7 +692,8 @@ const AdPublish = () => {
                   <div className="review-group">
                     <h4>🎯 Campaign Details</h4>
                     <div className="review-item">
-                      <strong>Ad Type:</strong> {adTypes.find(t => t.id === adData.adType)?.name}
+                      <strong>Ad Type:</strong>{" "}
+                      {adTypes.find((t) => t.id === adData.adType)?.name}
                     </div>
                     <div className="review-item">
                       <strong>Target Audience:</strong> {adData.targetAudience}
@@ -530,15 +748,15 @@ const AdPublish = () => {
                   ← Back
                 </button>
               )}
-              
+
               {currentStep < 3 ? (
                 <button type="button" className="btn-next" onClick={nextStep}>
                   Next →
                 </button>
               ) : (
-                <button 
-                  type="button" 
-                  className="btn-publish" 
+                <button
+                  type="button"
+                  className="btn-publish"
                   onClick={handlePublish}
                   disabled={!adData.agreeTerms}
                 >
@@ -554,7 +772,7 @@ const AdPublish = () => {
             <div className="preview-card">
               <h3>👀 Live Preview</h3>
               <p>See how your ad will appear to students</p>
-              
+
               <div className="ad-preview">
                 <div className="preview-container">
                   {adData.imageUrl && (
@@ -563,13 +781,20 @@ const AdPublish = () => {
                     </div>
                   )}
                   <div className="preview-content">
-                    <h5>{adData.title || 'Your Ad Title Here'}</h5>
-                    <p>{adData.description || 'Your ad description will appear here...'}</p>
-                    <div className="preview-company">{adData.company || 'Company Name'}</div>
+                    <h5>{adData.title || "Your Ad Title Here"}</h5>
+                    <p>
+                      {adData.description ||
+                        "Your ad description will appear here..."}
+                    </p>
+                    <div className="preview-company">
+                      {adData.company || "Company Name"}
+                    </div>
                     <button className="preview-btn">Learn More</button>
                   </div>
                 </div>
-                <p className="preview-note">*Preview may vary from actual placement</p>
+                <p className="preview-note">
+                  *Preview may vary from actual placement
+                </p>
               </div>
             </div>
 
@@ -577,7 +802,7 @@ const AdPublish = () => {
             <div className="performance-card">
               <h3>📊 Expected Performance</h3>
               <p>Estimated metrics for your campaign</p>
-              
+
               <div className="metrics-grid">
                 <div className="metric-item">
                   <div className="metric-icon">👁️</div>
@@ -606,7 +831,7 @@ const AdPublish = () => {
             <div className="active-ads-card">
               <h3>📢 Your Active Ads</h3>
               <p>Currently running campaigns</p>
-              
+
               <div className="ad-list">
                 <div className="ad-item">
                   <div className="ad-status active">Active</div>
@@ -619,7 +844,7 @@ const AdPublish = () => {
                   </div>
                   <button className="view-btn">View</button>
                 </div>
-                
+
                 <div className="ad-item">
                   <div className="ad-status pending">Pending</div>
                   <div className="ad-details">
@@ -650,11 +875,22 @@ const AdPublish = () => {
 
       {/* Payment Modal */}
       {showPaymentModal && (
-        <div className="company-adpublish-admin-modal-overlay" onClick={() => setShowPaymentModal(false)}>
-          <div className="company-adpublish-admin-modal-content" onClick={e => e.stopPropagation()}>
+        <div
+          className="company-adpublish-admin-modal-overlay"
+          onClick={() => setShowPaymentModal(false)}
+        >
+          <div
+            className="company-adpublish-admin-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="company-adpublish-admin-modal-header">
               <h2>💳 Complete Payment</h2>
-              <button className="company-adpublish-admin-modal-close" onClick={() => setShowPaymentModal(false)}>✕</button>
+              <button
+                className="company-adpublish-admin-modal-close"
+                onClick={() => setShowPaymentModal(false)}
+              >
+                ✕
+              </button>
             </div>
             <div className="company-adpublish-admin-modal-body">
               <div className="company-adpublish-admin-payment-summary">
@@ -673,9 +909,12 @@ const AdPublish = () => {
                 </div>
               </div>
 
-              <form onSubmit={handlePayment} className="company-adpublish-admin-payment-form">
+              <form
+                onSubmit={handlePayment}
+                className="company-adpublish-admin-payment-form"
+              >
                 <h3>Payment Information</h3>
-                
+
                 <div className="company-adpublish-admin-payment-methods">
                   <div className="company-adpublish-admin-payment-option">
                     <label className="company-adpublish-admin-payment-label">
@@ -683,35 +922,41 @@ const AdPublish = () => {
                         type="radio"
                         name="paymentMethod"
                         value="credit-card"
-                        checked={paymentData.paymentMethod === 'credit-card'}
+                        checked={paymentData.paymentMethod === "credit-card"}
                         onChange={handlePaymentChange}
                         className="company-adpublish-admin-form-radio"
                       />
                       💳 Credit/Debit Card
                       <div className="company-adpublish-admin-card-icons">
-                        <span className="company-adpublish-admin-card-icon">💳</span>
-                        <span className="company-adpublish-admin-card-icon">💳</span>
+                        <span className="company-adpublish-admin-card-icon">
+                          💳
+                        </span>
+                        <span className="company-adpublish-admin-card-icon">
+                          💳
+                        </span>
                       </div>
                     </label>
                   </div>
-                  
+
                   <div className="company-adpublish-admin-payment-option">
                     <label className="company-adpublish-admin-payment-label">
                       <input
                         type="radio"
                         name="paymentMethod"
                         value="paypal"
-                        checked={paymentData.paymentMethod === 'paypal'}
+                        checked={paymentData.paymentMethod === "paypal"}
                         onChange={handlePaymentChange}
                         className="company-adpublish-admin-form-radio"
                       />
                       🅿️ PayPal
-                      <span className="company-adpublish-admin-paypal-icon">🅿️</span>
+                      <span className="company-adpublish-admin-paypal-icon">
+                        🅿️
+                      </span>
                     </label>
                   </div>
                 </div>
 
-                {paymentData.paymentMethod === 'credit-card' && (
+                {paymentData.paymentMethod === "credit-card" && (
                   <div className="company-adpublish-admin-credit-card-form">
                     <div className="company-adpublish-admin-form-group">
                       <label>Card Number</label>
@@ -725,7 +970,7 @@ const AdPublish = () => {
                         required
                       />
                     </div>
-                    
+
                     <div className="company-adpublish-admin-card-details-row">
                       <div className="company-adpublish-admin-form-group">
                         <label>Expiry Date</label>
@@ -752,7 +997,7 @@ const AdPublish = () => {
                         />
                       </div>
                     </div>
-                    
+
                     <div className="company-adpublish-admin-form-group">
                       <label>Cardholder Name</label>
                       <input
@@ -782,10 +1027,17 @@ const AdPublish = () => {
                 </div>
 
                 <div className="company-adpublish-admin-form-actions">
-                  <button type="button" className="company-adpublish-admin-btn-cancel" onClick={() => setShowPaymentModal(false)}>
+                  <button
+                    type="button"
+                    className="company-adpublish-admin-btn-cancel"
+                    onClick={() => setShowPaymentModal(false)}
+                  >
                     Cancel
                   </button>
-                  <button type="submit" className="company-adpublish-admin-btn-pay-now">
+                  <button
+                    type="submit"
+                    className="company-adpublish-admin-btn-pay-now"
+                  >
                     Pay ${total.toFixed(2)}
                   </button>
                 </div>
