@@ -9,7 +9,7 @@ urlpatterns = [
     path('sessions/<int:session_id>/delete/', views.delete_tutoring_session, name='delete_tutoring_session'),
     
     # Tutors
-    path('tutors/', views.get_tutors, name='get_tutors'),
+    path('tutors/', views.get_tutors_list, name='get_tutors_list'),
     
     # Subjects
     path('subjects/', views.get_subjects, name='get_subjects'),

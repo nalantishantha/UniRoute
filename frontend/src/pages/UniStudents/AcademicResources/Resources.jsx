@@ -1,16 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import {
-  Upload,
-  FileText,
-  Download,
-  Tag,
-  FolderOpen,
-} from "lucide-react";
-import {
-  Card,
-  CardContent,
-} from "../../../components/ui/Card";
+import { Upload, FileText, Download, Tag, FolderOpen } from "lucide-react";
+import { Card, CardContent } from "../../../components/ui/Card";
 import Button from "../../../components/ui/Button";
 import ResourcesGrid from "./ResourcesGrid";
 import UploadResourcesModal from "./UploadResourcesModal";
@@ -58,7 +49,9 @@ export default function Resources() {
   }, []);
 
   // Get all unique tags
-  const allTags = [...new Set(resources.flatMap((resource) => resource.tags || []))];
+  const allTags = [
+    ...new Set(resources.flatMap((resource) => resource.tags || [])),
+  ];
 
   const handleViewResource = (resource) => {
     setSelectedResource(resource);
@@ -68,15 +61,17 @@ export default function Resources() {
   const handleSaveResource = (editedResource) => {
     console.log("Resource updated:", editedResource);
     // Update the resource in the list
-    setResources(resources.map(resource =>
-      resource.id === editedResource.id ? editedResource : resource
-    ));
+    setResources(
+      resources.map((resource) =>
+        resource.id === editedResource.id ? editedResource : resource
+      )
+    );
   };
 
   const handleRemoveResource = (resource) => {
     console.log("Resource removed:", resource);
     // Remove resource from the list
-    setResources(resources.filter(r => r.id !== resource.id));
+    setResources(resources.filter((r) => r.id !== resource.id));
   };
 
   // Handle successful upload - refresh resources
@@ -85,7 +80,10 @@ export default function Resources() {
   };
 
   // Calculate stats
-  const totalDownloads = resources.reduce((sum, resource) => sum + (resource.downloads || 0), 0);
+  const totalDownloads = resources.reduce(
+    (sum, resource) => sum + (resource.downloads || 0),
+    0
+  );
 
   if (loading) {
     return (
@@ -112,12 +110,7 @@ export default function Resources() {
     >
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-neutral-black">Resources</h1>
-          <p className="mt-1 text-neutral-grey">
-            Upload and manage your educational resources
-          </p>
-        </div>
+        <div></div>
         <Button
           size="lg"
           className="flex items-center mt-4 space-x-2 lg:mt-0"
@@ -166,7 +159,9 @@ export default function Resources() {
                 <Download className="w-5 h-5 text-success" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-neutral-black">{totalDownloads}</p>
+                <p className="text-2xl font-bold text-neutral-black">
+                  {totalDownloads}
+                </p>
                 <p className="text-xs text-neutral-grey">Total Downloads</p>
               </div>
             </div>

@@ -13,6 +13,9 @@ import UniversityRegisterPage from "./components/UniversityRegisterPage";
 import CompanyRegisterPage from "./components/CompanyRegisterPage";
 import Universities from "./components/Universities";
 
+// Test pages
+import MentorAvailabilityTest from "./pages/Test/MentorAvailabilityTest";
+
 // Layouts
 import { StudentLayout, UniversityStudentLayout } from "./components/Navigation";
 
@@ -78,6 +81,9 @@ function App() {
 
           {/*Counsellor Routes */}
           <Route path="/counsellor/*" element={<CounsellorRoutes />} />
+
+          {/* Test Routes */}
+          <Route path="/test/mentor-availability" element={<MentorAvailabilityTest />} />
         </Routes>
     </RouteGuard>
     </Router >

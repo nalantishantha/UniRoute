@@ -1,9 +1,9 @@
 from django.urls import path
 from . import views
+from .mentor_api_views import MentorByUniversityStudentView
+from .user_mentor_status_view import UserMentorStatusView
 
 urlpatterns = [
-    path('', views.mentors_list, name='mentors_list'),
-    path('sessions/', views.create_mentoring_session, name='create_mentoring_session'),
     path('requests/<int:mentor_id>/', views.MentoringRequestsView.as_view(), name='mentoring_requests'),
     path('sessions/<int:mentor_id>/', views.MentoringSessionsView.as_view(), name='mentoring_sessions'),
     path('all-sessions/<int:mentor_id>/', views.get_all_sessions, name='all_sessions'),
@@ -13,4 +13,14 @@ urlpatterns = [
     path('sessions/<int:session_id>/reschedule/', views.reschedule_session, name='reschedule_session'),
     path('sessions/<int:session_id>/complete/', views.complete_session, name='complete_session'),
     path('stats/<int:mentor_id>/', views.get_mentor_stats, name='mentor_stats'),
+    
+    # Availability management
+    path('availability/<int:mentor_id>/', views.MentorAvailabilityView.as_view(), name='mentor_availability'),
+    path('available-slots/<int:mentor_id>/', views.AvailableTimeSlotsView.as_view(), name='available_slots'),
+    
+    # Mentor lookup by university student
+    path('by-university-student/<int:university_student_id>/', MentorByUniversityStudentView.as_view(), name='mentor_by_university_student'),
+    # Check if a given user (or current user) is a mentor
+    path('user-status/', UserMentorStatusView.as_view(), name='user_mentor_status'),
+    path('user-status/<int:user_id>/', UserMentorStatusView.as_view(), name='user_mentor_status_by_id'),
 ]

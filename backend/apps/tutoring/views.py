@@ -1,12 +1,85 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.db import transaction
+from django.db import transaction, connection
 from django.utils import timezone
 import json
 from .models import Tutors, TutoringSessions, TutorSubjects, TutorRatings, TutorFeedback
-from apps.accounts.models import Users
+from apps.accounts.models import Users, UserDetails
 from apps.students.models import Students
+
+
+@csrf_exempt
+def get_tutors_list(request):
+    """Get list of all tutors with their details from the database"""
+    if request.method == 'GET':
+        try:
+            with connection.cursor() as cursor:
+                query = """
+                    SELECT 
+                        t.tutor_id,
+                        t.user_id,
+                        t.university_student_id,
+                        t.bio,
+                        t.expertise,
+                        t.rating,
+                        t.created_at,
+                        u.username,
+                        u.email,
+                        ud.full_name,
+                        ud.profile_picture,
+                        ud.contact_number,
+                        ud.location,
+                        ud.gender
+                    FROM tutors t
+                    INNER JOIN users u ON t.user_id = u.user_id
+                    LEFT JOIN user_details ud ON u.user_id = ud.user_id
+                    WHERE u.is_active = 1
+                    ORDER BY t.rating DESC, t.created_at DESC
+                """
+                cursor.execute(query)
+                results = cursor.fetchall()
+                
+                tutors_data = []
+                for row in results:
+                    tutor_data = {
+                        'tutor_id': row[0],
+                        'user_id': row[1],
+                        'university_student_id': row[2],
+                        'bio': row[3] or '',
+                        'expertise': row[4] or '',
+                        'rating': float(row[5]) if row[5] else 0.0,
+                        'created_at': row[6].isoformat() if row[6] else None,
+                        'username': row[7],
+                        'email': row[8],
+                        'full_name': row[9] or row[7],  # Use username as fallback
+                        'profile_picture': row[10] or '',
+                        'contact_number': row[11] or '',
+                        'location': row[12] or '',
+                        'gender': row[13] or '',
+                        # Additional computed fields
+                        'years_experience': 2,  # You can calculate this based on created_at
+                        'hourly_rate': 'Rs. 2000-3000',  # You might want to add this to tutors table
+                        'availability': 'Available',  # You might want to add this to tutors table
+                    }
+                    tutors_data.append(tutor_data)
+                
+                return JsonResponse({
+                    'success': True,
+                    'tutors': tutors_data,
+                    'count': len(tutors_data)
+                })
+                
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error fetching tutors: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only GET method allowed'
+    }, status=405)
 
 
 @csrf_exempt

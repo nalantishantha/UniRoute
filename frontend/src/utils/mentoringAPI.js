@@ -119,4 +119,102 @@ export const mentoringAPI = {
         }
         return data;
     },
+
+    // Get mentor availability
+    getAvailability: async (mentorId) => {
+        const response = await fetch(`${API_BASE_URL}/mentoring/availability/${mentorId}/`);
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to fetch availability');
+        }
+        return data;
+    },
+
+    // Add mentor availability slot
+    addAvailability: async (mentorId, availabilityData) => {
+        const response = await fetch(`${API_BASE_URL}/mentoring/availability/${mentorId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(availabilityData),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to add availability');
+        }
+        return data;
+    },
+
+    // Update mentor availability slot
+    updateAvailability: async (mentorId, availabilityData) => {
+        const response = await fetch(`${API_BASE_URL}/mentoring/availability/${mentorId}/`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(availabilityData),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to update availability');
+        }
+        return data;
+    },
+
+    // Delete mentor availability slot
+    deleteAvailability: async (mentorId, availabilityId) => {
+        const response = await fetch(`${API_BASE_URL}/mentoring/availability/${mentorId}/`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ availability_id: availabilityId }),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to delete availability');
+        }
+        return data;
+    },
+
+    // Get available time slots for a mentor
+    getAvailableSlots: async (mentorId, startDate = null, endDate = null) => {
+        let url = `${API_BASE_URL}/mentoring/available-slots/${mentorId}/`;
+        const params = new URLSearchParams();
+        
+        if (startDate) {
+            params.append('start_date', startDate);
+        }
+        if (endDate) {
+            params.append('end_date', endDate);
+        }
+        
+        if (params.toString()) {
+            url += `?${params.toString()}`;
+        }
+
+        const response = await fetch(url);
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to fetch available slots');
+        }
+        return data;
+    },
+
+    // Book a session in an available slot
+    bookSlot: async (mentorId, bookingData) => {
+        const response = await fetch(`${API_BASE_URL}/mentoring/sessions/${mentorId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(bookingData),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to book session');
+        }
+        return data;
+    },
 };
