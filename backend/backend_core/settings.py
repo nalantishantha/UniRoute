@@ -21,6 +21,7 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='').split(',')
 
 # Application definition
 INSTALLED_APPS = [
+    'daphne',  # Must be first for channels
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -29,6 +30,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     # Third party apps
+    'channels',
     'corsheaders',  # Only one corsheaders entry
     
    # Your apps 
@@ -80,6 +82,19 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'backend_core.wsgi.application'
+ASGI_APPLICATION = 'backend_core.asgi.application'
+
+# Channels configuration
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',  # Use in-memory for development
+        # For production, use Redis:
+        # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        # 'CONFIG': {
+        #     "hosts": [('127.0.0.1', 6379)],
+        # },
+    },
+}
 
 # DATABASES = {
 #     'default': {

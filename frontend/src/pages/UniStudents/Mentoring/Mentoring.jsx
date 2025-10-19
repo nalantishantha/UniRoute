@@ -32,6 +32,7 @@ import {
 import Button from "../../../components/ui/Button";
 import { useChatContext } from "../../../context/ChatContext";
 import { mentoringAPI } from "../../../utils/mentoringAPI";
+import { joinMentoringVideoCall } from "../../../utils/videoCallAPI";
 import {
   DeclineModal,
   CancelSessionModal,
@@ -260,6 +261,17 @@ export default function Mentoring() {
       avatar: "",
       online: true,
     });
+  };
+
+  const handleJoinVideoCall = async (sessionId) => {
+    try {
+      setError(null);
+      // Join video call - opens in new window
+      await joinMentoringVideoCall(sessionId, MENTOR_ID, "mentor");
+    } catch (err) {
+      console.error("Error joining video call:", err);
+      setError("Failed to join video call. Please try again.");
+    }
   };
 
   const handleAcceptRequest = (request) => {
@@ -771,17 +783,18 @@ export default function Mentoring() {
                                           Location: {request.location}
                                         </p>
                                       )}
-                                      {request.meeting_link && (
-                                        <p className="text-sm text-neutral-grey">
-                                          <a
-                                            href={request.meeting_link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-primary-600 hover:underline"
-                                          >
-                                            Join Meeting
-                                          </a>
-                                        </p>
+                                      {request.session_type === "online" && (
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          onClick={() =>
+                                            handleJoinVideoCall(request.id)
+                                          }
+                                          className="mt-2"
+                                        >
+                                          <Video className="w-4 h-4 mr-1" />
+                                          Join Video Meeting
+                                        </Button>
                                       )}
                                     </div>
                                     <div className="flex items-center space-x-2">
@@ -910,22 +923,18 @@ export default function Mentoring() {
                                   <MessageSquare className="w-4 h-4 mr-1" />
                                   Message
                                 </Button>
-                                {session.session_type === "online" &&
-                                  session.meeting_link && (
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() =>
-                                        window.open(
-                                          session.meeting_link,
-                                          "_blank"
-                                        )
-                                      }
-                                    >
-                                      <Video className="w-4 h-4 mr-1" />
-                                      Join Meeting
-                                    </Button>
-                                  )}
+                                {session.session_type === "online" && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() =>
+                                      handleJoinVideoCall(session.id)
+                                    }
+                                  >
+                                    <Video className="w-4 h-4 mr-1" />
+                                    Join Video Meeting
+                                  </Button>
+                                )}
                                 <Button
                                   size="sm"
                                   variant="outline"
