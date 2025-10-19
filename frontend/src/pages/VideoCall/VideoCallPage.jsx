@@ -2,14 +2,14 @@
  * VideoCallPage
  * Page wrapper for video calls with routing and API integration
  */
-import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import VideoCall from '../../components/VideoCall/VideoCall';
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import VideoCall from "../../components/VideoCall/VideoCall";
 
 const VideoCallPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  
+
   const [roomId, setRoomId] = useState(null);
   const [userId, setUserId] = useState(null);
   const [userRole, setUserRole] = useState(null);
@@ -18,13 +18,13 @@ const VideoCallPage = () => {
 
   useEffect(() => {
     // Get parameters from URL
-    const roomIdParam = searchParams.get('room_id');
-    const sessionIdParam = searchParams.get('session_id');
-    const userIdParam = searchParams.get('user_id');
-    const userRoleParam = searchParams.get('role');
+    const roomIdParam = searchParams.get("room_id");
+    const sessionIdParam = searchParams.get("session_id");
+    const userIdParam = searchParams.get("user_id");
+    const userRoleParam = searchParams.get("role");
 
     if (!userIdParam || !userRoleParam) {
-      setError('Missing required parameters: user_id and role');
+      setError("Missing required parameters: user_id and role");
       setLoading(false);
       return;
     }
@@ -40,7 +40,7 @@ const VideoCallPage = () => {
       // Get/create room for session
       fetchRoomForSession(sessionIdParam, parseInt(userIdParam), userRoleParam);
     } else {
-      setError('Missing room_id or session_id parameter');
+      setError("Missing room_id or session_id parameter");
       setLoading(false);
     }
   }, [searchParams]);
@@ -53,35 +53,34 @@ const VideoCallPage = () => {
       );
 
       if (!response.ok) {
-        throw new Error('Failed to get video room');
+        throw new Error("Failed to get video room");
       }
 
       const data = await response.json();
-      
+
       // Join the room
       const joinResponse = await fetch(
         `http://localhost:8000/api/mentoring/video-call/${data.room_id}/join/`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             user_id: userId,
-            role: role
-          })
+            role: role,
+          }),
         }
       );
 
       if (!joinResponse.ok) {
-        throw new Error('Failed to join video room');
+        throw new Error("Failed to join video room");
       }
 
       setRoomId(data.room_id);
       setLoading(false);
-
     } catch (err) {
-      console.error('Error fetching room:', err);
+      console.error("Error fetching room:", err);
       setError(err.message);
       setLoading(false);
     }
@@ -94,14 +93,14 @@ const VideoCallPage = () => {
         await fetch(
           `http://localhost:8000/api/mentoring/video-call/${roomId}/end/`,
           {
-            method: 'POST',
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json'
-            }
+              "Content-Type": "application/json",
+            },
           }
         );
       } catch (err) {
-        console.error('Error ending call:', err);
+        console.error("Error ending call:", err);
       }
     }
 

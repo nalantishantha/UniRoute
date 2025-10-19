@@ -7,6 +7,7 @@ A fully self-hosted, peer-to-peer WebRTC video conferencing system integrated in
 ## ✨ Features
 
 ### Video Call Features
+
 - 🎥 **HD Video Calling** - 1280x720 resolution
 - 🎤 **High-Quality Audio** - Echo cancellation, noise suppression, auto gain control
 - 📺 **Screen Sharing** - Share your screen during mentoring sessions
@@ -17,6 +18,7 @@ A fully self-hosted, peer-to-peer WebRTC video conferencing system integrated in
 - 🚪 **Easy Join/Leave** - One-click to join or end calls
 
 ### Technical Features
+
 - ✅ **Peer-to-Peer** - Direct browser-to-browser connection (no server relay)
 - ✅ **No Third-Party Dependencies** - Completely self-hosted
 - ✅ **Free STUN Servers** - Uses Google's public STUN servers
@@ -89,18 +91,21 @@ frontend/
 ### Backend Setup
 
 1. **Install Dependencies**
+
    ```bash
    cd backend
    pip install -r requirements.txt
    ```
 
 2. **Create Database Migrations**
+
    ```bash
    python manage.py makemigrations mentoring
    python manage.py migrate
    ```
 
 3. **Run Server**
+
    ```bash
    # Development (supports ASGI)
    python manage.py runserver
@@ -112,6 +117,7 @@ frontend/
 ### Frontend Setup
 
 1. **Install Dependencies** (if not already installed)
+
    ```bash
    cd frontend
    npm install
@@ -156,6 +162,7 @@ frontend/
 ### REST Endpoints
 
 #### Create Video Room
+
 ```http
 POST /api/mentoring/video-call/create/
 Content-Type: application/json
@@ -175,6 +182,7 @@ Response:
 ```
 
 #### Get Room Info
+
 ```http
 GET /api/mentoring/video-call/{room_id}/
 
@@ -190,6 +198,7 @@ Response:
 ```
 
 #### Join Room
+
 ```http
 POST /api/mentoring/video-call/{room_id}/join/
 Content-Type: application/json
@@ -201,11 +210,13 @@ Content-Type: application/json
 ```
 
 #### End Room
+
 ```http
 POST /api/mentoring/video-call/{room_id}/end/
 ```
 
 #### Get Room by Session
+
 ```http
 GET /api/mentoring/video-call/session/{session_id}/
 
@@ -222,6 +233,7 @@ Response:
 #### Client → Server
 
 **Join Room:**
+
 ```json
 {
   "type": "join",
@@ -231,36 +243,46 @@ Response:
 ```
 
 **WebRTC Offer:**
+
 ```json
 {
   "type": "offer",
-  "offer": { /* RTCSessionDescription */ },
+  "offer": {
+    /* RTCSessionDescription */
+  },
   "sender_id": 1,
   "sender_role": "mentor"
 }
 ```
 
 **WebRTC Answer:**
+
 ```json
 {
   "type": "answer",
-  "answer": { /* RTCSessionDescription */ },
+  "answer": {
+    /* RTCSessionDescription */
+  },
   "sender_id": 2,
   "sender_role": "student"
 }
 ```
 
 **ICE Candidate:**
+
 ```json
 {
   "type": "ice-candidate",
-  "candidate": { /* RTCIceCandidate */ },
+  "candidate": {
+    /* RTCIceCandidate */
+  },
   "sender_id": 1,
   "sender_role": "mentor"
 }
 ```
 
 **Leave Room:**
+
 ```json
 {
   "type": "leave",
@@ -272,6 +294,7 @@ Response:
 #### Server → Client
 
 **User Joined:**
+
 ```json
 {
   "type": "user_joined",
@@ -282,30 +305,39 @@ Response:
 ```
 
 **Offer Received:**
+
 ```json
 {
   "type": "offer",
-  "offer": { /* RTCSessionDescription */ },
+  "offer": {
+    /* RTCSessionDescription */
+  },
   "sender_id": 1,
   "sender_role": "mentor"
 }
 ```
 
 **Answer Received:**
+
 ```json
 {
   "type": "answer",
-  "answer": { /* RTCSessionDescription */ },
+  "answer": {
+    /* RTCSessionDescription */
+  },
   "sender_id": 2,
   "sender_role": "student"
 }
 ```
 
 **ICE Candidate Received:**
+
 ```json
 {
   "type": "ice-candidate",
-  "candidate": { /* RTCIceCandidate */ },
+  "candidate": {
+    /* RTCIceCandidate */
+  },
   "sender_id": 1,
   "sender_role": "mentor"
 }
@@ -324,6 +356,7 @@ Response:
 7. **Test Video Call** - you should see yourself in both!
 
 ### Test Features:
+
 - ✅ Audio mute/unmute
 - ✅ Video on/off
 - ✅ Screen sharing
@@ -334,30 +367,38 @@ Response:
 ## 🐛 Troubleshooting
 
 ### Camera/Microphone Access Denied
+
 **Problem**: Browser blocks camera/mic access
-**Solution**: 
+**Solution**:
+
 - Check browser permissions (camera icon in address bar)
 - Use HTTPS in production (required for getUserMedia)
 - Grant permissions when prompted
 
 ### WebSocket Connection Failed
+
 **Problem**: Cannot connect to signaling server
 **Solution**:
+
 - Verify Django server is running
 - Check CORS settings in `settings.py`
 - Ensure WebSocket URL is correct
 
 ### Cannot See Remote Video
+
 **Problem**: Local video works but no remote video
 **Solution**:
+
 - Check if both users joined the room
 - Verify peer connection state in browser console
 - Check STUN servers are reachable
 - Try refreshing both browsers
 
 ### Connection State Stuck at "Connecting"
+
 **Problem**: Stays in connecting state
 **Solution**:
+
 - Check network firewalls
 - Verify ICE candidates are exchanging
 - May need TURN server for restrictive NATs
@@ -381,6 +422,7 @@ CHANNEL_LAYERS = {
 ### 2. Set Up TURN Server (Optional)
 
 For users behind restrictive NATs:
+
 ```bash
 # Install coturn
 sudo apt-get install coturn
@@ -392,16 +434,17 @@ server-name=yourdomain.com
 ```
 
 Update `useWebRTC.js`:
+
 ```javascript
 const ICE_SERVERS = {
   iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: "stun:stun.l.google.com:19302" },
     {
-      urls: 'turn:yourdomain.com:3478',
-      username: 'turnuser',
-      credential: 'turnpassword'
-    }
-  ]
+      urls: "turn:yourdomain.com:3478",
+      username: "turnuser",
+      credential: "turnpassword",
+    },
+  ],
 };
 ```
 
@@ -424,6 +467,7 @@ VITE_WS_BASE_URL=wss://yourdomain.com
 ## 📊 Database Schema
 
 ### VideoCallRoom
+
 ```
 room_id (PK)          VARCHAR(100)
 session_id (FK)       INT (nullable)
@@ -436,6 +480,7 @@ created_at            DATETIME
 ```
 
 ### VideoCallParticipant
+
 ```
 participant_id (PK)   INT
 room_id (FK)          VARCHAR(100)
@@ -448,13 +493,13 @@ is_online             BOOLEAN
 
 ## 🌐 Browser Compatibility
 
-| Browser | Support | Notes |
-|---------|---------|-------|
-| Chrome 90+ | ✅ Full | Best performance |
-| Firefox 88+ | ✅ Full | Excellent |
-| Safari 14+ | ✅ Full | iOS 11+ required |
-| Edge 90+ | ✅ Full | Chromium-based |
-| Opera 76+ | ✅ Full | - |
+| Browser     | Support | Notes            |
+| ----------- | ------- | ---------------- |
+| Chrome 90+  | ✅ Full | Best performance |
+| Firefox 88+ | ✅ Full | Excellent        |
+| Safari 14+  | ✅ Full | iOS 11+ required |
+| Edge 90+    | ✅ Full | Chromium-based   |
+| Opera 76+   | ✅ Full | -                |
 
 ## 🔒 Security Considerations
 
@@ -477,6 +522,7 @@ is_online             BOOLEAN
 ## 🆘 Support
 
 For issues or questions:
+
 1. Check browser console for errors
 2. Check Django server logs
 3. Verify WebSocket connection in Network tab

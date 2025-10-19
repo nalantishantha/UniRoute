@@ -3,6 +3,7 @@
 ## Pre-Deployment Checklist
 
 ### Backend Setup
+
 - [ ] Python dependencies installed (`pip install -r requirements.txt`)
 - [ ] Database migrations created (`python manage.py makemigrations mentoring`)
 - [ ] Database migrations applied (`python manage.py migrate`)
@@ -15,6 +16,7 @@
 - [ ] REST API views verified (`apps/mentoring/video_call_views.py`)
 
 ### Frontend Setup
+
 - [ ] Video call route added (`App.jsx`)
 - [ ] VideoCall component created (`components/VideoCall/VideoCall.jsx`)
 - [ ] VideoCallPage created (`pages/VideoCall/VideoCallPage.jsx`)
@@ -24,6 +26,7 @@
 - [ ] "Join Video Meeting" buttons functional
 
 ### Configuration
+
 - [ ] WebSocket URL configured correctly
 - [ ] API base URL configured correctly
 - [ ] CORS settings allow frontend domain
@@ -34,6 +37,7 @@
 ## Testing Checklist
 
 ### Basic Functionality
+
 - [ ] Backend server starts without errors
 - [ ] Frontend builds without errors
 - [ ] Can create a mentoring session
@@ -42,6 +46,7 @@
 - [ ] Video call page loads correctly
 
 ### WebSocket Connection
+
 - [ ] WebSocket connects to backend
 - [ ] Join message sent successfully
 - [ ] Server acknowledges join
@@ -49,12 +54,14 @@
 - [ ] Connection status shows "Connected"
 
 ### Media Permissions
+
 - [ ] Browser prompts for camera permission
 - [ ] Browser prompts for microphone permission
 - [ ] Local video appears after granting permissions
 - [ ] Audio indicator shows audio is working
 
 ### Peer Connection
+
 - [ ] Second user can join room
 - [ ] WebRTC offer sent
 - [ ] WebRTC answer received
@@ -64,6 +71,7 @@
 - [ ] Remote audio works
 
 ### Controls
+
 - [ ] Audio mute/unmute works
 - [ ] Video on/off works
 - [ ] Screen sharing works
@@ -73,6 +81,7 @@
 - [ ] Controls show on mouse move
 
 ### Error Handling
+
 - [ ] Handles missing permissions gracefully
 - [ ] Shows error message if connection fails
 - [ ] Handles disconnection properly
@@ -80,6 +89,7 @@
 - [ ] Shows loading states appropriately
 
 ### Cross-Browser Testing
+
 - [ ] Works in Chrome
 - [ ] Works in Firefox
 - [ ] Works in Safari
@@ -88,6 +98,7 @@
 - [ ] Works on mobile Safari (iOS)
 
 ### Database
+
 - [ ] Video call rooms created correctly
 - [ ] Participants recorded correctly
 - [ ] Room status updates correctly
@@ -97,6 +108,7 @@
 ## Production Deployment Checklist
 
 ### Security
+
 - [ ] Use HTTPS (required for getUserMedia)
 - [ ] Use WSS (secure WebSocket)
 - [ ] Update CORS_ALLOWED_ORIGINS with production domain
@@ -105,6 +117,7 @@
 - [ ] Secret keys secured
 
 ### Performance
+
 - [ ] Redis installed and configured for channel layers
 - [ ] Channel layer using Redis (not in-memory)
 - [ ] WebSocket connection limits configured
@@ -112,6 +125,7 @@
 - [ ] Database indexes on frequently queried fields
 
 ### Scalability (Optional)
+
 - [ ] TURN server installed (for restrictive NATs)
 - [ ] TURN server credentials configured
 - [ ] Load balancer configured for WebSocket
@@ -119,6 +133,7 @@
 - [ ] Redis cluster for high availability
 
 ### Monitoring
+
 - [ ] Logging configured for video calls
 - [ ] Error tracking set up
 - [ ] Connection metrics tracked
@@ -126,6 +141,7 @@
 - [ ] Performance monitoring active
 
 ### Documentation
+
 - [ ] README updated with video call info
 - [ ] API documentation updated
 - [ ] User guide created
@@ -135,6 +151,7 @@
 ## Post-Deployment Verification
 
 ### Smoke Tests
+
 - [ ] Can access video call page
 - [ ] WebSocket connects in production
 - [ ] Camera/microphone permissions work
@@ -144,6 +161,7 @@
 - [ ] Connection stable
 
 ### Load Testing (Optional)
+
 - [ ] Tested with 10 concurrent calls
 - [ ] Tested with 50 concurrent calls
 - [ ] Tested with 100 concurrent calls
@@ -152,6 +170,7 @@
 - [ ] No connection drops under load
 
 ### User Acceptance Testing
+
 - [ ] Tested by mentors
 - [ ] Tested by students
 - [ ] Feedback collected
@@ -161,6 +180,7 @@
 ## Rollback Plan
 
 If issues occur:
+
 - [ ] Previous version backup available
 - [ ] Database rollback script ready
 - [ ] Can revert migrations if needed
@@ -178,6 +198,7 @@ If issues occur:
 ## Success Metrics
 
 Define and track:
+
 - [ ] Number of video calls per day
 - [ ] Average call duration
 - [ ] Connection success rate

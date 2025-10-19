@@ -20,7 +20,10 @@ import MentorAvailabilityTest from "./pages/Test/MentorAvailabilityTest";
 import VideoCallPage from "./pages/VideoCall/VideoCallPage";
 
 // Layouts
-import { StudentLayout, UniversityStudentLayout } from "./components/Navigation";
+import {
+  StudentLayout,
+  UniversityStudentLayout,
+} from "./components/Navigation";
 
 // Company pages
 import Dashboard from "./pages/Company/Dashboard";
@@ -53,8 +56,14 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RoleSelectionPage />} />
           <Route path="/register/student" element={<StudentRegisterPage />} />
-          <Route path="/register/university-student" element={<UniversityStudentRegisterPage />} />
-          <Route path="/register/university" element={<UniversityRegisterPage />} />
+          <Route
+            path="/register/university-student"
+            element={<UniversityStudentRegisterPage />}
+          />
+          <Route
+            path="/register/university"
+            element={<UniversityRegisterPage />}
+          />
           <Route path="/register/company" element={<CompanyRegisterPage />} />
           <Route path="/universities" element={<Universities />} />
 
@@ -79,7 +88,11 @@ function App() {
 
           {/* University Routes */}
           {universityRoutes.map((route, idx) => (
-            <Route key={`uni-${idx}`} path={route.path} element={route.element} />
+            <Route
+              key={`uni-${idx}`}
+              path={route.path}
+              element={route.element}
+            />
           ))}
 
           {/*Counsellor Routes */}
@@ -89,10 +102,13 @@ function App() {
           <Route path="/video-call" element={<VideoCallPage />} />
 
           {/* Test Routes */}
-          <Route path="/test/mentor-availability" element={<MentorAvailabilityTest />} />
+          <Route
+            path="/test/mentor-availability"
+            element={<MentorAvailabilityTest />}
+          />
         </Routes>
-    </RouteGuard>
-    </Router >
+      </RouteGuard>
+    </Router>
   );
 }
 

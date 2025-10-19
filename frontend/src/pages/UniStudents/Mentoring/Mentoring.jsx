@@ -267,10 +267,10 @@ export default function Mentoring() {
     try {
       setError(null);
       // Join video call - opens in new window
-      await joinMentoringVideoCall(sessionId, MENTOR_ID, 'mentor');
+      await joinMentoringVideoCall(sessionId, MENTOR_ID, "mentor");
     } catch (err) {
-      console.error('Error joining video call:', err);
-      setError('Failed to join video call. Please try again.');
+      console.error("Error joining video call:", err);
+      setError("Failed to join video call. Please try again.");
     }
   };
 
@@ -787,7 +787,9 @@ export default function Mentoring() {
                                         <Button
                                           size="sm"
                                           variant="outline"
-                                          onClick={() => handleJoinVideoCall(request.id)}
+                                          onClick={() =>
+                                            handleJoinVideoCall(request.id)
+                                          }
                                           className="mt-2"
                                         >
                                           <Video className="w-4 h-4 mr-1" />
@@ -925,7 +927,9 @@ export default function Mentoring() {
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() => handleJoinVideoCall(session.id)}
+                                    onClick={() =>
+                                      handleJoinVideoCall(session.id)
+                                    }
                                   >
                                     <Video className="w-4 h-4 mr-1" />
                                     Join Video Meeting

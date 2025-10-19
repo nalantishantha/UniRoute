@@ -7,17 +7,21 @@ A complete peer-to-peer WebRTC video conferencing system for the UniRoute mentor
 ## ✅ Completed Features
 
 ### Backend (Django)
+
 1. ✅ **Django Channels Integration**
+
    - Added channels, channels-redis, daphne to requirements.txt
    - Configured ASGI application
    - Set up WebSocket routing
    - Configured channel layers (in-memory for dev)
 
 2. ✅ **Database Models**
+
    - `VideoCallRoom` - Tracks video call rooms and their status
    - `VideoCallParticipant` - Tracks participants in each room
 
 3. ✅ **WebSocket Consumer** (`consumers.py`)
+
    - Handles WebRTC signaling (offer, answer, ICE candidates)
    - Manages room join/leave events
    - Broadcasts messages to room participants
@@ -31,7 +35,9 @@ A complete peer-to-peer WebRTC video conferencing system for the UniRoute mentor
    - `GET /api/mentoring/video-call/session/<session_id>/` - Get room for session
 
 ### Frontend (React)
+
 1. ✅ **WebRTC Hook** (`useWebRTC.js`)
+
    - Handles peer connection setup
    - Manages media streams (local & remote)
    - Implements WebRTC offer/answer exchange
@@ -39,6 +45,7 @@ A complete peer-to-peer WebRTC video conferencing system for the UniRoute mentor
    - WebSocket communication with signaling server
 
 2. ✅ **Video Call Component** (`VideoCall.jsx`)
+
    - Full-screen video interface
    - Picture-in-picture local video
    - Real-time connection status
@@ -48,6 +55,7 @@ A complete peer-to-peer WebRTC video conferencing system for the UniRoute mentor
    - User role indicators
 
 3. ✅ **Video Call Page** (`VideoCallPage.jsx`)
+
    - Route parameter handling
    - Room creation/joining logic
    - API integration
@@ -55,10 +63,12 @@ A complete peer-to-peer WebRTC video conferencing system for the UniRoute mentor
    - Loading states
 
 4. ✅ **API Utilities** (`videoCallAPI.js`)
+
    - Helper functions for all video call API calls
    - `joinMentoringVideoCall()` helper for easy integration
 
 5. ✅ **Integration with Mentoring**
+
    - Updated `Mentoring.jsx` with video call handler
    - Replaced placeholder "Join Meeting" buttons with functional video call buttons
    - Added import for video call API
@@ -70,6 +80,7 @@ A complete peer-to-peer WebRTC video conferencing system for the UniRoute mentor
 ## 📁 Files Created/Modified
 
 ### Backend Files
+
 ```
 backend/
 ├── requirements.txt                           [MODIFIED]
@@ -85,6 +96,7 @@ backend/
 ```
 
 ### Frontend Files
+
 ```
 frontend/
 └── src/
@@ -104,6 +116,7 @@ frontend/
 ```
 
 ### Documentation Files
+
 ```
 VIDEO_CALL_README.md                          [CREATED]
 VIDEO_CALL_SETUP.md                          [CREATED]
@@ -113,6 +126,7 @@ setup_video_call.sh                          [CREATED]
 ## 🚀 How to Use (Quick Start)
 
 ### 1. Setup
+
 ```bash
 # Backend
 cd backend
@@ -128,6 +142,7 @@ npm run dev
 ```
 
 ### 2. Test
+
 1. Open browser 1: Login as mentor (university student)
 2. Go to Mentoring → Accept a request → Click "Join Video Meeting"
 3. Open browser 2 (or incognito): Login as student
@@ -137,22 +152,26 @@ npm run dev
 ## 🎯 Key Technical Decisions
 
 ### Why WebRTC?
+
 - **Peer-to-peer**: Direct connection between browsers
 - **No server costs**: Media doesn't go through server
 - **Low latency**: Direct connection means faster
 - **High quality**: No compression/transcoding on server
 
 ### Why Django Channels?
+
 - **WebSocket support**: Required for signaling
 - **Async capable**: Handles multiple connections efficiently
 - **Django integration**: Works seamlessly with existing Django app
 
 ### Why In-Memory Channel Layer?
+
 - **Development**: Simple and easy to set up
 - **No dependencies**: No need to install Redis initially
 - **Production**: Can easily switch to Redis later
 
 ### Why Free STUN Servers?
+
 - **Cost**: Completely free
 - **Reliability**: Google's servers are very reliable
 - **NAT traversal**: Works for most users (95%+)
@@ -189,6 +208,7 @@ npm run dev
 ## 🎨 UI Features
 
 ### Video Controls
+
 - **Mute/Unmute**: Toggle audio on/off
 - **Camera On/Off**: Toggle video on/off
 - **Screen Share**: Share your screen
@@ -196,6 +216,7 @@ npm run dev
 - **End Call**: Disconnect and close
 
 ### Visual Indicators
+
 - **Connection Status**: Colored badge showing connection state
 - **User Labels**: Shows role (mentor/student) and ID
 - **Auto-Hide Controls**: Controls fade out after 3 seconds
@@ -205,18 +226,22 @@ npm run dev
 ## 🔧 Configuration Options
 
 ### STUN/TURN Servers
+
 Located in `useWebRTC.js`:
+
 ```javascript
 const ICE_SERVERS = {
   iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: "stun:stun.l.google.com:19302" },
     // Add more STUN servers or TURN servers here
-  ]
+  ],
 };
 ```
 
 ### Video Quality
+
 Located in `useWebRTC.js`:
+
 ```javascript
 video: {
   width: { ideal: 1280 },
@@ -226,15 +251,19 @@ video: {
 ```
 
 ### WebSocket URL
+
 Located in `VideoCall.jsx`:
+
 ```javascript
 const websocketUrl = `ws://localhost:8000/ws/video-call/${roomId}/`;
 ```
 
 ### API Base URL
+
 Located in `videoCallAPI.js`:
+
 ```javascript
-const API_BASE_URL = 'http://localhost:8000/api/mentoring';
+const API_BASE_URL = "http://localhost:8000/api/mentoring";
 ```
 
 ## 📊 Database Tables
@@ -242,6 +271,7 @@ const API_BASE_URL = 'http://localhost:8000/api/mentoring';
 Two new tables added:
 
 1. **video_call_rooms**
+
    - Tracks all video call rooms
    - Links to mentoring sessions
    - Stores status (waiting/active/ended)
@@ -265,10 +295,12 @@ Two new tables added:
 ## 📈 Scalability
 
 ### Current Setup
+
 - In-memory channel layer
 - Good for: Development, small deployments (<100 concurrent users)
 
 ### Production Setup
+
 - Redis channel layer
 - Good for: Production, thousands of concurrent users
 - Can scale horizontally with multiple servers
@@ -284,6 +316,7 @@ Two new tables added:
 ## 🚀 Future Enhancements
 
 Possible additions:
+
 - [ ] Call recording
 - [ ] In-call chat
 - [ ] Group video calls (multiple students)
@@ -313,6 +346,7 @@ Possible additions:
 ## 🎓 Learning Resources
 
 Key technologies used:
+
 - **WebRTC**: Real-time communication
 - **Django Channels**: WebSocket support for Django
 - **React Hooks**: Modern React patterns
@@ -332,6 +366,7 @@ Key technologies used:
 ## 🎉 Success Criteria
 
 ✅ All implemented! The system:
+
 - Connects two users via WebRTC
 - Exchanges video and audio
 - Provides media controls
@@ -343,6 +378,7 @@ Key technologies used:
 ## 📞 Support
 
 For issues:
+
 1. Check `VIDEO_CALL_README.md` for troubleshooting
 2. Verify all files are created correctly
 3. Check Django and browser console logs
