@@ -56,6 +56,8 @@ export default function TopNavigation({ onMenuClick }) {
         return "Pre-Uni Courses";
       case "/university-student/resources":
         return "Resources";
+      case "/university-student/internships":
+        return "Internship-Opportunities";
       case "/university-student/calendar":
         return "Calendar";
       case "/university-student/earnings":
@@ -85,6 +87,8 @@ export default function TopNavigation({ onMenuClick }) {
         return "Manage pre-university course offerings";
       case "/university-student/resources":
         return "Access and share educational materials";
+      case "/university-student/internships":
+        return "Explore new Internship opportunities";
       case "/university-student/calendar":
         return "Manage your schedule and appointments";
       case "/university-student/earnings":

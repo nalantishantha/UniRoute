@@ -832,36 +832,11 @@ def submit_mentor_application(request):
             pre_mentor.updated_at = timezone.now()
             pre_mentor.save()
 
-            # Update mentor record bio with application details
+            # Update mentor record bio with only skills & expertise
             mentor_record = pre_mentor.mentor
             if mentor_record:
-                # Create comprehensive bio with application info
-                enhanced_bio = f"""
-=== MENTOR APPLICATION ===
-
-PERSONAL INFORMATION:
-- Status: {pre_mentor.status}
-- Skills: {pre_mentor.skills or 'Not specified'}
-- Applied: {'Yes' if pre_mentor.applied else 'No'}
-
-RECOMMENDATION:
-{recommendation}
-
-SKILLS & EXPERTISE:
-{skills}
-
-ADDITIONAL INFORMATION:
-{pre_mentor.skills or 'General academic support'}
-
-UPLOADED DOCUMENTS:
-- NIC File: {file_paths.get('nic_photo', 'Not provided')}
-- Student ID File: {file_paths.get('student_id_photo', 'Not provided')}
-- Recommendation Letter: {file_paths.get('recommendation_letter', 'Not provided')}
-
-Application submitted on: {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}
-                """.strip()
-
-                mentor_record.bio = enhanced_bio
+                # Only pass skills & expertise to the bio field
+                mentor_record.bio = skills or pre_mentor.skills or "General academic support"
                 mentor_record.expertise = skills or pre_mentor.skills or "General Mentoring"
                 mentor_record.save()
 

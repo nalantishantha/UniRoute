@@ -127,8 +127,8 @@ const InternshipOpportunities = () => {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium ${isOnline
-          ? 'bg-success/10 text-success'
-          : 'bg-error/10 text-error'
+        ? 'bg-success/10 text-success'
+        : 'bg-error/10 text-error'
         }`}
     >
       {isOnline ? (
@@ -154,7 +154,7 @@ const InternshipOpportunities = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-neutral-900">Internship Opportunities</h1>
-            <p className="text-neutral-600 mt-1">Browse available internships from companies</p>
+            <p className="mt-1 text-neutral-600">Browse available internships from companies</p>
           </div>
           <NetworkStatus />
         </div>
@@ -162,10 +162,10 @@ const InternshipOpportunities = () => {
         <Card>
           <CardContent className="p-8 text-center">
             <AlertCircle className="w-16 h-16 mx-auto mb-4 text-error" />
-            <h3 className="text-xl font-semibold text-neutral-900 mb-2">
+            <h3 className="mb-2 text-xl font-semibold text-neutral-900">
               Unable to Load Internships
             </h3>
-            <p className="text-neutral-600 mb-6 max-w-md mx-auto">
+            <p className="max-w-md mx-auto mb-6 text-neutral-600">
               {error}
             </p>
             <div className="flex items-center justify-center space-x-3">
@@ -187,16 +187,7 @@ const InternshipOpportunities = () => {
       animate="visible"
       className="space-y-6"
     >
-      {/* Header with network status */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-neutral-900">Internship Opportunities</h1>
-          <p className="text-neutral-600 mt-1">
-            Discover exciting internship opportunities from leading companies
-          </p>
-        </div>
-        <NetworkStatus />
-      </div>
+
 
       {/* Main Content */}
       <InternshipGrid
