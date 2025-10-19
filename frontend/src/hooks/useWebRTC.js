@@ -220,7 +220,7 @@ export const useWebRTC = (roomId, userId, userRole, websocketUrl) => {
 
         ws.onopen = () => {
             console.log('WebSocket connected');
-            
+
             // Mark as connected
             setIsConnected(true);
             setIsConnecting(false);
