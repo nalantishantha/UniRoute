@@ -8,6 +8,8 @@ urlpatterns = [
     path('mentors/', views.mentors_list, name='mentors_list'),
     path('mentoring/sessions/', views.create_mentoring_session, name='create_mentoring_session'),
     path('mentoring/requests-grouped/', views.get_student_mentoring_requests_grouped, name='get_student_mentoring_requests_grouped'),
+    path('mentoring/upcoming/', views.get_student_upcoming_sessions, name='get_student_upcoming_sessions'),
+    path('mentoring/upcoming-requests/', views.get_student_upcoming_requests, name='get_student_upcoming_requests'),
     path('announcements/', views.get_published_announcements, name='get_published_announcements'),
 ]
 

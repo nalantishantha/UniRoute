@@ -89,6 +89,141 @@ def get_student_mentoring_requests_grouped(request):
         return JsonResponse({'success': False, 'message': f'Error retrieving mentoring requests: {str(e)}'}, status=500)
 
 
+def get_student_upcoming_sessions(request):
+    """
+    Return upcoming scheduled mentoring sessions for a student.
+    Filters MentoringSessionEnrollments where session.status == 'scheduled'
+    and session.scheduled_at >= now().
+    Expects query param `user_id` (Users.user_id).
+    """
+    if request.method != 'GET':
+        return JsonResponse({'success': False, 'message': 'Only GET allowed'}, status=405)
+
+    user_id = request.GET.get('user_id')
+    if not user_id:
+        return JsonResponse({'success': False, 'message': 'user_id query parameter is required'}, status=400)
+
+    try:
+        try:
+            student = Students.objects.get(user__user_id=user_id)
+        except Students.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Student not found for given user_id'}, status=404)
+
+        now_dt = timezone.now()
+        upcoming = []
+
+        enrollments = MentoringSessionEnrollments.objects.select_related('session', 'session__mentor', 'session__mentor__user').filter(
+            student=student,
+            session__status='scheduled',
+            session__scheduled_at__gte=now_dt
+        ).order_by('session__scheduled_at')
+
+        for enroll in enrollments:
+            session = enroll.session
+            if not session:
+                continue
+            mentor_name = 'Mentor'
+            try:
+                mentor_obj = getattr(session, 'mentor', None)
+                if mentor_obj:
+                    try:
+                        ud = UserDetails.objects.get(user=mentor_obj.user)
+                    except Exception:
+                        ud = None
+                    if ud and getattr(ud, 'full_name', None):
+                        mentor_name = ud.full_name
+                    elif hasattr(mentor_obj, 'full_name'):
+                        mentor_name = mentor_obj.full_name
+                    elif hasattr(mentor_obj, 'name'):
+                        mentor_name = mentor_obj.name
+                    elif hasattr(mentor_obj, 'user') and hasattr(mentor_obj.user, 'username'):
+                        mentor_name = mentor_obj.user.username
+            except Exception:
+                pass
+
+            upcoming.append({
+                'id': getattr(session, 'session_id', session.id if hasattr(session, 'id') else None),
+                'topic': getattr(session, 'topic', ''),
+                'mentor': mentor_name,
+                'scheduled_at': session.scheduled_at.isoformat() if getattr(session, 'scheduled_at', None) else None,
+                'duration_minutes': getattr(session, 'duration_minutes', None),
+                'status': getattr(session, 'status', '') or '',
+            })
+
+        return JsonResponse({'success': True, 'upcoming': upcoming})
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'success': False, 'message': f'Error retrieving upcoming sessions: {str(e)}'}, status=500)
+
+
+def get_student_upcoming_requests(request):
+    """
+    Return upcoming mentoring requests for a student where status == 'scheduled'
+    and requested_date >= today. Uses MentoringRequests table.
+    Expects query param `user_id` (Users.user_id).
+    NOTE: There is no explicit `session_date` field on MentoringRequests in this schema;
+    we use `requested_date` as the scheduled date for requests marked scheduled.
+    """
+    if request.method != 'GET':
+        return JsonResponse({'success': False, 'message': 'Only GET allowed'}, status=405)
+
+    user_id = request.GET.get('user_id')
+    if not user_id:
+        return JsonResponse({'success': False, 'message': 'user_id query parameter is required'}, status=400)
+
+    try:
+        try:
+            student = Students.objects.get(user__user_id=user_id)
+        except Students.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Student not found for given user_id'}, status=404)
+
+        today = timezone.now().date()
+        upcoming = []
+
+        qs = MentoringRequests.objects.select_related('mentor', 'mentor__user').filter(
+            student=student,
+            status='scheduled',
+            requested_date__date__gte=today
+        ).order_by('requested_date')
+
+        for r in qs:
+            mentor_name = 'Mentor'
+            try:
+                mentor_obj = getattr(r, 'mentor', None)
+                if mentor_obj:
+                    try:
+                        ud = UserDetails.objects.get(user=mentor_obj.user)
+                    except Exception:
+                        ud = None
+                    if ud and getattr(ud, 'full_name', None):
+                        mentor_name = ud.full_name
+                    elif hasattr(mentor_obj, 'full_name'):
+                        mentor_name = mentor_obj.full_name
+                    elif hasattr(mentor_obj, 'name'):
+                        mentor_name = mentor_obj.name
+                    elif hasattr(mentor_obj, 'user') and hasattr(mentor_obj.user, 'username'):
+                        mentor_name = mentor_obj.user.username
+            except Exception:
+                pass
+
+            upcoming.append({
+                'id': getattr(r, 'request_id', r.id if hasattr(r, 'id') else None),
+                'mentor': mentor_name,
+                'subject': getattr(r, 'topic', None) or getattr(r, 'description', None) or '',
+                'session_date': getattr(r, 'requested_date', None).isoformat() if getattr(r, 'requested_date', None) else None,
+                'status': getattr(r, 'status', '') or '',
+            })
+
+        return JsonResponse({'success': True, 'upcoming': upcoming})
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'success': False, 'message': f'Error retrieving upcoming requests: {str(e)}'}, status=500)
+
+
 def students_list(request):
     with connection.cursor() as cursor:
         cursor.execute("SELECT student_id, user_id, current_stage, district, school FROM students LIMIT 10")

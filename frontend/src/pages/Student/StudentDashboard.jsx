@@ -54,6 +54,12 @@ const StudentDashboard = () => {
       if (!document.hidden) {
         console.log('Dashboard: Page became visible, refreshing data...');
         fetchStudentProfile();
+        const currentUser = getCurrentUser();
+        if (currentUser && currentUser.user_id) {
+          fetchGroupedMentoringRequests(currentUser.user_id);
+          fetchUpcomingSessions(currentUser.user_id);
+          fetchUpcomingRequests(currentUser.user_id);
+        }
       }
     };
     
@@ -66,6 +72,24 @@ const StudentDashboard = () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
+
+  // Poll upcoming sessions every 30 seconds when studentProfile exists
+  useEffect(() => {
+    let intervalId = null;
+    const currentUser = getCurrentUser();
+    if (studentProfile && currentUser && currentUser.user_id) {
+      // initial fetch
+      fetchUpcomingSessions(currentUser.user_id);
+      fetchUpcomingRequests(currentUser.user_id);
+      intervalId = setInterval(() => {
+        fetchUpcomingSessions(currentUser.user_id);
+        fetchUpcomingRequests(currentUser.user_id);
+      }, 30000);
+    }
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [studentProfile]);
 
   const fetchStudentProfile = async () => {
     try {
@@ -260,6 +284,7 @@ const StudentDashboard = () => {
 
   // Fetch mentoring requests grouped by status from student endpoint
   const [mentoringGrouped, setMentoringGrouped] = useState({ pending: [], accepted: [], completed: [] });
+  const [upcomingSessions, setUpcomingSessions] = useState([]);
 
   const fetchGroupedMentoringRequests = async (studentId) => {
     if (!studentId) return;
@@ -295,6 +320,71 @@ const StudentDashboard = () => {
     } catch (err) {
       console.warn('Dashboard: error fetching grouped mentoring requests', err);
     }
+  };
+
+  // Fetch upcoming scheduled sessions
+  const fetchUpcomingSessions = async (studentId) => {
+    if (!studentId) return;
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/api/students/mentoring/upcoming/?user_id=${studentId}`);
+      if (!res.ok) {
+        console.warn('Dashboard: upcoming sessions endpoint returned', res.status);
+        return;
+      }
+      const payload = await res.json();
+      if (payload && payload.success) {
+        const upcoming = Array.isArray(payload.upcoming) ? payload.upcoming : [];
+        setUpcomingSessions(upcoming);
+        // Merge upcoming sessions into recent activities (dedupe by id)
+        mergeUpcomingIntoRecent(upcoming);
+      }
+    } catch (err) {
+      console.warn('Dashboard: error fetching upcoming sessions', err);
+    }
+  };
+
+  // Fetch upcoming mentoring requests (status='scheduled') from mentoring_requests
+  const fetchUpcomingRequests = async (studentId) => {
+    if (!studentId) return;
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/api/students/mentoring/upcoming-requests/?user_id=${studentId}`);
+      if (!res.ok) {
+        console.warn('Dashboard: upcoming requests endpoint returned', res.status);
+        return;
+      }
+      const payload = await res.json();
+      if (payload && payload.success) {
+        // prefer requests if present
+        const upcoming = Array.isArray(payload.upcoming) ? payload.upcoming : [];
+        setUpcomingSessions(upcoming);
+        // Merge upcoming requested sessions into recent activities (dedupe)
+        mergeUpcomingIntoRecent(upcoming);
+      }
+    } catch (err) {
+      console.warn('Dashboard: error fetching upcoming requests', err);
+    }
+  };
+
+  // Merge upcoming sessions into recentActivities sidebar (dedupe)
+  const mergeUpcomingIntoRecent = (upcomingArr) => {
+    if (!Array.isArray(upcomingArr) || upcomingArr.length === 0) return;
+    setRecentActivities((prev) => {
+      const existingIds = new Set(prev.map((a) => a.id));
+      const newItems = upcomingArr
+        .map((s) => ({
+          id: `up-${s.id}`,
+          type: 'mentor',
+          title: s.topic || 'Mentoring Session',
+          description: `With ${s.mentor || 'Mentor'}`,
+          time: s.scheduled_at ? new Date(s.scheduled_at).toLocaleString() : (s.session_date ? new Date(s.session_date).toLocaleString() : 'Scheduled'),
+          icon: Calendar,
+          color: 'text-blue-500',
+        }))
+        .filter((item) => !existingIds.has(item.id));
+
+      if (newItems.length === 0) return prev;
+      return [...newItems, ...prev];
+    });
   };
 
   // upcomingEvents removed; sidebar will show a compact Recent Activities list instead
@@ -577,6 +667,7 @@ const StudentDashboard = () => {
                 </button>
               </div>
               <div className="space-y-4">
+                {/* Upcoming sessions removed from main card; they are merged into Recent Activities sidebar */}
                 {/* Mentoring Requests grouped by status */}
                 <div className="mb-4">
                   <h4 className="font-medium text-primary-400 mb-2">Pending Requests</h4>
@@ -718,35 +809,29 @@ const StudentDashboard = () => {
             <div className="bg-white rounded-2xl shadow-lg p-6 border border-accent-100">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-display font-semibold text-xl text-primary-400">
-                  Recent Activities
+                  Upcoming Sessions
                 </h3>
-                <Link
-                  to="/student/activity"
-                  className="text-accent-300 hover:text-accent-400 transition-colors text-sm"
-                >
-                  View All
-                </Link>
               </div>
               <div className="space-y-3">
-                {recentActivities.slice(0, 5).map((activity) => (
+                {upcomingSessions.length === 0 && (
+                  <p className="text-sm text-primary-300">No upcoming mentoring sessions</p>
+                )}
+                {upcomingSessions.slice(0,5).map((s) => (
                   <div
-                    key={`side-${activity.id}`}
+                    key={`side-up-${s.id}`}
                     className="p-3 border border-accent-100 rounded-xl hover:bg-accent-50 transition-colors cursor-pointer"
                   >
                     <div className="flex items-start space-x-3">
-                      <div className={`p-2 rounded-full bg-white ${activity.color}`}>
-                        <activity.icon className="h-4 w-4" />
+                      <div className={`p-2 rounded-full bg-white text-blue-500`}>
+                        <Calendar className="h-4 w-4" />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-medium text-primary-400 text-sm mb-1">{activity.title}</h4>
-                        <p className="text-xs text-primary-300">{activity.time}</p>
+                        <h4 className="font-medium text-primary-400 text-sm mb-1">{`Upcoming Mentoring Session with ${s.mentor || 'Mentor'}`}</h4>
+                        <p className="text-xs text-primary-300">{s.session_date ? new Date(s.session_date).toLocaleString() : (s.scheduled_at ? new Date(s.scheduled_at).toLocaleString() : '')}</p>
                       </div>
                     </div>
                   </div>
                 ))}
-                {recentActivities.length === 0 && (
-                  <p className="text-sm text-primary-300">No recent activity</p>
-                )}
               </div>
             </div>
           </div>
