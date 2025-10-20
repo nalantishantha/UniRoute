@@ -22,7 +22,7 @@ import {
 
 const StudentHome = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-r from-primary-100 to-white">
+    <div className="min-h-screen bg-gradient-to-r from-blue-200 to-blue-100">
       {/* Navigation */}
       <StudentNavigation />
 
@@ -192,41 +192,41 @@ const StudentHome = () => {
             </Link>
 
             <Link
-              to="/student/career-counseling"
+              to="/student/mentors"
               className="bg-gradient-to-br from-primary-700 to-primary-500 p-8 rounded-xl border border-warning/30 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:from-primary-500 hover:to-primary-700"
             >
               <div className="bg-gradient-to-br from-primary-900 to-primary-900 w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg">
                 <Users className="h-8 w-8 text-white" />
               </div>
               <h3 className="font-display font-semibold text-2xl text-white mb-4">
-                Career Counseling
+                Find Mentors
               </h3>
               <p className="text-primary-100 mb-4 leading-relaxed">
-                Get expert advice on career paths and professional development
-                opportunities.
+                Connect with experienced university students who can guide you
+                through your academic journey and career decisions.
               </p>
               <div className="flex items-center text-white font-medium hover:text-primary-800 transition-colors cursor-pointer">
-                <span>Get guidance</span>
+                <span>Find mentors</span>
                 <ChevronRight className="h-4 w-4 ml-1" />
               </div>
             </Link>
 
             <Link
-              to="/student/scholarship-info"
+              to="/student/tutoring"
               className="bg-gradient-to-br from-primary-50 to-primary-100 p-8 rounded-xl border border-primary-200 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:from-primary-100 hover:to-primary-150"
             >
               <div className="bg-gradient-to-br from-primary-800 to-primary-900 w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg">
-                <Award className="h-8 w-8 text-white" />
+                <BookOpen className="h-8 w-8 text-white" />
               </div>
               <h3 className="font-display font-semibold text-2xl text-primary-800 mb-4">
-                Scholarship Info
+                Tutoring Services
               </h3>
               <p className="text-neutral-dark-grey mb-4 leading-relaxed">
-                Discover scholarship opportunities and financial aid options for
-                your studies.
+                Get personalized tutoring help from qualified tutors to improve
+                your academic performance and understanding.
               </p>
               <div className="flex items-center text-primary-900 font-medium hover:text-primary-800 transition-colors cursor-pointer">
-                <span>Find scholarships</span>
+                <span>Browse tutors</span>
                 <ChevronRight className="h-4 w-4 ml-1" />
               </div>
             </Link>

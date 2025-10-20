@@ -23,8 +23,7 @@ import {
   GraduationCap,
   Award
 } from 'lucide-react';
-import AdminSidebar from '../../../components/common/Admin/Sidebar';
-import AdminHeader from '../../../components/common/Admin/AdminHeader';
+import AdminLayout from '../../../components/common/Admin/AdminLayout';
 import RequestStatusBadge from "../../../components/Admin/RequestStatusBadge";
 
 const RequestDetails = () => {

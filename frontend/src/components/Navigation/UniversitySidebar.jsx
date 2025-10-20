@@ -66,12 +66,6 @@ export default function UniversitySidebar({ isOpen, setIsOpen }) {
     return () => window.removeEventListener("resize", checkDesktop);
   }, []);
 
-  // const handleLogout = async () => {
-  //   if (window.confirm("Are you sure you want to logout?")) {
-  //     await logout();
-  //   }
-  // };
-
   const sidebarVariants = {
     open: {
       x: 0,
@@ -111,12 +105,9 @@ export default function UniversitySidebar({ isOpen, setIsOpen }) {
   };
 
   const handleLogout = async () => {
-    // Optionally: Call your backend logout endpoint here
-    // await fetch("/api/logout_user/", { method: "POST", ... });
-
-    localStorage.removeItem("token"); // Remove auth token
-    // Remove any other university-specific data if needed
-    navigate("/login"); // Redirect to university login
+    if (window.confirm("Are you sure you want to logout?")) {
+      await logout();
+    }
   };
 
   return (

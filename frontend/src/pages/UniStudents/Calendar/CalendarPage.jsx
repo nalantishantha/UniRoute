@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
   Calendar as CalendarIcon,
@@ -11,6 +11,7 @@ import {
   Plus,
   Filter,
   Eye,
+  Settings,
 } from "lucide-react";
 import {
   Card,
@@ -21,6 +22,9 @@ import {
 } from "../../../components/ui/Card";
 import Button from "../../../components/ui/Button";
 import Calendar from "../../../components/ui/Calendar";
+import AvailabilityManager from "../../../components/MentorAvailability/AvailabilityManager";
+import TutoringAvailabilityManager from "../../../components/TutoringAvailability/TutoringAvailabilityManager";
+import { mentoringAPI } from "../../../utils/mentoringAPI";
 
 const mockAvailableDates = [
   new Date(2024, 1, 15),
@@ -94,9 +98,82 @@ const upcomingAvailability = [
 export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [availableDates, setAvailableDates] = useState(mockAvailableDates);
-  const [bookedDates, setBookedDates] = useState(mockBookedDates);
-  const [events, setEvents] = useState(mockEvents);
+  const [bookedDates] = useState(mockBookedDates);
+  const [events] = useState(mockEvents);
   const [activeTab, setActiveTab] = useState("calendar");
+  const [tutorId, setTutorId] = useState(null);
+  
+  // Get user ID from localStorage
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const mentorId = user.mentor_id || 1; // For mentoring availability
+  
+  // Debug: Log user data
+  console.log('CalendarPage - User from localStorage:', user);
+  console.log('CalendarPage - User keys:', Object.keys(user));
+  
+  // Fetch tutor_id for the logged-in university student
+  useEffect(() => {
+    const fetchTutorId = async () => {
+      try {
+        // Check if user object is empty
+        if (!user || Object.keys(user).length === 0) {
+          console.error('❌ No user data in localStorage');
+          setTutorId(null);
+          return;
+        }
+        
+        console.log('Fetching tutor ID for user:', {
+          user_id: user.user_id,
+          university_student_id: user.university_student_id,
+          student_id: user.student_id
+        });
+        
+        // First check if tutor_id is already in user object
+        if (user.tutor_id) {
+          console.log('✓ Found tutor_id in user object:', user.tutor_id);
+          setTutorId(user.tutor_id);
+          return;
+        }
+        
+        // Otherwise, fetch from API using university_student_id
+        if (user.university_student_id || user.student_id) {
+          console.log('Fetching tutors from API...');
+          const response = await fetch(`http://localhost:8000/api/tutoring/tutors/`);
+          const data = await response.json();
+          console.log('API Response:', data);
+          
+          if (data.success && data.tutors) {
+            // Find tutor matching this university student
+            const myTutor = data.tutors.find(
+              t => t.university_student_id === (user.university_student_id || user.student_id)
+            );
+            if (myTutor) {
+              console.log('✓ Found matching tutor:', myTutor.tutor_id);
+              setTutorId(myTutor.tutor_id);
+            } else {
+              console.warn('⚠️ No tutor found for this university student');
+              console.log('Available tutors:', data.tutors.map(t => ({
+                tutor_id: t.tutor_id,
+                university_student_id: t.university_student_id
+              })));
+              setTutorId(null);
+            }
+          } else {
+            console.error('❌ API returned no tutors');
+            setTutorId(null);
+          }
+        } else {
+          console.error('❌ No university_student_id or student_id in user object');
+          setTutorId(null);
+        }
+      } catch (error) {
+        console.error('❌ Failed to fetch tutor ID:', error);
+        setTutorId(null);
+      }
+    };
+    fetchTutorId();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleDateSelect = (date) => {
     setSelectedDate(date);
@@ -133,17 +210,44 @@ export default function CalendarPage() {
       className="space-y-6"
     >
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-end">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div></div>
         <div className="flex items-center space-x-3 mt-4 lg:mt-0">
           <Button variant="outline" size="lg">
             <Filter className="w-4 h-4 mr-2" />
             Filter Events
           </Button>
-          <Button size="lg">
-            <Plus className="w-4 h-4 mr-2" />
-            Quick Availability
+          <Button size="lg" onClick={() => setActiveTab("availability")}>
+            <Settings className="w-4 h-4 mr-2" />
+            Manage Availability
           </Button>
         </div>
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="border-b border-neutral-light-grey">
+        <nav className="flex space-x-8">
+          <button
+            onClick={() => setActiveTab("calendar")}
+            className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === "calendar"
+                ? "border-primary-600 text-primary-600"
+                : "border-transparent text-neutral-grey hover:text-neutral-black hover:border-neutral-light-grey"
+            }`}
+          >
+            Calendar View
+          </button>
+          <button
+            onClick={() => setActiveTab("availability")}
+            className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === "availability"
+                ? "border-primary-600 text-primary-600"
+                : "border-transparent text-neutral-grey hover:text-neutral-black hover:border-neutral-light-grey"
+            }`}
+          >
+            Availability Management
+          </button>
+        </nav>
       </div>
 
       {/* Stats Cards */}
@@ -233,155 +337,193 @@ export default function CalendarPage() {
       </div>
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Calendar */}
-        <div className="lg:col-span-3">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <CalendarIcon className="w-5 h-5 text-primary-600" />
-                <span>Schedule Calendar</span>
-              </CardTitle>
-              <CardDescription>
-                Set your availability and view scheduled sessions
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Calendar
-                selectedDate={selectedDate}
-                onDateSelect={handleDateSelect}
-                availableDates={availableDates}
-                bookedDates={bookedDates}
-                onSetAvailability={handleSetAvailability}
-                events={events}
-              />
-            </CardContent>
-          </Card>
-        </div>
+      {activeTab === "calendar" && (
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Calendar */}
+          <div className="lg:col-span-3">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <CalendarIcon className="w-5 h-5 text-primary-600" />
+                  <span>Schedule Calendar</span>
+                </CardTitle>
+                <CardDescription>
+                  View your availability and scheduled sessions
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Calendar
+                  selectedDate={selectedDate}
+                  onDateSelect={handleDateSelect}
+                  availableDates={availableDates}
+                  bookedDates={bookedDates}
+                  onSetAvailability={handleSetAvailability}
+                  events={events}
+                />
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Upcoming Availability */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Clock className="w-5 h-5 text-primary-600" />
-                <span>Upcoming Availability</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {upcomingAvailability.map((availability, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="p-4 bg-neutral-silver/50 rounded-lg"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium text-neutral-black">
-                      {new Date(availability.date).toLocaleDateString("en-US", {
-                        weekday: "short",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </h4>
-                    <div className="flex items-center space-x-2">
-                      <Button size="sm" variant="ghost">
-                        <Edit3 className="w-3 h-3" />
-                      </Button>
-                      <Button size="sm" variant="ghost">
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="text-neutral-grey">
-                      {availability.timeSlots.length} slots
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-success">
-                        {availability.available} available
-                      </span>
-                      <span className="text-neutral-light-grey">•</span>
-                      <span className="text-info">
-                        {availability.booked} booked
-                      </span>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* Today's Events */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Eye className="w-5 h-5 text-primary-600" />
-                <span>Today's Events</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {events
-                .filter((event) => {
-                  const eventDate = new Date(event.date);
-                  const today = new Date();
-                  return eventDate.toDateString() === today.toDateString();
-                })
-                .map((event, index) => (
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Upcoming Availability */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Clock className="w-5 h-5 text-primary-600" />
+                  <span>Upcoming Availability</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {upcomingAvailability.map((availability, index) => (
                   <motion.div
-                    key={event.id}
+                    key={index}
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className="p-4 border border-neutral-light-grey rounded-lg"
+                    className="p-4 bg-neutral-silver/50 rounded-lg"
                   >
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h4 className="font-medium text-neutral-black">
-                          {event.title}
-                        </h4>
-                        <p className="text-sm text-neutral-grey">
-                          {event.student}
-                        </p>
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-neutral-black">
+                        {new Date(availability.date).toLocaleDateString(
+                          "en-US",
+                          {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                          }
+                        )}
+                      </h4>
+                      <div className="flex items-center space-x-2">
+                        <Button size="sm" variant="ghost">
+                          <Edit3 className="w-3 h-3" />
+                        </Button>
+                        <Button size="sm" variant="ghost">
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
                       </div>
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full ${
-                          event.status === "confirmed"
-                            ? "bg-success/20 text-success"
-                            : "bg-warning/20 text-yellow-600"
-                        }`}
-                      >
-                        {event.status}
-                      </span>
                     </div>
-                    <div className="flex items-center space-x-4 text-sm text-neutral-grey">
-                      <div className="flex items-center space-x-1">
-                        <Clock className="w-3 h-3" />
-                        <span>{event.time}</span>
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="text-neutral-grey">
+                        {availability.timeSlots.length} slots
                       </div>
-                      <div className="flex items-center space-x-1">
-                        <CalendarIcon className="w-3 h-3" />
-                        <span>{event.duration}</span>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-success">
+                          {availability.available} available
+                        </span>
+                        <span className="text-neutral-light-grey">•</span>
+                        <span className="text-info">
+                          {availability.booked} booked
+                        </span>
                       </div>
                     </div>
                   </motion.div>
                 ))}
-              {events.filter((event) => {
-                const eventDate = new Date(event.date);
-                const today = new Date();
-                return eventDate.toDateString() === today.toDateString();
-              }).length === 0 && (
-                <div className="text-center py-8">
-                  <CalendarIcon className="w-12 h-12 text-neutral-light-grey mx-auto mb-4" />
-                  <p className="text-neutral-grey">No events today</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            {/* Today's Events */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Eye className="w-5 h-5 text-primary-600" />
+                  <span>Today's Events</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {events
+                  .filter((event) => {
+                    const eventDate = new Date(event.date);
+                    const today = new Date();
+                    return eventDate.toDateString() === today.toDateString();
+                  })
+                  .map((event, index) => (
+                    <motion.div
+                      key={event.id}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="p-4 border border-neutral-light-grey rounded-lg"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <h4 className="font-medium text-neutral-black">
+                            {event.title}
+                          </h4>
+                          <p className="text-sm text-neutral-grey">
+                            {event.student}
+                          </p>
+                        </div>
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full ${
+                            event.status === "confirmed"
+                              ? "bg-success/20 text-success"
+                              : "bg-warning/20 text-yellow-600"
+                          }`}
+                        >
+                          {event.status}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-4 text-sm text-neutral-grey">
+                        <div className="flex items-center space-x-1">
+                          <Clock className="w-3 h-3" />
+                          <span>{event.time}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <CalendarIcon className="w-3 h-3" />
+                          <span>{event.duration}</span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                {events.filter((event) => {
+                  const eventDate = new Date(event.date);
+                  const today = new Date();
+                  return eventDate.toDateString() === today.toDateString();
+                }).length === 0 && (
+                  <div className="text-center py-8">
+                    <CalendarIcon className="w-12 h-12 text-neutral-light-grey mx-auto mb-4" />
+                    <p className="text-neutral-grey">No events today</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Availability Management Tab */}
+      {activeTab === "availability" && (
+        <div className="space-y-6">
+          {/* Mentoring Availability Section */}
+          <div>
+            <h2 className="text-xl font-bold text-neutral-black mb-4">Mentoring Availability</h2>
+            <p className="text-neutral-grey mb-4">
+              Manage your one-time mentoring session availability. Students can book individual sessions with you.
+            </p>
+            <AvailabilityManager mentorId={mentorId} />
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-neutral-light-grey my-8"></div>
+
+          {/* Tutoring Availability Section */}
+          <div>
+            <h2 className="text-xl font-bold text-neutral-black mb-4">Tutoring Availability (Recurring)</h2>
+            <p className="text-neutral-grey mb-4">
+              Manage your recurring weekly tutoring slots. Students can book regular tutoring sessions that repeat every week.
+            </p>
+            {tutorId ? (
+              <TutoringAvailabilityManager tutorId={tutorId} />
+            ) : (
+              <div className="text-center py-8">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-400 mb-4"></div>
+                <p className="text-neutral-grey">Loading tutor information...</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }

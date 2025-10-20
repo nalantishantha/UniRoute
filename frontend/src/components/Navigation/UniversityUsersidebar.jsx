@@ -46,8 +46,9 @@ export default function UniversityUserSidebar({ isOpen, setIsOpen }) {
   const navigate = useNavigate();
 
    const handleLogout = async () => {
-   localStorage.removeItem("token");
-   navigate("/login"); // Redirect to university login
+    if (window.confirm("Are you sure you want to logout?")) {
+      await logout();
+    }
   };
 
   useEffect(() => {
@@ -59,12 +60,6 @@ export default function UniversityUserSidebar({ isOpen, setIsOpen }) {
     window.addEventListener("resize", checkDesktop);
     return () => window.removeEventListener("resize", checkDesktop);
   }, []);
-
-  // const handleLogout = async () => {
-  //   if (window.confirm("Are you sure you want to logout?")) {
-  //     await logout();
-  //   }
-  // };
 
   const sidebarVariants = {
     open: {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import uocImage from "../../assets/uoc.jpg"; // University of Colombo
 import peradeniyaImage from "../../assets/uop.jpg"; // University of Peradeniya - you can replace with actual image
@@ -32,222 +32,97 @@ import {
 const UniversityGuide = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("all");
+  const [universities, setUniversities] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [programsModal, setProgramsModal] = useState({ open: false, programs: [], universityName: '' });
+  const [quickStats, setQuickStats] = useState(null);
+  const [loadingStats, setLoadingStats] = useState(true);
 
-  const universities = [
-    {
-      id: 1,
-      name: "University of Colombo",
-      type: "National",
-      location: "Colombo, Western Province",
-      established: 1921,
-      studentCount: "12,000+",
-      faculties: 16,
-      ranking: 1,
-      description:
-        "The oldest and most prestigious university in Sri Lanka, known for its academic excellence and research contributions.",
-      website: "https://www.cmb.ac.lk",
-      phone: "+94 11 2581835",
-      email: "info@cmb.ac.lk",
-      backgroundImage: uocImage,
-      programs: [
-        "Medicine",
-        "Engineering",
-        "Science",
-        "Arts",
-        "Law",
-        "Management",
-      ],
-      facilities: [
-        "Central Library",
-        "Research Centers",
-        "Sports Complex",
-        "Student Hostels",
-        "Medical Center",
-      ],
-      achievements: [
-        "QS World University Rankings",
-        "Research Excellence",
-        "Alumni Network",
-      ],
-      tuitionFee: "Government Funded",
-      applicationDeadline: "Applications through UGC",
-      rating: 4.8,
-    },
-    {
-      id: 2,
-      name: "University of Peradeniya",
-      type: "National",
-      location: "Peradeniya, Central Province",
-      established: 1942,
-      studentCount: "15,000+",
-      faculties: 9,
-      ranking: 2,
-      description:
-        "One of the largest and most beautiful universities in Sri Lanka, situated in the scenic hill country.",
-      website: "https://www.pdn.ac.lk",
-      phone: "+94 81 2392751",
-      email: "info@pdn.ac.lk",
-      backgroundImage: peradeniyaImage,
-      programs: [
-        "Medicine",
-        "Engineering",
-        "Science",
-        "Arts",
-        "Agriculture",
-        "Veterinary Medicine",
-      ],
-      facilities: [
-        "Botanical Gardens",
-        "Teaching Hospital",
-        "Research Labs",
-        "Sports Facilities",
-        "Cultural Center",
-      ],
-      achievements: [
-        "Research Publications",
-        "International Collaborations",
-        "Innovation Hub",
-      ],
-      tuitionFee: "Government Funded",
-      applicationDeadline: "Applications through UGC",
-      rating: 4.7,
-    },
-    {
-      id: 3,
-      name: "University of Moratuwa",
-      type: "National",
-      location: "Moratuwa, Western Province",
-      established: 1978,
-      studentCount: "10,000+",
-      faculties: 5,
-      ranking: 3,
-      description:
-        "Sri Lanka's premier technological university, specializing in engineering, technology, and architecture.",
-      website: "https://www.mrt.ac.lk",
-      phone: "+94 11 2640051",
-      email: "info@mrt.ac.lk",
-      backgroundImage: moratuwaImage,
-      programs: [
-        "Engineering",
-        "Architecture",
-        "Information Technology",
-        "Business",
-      ],
-      facilities: [
-        "Modern Labs",
-        "Technology Incubator",
-        "Innovation Center",
-        "Industry Partnerships",
-      ],
-      achievements: [
-        "Engineering Excellence",
-        "Industry Connections",
-        "Innovation Awards",
-      ],
-      tuitionFee: "Government Funded",
-      applicationDeadline: "Applications through UGC",
-      rating: 4.9,
-    },
-    {
-      id: 4,
-      name: "University of Sri Jayewardenepura",
-      type: "National",
-      location: "Nugegoda, Western Province",
-      established: 1958,
-      studentCount: "11,000+",
-      faculties: 8,
-      ranking: 4,
-      description:
-        "Known for its strong programs in management, applied sciences, and humanities.",
-      website: "https://www.sjp.ac.lk",
-      phone: "+94 11 2802026",
-      email: "info@sjp.ac.lk",
-      backgroundImage: jayewardenepuraImage,
-      programs: [
-        "Management Studies",
-        "Applied Sciences",
-        "Humanities",
-        "Medical Sciences",
-        "Graduate Studies",
-      ],
-      facilities: [
-        "Business Incubator",
-        "Research Centers",
-        "Library Complex",
-        "Sports Facilities",
-      ],
-      achievements: [
-        "Business Education Excellence",
-        "Research Contributions",
-        "Alumni Success",
-      ],
-      tuitionFee: "Government Funded",
-      applicationDeadline: "Applications through UGC",
-      rating: 4.6,
-    },
-    {
-      id: 5,
-      name: "SLIIT (Sri Lanka Institute of Information Technology)",
-      type: "Private",
-      location: "Malabe, Western Province",
-      established: 1999,
-      studentCount: "8,000+",
-      faculties: 6,
-      ranking: 5,
-      description:
-        "Leading private institution specializing in computing, engineering, and business studies.",
-      website: "https://www.sliit.lk",
-      phone: "+94 11 2413500",
-      email: "info@sliit.lk",
-      backgroundImage: sliitImage,
-      programs: ["Computing", "Engineering", "Business", "Humanities"],
-      facilities: [
-        "Modern Campus",
-        "Tech Labs",
-        "Industry Partnerships",
-        "Career Services",
-      ],
-      achievements: [
-        "Industry Recognition",
-        "Graduate Employment",
-        "International Programs",
-      ],
-      tuitionFee: "Rs. 300,000 - 500,000 per year",
-      applicationDeadline: "Rolling Admissions",
-      rating: 4.5,
-    },
-    {
-      id: 6,
-      name: "NSBM Green University",
-      type: "Private",
-      location: "Pitipana, Western Province",
-      established: 2011,
-      studentCount: "6,000+",
-      faculties: 5,
-      ranking: 6,
-      description:
-        "South Asia's first green university, offering innovative programs in a sustainable environment.",
-      website: "https://www.nsbm.ac.lk",
-      phone: "+94 11 5445000",
-      email: "info@nsbm.ac.lk",
-      backgroundImage: nsbmImage,
-      programs: ["Business", "Computing", "Engineering", "Sciences"],
-      facilities: [
-        "Green Campus",
-        "Modern Labs",
-        "Innovation Hub",
-        "Sustainability Center",
-      ],
-      achievements: [
-        "Green Certification",
-        "Innovation Awards",
-        "Industry Partnerships",
-      ],
-      tuitionFee: "Rs. 250,000 - 400,000 per year",
-      applicationDeadline: "Multiple Intakes",
-      rating: 4.4,
-    },
-  ];
+  // Normalize program / title strings to Title Case (e.g. "INFORMATION COMMUNICATION TECHNOLOGY" -> "Information Communication Technology")
+  const normalizeTitle = (input) => {
+    if (!input && input !== 0) return input;
+    const s = String(input).trim();
+    if (!s) return s;
+    // lowercase everything then uppercase first letter of each word (also handle hyphenated words)
+    return s
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .split(' ')
+      .map((word) => word.split('-').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('-'))
+      .join(' ');
+  };
+
+  // We'll fetch universities from backend (detailed endpoint)
+  useEffect(() => {
+    let mounted = true;
+    fetch('/api/universities/detailed/')
+      .then((res) => res.json())
+      .then((data) => {
+        if (!mounted) return;
+        const list = data.results || data.results || [];
+        // determine type heuristically: if the website contains 'ac.lk' or ugc_ranking exists assume National, otherwise Private
+        const enriched = list.map((u) => ({
+          id: u.university_id || u.id,
+          name: u.name,
+          type: u.ugc_ranking ? 'National' : 'Private',
+          location: u.location || '',
+          established: u.established_year || u.established || null,
+          studentCount: u.student_count || '',
+          faculties: u.faculties_count || 0,
+          ranking: u.ugc_ranking || u.ranking || null,
+          description: u.description || '',
+          website: u.website,
+          phone: u.phone_number,
+          email: u.contact_email,
+          backgroundImage: u.logo || '',
+          programs: (u.degree_programs || []).map((p) => {
+            // p may be a string or an object with title
+            if (p && typeof p === 'object') {
+              return { ...p, title: normalizeTitle(p.title || '') };
+            }
+            return normalizeTitle(p || '');
+          }),
+          facilities: u.facilities || [],
+          tuitionFee: u.tuition_fee || '',
+          applicationDeadline: u.application_deadline || '',
+          rating: u.rating || (u.ugc_ranking ? 4.5 : 4.0),
+          degree_programs_count: u.degree_programs_count || 0,
+        }));
+        setUniversities(enriched);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Error fetching universities', err);
+        setLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+  
+  useEffect(() => {
+    let mounted = true;
+    setLoadingStats(true);
+    fetch('/api/universities/quick-stats/')
+      .then(res => res.json())
+      .then(data => {
+        if (!mounted) return;
+        if (data?.success && data.stats) {
+          setQuickStats(data.stats);
+        } else {
+          setQuickStats(null);
+        }
+      })
+      .catch(err => {
+        console.error('Failed to fetch quick stats', err);
+        setQuickStats(null);
+      })
+      .finally(() => {
+        if (mounted) setLoadingStats(false);
+      });
+
+    return () => { mounted = false };
+  }, []);
 
   const universityTypes = [
     { id: "all", name: "All Universities" },
@@ -255,16 +130,18 @@ const UniversityGuide = () => {
     { id: "Private", name: "Private Universities" },
   ];
 
-  const filteredUniversities = universities
+  const filteredUniversities = (loading ? [] : universities)
     .filter((uni) => selectedType === "all" || uni.type === selectedType)
-    .filter(
-      (uni) =>
-        uni.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        uni.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        uni.programs.some((program) =>
-          program.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-    );
+    .filter((uni) => {
+      const q = searchTerm.toLowerCase();
+      if (!q) return true;
+      const inPrograms = (uni.programs || []).some((p) => (p.title || p).toString().toLowerCase().includes(q));
+      return (
+        (uni.name || '').toLowerCase().includes(q) ||
+        (uni.location || '').toLowerCase().includes(q) ||
+        inPrograms
+      );
+    });
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-200 to-blue-100">
@@ -317,15 +194,21 @@ const UniversityGuide = () => {
 
         {/* Universities Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {loading ? (
+            <div className="col-span-full text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-400"></div>
+              <p className="mt-4 text-primary-300">Loading universities...</p>
+            </div>
+          ) : null}
           {filteredUniversities.map((university) => (
             <div
               key={university.id}
               className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             >
               {/* University Header */}
-              <div className="relative h-56 bg-gradient-to-l from-primary-700 to-accent-900"
+              <div className="relative h-56 bg-gradient-to-l from-primary-700 to-accent-900 rounded-t-2xl overflow-hidden"
                 style={{
-                      backgroundImage: `linear-gradient(to left, rgba(91, 138, 214, 0.3), rgba(165, 105, 221, 0.3)), url(${university.backgroundImage})`,
+                      backgroundImage: `linear-gradient(to left, rgba(91, 138, 214, 0.3), rgba(165, 105, 221, 0.3)), url(${university.backgroundImage || ''})`,
                       backgroundSize: 'cover',
                       backgroundPosition: 'center',
                       backgroundRepeat: 'no-repeat'
@@ -378,7 +261,7 @@ const UniversityGuide = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="bg-white/20 backdrop-blur-md rounded-lg px-3 py-2 border border-white/30">
+                      <div className="bg-white/20 backdrop-blur-md rounded-lg px-3 py-2 border border-white/30">
                       <div className="flex items-center space-x-1">
                         <Star className="h-4 w-4 text-yellow-300 fill-current" />
                         <span className="text-white font-semibold">
@@ -393,7 +276,7 @@ const UniversityGuide = () => {
               <div className="p-6">
                 {/* Description */}
                 <div className="mb-6">
-                  <p className="text-blue-900 text-2lg leading-relaxed text-sm">
+                  <p className="text-blue-900 text-lg leading-relaxed text-sm">
                     {university.description}
                   </p>
                 </div>
@@ -415,7 +298,7 @@ const UniversityGuide = () => {
                     </div>
                     <div className="text-xs text-blue-700 mb-1 font-medium">Programs</div>
                     <div className="font-bold text-blue-700 text-lg">
-                      {university.programs.length}+
+                      {(university.degree_programs_count || (university.programs && university.programs.length))}
                     </div>
                   </div>
                   <div className="bg-gradient-to-br from-green-200 to-green-300 rounded-lg p-3 text-center border border-green-200 shadow-md">
@@ -436,18 +319,24 @@ const UniversityGuide = () => {
                     <span>Popular Programs</span>
                   </h4>
                   <div className="flex flex-wrap gap-2">
-                    {university.programs.slice(0, 4).map((program, index) => (
-                      <span
-                        key={index}
-                        className="bg-gradient-to-r from-accent-400 to-accent-400 text-blue-900 px-3 py-1.5 rounded-full text-sm font-medium border border-accent-200 hover:shadow-sm transition-shadow"
+                    {(university.programs || university.degree_programs || []).slice(0, 4).map((program, index) => {
+                      const title = program.title || program;
+                      return (
+                        <span
+                          key={index}
+                          className="bg-gradient-to-r from-accent-400 to-accent-400 text-blue-900 px-3 py-1.5 rounded-full text-sm font-medium border border-accent-200 hover:shadow-sm transition-shadow"
+                        >
+                          {title}
+                        </span>
+                      );
+                    })}
+                    {(university.degree_programs_count || (university.programs && university.programs.length) || 0) > 4 && (
+                      <button
+                        onClick={() => setProgramsModal({ open: true, programs: university.programs || university.degree_programs || [], universityName: university.name })}
+                        className="text-blue-800 text-sm px-3 py-1.5 underline"
                       >
-                        {program}
-                      </span>
-                    ))}
-                    {university.programs.length > 4 && (
-                      <span className="text-blue-800 text-sm px-3 py-1.5">
-                        +{university.programs.length - 4} more
-                      </span>
+                        View all ({university.degree_programs_count || (university.programs && university.programs.length)})
+                      </button>
                     )}
                   </div>
                 </div>
@@ -501,42 +390,43 @@ const UniversityGuide = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center space-x-2 text-primary-300 hover:text-primary-400 transition-colors group"
+                        aria-label={`Visit website of ${university.name}`}
                       >
                         <div className="p-1.5 bg-accent-100 rounded-lg group-hover:bg-accent-200 transition-colors">
                           <Globe className="h-4 w-4" />
                         </div>
                         <span className="text-sm font-medium">Website</span>
                       </a>
-                      <button className="flex items-center space-x-2 text-primary-300 hover:text-primary-400 transition-colors group">
+                      <a href={`tel:${university.phone}`} className="flex items-center space-x-2 text-primary-300 hover:text-primary-400 transition-colors group" aria-label={`Call ${university.name}`}>
                         <div className="p-1.5 bg-accent-100 rounded-lg group-hover:bg-accent-200 transition-colors">
                           <Phone className="h-4 w-4" />
                         </div>
                         <span className="text-sm font-medium">Contact</span>
-                      </button>
-                      <button className="flex items-center space-x-2 text-primary-300 hover:text-primary-400 transition-colors group">
+                      </a>
+                      <a href={`mailto:${university.email}`} className="flex items-center space-x-2 text-primary-300 hover:text-primary-400 transition-colors group" aria-label={`Email ${university.name}`}>
                         <div className="p-1.5 bg-accent-100 rounded-lg group-hover:bg-accent-200 transition-colors">
                           <Mail className="h-4 w-4" />
                         </div>
                         <span className="text-sm font-medium">Email</span>
-                      </button>
+                      </a>
                     </div>
                   </div>
                   
-                  <div className="flex space-x-3">
+                  {/* <div className="flex space-x-3">
                     <button className="flex-1 bg-accent-100 text-primary-400 px-4 py-3 rounded-lg hover:bg-accent-200 transition-all duration-200 font-medium text-sm hover:shadow-md">
                       Compare Universities
                     </button>
                     <button className="flex-1 bg-blue-400 from-primary-400 to-accent-400 text-white px-4 py-3 rounded-lg hover:from-primary-600 hover:to-accent-600 transition-all duration-200 font-medium text-sm hover:shadow-lg">
                       View Details
                     </button>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        {filteredUniversities.length === 0 && (
+        {!loading && filteredUniversities.length === 0 && (
           <div className="text-center py-12">
             <Building className="h-16 w-16 text-blue-300 mx-auto mb-4" />
             <h3 className="font-display font-semibold text-2xl text-blue-900 mb-2">
@@ -555,30 +445,44 @@ const UniversityGuide = () => {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-900 mb-2">17</div>
-              <div className="text-blue-800">National Universities</div>
+              <div className="text-3xl font-bold text-blue-900 mb-2">{loadingStats ? '—' : (quickStats?.universities_count ?? 0)}</div>
+              <div className="text-blue-800">Universities</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-900 mb-2">
-                20+
-              </div>
-              <div className="text-blue-800">Private Universities</div>
+              <div className="text-3xl font-bold text-blue-900 mb-2">{loadingStats ? '—' : (quickStats?.faculties_count ?? 0)}</div>
+              <div className="text-blue-800">Faculties</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-900 mb-2">
-                120,000+
-              </div>
+              <div className="text-3xl font-bold text-blue-900 mb-2">{loadingStats ? '—' : (quickStats?.students_count ?? 0).toLocaleString()}</div>
               <div className="text-blue-800">University Students</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-900 mb-2">
-                500+
-              </div>
+              <div className="text-3xl font-bold text-blue-900 mb-2">{loadingStats ? '—' : (quickStats?.degree_programs_count ?? 0)}</div>
               <div className="text-blue-800">Degree Programs</div>
             </div>
           </div>
         </div>
       </div>
+      {/* Programs Modal */}
+      {programsModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl max-w-2xl w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Degree Programs @ {programsModal.universityName}</h3>
+              <button onClick={() => setProgramsModal({ open: false, programs: [], universityName: '' })} className="text-sm text-gray-600">Close</button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-80 overflow-auto">
+              {(programsModal.programs || []).map((p, idx) => (
+                <div key={idx} className="p-3 border rounded-lg">
+                  <div className="font-medium">{p.title || p}</div>
+                  {p.code && <div className="text-xs text-gray-500">Code: {p.code}</div>}
+                  {p.description && <div className="text-sm text-gray-700 mt-1">{p.description}</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

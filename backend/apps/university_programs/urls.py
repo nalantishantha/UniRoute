@@ -26,4 +26,8 @@ urlpatterns = [
          views.subject_files_view, name='subject_files'),
     path('academic/files/<int:file_id>/download/',
          views.download_subject_file, name='download_subject_file'),
+    # Z-Score Analysis endpoint
+    path('analyze-zscore/', views.analyze_zscore, name='analyze_zscore'),
+    # Get all programs for program matching page
+    path('programs/', views.get_all_programs, name='get_all_programs'),
 ]

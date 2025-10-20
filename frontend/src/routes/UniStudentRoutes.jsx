@@ -7,6 +7,7 @@ import {
   Dashboard,
   Earnings,
   Feedback,
+  InternshipOpportunities,
   Mentoring,
   PreUniCourses,
   Profile,
@@ -16,6 +17,7 @@ import {
 import { CalendarPage } from "../pages/UniStudents/Calendar";
 
 import StudentProfile from "../pages/UniStudents/StudentProfile/StudentProfile";
+import UniStudentSettings from "../pages/UniStudents/UniStudentSettings/UniStudentSettings";
 
 const UniStudentRoutes = () => {
   return (
@@ -31,7 +33,9 @@ const UniStudentRoutes = () => {
           <Route path="feedback" element={<Feedback />} />
           <Route path="profile" element={<Profile />} />
           <Route path="resources" element={<Resources />} />
+          <Route path="internships" element={<InternshipOpportunities />} />
           <Route path="earnings" element={<Earnings />} />
+          <Route path="settings" element={<UniStudentSettings />} />
           <Route
             path="mentoring/student-profile/:studentId"
             element={<StudentProfile />}

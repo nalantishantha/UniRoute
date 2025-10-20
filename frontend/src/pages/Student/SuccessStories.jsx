@@ -1,26 +1,18 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import StudentNavigation from "../../components/Navigation/StudentNavigation";
 import {
-  GraduationCap,
-  ArrowLeft,
   Search,
   Heart,
   MessageCircle,
   Share2,
-  Play,
   Award,
   Users,
-  TrendingUp,
   Star,
   Calendar,
   MapPin,
   BookOpen,
-  Briefcase,
   Quote,
-  Bell,
-  User,
-  Settings,
-  LogOut,
 } from "lucide-react";
 
 const SuccessStories = () => {
@@ -218,116 +210,33 @@ const SuccessStories = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50">
+    <div className="min-h-screen bg-gradient-to-r from-blue-200 to-blue-100">
       {/* Navigation */}
-      <nav className="bg-white/90 backdrop-blur-md border-b border-accent-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link to="/student/home" className="flex items-center space-x-2">
-              <GraduationCap className="h-8 w-8 text-primary-400" />
-              <span className="font-display font-bold text-2xl text-primary-400">
-                UniRoute
-              </span>
-            </Link>
+      <StudentNavigation />
 
-            <div className="hidden md:flex items-center space-x-8">
-              <Link
-                to="/student/mentors"
-                className="text-primary-300 hover:text-primary-400 transition-colors duration-200"
-              >
-                Mentors
-              </Link>
-              <Link
-                to="/student/tutors"
-                className="text-primary-300 hover:text-primary-400 transition-colors duration-200"
-              >
-                Tutors
-              </Link>
-              <Link
-                to="/student/news"
-                className="text-primary-300 hover:text-primary-400 transition-colors duration-200"
-              >
-                News
-              </Link>
-              <Link
-                to="/student/career-counseling"
-                className="text-primary-300 hover:text-primary-400 transition-colors duration-200"
-              >
-                Counseling
-              </Link>
-            </div>
-
-            <div className="hidden md:flex items-center space-x-4">
-              <button className="text-primary-300 hover:text-primary-400 transition-colors relative">
-                <Bell className="h-6 w-6" />
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  3
-                </span>
-              </button>
-              <Link
-                to="/student/profile"
-                className="text-primary-300 hover:text-primary-400 transition-colors"
-              >
-                <User className="h-6 w-6" />
-              </Link>
-              <Link
-                to="/student/settings"
-                className="text-primary-300 hover:text-primary-400 transition-colors"
-              >
-                <Settings className="h-6 w-6" />
-              </Link>
-              <Link
-                to="/student/dashboard"
-                className="bg-accent-200 text-primary-400 px-6 py-2 rounded-full font-medium hover:bg-accent-300 transition-all duration-200 hover:shadow-lg"
-              >
-                My Dashboard
-              </Link>
-              <Link
-                to="/"
-                className="text-primary-300 hover:text-primary-400 transition-colors"
-              >
-                <LogOut className="h-6 w-6" />
-              </Link>
-            </div>
-
-            <div className="md:hidden">
-              <Link
-                to="/student/dashboard"
-                className="bg-accent-200 text-primary-400 px-4 py-2 rounded-full text-sm font-medium"
-              >
-                Dashboard
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Header */}
-      <div className="bg-gradient-to-r from-primary-400 to-accent-400 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="font-display font-bold text-5xl mb-6">
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center mb-8">
+          <h1 className="font-display font-bold text-5xl text-blue-900 mb-4 drop-shadow-md">
             Success Stories
           </h1>
-          <p className="text-xl opacity-90 max-w-3xl mx-auto">
+          <p className="text-xl text-blue-800 max-w-3xl mx-auto">
             Be inspired by the journeys of our alumni who have achieved
             remarkable success in their careers. Learn from their experiences
             and discover your own path to greatness.
           </p>
         </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Search and Filters */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-accent-100 mb-8">
+        <div className="bg-white rounded-2xl shadow-lg p-6 border border-blue-200 mb-8">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-300" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-600" />
               <input
                 type="text"
                 placeholder="Search by name, role, university, or degree..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
+                className="w-full pl-12 pr-4 py-3 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-blue-900 placeholder-blue-600"
               />
             </div>
             <div className="flex flex-wrap gap-2">
@@ -337,8 +246,8 @@ const SuccessStories = () => {
                   onClick={() => setSelectedCategory(category.id)}
                   className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                     selectedCategory === category.id
-                      ? "bg-primary-400 text-white"
-                      : "bg-accent-50 text-primary-400 hover:bg-accent-100"
+                      ? "bg-blue-600 text-white"
+                      : "bg-white text-blue-700 border border-blue-200 hover:bg-blue-50"
                   }`}
                 >
                   {category.name}
@@ -350,41 +259,41 @@ const SuccessStories = () => {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-accent-100 text-center">
-            <Users className="h-8 w-8 text-primary-400 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-primary-400">
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-blue-200 text-center">
+            <Users className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+            <div className="text-2xl font-bold text-blue-900">
               {stories.length}
             </div>
-            <div className="text-primary-300">Success Stories</div>
+            <div className="text-blue-700">Success Stories</div>
           </div>
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-accent-100 text-center">
-            <Award className="h-8 w-8 text-accent-400 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-primary-400">50+</div>
-            <div className="text-primary-300">Industries</div>
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-blue-200 text-center">
+            <Award className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+            <div className="text-2xl font-bold text-blue-900">50+</div>
+            <div className="text-blue-700">Industries</div>
           </div>
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-accent-100 text-center">
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-blue-200 text-center">
             <MapPin className="h-8 w-8 text-green-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-primary-400">25+</div>
-            <div className="text-primary-300">Countries</div>
+            <div className="text-2xl font-bold text-blue-900">25+</div>
+            <div className="text-blue-700">Countries</div>
           </div>
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-accent-100 text-center">
-            <TrendingUp className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-primary-400">95%</div>
-            <div className="text-primary-300">Employment Rate</div>
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-blue-200 text-center">
+            <Users className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+            <div className="text-2xl font-bold text-blue-900">95%</div>
+            <div className="text-blue-700">Employment Rate</div>
           </div>
         </div>
 
         {/* Featured Stories */}
         {featuredStories.length > 0 && (
           <div className="mb-12">
-            <h2 className="font-display font-semibold text-3xl text-primary-400 mb-8">
+            <h2 className="font-display font-semibold text-3xl text-blue-900 mb-8">
               Featured Stories
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {featuredStories.map((story) => (
                 <div
                   key={story.id}
-                  className="bg-gradient-to-br from-primary-400 to-accent-400 rounded-2xl text-white overflow-hidden"
+                  className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl text-white overflow-hidden"
                 >
                   <div className="p-8">
                     <div className="flex items-center space-x-4 mb-6">
@@ -425,23 +334,23 @@ const SuccessStories = () => {
           {regularStories.map((story) => (
             <div
               key={story.id}
-              className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden"
+              className="bg-white rounded-2xl shadow-lg border border-blue-200 overflow-hidden"
             >
               <div className="p-6">
                 <div className="flex flex-col lg:flex-row gap-6">
                   <div className="lg:w-2/3">
                     <div className="flex items-start space-x-4 mb-4">
-                      <div className="w-16 h-16 bg-gradient-to-br from-primary-200 to-accent-200 rounded-full flex items-center justify-center flex-shrink-0">
-                        <Award className="h-8 w-8 text-primary-400" />
+                      <div className="w-16 h-16 bg-gradient-to-br from-blue-200 to-blue-300 rounded-full flex items-center justify-center flex-shrink-0">
+                        <Award className="h-8 w-8 text-blue-600" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-display font-semibold text-xl text-primary-400 mb-1">
+                        <h3 className="font-display font-semibold text-xl text-blue-900 mb-1">
                           {story.name}
                         </h3>
-                        <p className="text-primary-300 mb-2">
+                        <p className="text-blue-700 mb-2">
                           {story.currentRole}
                         </p>
-                        <div className="flex items-center space-x-4 text-sm text-primary-300">
+                        <div className="flex items-center space-x-4 text-sm text-blue-700">
                           <div className="flex items-center space-x-1">
                             <BookOpen className="h-4 w-4" />
                             <span>{story.university}</span>
@@ -458,12 +367,12 @@ const SuccessStories = () => {
                       </div>
                     </div>
 
-                    <p className="text-primary-300 mb-4 leading-relaxed">
+                    <p className="text-blue-700 mb-4 leading-relaxed">
                       {story.story}
                     </p>
 
                     <div className="mb-4">
-                      <h4 className="font-medium text-primary-400 mb-2">
+                      <h4 className="font-medium text-blue-900 mb-2">
                         Key Achievements
                       </h4>
                       <ul className="space-y-1">
@@ -472,8 +381,8 @@ const SuccessStories = () => {
                             key={index}
                             className="flex items-start space-x-2"
                           >
-                            <Award className="h-4 w-4 text-accent-400 mt-0.5 flex-shrink-0" />
-                            <span className="text-primary-300 text-sm">
+                            <Award className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                            <span className="text-blue-700 text-sm">
                               {achievement}
                             </span>
                           </li>
@@ -481,44 +390,44 @@ const SuccessStories = () => {
                       </ul>
                     </div>
 
-                    <div className="bg-accent-50 rounded-lg p-4 mb-4">
-                      <h4 className="font-medium text-primary-400 mb-2 flex items-center space-x-2">
+                    <div className="bg-blue-50 rounded-lg p-4 mb-4">
+                      <h4 className="font-medium text-blue-900 mb-2 flex items-center space-x-2">
                         <Quote className="h-4 w-4" />
                         <span>Advice for Students</span>
                       </h4>
-                      <p className="text-primary-300 italic">
+                      <p className="text-blue-700 italic">
                         "{story.advice}"
                       </p>
                     </div>
                   </div>
 
                   <div className="lg:w-1/3">
-                    <div className="bg-accent-50 rounded-lg p-4 mb-4">
-                      <h4 className="font-medium text-primary-400 mb-3">
+                    <div className="bg-blue-50 rounded-lg p-4 mb-4">
+                      <h4 className="font-medium text-blue-900 mb-3">
                         Education Background
                       </h4>
                       <div className="space-y-2 text-sm">
                         <div>
-                          <div className="text-primary-300">Degree</div>
-                          <div className="font-medium text-primary-400">
+                          <div className="text-blue-700">Degree</div>
+                          <div className="font-medium text-blue-900">
                             {story.degree}
                           </div>
                         </div>
                         <div>
-                          <div className="text-primary-300">University</div>
-                          <div className="font-medium text-primary-400">
+                          <div className="text-blue-700">University</div>
+                          <div className="font-medium text-blue-900">
                             {story.university}
                           </div>
                         </div>
                         <div>
-                          <div className="text-primary-300">Graduation</div>
-                          <div className="font-medium text-primary-400">
+                          <div className="text-blue-700">Graduation</div>
+                          <div className="font-medium text-blue-900">
                             {story.graduationYear}
                           </div>
                         </div>
                         <div>
-                          <div className="text-primary-300">Field</div>
-                          <div className="font-medium text-primary-400">
+                          <div className="text-blue-700">Field</div>
+                          <div className="font-medium text-blue-900">
                             {story.category}
                           </div>
                         </div>
@@ -527,14 +436,14 @@ const SuccessStories = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-accent-100">
+                <div className="flex items-center justify-between pt-4 border-t border-blue-200">
                   <div className="flex items-center space-x-6">
                     <button
                       onClick={() => toggleLike(story.id)}
                       className={`flex items-center space-x-2 transition-colors ${
                         likedStories.has(story.id)
                           ? "text-red-500"
-                          : "text-primary-300 hover:text-red-500"
+                          : "text-blue-700 hover:text-red-500"
                       }`}
                     >
                       <Heart
@@ -546,16 +455,16 @@ const SuccessStories = () => {
                         {story.likes + (likedStories.has(story.id) ? 1 : 0)}
                       </span>
                     </button>
-                    <button className="flex items-center space-x-2 text-primary-300 hover:text-primary-400 transition-colors">
+                    <button className="flex items-center space-x-2 text-blue-700 hover:text-blue-900 transition-colors">
                       <MessageCircle className="h-5 w-5" />
                       <span>{story.comments}</span>
                     </button>
-                    <button className="flex items-center space-x-2 text-primary-300 hover:text-primary-400 transition-colors">
+                    <button className="flex items-center space-x-2 text-blue-700 hover:text-blue-900 transition-colors">
                       <Share2 className="h-5 w-5" />
                       <span>{story.shares}</span>
                     </button>
                   </div>
-                  <span className="bg-accent-100 text-primary-400 px-3 py-1 rounded-full text-sm">
+                  <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
                     {story.category}
                   </span>
                 </div>
@@ -566,18 +475,18 @@ const SuccessStories = () => {
 
         {filteredStories.length === 0 && (
           <div className="text-center py-12">
-            <Users className="h-16 w-16 text-primary-200 mx-auto mb-4" />
-            <h3 className="font-display font-semibold text-2xl text-primary-400 mb-2">
+            <Users className="h-16 w-16 text-blue-300 mx-auto mb-4" />
+            <h3 className="font-display font-semibold text-2xl text-blue-900 mb-2">
               No Stories Found
             </h3>
-            <p className="text-primary-300">
+            <p className="text-blue-700">
               Try adjusting your search criteria or filters.
             </p>
           </div>
         )}
 
         {/* Call to Action */}
-        <div className="mt-12 bg-gradient-to-r from-primary-400 to-accent-400 rounded-2xl p-8 text-white text-center">
+        <div className="mt-12 bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl p-8 text-white text-center">
           <h2 className="font-display font-bold text-3xl mb-4">
             Share Your Success Story
           </h2>
@@ -585,7 +494,7 @@ const SuccessStories = () => {
             Inspire the next generation of students by sharing your journey and
             achievements.
           </p>
-          <button className="bg-white text-primary-400 px-8 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors">
+          <button className="bg-white text-blue-700 px-8 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors">
             Submit Your Story
           </button>
         </div>

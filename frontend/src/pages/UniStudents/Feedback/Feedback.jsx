@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   MessageSquare,
   Star,
   TrendingUp,
   BarChart3,
+  Users,
+  BookOpen,
 } from "lucide-react";
 import {
   Card,
@@ -15,127 +17,124 @@ import {
 } from "../../../components/ui/Card";
 import Button from "../../../components/ui/Button";
 import FeedbackList from "./FeedbackList";
-
-const feedbackData = [
-  {
-    id: 1,
-    student: "Sarah Chen",
-    course: "Mathematics Foundations",
-    rating: 5,
-    sentiment: "positive",
-    comment:
-      "Alex is an amazing tutor! His explanations are clear and he's very patient. I finally understand calculus thanks to his teaching methods.",
-    date: "2024-01-20",
-    isRead: true,
-    hasReply: false,
-    avatar:
-      "https://images.unsplash.com/photo-1494790108755-2616b612b5bc?w=40&h=40&fit=crop&crop=face",
-  },
-  {
-    id: 2,
-    student: "Michael Brown",
-    course: "Physics for Beginners",
-    rating: 4,
-    sentiment: "positive",
-    comment:
-      "Great course content and Alex is very knowledgeable. Sometimes the pace is a bit fast, but overall excellent experience.",
-    date: "2024-01-18",
-    isRead: true,
-    hasReply: true,
-    avatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
-  },
-  {
-    id: 3,
-    student: "Emily Watson",
-    course: "Chemistry Lab Techniques",
-    rating: 5,
-    sentiment: "positive",
-    comment:
-      "Absolutely loved this course! The lab demonstrations were fantastic and Alex made complex concepts easy to understand.",
-    date: "2024-01-15",
-    isRead: false,
-    hasReply: false,
-    avatar:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
-  },
-  {
-    id: 4,
-    student: "John Doe",
-    course: "Biology Essentials",
-    rating: 3,
-    sentiment: "neutral",
-    comment:
-      "The course material is good but I wish there were more interactive elements. Alex is helpful when asked questions directly.",
-    date: "2024-01-12",
-    isRead: true,
-    hasReply: false,
-    avatar:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
-  },
-  {
-    id: 5,
-    student: "Lisa Johnson",
-    course: "Advanced Mathematics",
-    rating: 5,
-    sentiment: "positive",
-    comment:
-      "Best math tutor I've ever had! Alex goes above and beyond to ensure students understand the material. Highly recommend!",
-    date: "2024-01-10",
-    isRead: true,
-    hasReply: true,
-    avatar:
-      "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=40&h=40&fit=crop&crop=face",
-  },
-  {
-    id: 6,
-    student: "David Wilson",
-    course: "Physics Problem Solving",
-    rating: 2,
-    sentiment: "negative",
-    comment:
-      "The course didn't meet my expectations. Some explanations were unclear and I struggled to follow along with the examples.",
-    date: "2024-01-08",
-    isRead: false,
-    hasReply: false,
-    avatar:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face",
-  },
-];
-
-const stats = {
-  totalFeedback: feedbackData.length,
-  averageRating: 4.2,
-  unreadCount: feedbackData.filter((f) => !f.isRead).length,
-  responseRate: 85,
-  positive: feedbackData.filter((f) => f.sentiment === "positive").length,
-  neutral: feedbackData.filter((f) => f.sentiment === "neutral").length,
-  negative: feedbackData.filter((f) => f.sentiment === "negative").length,
-};
-
-const monthlyTrends = [
-  { month: "Jul", rating: 4.1, count: 8 },
-  { month: "Aug", rating: 4.3, count: 12 },
-  { month: "Sep", rating: 4.0, count: 15 },
-  { month: "Oct", rating: 4.4, count: 18 },
-  { month: "Nov", rating: 4.2, count: 16 },
-  { month: "Dec", rating: 4.2, count: 14 },
-];
+import { feedbackAPI } from "../../../utils/feedbackAPI";
+import { getCurrentUser } from "../../../utils/auth";
 
 export default function Feedback() {
   const [filterStatus, setFilterStatus] = useState("all");
+  const [serviceTypeFilter, setServiceTypeFilter] = useState("all");
+  const [feedbackData, setFeedbackData] = useState([]);
+  const [stats, setStats] = useState({
+    total_feedback: 0,
+    average_rating: 0,
+    unread_count: 0,
+    response_rate: 0,
+    positive: 0,
+    neutral: 0,
+    negative: 0,
+    mentoring_count: 0,
+    tutoring_count: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Get current user and use their user_id
+  const currentUser = getCurrentUser();
+  const USER_ID = currentUser?.user_id || 19;
+
+  useEffect(() => {
+    fetchFeedback();
+  }, [serviceTypeFilter]);
+
+  const fetchFeedback = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const filters = {
+        service_type: serviceTypeFilter,
+      };
+
+      const response = await feedbackAPI.getFeedback(USER_ID, filters);
+
+      if (response.success) {
+        setFeedbackData(response.feedback || []);
+        setStats(response.stats || stats);
+      } else {
+        setError(response.message || 'Failed to fetch feedback');
+      }
+    } catch (err) {
+      setError(err.message || 'An error occurred while fetching feedback');
+      console.error('Error fetching feedback:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleExportReport = async () => {
+    try {
+      const filters = {
+        service_type: serviceTypeFilter,
+      };
+
+      await feedbackAPI.exportFeedbackReport(USER_ID, filters);
+
+      // You could add a success notification here if you have a notification system
+    } catch (err) {
+      setError(err.message || 'An error occurred while exporting the report');
+      console.error('Error exporting report:', err);
+    }
+  };
 
   const renderStars = (rating) => {
     return Array.from({ length: 5 }).map((_, index) => (
       <Star
         key={index}
         className={`w-4 h-4 ${index < rating
-            ? "text-warning fill-current"
-            : "text-neutral-light-grey"
+          ? "text-warning fill-current"
+          : "text-neutral-light-grey"
           }`}
       />
     ));
   };
+
+  if (loading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex items-center justify-center min-h-96"
+      >
+        <div className="text-center">
+          <div className="w-12 h-12 mx-auto border-b-2 rounded-full animate-spin border-primary-600"></div>
+          <p className="mt-4 text-neutral-grey">Loading feedback...</p>
+        </div>
+      </motion.div>
+    );
+  }
+
+  if (error) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-6"
+      >
+        <Card>
+          <CardContent className="p-12 text-center">
+            <MessageSquare className="w-12 h-12 mx-auto mb-4 text-error" />
+            <h3 className="mb-2 text-lg font-medium text-neutral-black">
+              Error Loading Feedback
+            </h3>
+            <p className="mb-4 text-neutral-grey">{error}</p>
+            <Button onClick={fetchFeedback} variant="outline">
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
@@ -145,22 +144,22 @@ export default function Feedback() {
     >
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-end">
-        <div className="flex items-center space-x-3 mt-4 lg:mt-0">
+        <div className="flex items-center mt-4 space-x-3 lg:mt-0">
           <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+            value={serviceTypeFilter}
+            onChange={(e) => setServiceTypeFilter(e.target.value)}
+            className="px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
           >
-            <option value="all">All Feedback</option>
-            <option value="unread">Unread</option>
-            <option value="read">Read</option>
+            <option value="all">All Services</option>
+            <option value="mentoring">Mentoring Only</option>
+            <option value="tutoring">Tutoring Only</option>
           </select>
-          <Button variant="outline">Export Report</Button>
+          <Button variant="outline" onClick={handleExportReport}>Export Report</Button>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-5">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -168,14 +167,11 @@ export default function Feedback() {
                 <p className="text-sm font-medium text-neutral-grey">
                   Total Feedback
                 </p>
-                <p className="text-2xl font-bold text-neutral-black mt-2">
-                  {stats.totalFeedback}
-                </p>
-                <p className="text-sm text-neutral-grey mt-1">
-                  {stats.unreadCount} unread
+                <p className="mt-2 text-2xl font-bold text-neutral-black">
+                  {stats.total_feedback}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
+              <div className="flex items-center justify-center w-12 h-12 bg-primary-100 rounded-xl">
                 <MessageSquare className="w-6 h-6 text-primary-600" />
               </div>
             </div>
@@ -189,16 +185,16 @@ export default function Feedback() {
                 <p className="text-sm font-medium text-neutral-grey">
                   Average Rating
                 </p>
-                <div className="flex items-center space-x-2 mt-2">
+                <div className="flex items-center mt-2 space-x-2">
                   <p className="text-2xl font-bold text-neutral-black">
-                    {stats.averageRating}
+                    {stats.average_rating}
                   </p>
                   <div className="flex">
-                    {renderStars(Math.round(stats.averageRating))}
+                    {renderStars(Math.round(stats.average_rating))}
                   </div>
                 </div>
               </div>
-              <div className="w-12 h-12 bg-secondary/20 rounded-xl flex items-center justify-center">
+              <div className="flex items-center justify-center w-12 h-12 bg-secondary/20 rounded-xl">
                 <Star className="w-6 h-6 text-yellow-600" />
               </div>
             </div>
@@ -210,15 +206,15 @@ export default function Feedback() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-neutral-grey">
-                  Response Rate
+                  Mentoring
                 </p>
-                <p className="text-2xl font-bold text-neutral-black mt-2">
-                  {stats.responseRate}%
+                <p className="mt-2 text-2xl font-bold text-neutral-black">
+                  {stats.mentoring_count}
                 </p>
-                <p className="text-sm text-success mt-1">+5% this month</p>
+                <p className="mt-1 text-sm text-neutral-grey">feedback</p>
               </div>
-              <div className="w-12 h-12 bg-success/20 rounded-xl flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-success" />
+              <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-xl">
+                <Users className="w-6 h-6 text-blue-600" />
               </div>
             </div>
           </CardContent>
@@ -229,54 +225,52 @@ export default function Feedback() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-neutral-grey">
-                  Sentiment
+                  Tutoring
                 </p>
-                <div className="flex items-center space-x-1 mt-2">
-                  <span className="text-sm text-success">
-                    {stats.positive}+
-                  </span>
-                  <span className="text-sm text-warning">{stats.neutral}~</span>
-                  <span className="text-sm text-error">{stats.negative}-</span>
-                </div>
+                <p className="mt-2 text-2xl font-bold text-neutral-black">
+                  {stats.tutoring_count}
+                </p>
+                <p className="mt-1 text-sm text-neutral-grey">feedback</p>
               </div>
-              <div className="w-12 h-12 bg-info/20 rounded-xl flex items-center justify-center">
-                <BarChart3 className="w-6 h-6 text-info" />
+              <div className="flex items-center justify-center w-12 h-12 bg-purple-100 rounded-xl">
+                <BookOpen className="w-6 h-6 text-purple-600" />
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Trends Chart */}
+      {/* Sentiment Analysis Card */}
       <Card>
         <CardHeader>
-          <CardTitle>Feedback Trends</CardTitle>
+          <CardTitle>Sentiment Analysis</CardTitle>
           <CardDescription>
-            Monthly feedback rating and volume trends
+            Breakdown of feedback sentiment across all services
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-64 flex items-end justify-between space-x-2">
-            {monthlyTrends.map((data, index) => (
-              <div
-                key={data.month}
-                className="flex flex-col items-center flex-1"
-              >
-                <motion.div
-                  initial={{ height: 0 }}
-                  animate={{ height: `${(data.rating / 5) * 100}%` }}
-                  transition={{ delay: index * 0.1, duration: 0.6 }}
-                  className="w-full bg-gradient-to-t from-primary-600 to-primary-400 rounded-t-lg mb-2 min-h-[20px]"
-                />
-                <span className="text-xs text-neutral-grey">{data.month}</span>
-                <span className="text-xs font-medium text-neutral-black">
-                  {data.rating}
-                </span>
-                <span className="text-xs text-neutral-light-grey">
-                  ({data.count})
-                </span>
+          <div className="grid grid-cols-3 gap-6">
+            <div className="text-center">
+              <div className="flex items-center justify-center w-16 h-16 mx-auto mb-3 rounded-full bg-success/20">
+                <BarChart3 className="w-8 h-8 text-success" />
               </div>
-            ))}
+              <p className="text-2xl font-bold text-success">{stats.positive}</p>
+              <p className="text-sm text-neutral-grey">Positive</p>
+            </div>
+            <div className="text-center">
+              <div className="flex items-center justify-center w-16 h-16 mx-auto mb-3 rounded-full bg-warning/20">
+                <BarChart3 className="w-8 h-8 text-yellow-600" />
+              </div>
+              <p className="text-2xl font-bold text-yellow-600">{stats.neutral}</p>
+              <p className="text-sm text-neutral-grey">Neutral</p>
+            </div>
+            <div className="text-center">
+              <div className="flex items-center justify-center w-16 h-16 mx-auto mb-3 rounded-full bg-error/20">
+                <BarChart3 className="w-8 h-8 text-error" />
+              </div>
+              <p className="text-2xl font-bold text-error">{stats.negative}</p>
+              <p className="text-sm text-neutral-grey">Negative</p>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -285,6 +279,8 @@ export default function Feedback() {
       <FeedbackList
         feedbackData={feedbackData}
         filterStatus={filterStatus}
+        serviceTypeFilter={serviceTypeFilter}
+        onRefreshData={fetchFeedback}
       />
     </motion.div>
   );

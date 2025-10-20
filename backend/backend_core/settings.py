@@ -21,6 +21,7 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='').split(',')
 
 # Application definition
 INSTALLED_APPS = [
+    'daphne',  # Must be first for channels
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -29,9 +30,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # Third party apps
+    'channels',
     'corsheaders',  # Only one corsheaders entry
 
     # Your apps
+    
+   # Your apps 
+    'apps.academic_resources',
     'apps.accounts',
     'apps.administration',
     'apps.communications',
@@ -43,8 +48,11 @@ INSTALLED_APPS = [
     'apps.companies',
     'apps.tutoring',
     'apps.mentoring',
+    'apps.pre_mentors',
+    'apps.counsellors',
     'apps.advertisements',
     'apps.payments',
+    'apps.pre_university_courses',
 ]
 
 MIDDLEWARE = [
@@ -77,6 +85,19 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'backend_core.wsgi.application'
+ASGI_APPLICATION = 'backend_core.asgi.application'
+
+# Channels configuration
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',  # Use in-memory for development
+        # For production, use Redis:
+        # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        # 'CONFIG': {
+        #     "hosts": [('127.0.0.1', 6379)],
+        # },
+    },
+}
 
 # DATABASES = {
 #     'default': {
@@ -127,9 +148,16 @@ CORS_ALLOW_CREDENTIALS = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'static'
 
-# Media files
+# Media files (uploads)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# File upload settings
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
+
+# Security: Allowed file extensions (optional, for additional security)
+ALLOWED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserCheck, Mail, Lock, Eye, EyeOff, ArrowLeft, User, Phone, CheckCircle, AlertCircle, School, Calendar } from 'lucide-react';
 
@@ -7,6 +7,7 @@ const UniversityStudentRegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [pageError, setPageError] = useState(null);
   const [message, setMessage] = useState({ type: '', text: '' });
   
   const [formData, setFormData] = useState({
@@ -16,20 +17,171 @@ const UniversityStudentRegisterPage = () => {
     phoneNumber: '',
     password: '',
     confirmPassword: '',
-    universityName: '',
-    studentId: '',
+    universityId: '',
+    facultyId: '',
+    degreeProgramId: '',
+    durationId: '',
     yearOfStudy: '',
-    program: '',
+    registrationNumber: '',
     agreeToTerms: false,
     receiveUpdates: true
   });
 
+  // Dropdown data
+  const [universities, setUniversities] = useState([]);
+  const [faculties, setFaculties] = useState([]);
+  const [degreePrograms, setDegreePrograms] = useState([]);
+  const [durations, setDurations] = useState([]);
+
+  // Add error boundary effect
+  useEffect(() => {
+    const handleError = (error) => {
+      console.error('Page error caught:', error);
+      setPageError(error.message);
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', (event) => {
+      console.error('Unhandled promise rejection:', event.reason);
+      setPageError('An unexpected error occurred');
+    });
+
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleError);
+    };
+  }, []);
+
+  // Fetch universities on mount
+  useEffect(() => {
+    console.log('Fetching universities...');
+    
+    fetch('http://127.0.0.1:8000/api/universities/')
+      .then(res => {
+        console.log('Universities response status:', res.status);
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(data => {
+        console.log('Universities data:', data);
+        setUniversities(data.results || data);
+      })
+      .catch(error => {
+        console.error('Error fetching universities:', error);
+        setUniversities([]);
+      });
+  }, []);
+
+  // Fetch faculties when universityId changes
+  useEffect(() => {
+    if (formData.universityId) {
+      console.log('Fetching faculties for university:', formData.universityId);
+      
+      fetch(`http://127.0.0.1:8000/api/universities/faculties/?university_id=${formData.universityId}`)
+        .then(res => {
+          console.log('Faculties response status:', res.status);
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then(data => {
+          console.log('Faculties data:', data);
+          setFaculties(data.results || data);
+        })
+        .catch(error => {
+          console.error('Error fetching faculties:', error);
+          setFaculties([]);
+        });
+    } else {
+      setFaculties([]);
+    }
+  }, [formData.universityId]);
+
+  // Fetch degree programs when facultyId changes
+  useEffect(() => {
+    if (formData.facultyId) {
+      console.log('Fetching degree programs for faculty:', formData.facultyId);
+      
+      fetch(`http://127.0.0.1:8000/api/universities/degree-programs/?faculty_id=${formData.facultyId}`)
+        .then(res => {
+          console.log('Degree programs response status:', res.status);
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then(data => {
+          console.log('Degree programs data:', data);
+          setDegreePrograms(data.results || data);
+        })
+        .catch(error => {
+          console.error('Error fetching degree programs:', error);
+          setDegreePrograms([]);
+        });
+    } else {
+      setDegreePrograms([]);
+    }
+  }, [formData.facultyId]);
+
+  // Fetch durations when degreeProgramId changes
+  useEffect(() => {
+    if (formData.degreeProgramId) {
+      console.log('Fetching durations for degree program:', formData.degreeProgramId);
+      
+      fetch(`http://127.0.0.1:8000/api/universities/degree-program-durations/?degree_program_id=${formData.degreeProgramId}`)
+        .then(res => {
+          console.log('Durations response status:', res.status);
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then(data => {
+          console.log('Durations data:', data);
+          setDurations(data.results || data);
+        })
+        .catch(error => {
+          console.error('Error fetching durations:', error);
+          setDurations([]);
+        });
+    } else {
+      setDurations([]);
+    }
+  }, [formData.degreeProgramId]);
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
+    
+    // Handle clearing dependent fields when parent selections change
+    let updatedFormData = {
+      ...formData,
       [name]: type === 'checkbox' ? checked : value
-    }));
+    };
+
+    if (name === 'universityId') {
+      updatedFormData = {
+        ...updatedFormData,
+        facultyId: '',
+        degreeProgramId: '',
+        durationId: ''
+      };
+    } else if (name === 'facultyId') {
+      updatedFormData = {
+        ...updatedFormData,
+        degreeProgramId: '',
+        durationId: ''
+      };
+    } else if (name === 'degreeProgramId') {
+      updatedFormData = {
+        ...updatedFormData,
+        durationId: ''
+      };
+    }
+
+    setFormData(updatedFormData);
     
     if (message.text) {
       setMessage({ type: '', text: '' });
@@ -55,10 +207,12 @@ const UniversityStudentRegisterPage = () => {
         phoneNumber: formData.phoneNumber,
         password: formData.password,
         confirmPassword: formData.confirmPassword,
-        universityName: formData.universityName,
-        studentId: formData.studentId,
+        universityId: formData.universityId,
+        facultyId: formData.facultyId,
+        degreeProgramId: formData.degreeProgramId,
+        durationId: formData.durationId,
         yearOfStudy: formData.yearOfStudy,
-        program: formData.program
+        registrationNumber: formData.registrationNumber
       };
 
       console.log('Sending university student registration data:', registrationData);
@@ -168,6 +322,16 @@ const UniversityStudentRegisterPage = () => {
               </div>
             )}
 
+            {/* Page Error Message */}
+            {pageError && (
+              <div className="mb-6 p-4 rounded-xl flex items-center space-x-3 bg-[#E57373]/10 border border-[#E57373]/20">
+                <AlertCircle className="h-5 w-5 text-[#E57373]" />
+                <span className="text-sm font-medium text-[#E57373]">
+                  Page Error: {pageError}
+                </span>
+              </div>
+            )}
+
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Name Fields */}
@@ -254,44 +418,92 @@ const UniversityStudentRegisterPage = () => {
               {/* University Information */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="universityName" className="block text-sm font-medium text-[#263238] mb-2">
+                  <label htmlFor="universityId" className="block text-sm font-medium text-[#263238] mb-2">
                     University
                   </label>
                   <div className="relative">
                     <School className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#717171]" />
-                    <input
-                      type="text"
-                      id="universityName"
-                      name="universityName"
-                      value={formData.universityName}
+                    <select
+                      id="universityId"
+                      name="universityId"
+                      value={formData.universityId}
                       onChange={handleInputChange}
                       className="w-full pl-10 pr-4 py-3 border border-[#C8E6C9] rounded-xl focus:ring-2 focus:ring-[#2E7D32] focus:border-[#2E7D32] transition-all bg-white"
-                      placeholder="University name"
                       required
                       disabled={isLoading}
-                    />
+                    >
+                      <option value="">Select university</option>
+                      {universities.map(u => (
+                        <option key={u.university_id || u.id} value={u.university_id || u.id}>{u.name}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="studentId" className="block text-sm font-medium text-[#263238] mb-2">
-                    Student ID
+                  <label htmlFor="facultyId" className="block text-sm font-medium text-[#263238] mb-2">
+                    Faculty
                   </label>
-                  <input
-                    type="text"
-                    id="studentId"
-                    name="studentId"
-                    value={formData.studentId}
+                  <select
+                    id="facultyId"
+                    name="facultyId"
+                    value={formData.facultyId}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-[#C8E6C9] rounded-xl focus:ring-2 focus:ring-[#2E7D32] focus:border-[#2E7D32] transition-all bg-white"
-                    placeholder="Student ID"
                     required
-                    disabled={isLoading}
-                  />
+                    disabled={isLoading || !formData.universityId}
+                  >
+                    <option value="">Select faculty</option>
+                    {faculties.map(f => (
+                      <option key={f.faculty_id || f.id} value={f.faculty_id || f.id}>{f.name}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
-              {/* Academic Information */}
+              {/* Degree Program & Duration */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="degreeProgramId" className="block text-sm font-medium text-[#263238] mb-2">
+                    Degree Program
+                  </label>
+                  <select
+                    id="degreeProgramId"
+                    name="degreeProgramId"
+                    value={formData.degreeProgramId}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-[#C8E6C9] rounded-xl focus:ring-2 focus:ring-[#2E7D32] focus:border-[#2E7D32] transition-all bg-white"
+                    required
+                    disabled={isLoading || !formData.facultyId}
+                  >
+                    <option value="">Select degree program</option>
+                    {degreePrograms.map(d => (
+                      <option key={d.degree_program_id || d.id} value={d.degree_program_id || d.id}>{d.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="durationId" className="block text-sm font-medium text-[#263238] mb-2">
+                    Program Duration
+                  </label>
+                  <select
+                    id="durationId"
+                    name="durationId"
+                    value={formData.durationId}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-[#C8E6C9] rounded-xl focus:ring-2 focus:ring-[#2E7D32] focus:border-[#2E7D32] transition-all bg-white"
+                    required
+                    disabled={isLoading || !formData.degreeProgramId}
+                  >
+                    <option value="">Select duration</option>
+                    {durations.map(d => (
+                      <option key={d.duration_id || d.id} value={d.duration_id || d.id}>{d.duration || d.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Year of Study & Registration Number */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="yearOfStudy" className="block text-sm font-medium text-[#263238] mb-2">
@@ -320,17 +532,17 @@ const UniversityStudentRegisterPage = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="program" className="block text-sm font-medium text-[#263238] mb-2">
-                    Program/Degree
+                  <label htmlFor="registrationNumber" className="block text-sm font-medium text-[#263238] mb-2">
+                    Registration Number
                   </label>
                   <input
                     type="text"
-                    id="program"
-                    name="program"
-                    value={formData.program}
+                    id="registrationNumber"
+                    name="registrationNumber"
+                    value={formData.registrationNumber}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-[#C8E6C9] rounded-xl focus:ring-2 focus:ring-[#2E7D32] focus:border-[#2E7D32] transition-all bg-white"
-                    placeholder="e.g. Computer Science"
+                    placeholder="Registration Number"
                     required
                     disabled={isLoading}
                   />
