@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import video_call_views
 
 urlpatterns = [
     # Tutoring Sessions (Legacy)
@@ -36,4 +37,11 @@ urlpatterns = [
     path('tutor/<int:tutor_id>/sessions/', views.get_tutor_sessions_detailed, name='get_tutor_sessions_detailed'),
     path('tutor/<int:tutor_id>/stats/', views.get_tutor_stats, name='get_tutor_stats'),
     path('tutor/by-user/<int:user_id>/', views.get_tutor_by_user_id, name='get_tutor_by_user_id'),
+    
+    # Video Call Endpoints
+    path('video-call/create/', video_call_views.create_tutoring_video_room, name='create_tutoring_video_room'),
+    path('video-call/<str:room_id>/', video_call_views.get_tutoring_video_room, name='get_tutoring_video_room'),
+    path('video-call/<str:room_id>/join/', video_call_views.join_tutoring_video_room, name='join_tutoring_video_room'),
+    path('video-call/<str:room_id>/end/', video_call_views.end_tutoring_video_room, name='end_tutoring_video_room'),
+    path('video-call/booking/<int:booking_id>/', video_call_views.get_or_create_room_for_booking, name='get_or_create_room_for_tutoring_booking'),
 ]

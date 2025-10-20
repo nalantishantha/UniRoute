@@ -26,7 +26,7 @@ import {
 import Button from "../../../components/ui/Button";
 import { useChatContext } from "../../../context/ChatContext";
 import { tutoringAPI } from "../../../utils/tutoringAPI";
-import { joinMentoringVideoCall } from "../../../utils/videoCallAPI";
+import { joinTutoringVideoCall } from "../../../utils/tutoringVideoCallAPI";
 import RescheduleSessionModal from "./RescheduleSessionModal";
 import CompleteBookingModal from "./CompleteBookingModal";
 
@@ -177,11 +177,15 @@ export default function Tutoring() {
     });
   };
 
-  const handleJoinVideoCall = async (sessionId) => {
+  const handleJoinVideoCall = async (bookingId) => {
     try {
-      await joinMentoringVideoCall(sessionId);
-    } catch (error) {
-      console.error("Failed to join video call:", error);
+      setError(null);
+      // Join tutoring video call - opens in new window
+      // tutorId is already available in state
+      await joinTutoringVideoCall(bookingId, tutorId, "tutor");
+    } catch (err) {
+      console.error("Error joining tutoring video call:", err);
+      setError("Failed to join tutoring video call. Please try again.");
       alert("Failed to join video call. Please try again.");
     }
   };
@@ -391,13 +395,13 @@ export default function Tutoring() {
         </div>
 
         {/* Tabs */}
-        <div className="bg-white rounded-lg shadow-sm border border-accent-100 mb-6">
+        <div className=" rounded-lg shadow-sm border border-accent-100 mb-3">
           <div className="flex border-b border-accent-100">
             <button
               onClick={() => setActiveTab("upcoming")}
-              className={`flex-1 py-4 px-6 font-medium transition-colors ${
+              className={`flex-1 py-4 px-6 font-medium border-b-2 transition-colors ${
                 activeTab === "upcoming"
-                  ? "border-primary-500 text-primary-600"
+                  ? "border-primary-500 text-primary-600 border-b "
                   : "border-transparent text-neutral-grey hover:text-neutral-black"
               }`}
             >
@@ -415,9 +419,9 @@ export default function Tutoring() {
 
             <button
               onClick={() => setActiveTab("completed")}
-              className={`flex-1 py-4 px-6 font-medium transition-colors ${
+              className={`flex-1 py-4 px-6 font-medium border-b-2 transition-colors ${
                 activeTab === "completed"
-                  ? "border-primary-500 text-primary-600"
+                  ? "border-primary-500 text-primary-600 "
                   : "border-transparent text-neutral-grey hover:text-neutral-black"
               }`}
             >
@@ -590,7 +594,7 @@ function UpcomingSessionsTab({
 
         return (
           <Card key={bookingId} className="hover:shadow-lg transition-shadow">
-            <CardHeader className="bg-gradient-to-r from-primary-50 to-accent-50 border-b border-accent-100">
+            <CardHeader className=" border-b border-accent-100">
               <div className="flex items-start justify-between">
                 <div className="flex items-start space-x-4">
                   <img
@@ -612,7 +616,7 @@ function UpcomingSessionsTab({
                         {firstSession.sessions_completed}/
                         {firstSession.sessions_total} sessions
                       </span>
-                      <span className="text-xs bg-primary-100 text-primary-400 px-2 py-1 rounded-full">
+                      <span className="text-xs  px-2 py-1 rounded-full">
                         {firstSession.payment_type}
                       </span>
                     </CardDescription>
@@ -620,7 +624,7 @@ function UpcomingSessionsTab({
                 </div>
                 <div className="flex items-center space-x-2">
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={() =>
                       onMessage(
@@ -629,10 +633,11 @@ function UpcomingSessionsTab({
                       )
                     }
                   >
-                    <MessageSquare className="h-4 w-4" />
+                    <MessageSquare className="h-4 w-4 mr-1" />
+                    Message
                   </Button>
-                  <Button
-                    variant="ghost"
+                  {/* <Button
+                    variant="outline"
                     size="sm"
                     onClick={() =>
                       onViewProfile(
@@ -641,13 +646,14 @@ function UpcomingSessionsTab({
                       )
                     }
                   >
-                    <Eye className="h-4 w-4" />
-                  </Button>
+                    <Eye className="h-4 w-4 mr-1" />
+                    View Profile
+                  </Button> */}
                   {canComplete && (
                     <Button
-                      variant="success"
                       size="sm"
                       onClick={() => onComplete(firstSession)}
+                      className="text-success hover:bg-success/10"
                     >
                       <CheckCircle className="h-4 w-4 mr-1" />
                       Complete Package
@@ -697,7 +703,7 @@ function UpcomingSessionsTab({
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center space-x-4 mt-2 text-sm text-primary-300">
+                        <div className="flex items-center space-x-4 mt-2 text-sm text-neutral-grey">
                           <span className="flex items-center">
                             <Calendar className="h-4 w-4 mr-1" />
                             {new Date(session.date).toLocaleDateString(
@@ -716,7 +722,7 @@ function UpcomingSessionsTab({
                           </span>
                         </div>
                         {session.topic && (
-                          <p className="text-sm text-primary-300 mt-2">
+                          <p className="text-sm text-neutral-grey mt-2">
                             <span className="font-medium">Topic:</span>{" "}
                             {session.topic}
                           </p>
@@ -727,30 +733,29 @@ function UpcomingSessionsTab({
                           !session.is_expired && (
                             <>
                               <Button
+                                size="sm"
                                 variant="outline"
-                                size="sm"
-                                onClick={() => onReschedule(session)}
-                              >
-                                <RefreshCw className="h-4 w-4 mr-1" />
-                                Reschedule
-                              </Button>
-                              <Button
-                                variant="success"
-                                size="sm"
-                                onClick={() => onMarkSessionComplete(session)}
-                              >
-                                <CheckCircle className="h-4 w-4 mr-1" />
-                                Mark Complete
-                              </Button>
-                              <Button
-                                variant="primary"
-                                size="sm"
                                 onClick={() =>
                                   onJoinVideoCall(session.booking_id)
                                 }
                               >
-                                <Video className="h-4 w-4 mr-1" />
-                                Join Session
+                                <Video className="w-4 h-4 mr-1" />
+                                Join Video Meeting
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => onMarkSessionComplete(session)}
+                                className="text-success hover:bg-success/10"
+                              >
+                                <CheckCircle className="w-4 h-4 mr-1" />
+                                Mark Complete
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={() => onReschedule(session)}
+                              >
+                                Reschedule
                               </Button>
                             </>
                           )}
@@ -858,7 +863,7 @@ function CompletedSessionsTab({ sessions, onViewProfile, onMessage }) {
             key={bookingId}
             className="hover:shadow-lg transition-shadow opacity-90"
           >
-            <CardHeader className="bg-gradient-to-r from-neutral-light-grey/30 to-accent-50/30 border-b border-accent-100">
+            <CardHeader className="border-b border-accent-100">
               <div className="flex items-start justify-between">
                 <div className="flex items-start space-x-4">
                   <img
@@ -887,7 +892,7 @@ function CompletedSessionsTab({ sessions, onViewProfile, onMessage }) {
                 </div>
                 <div className="flex items-center space-x-2">
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={() =>
                       onMessage(
@@ -896,10 +901,11 @@ function CompletedSessionsTab({ sessions, onViewProfile, onMessage }) {
                       )
                     }
                   >
-                    <MessageSquare className="h-4 w-4" />
+                    <MessageSquare className="h-4 w-4 mr-1" />
+                    Message
                   </Button>
-                  <Button
-                    variant="ghost"
+                  {/* <Button
+                    variant="outline"
                     size="sm"
                     onClick={() =>
                       onViewProfile(
@@ -908,8 +914,9 @@ function CompletedSessionsTab({ sessions, onViewProfile, onMessage }) {
                       )
                     }
                   >
-                    <Eye className="h-4 w-4" />
-                  </Button>
+                    <Eye className="h-4 w-4 mr-1" />
+                    View Profile
+                  </Button> */}
                 </div>
               </div>
             </CardHeader>

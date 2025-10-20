@@ -111,7 +111,7 @@ export default function RescheduleSessionModal({
                 <h3 className="font-semibold text-primary-900 mb-2">
                   Current Session
                 </h3>
-                <div className="flex items-center space-x-2 text-sm text-primary-300">
+                <div className="flex items-center space-x-2 text-sm text-neutral-grey">
                   <Calendar className="h-4 w-4" />
                   <span>
                     {new Date(session.date).toLocaleDateString("en-US", {
@@ -122,17 +122,17 @@ export default function RescheduleSessionModal({
                     })}
                   </span>
                 </div>
-                <div className="flex items-center space-x-2 text-sm text-primary-300">
+                <div className="flex items-center space-x-2 text-sm text-neutral-grey">
                   <Clock className="h-4 w-4" />
                   <span>
                     {session.start_time} - {session.end_time}
                   </span>
                 </div>
-                <p className="text-sm text-primary-300">
+                <p className="text-sm text-neutral-grey">
                   <span className="font-medium">Student:</span>{" "}
                   {session.student_name}
                 </p>
-                <p className="text-sm text-primary-300">
+                <p className="text-smt text-neutral-grey">
                   <span className="font-medium">Subject:</span>{" "}
                   {session.subject}
                 </p>
