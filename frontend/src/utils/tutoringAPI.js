@@ -72,14 +72,14 @@ export const tutoringAPI = {
     getAvailableTutors: async (subjectId = null, dayOfWeek = null) => {
         let url = `${API_BASE_URL}/tutoring/tutors/available/`;
         const params = new URLSearchParams();
-        
+
         if (subjectId) {
             params.append('subject_id', subjectId);
         }
         if (dayOfWeek !== null) {
             params.append('day_of_week', dayOfWeek);
         }
-        
+
         if (params.toString()) {
             url += `?${params.toString()}`;
         }
@@ -95,7 +95,7 @@ export const tutoringAPI = {
     // Get available time slots for a specific tutor
     getAvailableSlots: async (tutorId, subjectId = null) => {
         let url = `${API_BASE_URL}/tutoring/available-slots/${tutorId}/`;
-        
+
         if (subjectId) {
             url += `?subject_id=${subjectId}`;
         }
@@ -122,7 +122,7 @@ export const tutoringAPI = {
                 },
                 body: JSON.stringify(bookingData),
             });
-            
+
             if (!response.ok) {
                 // Try to get error message from response
                 try {
@@ -132,7 +132,7 @@ export const tutoringAPI = {
                     throw new Error(`Server error: ${response.status} - ${response.statusText}`);
                 }
             }
-            
+
             const data = await response.json();
             if (data.status !== 'success') {
                 throw new Error(data.message || 'Failed to create booking');
@@ -182,7 +182,7 @@ export const tutoringAPI = {
     // Get bookings for a student
     getStudentBookings: async (studentId, status = null) => {
         let url = `${API_BASE_URL}/tutoring/bookings/student/${studentId}/`;
-        
+
         if (status) {
             url += `?status=${status}`;
         }
@@ -198,7 +198,7 @@ export const tutoringAPI = {
     // Get bookings for a tutor
     getTutorBookings: async (tutorId, status = null) => {
         let url = `${API_BASE_URL}/tutoring/bookings/tutor/${tutorId}/`;
-        
+
         if (status) {
             url += `?status=${status}`;
         }
@@ -207,6 +207,106 @@ export const tutoringAPI = {
         const data = await response.json();
         if (data.status !== 'success') {
             throw new Error(data.message || 'Failed to fetch bookings');
+        }
+        return data;
+    },
+
+    // Mark an individual session as completed
+    markSessionCompleted: async (bookingId) => {
+        const response = await fetch(`${API_BASE_URL}/tutoring/bookings/${bookingId}/mark-completed/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        const data = await response.json();
+        if (data.status !== 'success') {
+            throw new Error(data.message || 'Failed to mark session as completed');
+        }
+        return data;
+    },
+
+    // Complete a tutoring booking (all sessions done)
+    completeBooking: async (bookingId) => {
+        const response = await fetch(`${API_BASE_URL}/tutoring/bookings/${bookingId}/complete/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        const data = await response.json();
+        if (data.status !== 'success') {
+            throw new Error(data.message || 'Failed to complete booking');
+        }
+        return data;
+    },
+
+    // ============================================================================
+    // SESSION RESCHEDULING
+    // ============================================================================
+
+    // Reschedule a specific session within a booking
+    rescheduleSession: async (bookingId, rescheduleData) => {
+        const response = await fetch(`${API_BASE_URL}/tutoring/bookings/${bookingId}/reschedule/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(rescheduleData),
+        });
+        const data = await response.json();
+        if (data.status !== 'success') {
+            throw new Error(data.message || 'Failed to reschedule session');
+        }
+        return data;
+    },
+
+    // Get all reschedules for a booking
+    getBookingReschedules: async (bookingId) => {
+        const response = await fetch(`${API_BASE_URL}/tutoring/bookings/${bookingId}/reschedules/`);
+        const data = await response.json();
+        if (data.status !== 'success') {
+            throw new Error(data.message || 'Failed to fetch reschedules');
+        }
+        return data;
+    },
+
+    // ============================================================================
+    // TUTOR SESSION MANAGEMENT
+    // ============================================================================
+
+    // Get detailed session information for a tutor
+    getTutorSessions: async (tutorId, status = 'upcoming') => {
+        let url = `${API_BASE_URL}/tutoring/tutor/${tutorId}/sessions/`;
+
+        if (status) {
+            url += `?status=${status}`;
+        }
+
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data.status !== 'success') {
+            throw new Error(data.message || 'Failed to fetch tutor sessions');
+        }
+        return data;
+    },
+
+    // Get tutor statistics
+    getTutorStats: async (tutorId) => {
+        const response = await fetch(`${API_BASE_URL}/tutoring/tutor/${tutorId}/stats/`);
+        const data = await response.json();
+        if (data.status !== 'success') {
+            throw new Error(data.message || 'Failed to fetch tutor stats');
+        }
+        return data;
+    },
+
+    // Get tutor info by user ID
+    getTutorByUserId: async (userId) => {
+        const response = await fetch(`${API_BASE_URL}/tutoring/tutor/by-user/${userId}/`);
+        const data = await response.json();
+        if (data.status !== 'success') {
+            throw new Error(data.message || 'Failed to fetch tutor info');
         }
         return data;
     },

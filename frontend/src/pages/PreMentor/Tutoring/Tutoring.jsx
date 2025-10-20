@@ -30,7 +30,6 @@ import {
   CardDescription,
 } from "../../../components/ui/Card";
 import Button from "../../../components/ui/Button";
-import { useChatContext } from "../../../context/ChatContext";
 import { mentoringAPI } from "../../../utils/mentoringAPI";
 import { joinMentoringVideoCall } from "../../../utils/videoCallAPI";
 import {
@@ -42,7 +41,6 @@ import {
 
 export default function Mentoring() {
   const navigate = useNavigate();
-  const { openChat } = useChatContext();
   const [activeTab, setActiveTab] = useState("sessions");
   const [filterStatus, setFilterStatus] = useState("pending");
   const [searchTerm, setSearchTerm] = useState("");
@@ -254,15 +252,6 @@ export default function Mentoring() {
     });
   };
 
-  const handleMessage = (studentId, studentName) => {
-    openChat({
-      id: studentId,
-      name: studentName,
-      avatar: "",
-      online: true,
-    });
-  };
-
   const handleJoinVideoCall = async (sessionId) => {
     try {
       setError(null);
@@ -405,7 +394,7 @@ export default function Mentoring() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-neutral-grey">Loading mentoring data...</p>
+          <p className="text-neutral-grey">Loading tutoring data...</p>
         </div>
       </div>
     );
@@ -604,7 +593,7 @@ export default function Mentoring() {
 
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-2">
-                                <Button
+                                {/* <Button
                                   size="sm"
                                   variant="outline"
                                   onClick={() =>
@@ -616,7 +605,7 @@ export default function Mentoring() {
                                 >
                                   <MessageSquare className="w-4 h-4 mr-1" />
                                   Message
-                                </Button>
+                                </Button> */}
                                 {session.session_type === "online" && (
                                   <Button
                                     size="sm"

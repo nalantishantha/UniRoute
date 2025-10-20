@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronLeft,
@@ -97,16 +97,28 @@ const mockEvents = [
 ];
 
 const defaultEventColors = {
+  "scheduled-tutoring": {
+    bg: "bg-pink-300",
+    text: "text-pink-900",
+    border: "border-pink-400",
+    name: "Scheduled Tutoring",
+  },
+  "scheduled-mentoring": {
+    bg: "bg-purple-300",
+    text: "text-purple-900",
+    border: "border-purple-400",
+    name: "Scheduled Mentoring",
+  },
   tutoring: {
-    bg: "bg-info/20",
-    text: "text-info",
-    border: "border-info/30",
+    bg: "bg-pink-300",
+    text: "text-pink-900",
+    border: "border-pink-400",
     name: "Tutoring",
   },
   mentoring: {
-    bg: "bg-primary-100",
-    text: "text-primary-600",
-    border: "border-primary-200",
+    bg: "bg-purple-300",
+    text: "text-purple-900",
+    border: "border-purple-400",
     name: "Mentoring",
   },
   personal: {
@@ -129,10 +141,18 @@ const defaultEventColors = {
   },
 };
 
-export default function Calendar({ compact = false, onDateSelect = null }) {
+export default function Calendar({
+  compact = false,
+  onDateSelect = null,
+  events: externalEvents = null,
+  availableMentoringDates = [],
+  availableTutoringDates = [],
+  scheduledMentoringDates = [],
+  scheduledTutoringDates = [],
+}) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
-  const [events, setEvents] = useState(mockEvents);
+  const [events, setEvents] = useState(externalEvents || mockEvents);
   const [showEventModal, setShowEventModal] = useState(false);
   const [showColorSettings, setShowColorSettings] = useState(false);
   const [showDayDetails, setShowDayDetails] = useState(false);
@@ -150,6 +170,15 @@ export default function Calendar({ compact = false, onDateSelect = null }) {
     location: "",
     notes: "",
   });
+
+  // Update events when external events prop changes
+  useEffect(() => {
+    if (externalEvents && externalEvents.length >= 0) {
+      console.log("Calendar - Received events:", externalEvents);
+      setEvents(externalEvents);
+    }
+  }, [externalEvents]);
+
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -438,10 +467,10 @@ export default function Calendar({ compact = false, onDateSelect = null }) {
                 </div>
               </div>
               <div className="flex items-center space-x-3">
-                <Button size="sm" onClick={handleAddEvent}>
+                {/* <Button size="sm" onClick={handleAddEvent}>
                   <Plus className="w-4 h-4 mr-2" />
                   Add Event
-                </Button>
+                </Button> */}
               </div>
             </div>
           </CardHeader>
@@ -482,6 +511,45 @@ export default function Calendar({ compact = false, onDateSelect = null }) {
                   date.toDateString() === selectedDate.toDateString();
                 const hasEvents = dayEvents.length > 0;
 
+                // Check if this date is in any of the 4 date categories
+                const dateStr = formatDate(date);
+                const isAvailableMentoring = availableMentoringDates.some(
+                  (d) => formatDate(d) === dateStr
+                );
+                const isAvailableTutoring = availableTutoringDates.some(
+                  (d) => formatDate(d) === dateStr
+                );
+                const isScheduledMentoring = scheduledMentoringDates.some(
+                  (d) => formatDate(d) === dateStr
+                );
+                const isScheduledTutoring = scheduledTutoringDates.some(
+                  (d) => formatDate(d) === dateStr
+                );
+
+                // Determine background color based on priority
+                // Priority: Scheduled > Available, Specific > None
+                let bgClass = "";
+                let borderClass = "";
+                if (isScheduledMentoring && isScheduledTutoring) {
+                  bgClass = "bg-gradient-to-br from-purple-100 to-pink-100";
+                  borderClass = "border-purple-400";
+                } else if (isScheduledMentoring) {
+                  bgClass = "bg-purple-100";
+                  borderClass = "border-purple-400";
+                } else if (isScheduledTutoring) {
+                  bgClass = "bg-pink-100";
+                  borderClass = "border-pink-400";
+                } else if (isAvailableMentoring && isAvailableTutoring) {
+                  bgClass = "bg-gradient-to-br from-blue-50 to-green-50";
+                  borderClass = "border-blue-300";
+                } else if (isAvailableMentoring) {
+                  bgClass = "bg-blue-100";
+                  borderClass = "border-blue-400";
+                } else if (isAvailableTutoring) {
+                  bgClass = "bg-green-100";
+                  borderClass = "border-green-400";
+                }
+
                 return (
                   <motion.div
                     key={`${date.getMonth()}-${date.getDate()}-${index}`}
@@ -500,78 +568,122 @@ export default function Calendar({ compact = false, onDateSelect = null }) {
                           : ""
                       }
                       ${
+                        bgClass && isCurrentMonth && !isToday && !isSelected
+                          ? `${bgClass} ${borderClass} shadow-sm`
+                          : ""
+                      }
+                      ${
                         !isCurrentMonth
                           ? "bg-neutral-silver/20 border-neutral-light-grey/50 text-neutral-light-grey opacity-60"
-                          : "border-neutral-300 bg-white hover:border-primary-300 hover:shadow-md hover:bg-primary-50/30"
+                          : !bgClass
+                          ? "border-neutral-300 bg-white hover:border-primary-300 hover:shadow-md hover:bg-primary-50/30"
+                          : "hover:border-primary-300 hover:shadow-md"
                       }
                     `}
                   >
-                    <div
-                      className={`
-                      font-semibold mb-2 
-                      ${isToday ? "text-primary-600" : ""}
-                      ${
-                        !isCurrentMonth
-                          ? "text-neutral-light-grey"
-                          : "text-neutral-black"
-                      }
-                    `}
-                    >
-                      {date.getDate()}
+                    <div className="flex items-center justify-between mb-2">
+                      <div
+                        className={`
+                        font-semibold
+                        ${isToday ? "text-primary-600" : ""}
+                        ${
+                          !isCurrentMonth
+                            ? "text-neutral-light-grey"
+                            : "text-neutral-black"
+                        }
+                      `}
+                      >
+                        {date.getDate()}
+                      </div>
+                      <div className="flex space-x-1">
+                        {isScheduledMentoring && isCurrentMonth && (
+                          <div
+                            className="w-2 h-2 bg-purple-500 rounded-full shadow-sm"
+                            title="Scheduled mentoring session"
+                          ></div>
+                        )}
+                        {isScheduledTutoring && isCurrentMonth && (
+                          <div
+                            className="w-2 h-2 bg-pink-500 rounded-full shadow-sm"
+                            title="Scheduled tutoring session"
+                          ></div>
+                        )}
+                        {isAvailableMentoring &&
+                          !isScheduledMentoring &&
+                          isCurrentMonth && (
+                            <div
+                              className="w-2 h-2 bg-blue-500 rounded-full shadow-sm"
+                              title="Available for mentoring"
+                            ></div>
+                          )}
+                        {isAvailableTutoring &&
+                          !isScheduledTutoring &&
+                          isCurrentMonth && (
+                            <div
+                              className="w-2 h-2 bg-green-500 rounded-full shadow-sm"
+                              title="Available for tutoring"
+                            ></div>
+                          )}
+                      </div>
                     </div>
 
                     <div className="space-y-1">
-                      {dayEvents.slice(0, 4).map((event, i) => (
+                      {dayEvents.slice(0, 3).map((event, i) => {
+                        // Format time display (handle both 24hr and 12hr formats)
+                        const timeDisplay = event.time
+                          ? event.time.includes("AM") ||
+                            event.time.includes("PM")
+                            ? event.time.replace(/:00/g, "")
+                            : event.time
+                          : "";
+                        const endTimeDisplay = event.endTime
+                          ? event.endTime.includes("AM") ||
+                            event.endTime.includes("PM")
+                            ? event.endTime.replace(/:00/g, "")
+                            : ""
+                          : "";
+
+                        return (
+                          <div
+                            key={event.id}
+                            className={`
+                              text-xs px-1 py-1 rounded cursor-pointer truncate
+                              ${eventColors[event.type]?.bg || "bg-gray-100"} ${
+                              eventColors[event.type]?.text || "text-gray-700"
+                            } 
+                              border ${
+                                eventColors[event.type]?.border ||
+                                "border-gray-200"
+                              }
+                              hover:opacity-80 transition-opacity
+                              ${!isCurrentMonth ? "opacity-50" : ""}
+                            `}
+                            title={`${event.title} - ${
+                              event.student || "No student"
+                            }`}
+                          >
+                            <div className="font-medium truncate">
+                              {timeDisplay} {event.title?.substring(0, 15)}
+                              {event.title?.length > 15 ? "..." : ""}
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {dayEvents.length > 3 && (
                         <div
-                          key={event.id}
-                          className={`
-                            text-xs px-0 py-1 rounded cursor-pointer
-                            ${eventColors[event.type]?.bg} ${
-                            eventColors[event.type]?.text
-                          } 
-                            border ${eventColors[event.type]?.border}
-                            hover:opacity-80 transition-opacity
-                            ${!isCurrentMonth ? "opacity-50" : ""}
-                          `}
-                        >
-                          {event.time.replace(/:00/g, "")} -{" "}
-                          {event.endTime.replace(/:00/g, "")}
-                        </div>
-                      ))}
-                      {dayEvents.length > 4 && (
-                        <div
-                          className={`text-xs px-2 ${
+                          className={`text-xs px-1 font-medium ${
                             !isCurrentMonth
                               ? "text-neutral-light-grey"
                               : "text-neutral-grey"
                           }`}
                         >
-                          +{dayEvents.length - 4} more
+                          +{dayEvents.length - 3} more
                         </div>
                       )}
                     </div>
                   </motion.div>
                 );
               })}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Legend */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Legend</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              {Object.entries(eventColors).map(([type, colors]) => (
-                <div key={type} className="flex items-center space-x-2">
-                  <div
-                    className={`w-4 h-4 rounded ${colors.bg} border ${colors.border}`}
-                  />
-                  <span className="text-sm font-medium">{colors.name}</span>
-                </div>
-              ))}
             </div>
           </CardContent>
         </Card>
@@ -656,7 +768,7 @@ export default function Calendar({ compact = false, onDateSelect = null }) {
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <button
+                        {/* <button
                           onClick={() => {
                             handleEditEvent(event);
                             setShowDayDetails(false);
@@ -664,8 +776,8 @@ export default function Calendar({ compact = false, onDateSelect = null }) {
                           className="p-2 text-neutral-grey hover:text-primary-600 transition-colors"
                         >
                           <Edit className="w-4 h-4" />
-                        </button>
-                        <button
+                        </button> */}
+                        {/* <button
                           onClick={() => {
                             handleDeleteEvent(event.id);
                             setSelectedDayEvents((prev) =>
@@ -678,7 +790,7 @@ export default function Calendar({ compact = false, onDateSelect = null }) {
                           className="p-2 text-neutral-grey hover:text-error transition-colors"
                         >
                           <Trash2 className="w-4 h-4" />
-                        </button>
+                        </button> */}
                       </div>
                     </div>
 
@@ -718,10 +830,10 @@ export default function Calendar({ compact = false, onDateSelect = null }) {
 
                       {event.type !== "personal" && (
                         <div className="flex items-center space-x-2">
-                          <button className="text-sm text-primary-600 hover:text-primary-800 flex items-center space-x-1">
+                          {/* <button className="text-sm text-primary-600 hover:text-primary-800 flex items-center space-x-1">
                             <MessageSquare className="w-4 h-4" />
                             <span>Message</span>
-                          </button>
+                          </button> */}
                           {event.type === "tutoring" && (
                             <button className="text-sm text-primary-600 hover:text-primary-800 flex items-center space-x-1">
                               <Video className="w-4 h-4" />
@@ -736,7 +848,7 @@ export default function Calendar({ compact = false, onDateSelect = null }) {
               </div>
 
               <div className="flex justify-end space-x-3 pt-6 border-t border-neutral-silver mt-6">
-                <Button
+                {/* <Button
                   variant="outline"
                   onClick={() => {
                     setShowDayDetails(false);
@@ -745,7 +857,7 @@ export default function Calendar({ compact = false, onDateSelect = null }) {
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Add Event
-                </Button>
+                </Button> */}
                 <Button onClick={() => setShowDayDetails(false)}>Close</Button>
               </div>
             </motion.div>

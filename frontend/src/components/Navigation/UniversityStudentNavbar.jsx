@@ -186,7 +186,7 @@ export default function TopNavigation({ onMenuClick }) {
             </span>
           </motion.button>
 
-          <motion.button
+          {/* <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="relative p-3 transition-all duration-200 rounded-xl hover:bg-neutral-silver/70 group hover:shadow-sm"
@@ -195,7 +195,7 @@ export default function TopNavigation({ onMenuClick }) {
             <span className="absolute flex items-center justify-center w-4 h-4 rounded-full shadow-sm -top-1 -right-1 bg-error">
               <span className="w-2 h-2 bg-white rounded-full"></span>
             </span>
-          </motion.button>
+          </motion.button> */}
 
           {/* User Profile Dropdown */}
           <div className="relative">

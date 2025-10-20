@@ -1,27 +1,143 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Calendar, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { cn } from "../../utils/cn";
 
 export default function CompactCalendar({ isOpen, onClose }) {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  // Sample events data for demonstration
-  const events = [
-    { date: "2024-01-15", type: "assignment", title: "Math Assignment Due" },
-    { date: "2024-01-18", type: "meeting", title: "Mentoring Session" },
-    { date: "2024-01-22", type: "exam", title: "Physics Exam" },
-    { date: "2024-01-25", type: "assignment", title: "Essay Submission" },
-    { date: "2024-01-28", type: "meeting", title: "Study Group" },
-  ];
+  // Get user data from localStorage
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const mentorId = user.mentor_id || null;
 
-  // Event type colors
+  // Fetch sessions data
+  useEffect(() => {
+    const fetchSessions = async () => {
+      if (!isOpen) return;
+
+      setLoading(true);
+      const fetchedEvents = [];
+
+      try {
+        // Fetch tutor_id first
+        let tutorId = user.tutor_id || null;
+        if (!tutorId && (user.university_student_id || user.student_id)) {
+          try {
+            const response = await fetch(
+              `http://localhost:8000/api/tutoring/tutors/`
+            );
+            const data = await response.json();
+            if (data.success && data.tutors) {
+              const myTutor = data.tutors.find(
+                (t) =>
+                  t.university_student_id ===
+                  (user.university_student_id || user.student_id)
+              );
+              if (myTutor) {
+                tutorId = myTutor.tutor_id;
+              }
+            }
+          } catch (error) {
+            console.error("Failed to fetch tutor ID:", error);
+          }
+        }
+
+        // Fetch mentoring sessions
+        if (mentorId) {
+          try {
+            const response = await fetch(
+              `http://localhost:8000/api/mentoring/sessions/${mentorId}/`
+            );
+            const data = await response.json();
+            if (data.status === "success" && data.sessions) {
+              data.sessions.forEach((session) => {
+                const sessionDate = new Date(session.scheduled_at);
+                fetchedEvents.push({
+                  date: sessionDate.toISOString().split("T")[0],
+                  type: "scheduled-mentoring",
+                  title: session.topic,
+                });
+              });
+            }
+          } catch (error) {
+            console.error("Failed to fetch mentoring sessions:", error);
+          }
+        }
+
+        // Fetch tutoring bookings
+        if (tutorId) {
+          try {
+            const response = await fetch(
+              `http://localhost:8000/api/tutoring/bookings/tutor/${tutorId}/`
+            );
+            const data = await response.json();
+            if (data.status === "success" && data.bookings) {
+              data.bookings.forEach((booking) => {
+                const bookingDate = new Date(booking.start_date);
+
+                // Handle recurring bookings
+                if (booking.is_recurring && booking.availability_slot) {
+                  const endDate = booking.end_date
+                    ? new Date(booking.end_date)
+                    : new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
+                  const currentDate = new Date(bookingDate);
+                  const dayOfWeek = booking.availability_slot.day_of_week;
+
+                  while (currentDate <= endDate) {
+                    if (currentDate.getDay() === dayOfWeek) {
+                      fetchedEvents.push({
+                        date: currentDate.toISOString().split("T")[0],
+                        type: "scheduled-tutoring",
+                        title:
+                          booking.topic ||
+                          booking.subject_name ||
+                          "Tutoring Session",
+                      });
+                    }
+                    currentDate.setDate(currentDate.getDate() + 1);
+                  }
+                } else {
+                  fetchedEvents.push({
+                    date: bookingDate.toISOString().split("T")[0],
+                    type: "scheduled-tutoring",
+                    title:
+                      booking.topic ||
+                      booking.subject_name ||
+                      "Tutoring Session",
+                  });
+                }
+              });
+            }
+          } catch (error) {
+            console.error("Failed to fetch tutoring bookings:", error);
+          }
+        }
+
+        setEvents(fetchedEvents);
+      } catch (error) {
+        console.error("Failed to fetch sessions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSessions();
+  }, [
+    isOpen,
+    mentorId,
+    user.university_student_id,
+    user.student_id,
+    user.tutor_id,
+  ]);
+
+  // Event type colors (pastel colors matching main calendar)
   const eventColors = {
-    assignment: "bg-blue-400",
-    meeting: "bg-green-400",
-    exam: "bg-red-400",
-    study: "bg-yellow-400",
-    deadline: "bg-purple-400",
+    "scheduled-mentoring": "bg-purple-400",
+    "scheduled-tutoring": "bg-pink-400",
   };
 
   // Get events for a specific date
@@ -114,7 +230,16 @@ export default function CompactCalendar({ isOpen, onClose }) {
   // Handle day click
   const handleDayClick = (date) => {
     // Navigate to calendar page with selected date
-    window.location.href = `/calendar?date=${date.toISOString().split("T")[0]}`;
+    onClose(); // Close the modal first
+    navigate(
+      `/university-student/calendar?date=${date.toISOString().split("T")[0]}`
+    );
+  };
+
+  // Handle "View Full Calendar" click
+  const handleViewFullCalendar = () => {
+    onClose(); // Close the modal first
+    navigate("/university-student/calendar");
   };
 
   // Close modal when clicking outside
@@ -156,9 +281,14 @@ export default function CompactCalendar({ isOpen, onClose }) {
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-neutral-black">
-                {monthNames[currentMonth]} {currentYear}
-              </h3>
+              <div className="flex items-center space-x-2">
+                <h3 className="text-lg font-semibold text-neutral-black">
+                  {monthNames[currentMonth]} {currentYear}
+                </h3>
+                {loading && (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-400"></div>
+                )}
+              </div>
               <div className="flex items-center space-x-2">
                 <button
                   onClick={goToPrevMonth}
@@ -244,27 +374,21 @@ export default function CompactCalendar({ isOpen, onClose }) {
             <div className="mt-4 pt-4 border-t border-neutral-silver/50">
               {/* Event legend */}
               <div className="mb-3">
-                <p className="text-xs text-neutral-grey mb-2">Event Types:</p>
+                <p className="text-xs text-neutral-grey mb-2">Sessions:</p>
                 <div className="flex flex-wrap gap-2 text-xs">
                   <div className="flex items-center space-x-1">
-                    <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-                    <span className="text-neutral-grey">Assignment</span>
+                    <div className="w-2 h-2 rounded-full bg-purple-400"></div>
+                    <span className="text-neutral-grey">Mentoring</span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <div className="w-2 h-2 rounded-full bg-green-400"></div>
-                    <span className="text-neutral-grey">Meeting</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <div className="w-2 h-2 rounded-full bg-red-400"></div>
-                    <span className="text-neutral-grey">Exam</span>
+                    <div className="w-2 h-2 rounded-full bg-pink-400"></div>
+                    <span className="text-neutral-grey">Tutoring</span>
                   </div>
                 </div>
               </div>
 
               <button
-                onClick={() =>
-                  (window.location.href = "/university-student/calendar")
-                }
+                onClick={handleViewFullCalendar}
                 className="w-full px-4 py-2 text-sm text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-colors font-medium"
               >
                 View Full Calendar
