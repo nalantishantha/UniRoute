@@ -16,59 +16,28 @@ class Mentors(models.Model):
         managed = True
         db_table = 'mentors'
 
-class MentoringRequests(models.Model):
-    STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('scheduled', 'Scheduled'),
-        ('completed', 'Completed'),
-        ('declined', 'Declined'),
-        ('expired', 'Expired'),
-    ]
-    
-    URGENCY_CHOICES = [
-        ('low', 'Low'),
-        ('medium', 'Medium'),
-        ('high', 'High'),
-    ]
-    
-    SESSION_TYPE_CHOICES = [
-        ('online', 'Online'),
-        ('physical', 'Physical'),
-    ]
-    
-    request_id = models.AutoField(primary_key=True)
-    mentor = models.ForeignKey('mentoring.Mentors', models.DO_NOTHING)
-    student = models.ForeignKey('students.Students', models.DO_NOTHING)
-    topic = models.CharField(max_length=255)
-    description = models.TextField()
-    preferred_time = models.CharField(max_length=100)
-    session_type = models.CharField(max_length=8, choices=SESSION_TYPE_CHOICES, default='online')
-    urgency = models.CharField(max_length=6, choices=URGENCY_CHOICES, default='medium')
-    status = models.CharField(max_length=9, choices=STATUS_CHOICES, default='pending')
-    requested_date = models.DateTimeField(auto_now_add=True)
-    expiry_date = models.DateTimeField()
-    decline_reason = models.TextField(blank=True, null=True)
+
+class PreMentorApplications(models.Model):
+    """Pre-mentor applications submitted by university students.
+
+    This table represents mentor applications awaiting university decision.
+    It links to an existing mentor row (Mentors) and tracks if the student
+    has actively applied (applied=1). University can accept (set mentor.approved=1)
+    or reject (set applied=0 and store rejection_reason).
+    """
+    pre_mentor_id = models.AutoField(primary_key=True)
+    mentor = models.ForeignKey('mentoring.Mentors', models.DO_NOTHING, related_name='pre_apps')
+    # 1 = applied/request sent, 0 = not applied/withdrawn/rejected
+    applied = models.IntegerField(default=1)
+    # Raw form submission data captured from UI (flexible)
+    form_data = models.JSONField(default=dict)
+    rejection_reason = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         managed = True
-        db_table = 'mentoring_requests'
-
-class SessionDetails(models.Model):
-    detail_id = models.AutoField(primary_key=True)
-    session = models.OneToOneField('mentoring.MentoringSessions', models.CASCADE, related_name='details')
-    request = models.ForeignKey('mentoring.MentoringRequests', models.CASCADE, blank=True, null=True)
-    location = models.CharField(max_length=255, blank=True, null=True)
-    meeting_link = models.URLField(blank=True, null=True)
-    cancellation_reason = models.TextField(blank=True, null=True)
-    completion_notes = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        managed = True
-        db_table = 'session_details'
+        db_table = 'pre_mentor_applications'
 
 class MentoringFeedback(models.Model):
     feedback_id = models.AutoField(primary_key=True)

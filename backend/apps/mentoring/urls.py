@@ -16,6 +16,17 @@ urlpatterns = [
     path('stats/<int:mentor_id>/', views.get_mentor_stats, name='mentor_stats'),
     path('feedback/<int:mentor_id>/', views.get_mentor_feedback, name='mentor_feedback'),
     
+    # Mentors
+    path('mentors/', views.get_mentors, name='get_mentors'),
+
+    # University Mentor Admin
+    path('university/mentor-requests/', views.university_mentor_requests, name='university_mentor_requests'),
+    path('university/active-mentors/', views.university_active_mentors, name='university_active_mentors'),
+    path('university/mentor-requests/<int:pre_mentor_id>/accept/', views.accept_pre_mentor, name='accept_pre_mentor'),
+    path('university/mentor-requests/<int:pre_mentor_id>/reject/', views.reject_pre_mentor, name='reject_pre_mentor'),
+
+    # Student-facing status
+    path('pre-mentor/status/', views.pre_mentor_status, name='pre_mentor_status'),
     # Availability management
     path('availability/<int:mentor_id>/', views.MentorAvailabilityView.as_view(), name='mentor_availability'),
     path('available-slots/<int:mentor_id>/', views.AvailableTimeSlotsView.as_view(), name='available_slots'),
