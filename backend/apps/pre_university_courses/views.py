@@ -7,7 +7,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.utils.text import slugify
 from django.db import models
-from .models import PreUniversityCourse, CourseVideo, CourseEnrollment, VideoProgress
+from .models import PreUniversityCourse, CourseVideo, CourseEnrollment, VideoProgress, VideoRating
 from .serializers import (
     serialize_course, serialize_course_video, serialize_enrollment, 
     validate_course_data
@@ -793,3 +793,102 @@ class BulkResourceOrderView(View):
                 'success': False,
                 'error': str(e)
             }, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def rate_video(request, course_id, video_id):
+    """Rate an individual video and update video/course averages"""
+    try:
+        data = json.loads(request.body)
+        student_id = data.get('student_id')
+        rating = data.get('rating')
+        review = data.get('review', '')
+
+        if not student_id:
+            return JsonResponse({'success': False, 'error': 'student_id is required'}, status=400)
+
+        if rating is None:
+            return JsonResponse({'success': False, 'error': 'rating is required'}, status=400)
+
+        try:
+            rating = float(rating)
+        except Exception:
+            return JsonResponse({'success': False, 'error': 'rating must be a number'}, status=400)
+
+        if rating < 0 or rating > 5:
+            return JsonResponse({'success': False, 'error': 'rating must be between 0 and 5'}, status=400)
+
+        course = get_object_or_404(PreUniversityCourse, id=course_id)
+        video = get_object_or_404(CourseVideo, id=video_id, course=course)
+
+        try:
+            student = Users.objects.get(user_id=student_id)
+        except Users.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Student not found'}, status=404)
+
+        # Ensure there's an enrollment record
+        enrollment, created = CourseEnrollment.objects.get_or_create(student=student, course=course)
+
+        # Create or update video rating
+        video_rating, rating_created = VideoRating.objects.update_or_create(
+            student=student,
+            video=video,
+            defaults={
+                'enrollment': enrollment,
+                'rating': rating,
+                'review': review
+            }
+        )
+
+        # Recalculate video average rating
+        # Formula: average_rating = total sum of ratings / number of ratings
+        video_agg = VideoRating.objects.filter(video=video).aggregate(
+            count=models.Count('id'),
+            avg=models.Avg('rating')
+        )
+        video.rating_count = video_agg['count'] or 0
+        video.average_rating = float(video_agg['avg'] or 0)
+        video.save()
+
+        # Recalculate course average rating
+        # Formula: course_rating = (sum of all video ratings across all videos) / (total number of video ratings)
+        # This is the average of ALL individual video ratings in the course, not the average of video averages
+        course_rating_agg = VideoRating.objects.filter(video__course=course).aggregate(
+            count=models.Count('id'),
+            avg=models.Avg('rating')
+        )
+        course.rating_count = course_rating_agg['count'] or 0
+        course.average_rating = float(course_rating_agg['avg'] or 0)
+        course.save()
+
+        # Also update enrollment rating (for backward compatibility)
+        enrollment.rating = int(round(rating))
+        if review:
+            enrollment.review = review
+        enrollment.save()
+
+        return JsonResponse({
+            'success': True,
+            'video_rating': {
+                'id': video_rating.id,
+                'rating': video_rating.rating,
+                'review': video_rating.review,
+                'created_at': video_rating.created_at.isoformat()
+            },
+            'video': {
+                'id': video.id,
+                'average_rating': video.average_rating,
+                'rating_count': video.rating_count
+            },
+            'course': {
+                'id': course.id,
+                'average_rating': course.average_rating,
+                'rating_count': course.rating_count
+            }
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

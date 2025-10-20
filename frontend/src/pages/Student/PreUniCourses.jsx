@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import StudentNavigation from "../../components/Navigation/StudentNavigation";
+import StarRating from "../../components/StarRating";
 import { getCurrentUser } from '../../utils/auth';
 
 const sampleVideos = [
@@ -212,9 +213,8 @@ const PreUniCourses = () => {
           return copy;
         });
 
-        // Play a preview or first video if available
-        const courseToPlay = enrolledCourse || courses.find(x => x.id === courseId);
-        if (courseToPlay) playCourse(courseToPlay);
+        // Switch to enrolled tab after successful enrollment
+        setActiveTab('enrolled');
       } else {
         alert(data.error || 'Enrollment failed');
       }
@@ -242,14 +242,11 @@ const PreUniCourses = () => {
     );
   };
 
-  const [activeTab, setActiveTab] = useState('videos'); // 'videos' | 'resources'
+  const [activeTab, setActiveTab] = useState('not-enrolled'); // 'not-enrolled' | 'enrolled'
 
-  const allResources = courses.reduce((acc, c) => {
-    if (c.resources && c.resources.length) {
-      c.resources.forEach(r => acc.push({ ...r, course_title: c.title, course_id: c.id }));
-    }
-    return acc;
-  }, []);
+  // Separate courses into enrolled and not enrolled
+  const enrolledCourses = courses.filter(c => c._enrolled);
+  const notEnrolledCourses = courses.filter(c => !c._enrolled);
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-primary-50 to-white">
@@ -267,112 +264,129 @@ const PreUniCourses = () => {
         <div className="flex items-center justify-center mb-6">
           <div className="inline-flex rounded-lg bg-white/80 p-1 shadow-sm">
             <button
-              onClick={() => setActiveTab('videos')}
-              className={`px-4 py-2 rounded-lg ${activeTab === 'videos' ? 'bg-primary-600 text-white' : 'text-primary-600'}`}
+              onClick={() => setActiveTab('not-enrolled')}
+              className={`px-4 py-2 rounded-lg ${activeTab === 'not-enrolled' ? 'bg-primary-600 text-white' : 'text-primary-600'}`}
             >
-              Videos
+              Not Enrolled ({notEnrolledCourses.length})
             </button>
             <button
-              onClick={() => setActiveTab('resources')}
-              className={`px-4 py-2 rounded-lg ${activeTab === 'resources' ? 'bg-primary-600 text-white' : 'text-primary-600'}`}
+              onClick={() => setActiveTab('enrolled')}
+              className={`px-4 py-2 rounded-lg ${activeTab === 'enrolled' ? 'bg-primary-600 text-white' : 'text-primary-600'}`}
             >
-              Resources
+              Enrolled ({enrolledCourses.length})
             </button>
           </div>
         </div>
 
-        {activeTab === 'videos' && (
+        {/* Not Enrolled Tab */}
+        {activeTab === 'not-enrolled' && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {courses.map((course) => (
-                <div key={course.id} className="bg-white rounded-2xl shadow p-4 border border-accent-100 flex flex-col">
-              <div className="relative rounded-lg overflow-hidden bg-gray-100">
-                <img
-                  src={course.thumbnail_url || `https://via.placeholder.com/400x225?text=${encodeURIComponent(course.title)}`}
-                  alt={course.title}
-                  className="w-full h-40 object-cover"
-                />
-              </div>
+            {notEnrolledCourses.length === 0 && <div className="col-span-full text-center text-primary-300 py-8">No courses available. All courses are enrolled!</div>}
+            {notEnrolledCourses.map((course) => (
+              <div key={course.id} className="bg-white rounded-2xl shadow p-4 border border-accent-100 flex flex-col">
+                <div className="relative rounded-lg overflow-hidden bg-gray-100">
+                  <img
+                    src={course.thumbnail_url || `https://via.placeholder.com/400x225?text=${encodeURIComponent(course.title)}`}
+                    alt={course.title}
+                    className="w-full h-40 object-cover"
+                  />
+                </div>
 
-              {/* Resource or category label (placed outside the image to avoid overlap) */}
-              <div className="mt-2">
-                {course.resources && course.resources.length > 0 ? (
-                  <div className="inline-block bg-white/90 px-3 py-1 rounded-full text-xs font-medium shadow-sm max-w-full truncate">
-                    {course.resources[0].title}
-                  </div>
-                ) : (
+                <div className="mt-2">
                   <div className="inline-block bg-white/90 px-3 py-1 rounded-full text-xs font-medium shadow-sm max-w-full truncate">
                     {course.category}
                   </div>
-                )}
-              </div>
-
-              <div className="mt-4 flex-1">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-primary-400 mb-1">{course.title}</h3>
-                  <div className="flex items-center space-x-2">
-                    {course.has_youtube ? <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded text-xs">YouTube</span> : null}
-                    {course.has_udemy ? <span className="px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded text-xs">Udemy</span> : null}
-                  </div>
                 </div>
-                <p className="text-primary-300 text-sm line-clamp-3">{course.description}</p>
-              </div>
 
-              <div className="mt-4">
-                <div className="text-sm text-primary-300">Duration: {course.total_duration_minutes ? `${course.total_duration_minutes} mins` : '—'}</div>
-                <div className="text-sm text-primary-300">Videos: {course.video_count || 0} · Resources: {course.resource_count || 0}</div>
-              </div>
-
-              {/* <div className="mt-3">
-                list previews / first few videos and resources
-                {course.videos && course.videos.slice(0,3).map((v) => (
-                  <div key={v.id} className="flex items-center justify-between py-1">
-                    <div className="text-sm text-primary-300">{v.order}. {v.title}</div>
-                    <div>
-                      Preview button remains for preview videos only; Open removed per request
-                      {v.is_preview && (
-                        <button onClick={() => openVideo(v)} className="text-primary-600 text-sm">Preview</button>
-                      )}
+                <div className="mt-4 flex-1">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-primary-400 mb-1">{course.title}</h3>
+                    <div className="flex items-center space-x-2">
+                      {course.has_youtube ? <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded text-xs">YouTube</span> : null}
+                      {course.has_udemy ? <span className="px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded text-xs">Udemy</span> : null}
                     </div>
                   </div>
-                ))}
+                  <p className="text-primary-300 text-sm line-clamp-3">{course.description}</p>
+                </div>
 
-                {course.resources && course.resources.slice(0,3).map((r) => renderResourceLink(r))}
-              </div> */}
-
-              <div className="mt-4 flex items-center justify-end">
-                {course._enrolled ? (
-                  <div className="flex items-center space-x-2">
-                    <button onClick={() => playCourse(course)} className="px-3 py-1 rounded bg-success text-white text-sm">Enrolled</button>
-                    {(course.progress_percent >= 100 || course._video_completed) ? (
-                      <button onClick={() => setRatingModal({ courseId: course.id, rating: 5, review: '' })} className="px-3 py-1 rounded bg-primary-50 text-primary-600 text-sm border">Rate</button>
-                    ) : (
-                      <div className="text-xs text-primary-300">Complete videos to rate</div>
-                    )}
+                <div className="mt-4">
+                  <div className="flex items-center mb-2">
+                    <StarRating rating={course.average_rating || 0} readOnly={true} size="sm" />
+                    <span className="ml-2 text-xs text-primary-300">({course.rating_count || 0})</span>
                   </div>
-                ) : (
-                  <button onClick={() => enrollInCourse(course.id, courses.indexOf(course))} className="px-3 py-1 rounded bg-primary-600 text-white text-sm">Enroll</button>
-                )}
+                  <div className="text-sm text-primary-300">Duration: {course.total_duration_minutes ? `${course.total_duration_minutes} mins` : '—'}</div>
+                  <div className="text-sm text-primary-300">Videos: {course.video_count || 0} · Resources: {course.resource_count || 0}</div>
+                </div>
+
+                <div className="mt-4 flex items-center justify-end">
+                  <button onClick={() => enrollInCourse(course.id, courses.indexOf(course))} className="px-4 py-2 rounded bg-primary-600 text-white text-sm hover:bg-primary-700 transition-colors">Enroll Now</button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
           </div>
         )}
 
-        {activeTab === 'resources' && (
-          <div className="space-y-4">
-            {allResources.length === 0 && <div className="text-center text-primary-300">No resources available</div>}
-            {allResources.map((r) => (
-              <div key={`${r.id}-${r.course_id}`} className="bg-white rounded-xl p-4 border shadow-sm flex items-start justify-between">
-                <div>
-                  <div className="text-sm font-medium text-primary-600">{r.title} <span className="text-xs text-primary-300">· {r.resource_type}</span></div>
-                  <div className="text-sm text-primary-300">{r.description}</div>
-                  <div className="text-xs text-primary-300 mt-1">Course: {r.course_title}</div>
+        {/* Enrolled Tab */}
+        {activeTab === 'enrolled' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {enrolledCourses.length === 0 && <div className="col-span-full text-center text-primary-300 py-8">You haven't enrolled in any courses yet.</div>}
+            {enrolledCourses.map((course) => (
+              <Link to={`/student/course/${course.id}`} key={course.id} className="bg-white rounded-2xl shadow p-4 border border-accent-100 flex flex-col hover:shadow-lg transition-shadow cursor-pointer">
+                <div className="relative rounded-lg overflow-hidden bg-gray-100">
+                  <img
+                    src={course.thumbnail_url || `https://via.placeholder.com/400x225?text=${encodeURIComponent(course.title)}`}
+                    alt={course.title}
+                    className="w-full h-40 object-cover"
+                  />
+                  <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold">Enrolled</div>
                 </div>
-                <div className="flex flex-col items-end">
-                  <a href={r.file_url} target="_blank" rel="noreferrer" className="text-primary-600 underline">Open</a>
-                  {r.is_free ? <div className="text-xs text-success mt-2">Free</div> : null}
+
+                <div className="mt-2">
+                  <div className="inline-block bg-white/90 px-3 py-1 rounded-full text-xs font-medium shadow-sm max-w-full truncate">
+                    {course.category}
+                  </div>
                 </div>
-              </div>
+
+                <div className="mt-4 flex-1">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-primary-400 mb-1">{course.title}</h3>
+                    <div className="flex items-center space-x-2">
+                      {course.has_youtube ? <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded text-xs">YouTube</span> : null}
+                      {course.has_udemy ? <span className="px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded text-xs">Udemy</span> : null}
+                    </div>
+                  </div>
+                  <p className="text-primary-300 text-sm line-clamp-3">{course.description}</p>
+                </div>
+
+                <div className="mt-4">
+                  <div className="flex items-center mb-2">
+                    <StarRating rating={course.average_rating || 0} readOnly={true} size="sm" />
+                    <span className="ml-2 text-xs text-primary-300">({course.rating_count || 0})</span>
+                  </div>
+                  <div className="text-sm text-primary-300">Duration: {course.total_duration_minutes ? `${course.total_duration_minutes} mins` : '—'}</div>
+                  <div className="text-sm text-primary-300">Videos: {course.video_count || 0} · Resources: {course.resource_count || 0}</div>
+                  {course.progress_percent > 0 && (
+                    <div className="mt-2">
+                      <div className="text-xs text-primary-400 mb-1">Progress: {Math.round(course.progress_percent)}%</div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-primary-600 h-2 rounded-full" style={{ width: `${course.progress_percent}%` }}></div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="text-primary-600 text-sm font-medium">Click to watch →</span>
+                  {(course.progress_percent >= 100 || course._video_completed) && (
+                    <button 
+                      onClick={(e) => { e.preventDefault(); setRatingModal({ courseId: course.id, rating: 5, review: '' }); }} 
+                      className="px-3 py-1 rounded bg-primary-50 text-primary-600 text-xs border hover:bg-primary-100 transition-colors"
+                    >
+                      Rate Course
+                    </button>
+                  )}
+                </div>
+              </Link>
             ))}
           </div>
         )}

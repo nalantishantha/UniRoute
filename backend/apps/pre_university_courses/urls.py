@@ -14,6 +14,7 @@ urlpatterns = [
     path('api/courses/<int:course_id>/enroll/', views.enroll_course, name='course-enroll'),
     path('api/courses/<int:course_id>/rate/', views.rate_course, name='course-rate'),
     path('api/courses/<int:course_id>/videos/<int:video_id>/progress/', views.video_progress, name='video-progress'),
+    path('api/courses/<int:course_id>/videos/<int:video_id>/rate/', views.rate_video, name='rate-video'),
     
     # Course resources (PDFs, documents, etc.)
     path('api/courses/<int:course_id>/resources/', views.CourseResourceView.as_view(), name='course-resources'),

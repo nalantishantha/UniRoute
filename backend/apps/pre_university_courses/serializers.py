@@ -66,6 +66,8 @@ def serialize_course_video(video):
         'file_size_bytes': video.file_size_bytes,
         'thumbnail_url': video.thumbnail_url,
         'is_preview': video.is_preview,
+        'average_rating': float(video.average_rating) if video.average_rating else 0.0,
+        'rating_count': video.rating_count or 0,
         'uploaded_at': video.uploaded_at.isoformat() if video.uploaded_at else None,
     }
 
