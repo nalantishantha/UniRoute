@@ -167,11 +167,11 @@ export default function TopNavigation({ onMenuClick }) {
               <div className="hidden sm:block">
                 <p className="text-sm font-semibold text-neutral-black group-hover:text-primary-700">
                   {user
-                    ? `${user.first_name} ${user.last_name || ""}`.trim()
+                    ? `${user.full_name}`.trim()
                     : "University Student"}
                 </p>
                 <p className="text-xs font-medium text-neutral-grey">
-                  {user?.university || "Student Mentor"}
+                  {user?.user_type || "St"}
                 </p>
               </div>
               <ChevronDown
@@ -201,12 +201,11 @@ export default function TopNavigation({ onMenuClick }) {
                       <div className="flex-1">
                         <h3 className="font-semibold text-neutral-black">
                           {user
-                            ? `${user.first_name} ${user.last_name || ""
-                              }`.trim()
+                            ? `${user.full_name}`.trim()
                             : "Counsellor"}
                         </h3>
                         <p className="text-sm text-neutral-grey">
-                          {user?.email || "student@university.edu"}
+                          {user?.email || "counsellor@gmail.com"}
                         </p>
                         <p className="text-xs text-neutral-grey">
                           {user?.university || "Counsellor"}
@@ -219,21 +218,21 @@ export default function TopNavigation({ onMenuClick }) {
                   <div className="px-4 py-3 border-b border-neutral-silver">
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-neutral-grey">Student ID:</span>
+                        <span className="text-neutral-grey">Counsellor ID:</span>
                         <span className="font-medium text-neutral-black">
-                          {user?.student_id || "N/A"}
+                          {user?.counsellor_id || "N/A"}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-neutral-grey">Program:</span>
+                        <span className="text-neutral-grey">Location:</span>
                         <span className="font-medium text-neutral-black">
-                          {user?.program || "Computer Science"}
+                          {user?.location || "N/A"}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-neutral-grey">Year:</span>
+                        <span className="text-neutral-grey">Contact No:</span>
                         <span className="font-medium text-neutral-black">
-                          {user?.year || "3rd Year"}
+                          {user?.contact_number || "N/A"}
                         </span>
                       </div>
                       {/* <div className="flex justify-between">

@@ -327,3 +327,162 @@ def admin_update_counsellor(request):
         'success': False,
         'message': 'Only PUT method allowed'
     }, status=405)
+
+
+@csrf_exempt
+def get_counsellor_profile(request, user_id):
+    """Get counsellor profile by user ID"""
+    if request.method == 'GET':
+        try:
+            # Get the counsellor and related data
+            try:
+                user = Users.objects.get(user_id=user_id)
+                counsellor = Counsellors.objects.get(user=user)
+                user_details = UserDetails.objects.get(user=user)
+            except (Users.DoesNotExist, Counsellors.DoesNotExist, UserDetails.DoesNotExist):
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Counsellor not found'
+                }, status=404)
+            
+            # Get availability data
+            availability = []
+            for avail in counsellor.availability.filter(is_active=True):
+                availability.append({
+                    'day_of_week': avail.day_of_week,
+                    'day_name': avail.get_day_of_week_display(),
+                    'start_time': avail.start_time.strftime('%H:%M') if avail.start_time else None,
+                    'end_time': avail.end_time.strftime('%H:%M') if avail.end_time else None
+                })
+            
+            profile_data = {
+                'user_id': user.user_id,
+                'counsellor_id': counsellor.counsellor_id,
+                'username': user.username,
+                'email': user.email,
+                'full_name': user_details.full_name or '',
+                'profile_picture': user_details.profile_picture or '',
+                'bio': user_details.bio or counsellor.bio or '',
+                'contact_number': user_details.contact_number or '',
+                'location': user_details.location or '',
+                'gender': user_details.gender or '',
+                'is_verified': user_details.is_verified or 0,
+                'expertise': counsellor.expertise or '',
+                'experience_years': counsellor.experience_years,
+                'qualifications': counsellor.qualifications or '',
+                'specializations': counsellor.specializations or '',
+                'available_for_sessions': counsellor.available_for_sessions,
+                'hourly_rate': float(counsellor.hourly_rate) if counsellor.hourly_rate else None,
+                'is_active': user.is_active,
+                'availability': availability,
+                'created_at': counsellor.created_at.isoformat() if counsellor.created_at else None,
+                'updated_at': counsellor.updated_at.isoformat() if counsellor.updated_at else None
+            }
+            
+            return JsonResponse({
+                'success': True,
+                'profile': profile_data
+            })
+            
+        except Exception as e:
+            print(f"❌ Get counsellor profile error: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': f'Failed to get profile: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only GET method allowed'
+    }, status=405)
+
+
+@csrf_exempt
+def update_counsellor_profile(request, user_id):
+    """Update counsellor profile"""
+    if request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            
+            # Get the counsellor and related data
+            try:
+                user = Users.objects.get(user_id=user_id)
+                counsellor = Counsellors.objects.get(user=user)
+                user_details = UserDetails.objects.get(user=user)
+            except (Users.DoesNotExist, Counsellors.DoesNotExist, UserDetails.DoesNotExist):
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Counsellor not found'
+                }, status=404)
+            
+            # Update user details
+            if 'full_name' in data:
+                user_details.full_name = data['full_name']
+            if 'bio' in data:
+                user_details.bio = data['bio']
+            if 'contact_number' in data:
+                user_details.contact_number = data['contact_number']
+            if 'location' in data:
+                user_details.location = data['location']
+            if 'gender' in data:
+                user_details.gender = data['gender']
+            if 'profile_picture' in data:
+                user_details.profile_picture = data['profile_picture']
+            
+            # Update counsellor-specific fields
+            if 'expertise' in data:
+                counsellor.expertise = data['expertise']
+            if 'experience_years' in data:
+                counsellor.experience_years = data['experience_years'] if data['experience_years'] else None
+            if 'qualifications' in data:
+                counsellor.qualifications = data['qualifications']
+            if 'specializations' in data:
+                counsellor.specializations = data['specializations']
+            if 'hourly_rate' in data:
+                counsellor.hourly_rate = data['hourly_rate'] if data['hourly_rate'] else None
+            if 'available_for_sessions' in data:
+                counsellor.available_for_sessions = data['available_for_sessions']
+            
+            # If bio is updated in user_details, also update in counsellor table
+            if 'bio' in data:
+                counsellor.bio = data['bio']
+            
+            # Save changes with transaction
+            with transaction.atomic():
+                user_details.updated_at = timezone.now()
+                user_details.save()
+                counsellor.updated_at = timezone.now()
+                counsellor.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Profile updated successfully',
+                'profile': {
+                    'user_id': user.user_id,
+                    'counsellor_id': counsellor.counsellor_id,
+                    'full_name': user_details.full_name,
+                    'email': user.email,
+                    'bio': user_details.bio,
+                    'contact_number': user_details.contact_number,
+                    'location': user_details.location,
+                    'expertise': counsellor.expertise,
+                    'experience_years': counsellor.experience_years,
+                    'qualifications': counsellor.qualifications,
+                    'specializations': counsellor.specializations,
+                    'hourly_rate': float(counsellor.hourly_rate) if counsellor.hourly_rate else None,
+                    'available_for_sessions': counsellor.available_for_sessions,
+                    'updated_at': counsellor.updated_at.isoformat()
+                }
+            })
+            
+        except Exception as e:
+            print(f"❌ Update counsellor profile error: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': f'Failed to update profile: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only PUT method allowed'
+    }, status=405)
