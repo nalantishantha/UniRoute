@@ -7,7 +7,7 @@ from django.utils import timezone
 import json
 
 # Import your custom models
-from .models import Users, UserDetails, UserTypes
+from .models import Users, UserDetails, UserTypes, UserDailyLogin
 from apps.students.models import Students
 from apps.university_students.models import UniversityStudents
 from apps.universities.models import Universities, UniversityRequests
@@ -155,6 +155,17 @@ def login_user(request):
                 if check_password(password, user.password_hash):
                     print("Password verified")
                     
+                    # Record daily login activity
+                    login_date = timezone.localdate()
+                    daily_login, created = UserDailyLogin.objects.get_or_create(
+                        user=user,
+                        login_date=login_date,
+                        defaults={'login_count': 1}
+                    )
+                    if not created:
+                        daily_login.login_count += 1
+                        daily_login.save(update_fields=['login_count'])
+
                     # Get user details
                     try:
                         user_details = UserDetails.objects.get(user=user)

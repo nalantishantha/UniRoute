@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
-import jsPDF from "jspdf";
-import "jspdf-autotable";
 import {
   Users,
   GraduationCap,
@@ -25,7 +23,8 @@ import {
   Clock,
   X,
   User,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from 'lucide-react';
 import AdminLayout from '../../components/common/Admin/AdminLayout';
 
@@ -33,6 +32,11 @@ const AdminDashboard = () => {
   // State for date range reports
   const [reportStartDate, setReportStartDate] = useState('');
   const [reportEndDate, setReportEndDate] = useState('');
+  const [reportSummary, setReportSummary] = useState(null);
+  const [reportLoading, setReportLoading] = useState(false);
+  const [reportError, setReportError] = useState(null);
+  const [exportingReport, setExportingReport] = useState(false);
+  const [reportWarning, setReportWarning] = useState(null);
   
   // State for notifications
   const [showNotificationModal, setShowNotificationModal] = useState(false);
@@ -51,6 +55,11 @@ const AdminDashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    setReportError(null);
+    setReportWarning(null);
+  }, [reportStartDate, reportEndDate]);
 
   // Fetch dashboard statistics
   const fetchDashboardData = async () => {
@@ -190,55 +199,141 @@ const AdminDashboard = () => {
         userGrowthData: [],
         revenueData: [],
         activityData: [],
-        userDistributionData: [],
-        recentActivities: []
+        userDistributionData: []
       };
     }
 
-    // Generate revenue data based on user growth (mock calculation)
-    const revenueData = dashboardData.user_growth_data?.map((item, index) => ({
-      month: item.month,
-      revenue: Math.max(item.users * 10 + 15000 + (index * 2000), 15000)
-    })) || [];
+    const revenueData = (dashboardData.monthly_transaction_data || []).map((item) => ({
+      month: item.label || item.month,
+      total_amount: item.total_amount || 0,
+      transactions: item.transaction_count || 0,
+    }));
 
     return {
       userGrowthData: dashboardData.user_growth_data || [],
       revenueData,
       activityData: dashboardData.daily_activity || [],
-      userDistributionData: dashboardData.user_distribution || [],
-      recentActivities: dashboardData.recent_activities || []
+      userDistributionData: dashboardData.user_distribution || []
     };
   };
 
   const chartData = getChartData();
 
-  // Helper functions
-  const handleGeneratePDF = () => {
-    if (!reportStartDate || !reportEndDate) {
-      alert("Please select both start and end dates.");
-      return;
+  const formatNumber = (value) => new Intl.NumberFormat('en-US').format(value || 0);
+  const formatCurrency = (value) => new Intl.NumberFormat('en-LK', {
+    style: 'currency',
+    currency: 'LKR',
+    minimumFractionDigits: 2,
+  }).format(value || 0);
+  const formatDate = (value) => (value ? new Date(value).toLocaleDateString() : '');
+  const formatDateTime = (value) => (value ? new Date(value).toLocaleString() : '');
+
+  const renderRevenueTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      const dataPoint = payload[0].payload;
+      return (
+        <div className="rounded-md border border-[#E7F3FB] bg-white px-3 py-2 shadow-sm">
+          <p className="text-xs font-semibold text-[#123460]">{label}</p>
+          <p className="text-xs text-[#1D5D9B] mt-1">{formatCurrency(dataPoint.total_amount)}</p>
+          <p className="text-xs text-[#7F8B99]">{formatNumber(dataPoint.transactions)} transactions</p>
+        </div>
+      );
     }
-    const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text("UniRoute Admin Report", 14, 18);
-    doc.setFontSize(12);
-    doc.text(
-      `From: ${new Date(reportStartDate).toLocaleDateString()} To: ${new Date(reportEndDate).toLocaleDateString()}`,
-      14,
-      28
-    );
-    doc.save(`uniroute_admin_report_${reportStartDate}_to_${reportEndDate}.pdf`);
+    return null;
   };
 
-  const handleNotificationSubmit = (e) => {
-    e.preventDefault();
-    console.log('Notification submitted:', notificationForm);
+  const buildReportQuery = () => {
+    const params = new URLSearchParams({
+      start_date: reportStartDate,
+      end_date: reportEndDate,
+    });
+    return params.toString();
+  };
+
+  const handlePreviewReport = async () => {
+    if (!reportStartDate || !reportEndDate) {
+      setReportError('Please choose both a start date and an end date.');
+      return;
+    }
+
+    setReportLoading(true);
+    setReportError(null);
+    setReportSummary(null);
+    setReportWarning(null);
+
+    try {
+      const response = await fetch(`http://localhost:8000/api/admin-reports/overview/?${buildReportQuery()}`);
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Unable to load report summary for the selected range.');
+      }
+
+      setReportSummary(data.data);
+    } catch (err) {
+      console.error('Report summary error:', err);
+      setReportError(err.message);
+    } finally {
+      setReportLoading(false);
+    }
+  };
+
+  const handleGeneratePDF = async () => {
+    if (!reportStartDate || !reportEndDate) {
+      setReportError('Please choose both a start date and an end date before exporting.');
+      return;
+    }
+
+    setExportingReport(true);
+    setReportError(null);
+    setReportWarning(null);
+
+    try {
+      const response = await fetch('http://localhost:8000/api/admin-reports/export/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          start_date: reportStartDate,
+          end_date: reportEndDate,
+          requested_by: null,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Failed to generate PDF report.');
+      }
+
+      if (data.report?.download_url) {
+        window.open(data.report.download_url, '_blank', 'noopener');
+      }
+
+      if (data.report?.data_snapshot) {
+        setReportSummary(data.report.data_snapshot);
+      } else if (!reportSummary) {
+        await handlePreviewReport();
+      }
+
+      if (data.report?.persisted === false) {
+        setReportWarning('Report generated, but it could not be saved for history. Please apply the latest database migrations to enable archives.');
+      }
+    } catch (error) {
+      console.error('Report export error:', error);
+      setReportError(error.message);
+    } finally {
+      setExportingReport(false);
+    }
+  };
+
+  const handleNotificationSubmit = (event) => {
+    event.preventDefault();
+    // Future enhancement: send notification payload to dedicated endpoint
     setShowNotificationModal(false);
     setNotificationForm({
       title: '',
       message: '',
       type: 'info',
-      targetUsers: 'all'
+      targetUsers: 'all',
     });
   };
 
@@ -315,9 +410,255 @@ const AdminDashboard = () => {
   return (
     <AdminLayout pageTitle="Dashboard" pageDescription="Welcome back, Admin!">
       <div className="space-y-6">
-        
+        {/* Report Generator Hero */}
+        <section className="relative overflow-hidden rounded-2xl border border-[#C1DBF4] bg-gradient-to-br from-[#E8F2FF] via-white to-[#FDFBFF] shadow-lg">
+          <div className="absolute -top-28 -right-24 h-72 w-72 rounded-full bg-[#1D5D9B] opacity-10 blur-3xl" />
+          <div className="absolute -bottom-32 -left-16 h-64 w-64 rounded-full bg-[#81C784] opacity-10 blur-3xl" />
+          <div className="relative z-10 p-6 lg:p-8 space-y-6">
+            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+              <div className="space-y-3 max-w-2xl">
+                <span className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-[#1D5D9B] border border-white/60 shadow-sm backdrop-blur">
+                  <FileText className="h-3.5 w-3.5" />
+                  Admin Report Center
+                </span>
+                <h2 className="text-2xl font-semibold text-[#123460]">Generate insights for your chosen date range</h2>
+                <p className="text-sm text-[#4F5B67]">
+                  Preview platform-wide KPIs and export a polished PDF for your leadership team.
+                </p>
+                {reportSummary?.metadata?.start && reportSummary?.metadata?.end && (
+                  <div className="flex flex-wrap gap-3 text-xs sm:text-sm text-[#1D5D9B]">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 border border-white/60 shadow-sm">
+                      <Calendar className="h-4 w-4" />
+                      {formatDate(reportSummary.metadata.start)} – {formatDate(reportSummary.metadata.end)}
+                    </span>
+                    {reportSummary.metadata.generated_at && (
+                      <span className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 border border-white/60 shadow-sm">
+                        <Clock className="h-4 w-4" />
+                        Generated {formatDateTime(reportSummary.metadata.generated_at)}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
 
-        
+              <div className="flex flex-col sm:flex-row gap-4 bg-white/80 border border-white/60 rounded-xl p-4 shadow-sm backdrop-blur">
+                <div className="flex-1 min-w-[160px]">
+                  <label className="block text-xs font-semibold text-[#61748F] mb-2">Start Date</label>
+                  <input
+                    type="date"
+                    value={reportStartDate}
+                    onChange={(e) => setReportStartDate(e.target.value)}
+                    className="w-full px-3 py-2.5 border border-[#C1DBF4] rounded-lg focus:ring-2 focus:ring-[#1D5D9B] focus:border-transparent bg-white"
+                  />
+                </div>
+                <div className="flex-1 min-w-[160px]">
+                  <label className="block text-xs font-semibold text-[#61748F] mb-2">End Date</label>
+                  <input
+                    type="date"
+                    value={reportEndDate}
+                    min={reportStartDate || undefined}
+                    onChange={(e) => setReportEndDate(e.target.value)}
+                    className="w-full px-3 py-2.5 border border-[#C1DBF4] rounded-lg focus:ring-2 focus:ring-[#1D5D9B] focus:border-transparent bg-white"
+                  />
+                </div>
+                <div className="flex flex-col sm:justify-between gap-3 min-w-[160px]">
+                  <button
+                    onClick={handlePreviewReport}
+                    disabled={reportLoading}
+                    className="flex items-center justify-center space-x-2 px-4 py-2.5 border border-[#1D5D9B] text-[#1D5D9B] rounded-lg hover:bg-[#E7F3FB] transition-colors disabled:opacity-60"
+                  >
+                    <BarChart3 className="h-4 w-4" />
+                    <span>{reportLoading ? 'Loading…' : 'View Summary'}</span>
+                  </button>
+                  <button
+                    onClick={handleGeneratePDF}
+                    disabled={exportingReport}
+                    className="flex items-center justify-center space-x-2 px-4 py-2.5 bg-[#1D5D9B] text-white rounded-lg hover:bg-[#174A7C] transition-colors disabled:opacity-60 shadow"
+                  >
+                    {exportingReport ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
+                    <span>{exportingReport ? 'Generating…' : 'Generate PDF'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {reportError && (
+              <div className="flex items-start space-x-2 rounded-lg border border-red-200 bg-red-50/90 px-3 py-2 text-sm text-red-700">
+                <AlertCircle className="mt-0.5 h-4 w-4" />
+                <span>{reportError}</span>
+              </div>
+            )}
+
+            {reportWarning && (
+              <div className="flex items-start space-x-2 rounded-lg border border-amber-200 bg-amber-50/90 px-3 py-2 text-sm text-amber-700">
+                <AlertCircle className="mt-0.5 h-4 w-4" />
+                <span>{reportWarning}</span>
+              </div>
+            )}
+
+            {reportLoading && (
+              <div className="flex items-center space-x-3 text-[#61748F]">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Crunching the numbers…</span>
+              </div>
+            )}
+
+            {!reportSummary && !reportLoading && (
+              <p className="text-sm text-[#4F5B67]">
+                Choose a date range and click <strong>View Summary</strong> to preview key performance indicators before exporting.
+              </p>
+            )}
+
+            {reportSummary && !reportLoading && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="rounded-xl border border-white/60 bg-white/85 p-5 shadow-sm">
+                    <p className="text-xs font-semibold text-[#61748F] mb-1">New Users</p>
+                    <p className="text-2xl font-semibold text-[#123460]">{formatNumber(reportSummary.user_management?.total_new_users)}</p>
+                    <p className="text-xs text-[#7F8B99]">During this period</p>
+                  </div>
+                  <div className="rounded-xl border border-white/60 bg-white/85 p-5 shadow-sm">
+                    <p className="text-xs font-semibold text-[#61748F] mb-1">Courses Created</p>
+                    <p className="text-2xl font-semibold text-[#123460]">{formatNumber(reportSummary.content?.courses_created)}</p>
+                    <p className="text-xs text-[#7F8B99]">Drafts and published</p>
+                  </div>
+                  <div className="rounded-xl border border-white/60 bg-white/85 p-5 shadow-sm">
+                    <p className="text-xs font-semibold text-[#61748F] mb-1">Tutoring Revenue</p>
+                    <p className="text-2xl font-semibold text-[#123460]">{formatCurrency(reportSummary.tutoring_earnings?.total_revenue)}</p>
+                    <p className="text-xs text-[#7F8B99]">Recorded payments</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="rounded-xl border border-white/60 bg-white/85 p-5 shadow-sm">
+                    <h4 className="text-sm font-semibold text-[#123460] mb-3">User Breakdown</h4>
+                    <ul className="space-y-2">
+                      {(reportSummary.user_management?.breakdown || []).map((item) => {
+                        const label = item.user_type__type_name
+                          ? item.user_type__type_name.replace(/_/g, ' ')
+                          : 'Unknown';
+                        return (
+                          <li key={item.user_type__type_name || label} className="flex items-center justify-between text-sm text-[#263238]">
+                            <span>{label}</span>
+                            <span className="font-medium text-[#1D5D9B]">{formatNumber(item.count)}</span>
+                          </li>
+                        );
+                      })}
+                      {!reportSummary.user_management?.breakdown?.length && (
+                        <li className="text-sm text-[#7F8B99]">No registrations recorded.</li>
+                      )}
+                      <li className="flex items-center justify-between text-sm pt-2 border-t border-[#E7F3FB]">
+                        <span className="text-[#263238]">Active Users (all time)</span>
+                        <span className="font-medium text-[#1D5D9B]">{formatNumber(reportSummary.user_management?.active_users_total)}</span>
+                      </li>
+                      <li className="flex items-center justify-between text-sm">
+                        <span className="text-[#263238]">Inactive Users (all time)</span>
+                        <span className="font-medium text-[#1D5D9B]">{formatNumber(reportSummary.user_management?.inactive_users_total)}</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="rounded-xl border border-white/60 bg-white/85 p-5 shadow-sm">
+                    <h4 className="text-sm font-semibold text-[#123460] mb-3">Top Enrolled Courses</h4>
+                    <ul className="space-y-2">
+                      {(reportSummary.content?.popular_courses || []).map((course) => {
+                        const title = course.course__title || 'Untitled Course';
+                        return (
+                          <li key={title} className="flex items-center justify-between text-sm text-[#263238]">
+                            <span>{title}</span>
+                            <span className="font-medium text-[#1D5D9B]">{formatNumber(course.enrollments)}</span>
+                          </li>
+                        );
+                      })}
+                      {!reportSummary.content?.popular_courses?.length && (
+                        <li className="text-sm text-[#7F8B99]">No course enrollments recorded.</li>
+                      )}
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-white/60 bg-white/85 p-5 shadow-sm">
+                  <h4 className="text-sm font-semibold text-[#123460] mb-3">Tutoring Earnings</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-xs text-[#7F8B99]">Payments</p>
+                      <p className="text-lg font-semibold text-[#123460]">{formatNumber(reportSummary.tutoring_earnings?.payment_count)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-[#7F8B99]">Average Ticket Size</p>
+                      <p className="text-lg font-semibold text-[#123460]">{formatCurrency(reportSummary.tutoring_earnings?.average_payment)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-[#7F8B99]">Top Tutors</p>
+                      <p className="text-sm text-[#263238]">
+                        {reportSummary.tutoring_earnings?.top_tutors?.length
+                          ? reportSummary.tutoring_earnings.top_tutors
+                              .map((tutor) => tutor.tutor_username || `Tutor #${tutor.tutor_id}`)
+                              .join(', ')
+                          : 'No tutoring earnings available'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {reportSummary.metadata?.start && reportSummary.metadata?.end ? (
+                  <p className="text-xs text-[#7F8B99]">
+                    Reporting period: {formatDate(reportSummary.metadata.start)} – {formatDate(reportSummary.metadata.end)}
+                  </p>
+                ) : (
+                  <p className="text-xs text-[#7F8B99]">Reporting data unavailable for the selected range.</p>
+                )}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Daily Snapshot */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="relative overflow-hidden rounded-2xl border border-[#E7F3FB] bg-white shadow-sm p-6">
+            <div className="absolute -top-6 -right-6 h-16 w-16 rounded-full bg-[#1D5D9B] opacity-10" />
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-[#61748F] uppercase tracking-wide">Today's Transactions</p>
+                <p className="mt-2 text-2xl font-semibold text-[#123460]">{formatNumber(dashboardData?.today_transactions || 0)}</p>
+              </div>
+              <div className="p-3 rounded-full bg-[#1D5D9B]/10 text-[#1D5D9B]">
+                <TrendingUp className="h-5 w-5" />
+              </div>
+            </div>
+            <p className="mt-3 text-xs text-[#7F8B99]">
+              Total value {formatCurrency(dashboardData?.today_transaction_total || 0)} recorded today.
+            </p>
+          </div>
+
+          <div className="relative overflow-hidden rounded-2xl border border-[#E7F3FB] bg-white shadow-sm p-6">
+            <div className="absolute -top-6 -right-6 h-16 w-16 rounded-full bg-[#81C784] opacity-10" />
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-[#61748F] uppercase tracking-wide">New Registrations</p>
+                <p className="mt-2 text-2xl font-semibold text-[#123460]">{formatNumber(dashboardData?.today_registrations || 0)}</p>
+              </div>
+              <div className="p-3 rounded-full bg-[#81C784]/15 text-[#388E3C]">
+                <User className="h-5 w-5" />
+              </div>
+            </div>
+            <p className="mt-3 text-xs text-[#7F8B99]">Unique user accounts created in the last 24 hours.</p>
+          </div>
+
+          <div className="relative overflow-hidden rounded-2xl border border-[#E7F3FB] bg-white shadow-sm p-6">
+            <div className="absolute -top-6 -right-6 h-16 w-16 rounded-full bg-[#F4D160] opacity-20" />
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-[#61748F] uppercase tracking-wide">Platform Logins</p>
+                <p className="mt-2 text-2xl font-semibold text-[#123460]">{formatNumber(dashboardData?.today_logins || 0)}</p>
+              </div>
+              <div className="p-3 rounded-full bg-[#F4D160]/20 text-[#C27A02]">
+                <Activity className="h-5 w-5" />
+              </div>
+            </div>
+            <p className="mt-3 text-xs text-[#7F8B99]">Active sessions recorded so far today.</p>
+          </div>
+        </div>
 
         {/* Stats Cards */}
         <div className="space-y-8">
@@ -397,9 +738,9 @@ const AdminDashboard = () => {
               <BarChart data={chartData.revenueData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E7F3FB" />
                 <XAxis dataKey="month" stroke="#717171" />
-                <YAxis stroke="#717171" />
-                <Tooltip />
-                <Bar dataKey="revenue" fill="#1D5D9B" />
+                <YAxis stroke="#717171" tickFormatter={(value) => formatCurrency(value)} width={100} />
+                <Tooltip content={renderRevenueTooltip} cursor={{ fill: 'rgba(29, 93, 155, 0.06)' }} />
+                <Bar dataKey="total_amount" fill="#1D5D9B" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -457,38 +798,8 @@ const AdminDashboard = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* Bottom Row - Recent Activities and Activity Calendar */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Activities */}
-          <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-[#263238]">Recent Activities</h3>
-              <Link to="/admin/activities" className="text-sm text-[#1D5D9B] hover:underline">
-                View all
-              </Link>
-            </div>
-            <div className="space-y-4">
-              {chartData.recentActivities.slice(0, 5).map((activity) => (
-                <div key={activity.id} className="flex items-start space-x-3">
-                  <div className="bg-[#E7F3FB] p-2 rounded-lg">
-                    <User className="h-4 w-4 text-[#1D5D9B]" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm text-[#263238]">
-                      <span className="font-medium">{activity.user}</span> {activity.action}
-                    </p>
-                    <div className="flex items-center text-xs text-[#717171] mt-1">
-                      <Clock className="h-3 w-3 mr-1" />
-                      {activity.time}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Activity Calendar */}
-          <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
+        {/* Activity Calendar */}
+        <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-[#263238]">Activity Calendar</h3>
               <div className="flex items-center space-x-2">
@@ -531,64 +842,7 @@ const AdminDashboard = () => {
               ))}
             </div>
           </div>
-        </div>
       </div>
-
-      {/* Top Stats Row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
-            <div className="text-center">
-              <p className="text-sm text-[#717171] mb-1">Today's Revenue</p>
-              <p className="text-2xl font-bold text-[#1D5D9B]">${dashboardData?.today_revenue?.toLocaleString() || '0'}</p>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
-            <div className="text-center">
-              <p className="text-sm text-[#717171] mb-1">Registrations</p>
-              <p className="text-2xl font-bold text-[#1D5D9B]">{dashboardData?.today_registrations || '0'}</p>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
-            <div className="text-center">
-              <p className="text-sm text-[#717171] mb-1">Logins</p>
-              <p className="text-2xl font-bold text-[#1D5D9B]">{dashboardData?.today_logins || '0'}</p>
-            </div>
-          </div>
-        </div>
-
-      {/* PDF Report Generator */}
-        <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="flex flex-wrap gap-4 items-end">
-              <div>
-                <label className="block text-sm font-medium text-[#717171] mb-2">Start Date</label>
-                <input
-                  type="date"
-                  value={reportStartDate}
-                  onChange={e => setReportStartDate(e.target.value)}
-                  className="px-3 py-2 border border-[#C1DBF4] rounded-lg focus:ring-2 focus:ring-[#1D5D9B] focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[#717171] mb-2">End Date</label>
-                <input
-                  type="date"
-                  value={reportEndDate}
-                  onChange={e => setReportEndDate(e.target.value)}
-                  className="px-3 py-2 border border-[#C1DBF4] rounded-lg focus:ring-2 focus:ring-[#1D5D9B] focus:border-transparent"
-                />
-              </div>
-            </div>
-            <button
-              onClick={handleGeneratePDF}
-              className="flex items-center space-x-2 px-4 py-2 bg-[#1D5D9B] text-white rounded-lg hover:bg-[#174A7C] transition-colors"
-            >
-              <FileText className="h-4 w-4" />
-              <span>Generate PDF Report</span>
-            </button>
-          </div>
-        </div>
-
       {/* Notification Modal */}
       {showNotificationModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">

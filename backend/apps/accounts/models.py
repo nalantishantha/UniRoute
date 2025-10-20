@@ -1,5 +1,18 @@
 from django.db import models
 
+
+class UserDailyLogin(models.Model):
+    user = models.ForeignKey('Users', models.DO_NOTHING, related_name='daily_logins')
+    login_date = models.DateField()
+    login_count = models.PositiveIntegerField(default=0)
+    last_login_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        managed = True
+        db_table = 'user_daily_logins'
+        unique_together = ('user', 'login_date')
+
+
 class UserTypes(models.Model):
     type_id = models.AutoField(primary_key=True)
     type_name = models.CharField(unique=True, max_length=30)

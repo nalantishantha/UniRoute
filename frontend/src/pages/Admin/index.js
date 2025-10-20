@@ -64,10 +64,8 @@ export {
   JobForm
 } from './Jobs';
 
-// // Analytics
-// export { 
-//   Analytics 
-// } from './Analytics';
+// Analytics
+export { AdminReportGenerator } from './Analytics';
 
 // Reports
 export { 

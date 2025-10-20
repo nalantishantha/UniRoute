@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'apps.advertisements',
     'apps.payments',
     'apps.pre_university_courses',
+    'apps.reports',
 ]
 
 MIDDLEWARE = [

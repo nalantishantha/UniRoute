@@ -6,8 +6,9 @@ from django.db.models import Q, Count, Sum
 from django.core.paginator import Paginator
 import json
 from datetime import datetime, timedelta
+from decimal import Decimal
 
-from apps.accounts.models import Users, UserDetails, UserTypes
+from apps.accounts.models import Users, UserDetails, UserTypes, UserDailyLogin
 from apps.companies.models import Companies, InternshipOpportunities
 from apps.advertisements.models import AdBookings, Advertisements, AdSpaces
 from apps.universities.models import Universities
@@ -16,6 +17,7 @@ from apps.university_students.models import UniversityStudents
 from apps.tutoring.models import Tutors
 from apps.mentoring.models import Mentors
 from apps.university_programs.models import DegreePrograms
+from apps.payments.models import TutoringPayments, MentoringPayments
 from .models import Report, ReportCategory, ReportAction
 from django.contrib.auth.hashers import check_password, make_password
 
@@ -1048,8 +1050,8 @@ def get_dashboard_statistics(request):
             # Get current date for time-based calculations
             now = timezone.now()
             thirty_days_ago = now - timedelta(days=30)
-            last_month_start = (now.replace(day=1) - timedelta(days=1)).replace(day=1)
-            current_month_start = now.replace(day=1)
+            current_month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            last_month_start = (current_month_start - timedelta(days=1)).replace(day=1)
             
             # User Management Statistics
             total_users = Users.objects.count()
@@ -1121,25 +1123,70 @@ def get_dashboard_statistics(request):
                 {'name': 'Universities', 'value': total_universities, 'color': '#1D5D9B'},
                 {'name': 'Companies', 'value': total_companies, 'color': '#E57373'}
             ]
+
+            # Monthly transaction trends (last 6 months)
+            monthly_transaction_data = []
+            for offset in range(5, -1, -1):
+                year = current_month_start.year
+                month = current_month_start.month - offset
+                while month <= 0:
+                    month += 12
+                    year -= 1
+
+                period_start = current_month_start.replace(year=year, month=month)
+                if period_start.month == 12:
+                    next_month_start = period_start.replace(year=period_start.year + 1, month=1)
+                else:
+                    next_month_start = period_start.replace(month=period_start.month + 1)
+
+                month_filter = (
+                    Q(paid_at__isnull=False, paid_at__gte=period_start, paid_at__lt=next_month_start)
+                    | Q(
+                        paid_at__isnull=True,
+                        created_at__isnull=False,
+                        created_at__gte=period_start,
+                        created_at__lt=next_month_start,
+                    )
+                )
+                tutoring_month_qs = TutoringPayments.objects.filter(month_filter)
+
+                month_total_amount = tutoring_month_qs.aggregate(total=Sum('amount'))['total'] or Decimal('0')
+                month_transaction_count = tutoring_month_qs.count()
+
+                monthly_transaction_data.append({
+                    'month': period_start.strftime('%b'),
+                    'label': period_start.strftime('%b %Y'),
+                    'transaction_count': month_transaction_count,
+                    'total_amount': float(month_total_amount),
+                })
             
             # Daily Activity for last 7 days
             daily_activity = []
-            for i in range(7):
-                day = now - timedelta(days=i)
+            today_date = timezone.localdate(now)
+            seven_days_ago_date = today_date - timedelta(days=6)
+
+            login_totals = {
+                record['login_date']: record['total_logins']
+                for record in UserDailyLogin.objects.filter(
+                    login_date__gte=seven_days_ago_date,
+                    login_date__lte=today_date
+                ).values('login_date').annotate(total_logins=Sum('login_count'))
+            }
+
+            for offset in range(6, -1, -1):
+                day = now - timedelta(days=offset)
                 day_start = day.replace(hour=0, minute=0, second=0, microsecond=0)
                 day_end = day_start + timedelta(days=1)
-                
+
                 registrations = Users.objects.filter(
                     created_at__gte=day_start,
                     created_at__lt=day_end
                 ).count()
-                
-                # For logins, we'll use a mock calculation based on user activity
-                # In a real system, you'd track login events
-                logins = min(registrations * 15 + 200, 500)  # Mock data
-                
-                daily_activity.insert(0, {
-                    'date': day.strftime('%b %d'),
+
+                logins = int(login_totals.get(day_start.date(), 0) or 0)
+
+                daily_activity.append({
+                    'date': day_start.strftime('%b %d'),
                     'registrations': registrations,
                     'logins': logins
                 })
@@ -1182,9 +1229,33 @@ def get_dashboard_statistics(request):
             
             # Today's stats
             today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-            today_registrations = Users.objects.filter(created_at__gte=today_start).count()
-            today_logins = min(today_registrations * 20 + 320, 500)  # Mock data
-            today_revenue = min(today_registrations * 150 + 3500, 5000)  # Mock data
+            today_end = today_start + timedelta(days=1)
+            today_registrations = Users.objects.filter(created_at__gte=today_start, created_at__lt=today_end).count()
+            today_logins = int(
+                UserDailyLogin.objects.filter(login_date=today_date)
+                .aggregate(total=Sum('login_count'))
+                .get('total')
+                or 0
+            )
+            payments_date_filter = (
+                Q(paid_at__isnull=False, paid_at__gte=today_start, paid_at__lt=today_end)
+                | Q(
+                    paid_at__isnull=True,
+                    created_at__isnull=False,
+                    created_at__gte=today_start,
+                    created_at__lt=today_end,
+                )
+            )
+
+            tutoring_payments_today = TutoringPayments.objects.filter(payments_date_filter)
+            mentoring_payments_today = MentoringPayments.objects.filter(payments_date_filter)
+
+            tutoring_total = tutoring_payments_today.aggregate(total=Sum('amount'))['total'] or Decimal('0')
+            mentoring_total = mentoring_payments_today.aggregate(total=Sum('amount'))['total'] or Decimal('0')
+
+            today_transactions = tutoring_payments_today.count() + mentoring_payments_today.count()
+            today_transaction_total = tutoring_total + mentoring_total
+            today_revenue = float(today_transaction_total)
             
             return JsonResponse({
                 'success': True,
@@ -1214,11 +1285,14 @@ def get_dashboard_statistics(request):
                     'user_distribution': user_distribution,
                     'daily_activity': daily_activity,
                     'recent_activities': recent_activities,
+                    'monthly_transaction_data': monthly_transaction_data,
                     
                     # Today's Stats
                     'today_revenue': today_revenue,
                     'today_registrations': today_registrations,
-                    'today_logins': today_logins
+                    'today_logins': today_logins,
+                    'today_transactions': today_transactions,
+                    'today_transaction_total': float(today_transaction_total)
                 }
             })
             
