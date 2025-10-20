@@ -12,6 +12,8 @@ import {
   Filter,
   Eye,
   Settings,
+  BookOpen,
+  GraduationCap,
 } from "lucide-react";
 import {
   Card,
@@ -26,154 +28,342 @@ import AvailabilityManager from "../../../components/MentorAvailability/Availabi
 import TutoringAvailabilityManager from "../../../components/TutoringAvailability/TutoringAvailabilityManager";
 import { mentoringAPI } from "../../../utils/mentoringAPI";
 
-const mockAvailableDates = [
-  new Date(2024, 1, 15),
-  new Date(2024, 1, 16),
-  new Date(2024, 1, 17),
-  new Date(2024, 1, 20),
-  new Date(2024, 1, 21),
-  new Date(2024, 1, 22),
-];
-
-const mockBookedDates = [
-  new Date(2024, 1, 18),
-  new Date(2024, 1, 19),
-  new Date(2024, 1, 23),
-];
-
-const mockEvents = [
-  {
-    id: 1,
-    title: "Math Tutoring with Sarah",
-    date: "2024-02-15",
-    time: "14:00",
-    duration: "1 hour",
-    student: "Sarah Chen",
-    type: "tutoring",
-    status: "confirmed",
-  },
-  {
-    id: 2,
-    title: "University Guidance Session",
-    date: "2024-02-16",
-    time: "10:00",
-    duration: "2 hours",
-    student: "Michael Brown",
-    type: "mentoring",
-    status: "confirmed",
-  },
-  {
-    id: 3,
-    title: "Physics Lab Prep",
-    date: "2024-02-17",
-    time: "16:00",
-    duration: "1.5 hours",
-    student: "Lisa Johnson",
-    type: "tutoring",
-    status: "pending",
-  },
-];
-
-const upcomingAvailability = [
-  {
-    date: "2024-02-20",
-    timeSlots: ["09:00", "10:00", "14:00", "15:00", "16:00"],
-    booked: 2,
-    available: 3,
-  },
-  {
-    date: "2024-02-21",
-    timeSlots: ["11:00", "13:00", "14:00", "17:00", "18:00"],
-    booked: 1,
-    available: 4,
-  },
-  {
-    date: "2024-02-22",
-    timeSlots: ["09:00", "10:00", "11:00", "15:00"],
-    booked: 0,
-    available: 4,
-  },
-];
-
 export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState(null);
-  const [availableDates, setAvailableDates] = useState(mockAvailableDates);
-  const [bookedDates] = useState(mockBookedDates);
-  const [events] = useState(mockEvents);
+  const [availableMentoringDates, setAvailableMentoringDates] = useState([]);
+  const [availableTutoringDates, setAvailableTutoringDates] = useState([]);
+  const [scheduledMentoringDates, setScheduledMentoringDates] = useState([]);
+  const [scheduledTutoringDates, setScheduledTutoringDates] = useState([]);
+  const [events, setEvents] = useState([]);
   const [activeTab, setActiveTab] = useState("calendar");
   const [tutorId, setTutorId] = useState(null);
-  
+  const [loading, setLoading] = useState(true);
+  const [mentoringSessions, setMentoringSessions] = useState([]);
+  const [tutoringBookings, setTutoringBookings] = useState([]);
+  const [mentorAvailability, setMentorAvailability] = useState([]);
+  const [tutorAvailability, setTutorAvailability] = useState([]);
+
   // Get user ID from localStorage
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const mentorId = user.mentor_id || 1; // For mentoring availability
-  
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const mentorId = user.mentor_id || null;
+  const studentId = user.student_id || null;
+
   // Debug: Log user data
-  console.log('CalendarPage - User from localStorage:', user);
-  console.log('CalendarPage - User keys:', Object.keys(user));
-  
+  console.log("CalendarPage - User from localStorage:", user);
+  console.log("CalendarPage - User keys:", Object.keys(user));
+
   // Fetch tutor_id for the logged-in university student
   useEffect(() => {
     const fetchTutorId = async () => {
       try {
         // Check if user object is empty
         if (!user || Object.keys(user).length === 0) {
-          console.error('❌ No user data in localStorage');
+          console.error("❌ No user data in localStorage");
           setTutorId(null);
           return;
         }
-        
-        console.log('Fetching tutor ID for user:', {
+
+        console.log("Fetching tutor ID for user:", {
           user_id: user.user_id,
           university_student_id: user.university_student_id,
-          student_id: user.student_id
+          student_id: user.student_id,
         });
-        
+
         // First check if tutor_id is already in user object
         if (user.tutor_id) {
-          console.log('✓ Found tutor_id in user object:', user.tutor_id);
+          console.log("✓ Found tutor_id in user object:", user.tutor_id);
           setTutorId(user.tutor_id);
           return;
         }
-        
+
         // Otherwise, fetch from API using university_student_id
         if (user.university_student_id || user.student_id) {
-          console.log('Fetching tutors from API...');
-          const response = await fetch(`http://localhost:8000/api/tutoring/tutors/`);
+          console.log("Fetching tutors from API...");
+          const response = await fetch(
+            `http://localhost:8000/api/tutoring/tutors/`
+          );
           const data = await response.json();
-          console.log('API Response:', data);
-          
+          console.log("API Response:", data);
+
           if (data.success && data.tutors) {
             // Find tutor matching this university student
             const myTutor = data.tutors.find(
-              t => t.university_student_id === (user.university_student_id || user.student_id)
+              (t) =>
+                t.university_student_id ===
+                (user.university_student_id || user.student_id)
             );
             if (myTutor) {
-              console.log('✓ Found matching tutor:', myTutor.tutor_id);
+              console.log("✓ Found matching tutor:", myTutor.tutor_id);
               setTutorId(myTutor.tutor_id);
             } else {
-              console.warn('⚠️ No tutor found for this university student');
-              console.log('Available tutors:', data.tutors.map(t => ({
-                tutor_id: t.tutor_id,
-                university_student_id: t.university_student_id
-              })));
+              console.warn("⚠️ No tutor found for this university student");
+              console.log(
+                "Available tutors:",
+                data.tutors.map((t) => ({
+                  tutor_id: t.tutor_id,
+                  university_student_id: t.university_student_id,
+                }))
+              );
               setTutorId(null);
             }
           } else {
-            console.error('❌ API returned no tutors');
+            console.error("❌ API returned no tutors");
             setTutorId(null);
           }
         } else {
-          console.error('❌ No university_student_id or student_id in user object');
+          console.error(
+            "❌ No university_student_id or student_id in user object"
+          );
           setTutorId(null);
         }
       } catch (error) {
-        console.error('❌ Failed to fetch tutor ID:', error);
+        console.error("❌ Failed to fetch tutor ID:", error);
         setTutorId(null);
       }
     };
     fetchTutorId();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Fetch all calendar data
+  useEffect(() => {
+    const fetchCalendarData = async () => {
+      try {
+        setLoading(true);
+
+        // Fetch mentoring sessions if user is a mentor
+        if (mentorId) {
+          try {
+            const mentoringResponse = await fetch(
+              `http://localhost:8000/api/mentoring/sessions/${mentorId}/`
+            );
+            const mentoringData = await mentoringResponse.json();
+            if (mentoringData.status === "success") {
+              setMentoringSessions(mentoringData.sessions || []);
+              console.log("Mentoring sessions loaded:", mentoringData.sessions);
+            }
+          } catch (error) {
+            console.error("Failed to fetch mentoring sessions:", error);
+          }
+
+          // Fetch mentor availability
+          try {
+            const mentorAvailResponse = await fetch(
+              `http://localhost:8000/api/mentoring/availability/${mentorId}/`
+            );
+            const mentorAvailData = await mentorAvailResponse.json();
+            if (mentorAvailData.status === "success") {
+              setMentorAvailability(mentorAvailData.availability || []);
+              console.log(
+                "Mentor availability loaded:",
+                mentorAvailData.availability
+              );
+            }
+          } catch (error) {
+            console.error("Failed to fetch mentor availability:", error);
+          }
+        }
+
+        // Fetch tutoring bookings if user is a tutor
+        if (tutorId) {
+          try {
+            const tutoringResponse = await fetch(
+              `http://localhost:8000/api/tutoring/bookings/tutor/${tutorId}/`
+            );
+            const tutoringData = await tutoringResponse.json();
+            if (tutoringData.status === "success") {
+              setTutoringBookings(tutoringData.bookings || []);
+              console.log("Tutoring bookings loaded:", tutoringData.bookings);
+            }
+          } catch (error) {
+            console.error("Failed to fetch tutoring bookings:", error);
+          }
+
+          // Fetch tutor availability
+          try {
+            const tutorAvailResponse = await fetch(
+              `http://localhost:8000/api/tutoring/availability/${tutorId}/`
+            );
+            const tutorAvailData = await tutorAvailResponse.json();
+            if (tutorAvailData.status === "success") {
+              setTutorAvailability(tutorAvailData.availability || []);
+              console.log(
+                "Tutor availability loaded:",
+                tutorAvailData.availability
+              );
+            }
+          } catch (error) {
+            console.error("Failed to fetch tutor availability:", error);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch calendar data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (mentorId || tutorId) {
+      fetchCalendarData();
+    } else {
+      setLoading(false);
+    }
+  }, [mentorId, tutorId]);
+
+  // Process events and dates from fetched data
+  useEffect(() => {
+    const processedEvents = [];
+    const availableMentoringDatesSet = new Set();
+    const availableTutoringDatesSet = new Set();
+    const scheduledMentoringDatesSet = new Set();
+    const scheduledTutoringDatesSet = new Set();
+
+    // Process mentoring sessions (scheduled)
+    mentoringSessions.forEach((session) => {
+      const sessionDate = new Date(session.scheduled_at);
+      const dateStr = sessionDate.toISOString().split("T")[0];
+
+      processedEvents.push({
+        id: `mentoring-${session.id}`,
+        title: session.topic,
+        date: dateStr,
+        time: sessionDate.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        duration: `${session.duration_minutes || 60} min`,
+        student: session.student || "Unknown Student",
+        type: "scheduled-mentoring",
+        status: session.status,
+      });
+
+      scheduledMentoringDatesSet.add(dateStr);
+    });
+
+    // Process tutoring bookings (scheduled)
+    tutoringBookings.forEach((booking) => {
+      const bookingDate = new Date(booking.start_date);
+
+      // For recurring bookings, we'll add multiple events
+      if (booking.is_recurring && booking.availability_slot) {
+        const endDate = booking.end_date
+          ? new Date(booking.end_date)
+          : new Date(Date.now() + 90 * 24 * 60 * 60 * 1000); // 3 months from now
+        const currentDate = new Date(bookingDate);
+        const dayOfWeek = booking.availability_slot.day_of_week;
+
+        while (currentDate <= endDate) {
+          if (currentDate.getDay() === (dayOfWeek === 0 ? 0 : dayOfWeek)) {
+            const dateStr = currentDate.toISOString().split("T")[0];
+
+            processedEvents.push({
+              id: `tutoring-${booking.booking_id}-${dateStr}`,
+              title:
+                booking.topic || booking.subject_name || "Tutoring Session",
+              date: dateStr,
+              time: booking.availability_slot.start_time,
+              duration: `${calculateDuration(
+                booking.availability_slot.start_time,
+                booking.availability_slot.end_time
+              )} min`,
+              student: booking.student_name || "Unknown Student",
+              type: "scheduled-tutoring",
+              status: booking.status,
+            });
+
+            scheduledTutoringDatesSet.add(dateStr);
+          }
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+      } else {
+        // Single booking
+        const dateStr = bookingDate.toISOString().split("T")[0];
+        processedEvents.push({
+          id: `tutoring-${booking.booking_id}`,
+          title: booking.topic || booking.subject_name || "Tutoring Session",
+          date: dateStr,
+          time: booking.availability_slot?.start_time || "00:00",
+          duration: booking.availability_slot
+            ? `${calculateDuration(
+                booking.availability_slot.start_time,
+                booking.availability_slot.end_time
+              )} min`
+            : "N/A",
+          student: booking.student_name || "Unknown Student",
+          type: "scheduled-tutoring",
+          status: booking.status,
+        });
+        scheduledTutoringDatesSet.add(dateStr);
+      }
+    });
+
+    // Process mentor availability to show available mentoring dates
+    mentorAvailability.forEach((slot) => {
+      if (slot.is_active) {
+        // Generate dates for the next 30 days for this day of week
+        const today = new Date();
+        for (let i = 0; i < 30; i++) {
+          const date = new Date(today);
+          date.setDate(today.getDate() + i);
+
+          if (date.getDay() === slot.day_of_week) {
+            const dateStr = date.toISOString().split("T")[0];
+            // Only add if not already scheduled
+            if (!scheduledMentoringDatesSet.has(dateStr)) {
+              availableMentoringDatesSet.add(dateStr);
+            }
+          }
+        }
+      }
+    });
+
+    // Process tutor availability to show available tutoring dates
+    tutorAvailability.forEach((slot) => {
+      if (slot.is_active) {
+        // Generate dates for the next 30 days for this day of week
+        const today = new Date();
+        for (let i = 0; i < 30; i++) {
+          const date = new Date(today);
+          date.setDate(today.getDate() + i);
+
+          // Convert day_of_week (0=Sunday in backend) to JavaScript day (0=Sunday)
+          if (date.getDay() === slot.day_of_week) {
+            const dateStr = date.toISOString().split("T")[0];
+            // Only add if not already scheduled
+            if (!scheduledTutoringDatesSet.has(dateStr)) {
+              availableTutoringDatesSet.add(dateStr);
+            }
+          }
+        }
+      }
+    });
+
+    setEvents(processedEvents);
+    setAvailableMentoringDates(
+      Array.from(availableMentoringDatesSet).map((d) => new Date(d))
+    );
+    setAvailableTutoringDates(
+      Array.from(availableTutoringDatesSet).map((d) => new Date(d))
+    );
+    setScheduledMentoringDates(
+      Array.from(scheduledMentoringDatesSet).map((d) => new Date(d))
+    );
+    setScheduledTutoringDates(
+      Array.from(scheduledTutoringDatesSet).map((d) => new Date(d))
+    );
+  }, [
+    mentoringSessions,
+    tutoringBookings,
+    mentorAvailability,
+    tutorAvailability,
+  ]);
+
+  // Helper function to calculate duration in minutes
+  const calculateDuration = (startTime, endTime) => {
+    const [startHour, startMin] = startTime.split(":").map(Number);
+    const [endHour, endMin] = endTime.split(":").map(Number);
+    return endHour * 60 + endMin - (startHour * 60 + startMin);
+  };
 
   const handleDateSelect = (date) => {
     setSelectedDate(date);
@@ -196,11 +386,26 @@ export default function CalendarPage() {
     });
   };
 
+  // Calculate statistics from real data
   const stats = {
-    totalAvailableSlots: 45,
-    bookedSlots: 18,
-    upcomingSlots: 12,
-    completedSessions: 156,
+    totalAvailableSlots:
+      mentorAvailability.filter((s) => s.is_active).length +
+      tutorAvailability.filter((s) => s.is_active).length,
+    bookedSlots:
+      mentoringSessions.filter((s) => s.status === "scheduled").length +
+      tutoringBookings.filter((b) =>
+        ["confirmed", "active", "scheduled"].includes(b.status)
+      ).length,
+    upcomingSlots: events.filter((e) => {
+      const eventDate = new Date(e.date);
+      return (
+        eventDate >= new Date() &&
+        ["scheduled", "confirmed", "active"].includes(e.status)
+      );
+    }).length,
+    completedSessions:
+      mentoringSessions.filter((s) => s.status === "completed").length +
+      tutoringBookings.filter((b) => b.status === "completed").length,
   };
 
   return (
@@ -210,19 +415,7 @@ export default function CalendarPage() {
       className="space-y-6"
     >
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-        <div></div>
-        <div className="flex items-center space-x-3 mt-4 lg:mt-0">
-          <Button variant="outline" size="lg">
-            <Filter className="w-4 h-4 mr-2" />
-            Filter Events
-          </Button>
-          <Button size="lg" onClick={() => setActiveTab("availability")}>
-            <Settings className="w-4 h-4 mr-2" />
-            Manage Availability
-          </Button>
-        </div>
-      </div>
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between"></div>
 
       {/* Tab Navigation */}
       <div className="border-b border-neutral-light-grey">
@@ -245,7 +438,7 @@ export default function CalendarPage() {
                 : "border-transparent text-neutral-grey hover:text-neutral-black hover:border-neutral-light-grey"
             }`}
           >
-            Availability Management
+            Manage Availability
           </button>
         </nav>
       </div>
@@ -342,24 +535,84 @@ export default function CalendarPage() {
           {/* Calendar */}
           <div className="lg:col-span-3">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <CalendarIcon className="w-5 h-5 text-primary-600" />
-                  <span>Schedule Calendar</span>
-                </CardTitle>
-                <CardDescription>
-                  View your availability and scheduled sessions
-                </CardDescription>
-              </CardHeader>
+              {/* <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center space-x-2">
+                      <CalendarIcon className="w-5 h-5 text-primary-600" />
+                      <span>Schedule Calendar</span>
+                    </CardTitle>
+                    <CardDescription>
+                      View your availability and scheduled sessions
+                    </CardDescription>
+                  </div>
+                  {loading && (
+                    <div className="flex items-center text-sm text-neutral-grey">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-400 mr-2"></div>
+                      Loading...
+                    </div>
+                  )}
+                </div>
+              </CardHeader> */}
               <CardContent>
-                <Calendar
-                  selectedDate={selectedDate}
-                  onDateSelect={handleDateSelect}
-                  availableDates={availableDates}
-                  bookedDates={bookedDates}
-                  onSetAvailability={handleSetAvailability}
-                  events={events}
-                />
+                {loading ? (
+                  <div className="text-center py-16">
+                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-400 mb-4"></div>
+                    <p className="text-neutral-grey">
+                      Loading calendar data...
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <Calendar
+                      selectedDate={selectedDate}
+                      onDateSelect={handleDateSelect}
+                      availableMentoringDates={availableMentoringDates}
+                      availableTutoringDates={availableTutoringDates}
+                      scheduledMentoringDates={scheduledMentoringDates}
+                      scheduledTutoringDates={scheduledTutoringDates}
+                      onSetAvailability={handleSetAvailability}
+                      events={events}
+                    />
+                    {/* Calendar Legend with Pastel Colors */}
+                    <div className="mt-4 p-4 bg-gradient-to-r from-neutral-silver/20 to-neutral-silver/40 rounded-lg border border-neutral-light-grey">
+                      <div className="flex items-center justify-between text-sm flex-wrap gap-4">
+                        <div className="flex items-center gap-6 flex-wrap">
+                          <div className="flex items-center">
+                            <div className="w-5 h-5 bg-blue-200 border-2 border-blue-400 rounded shadow-sm mr-2"></div>
+                            <span className="text-neutral-black font-semibold">
+                              Available Mentoring Slots
+                            </span>
+                          </div>
+                          <div className="flex items-center">
+                            <div className="w-5 h-5 bg-green-200 border-2 border-green-400 rounded shadow-sm mr-2"></div>
+                            <span className="text-neutral-black font-semibold">
+                              Available Tutoring Slots
+                            </span>
+                          </div>
+                          <div className="flex items-center">
+                            <div className="w-5 h-5 bg-purple-200 border-2 border-purple-400 rounded shadow-sm mr-2"></div>
+                            <span className="text-neutral-black font-semibold">
+                              Scheduled Mentoring Sessions
+                            </span>
+                          </div>
+                          <div className="flex items-center">
+                            <div className="w-5 h-5 bg-pink-200 border-2 border-pink-400 rounded shadow-sm mr-2"></div>
+                            <span className="text-neutral-black font-semibold">
+                              Scheduled Tutoring Sessions
+                            </span>
+                          </div>
+                        </div>
+                        {events.length > 0 && (
+                          <div className="text-neutral-black font-semibold bg-white px-3 py-1 rounded-full border border-neutral-light-grey">
+                            {events.length} session
+                            {events.length !== 1 ? "s" : ""}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -371,54 +624,134 @@ export default function CalendarPage() {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Clock className="w-5 h-5 text-primary-600" />
-                  <span>Upcoming Availability</span>
+                  <span>Your Availability Slots</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {upcomingAvailability.map((availability, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="p-4 bg-neutral-silver/50 rounded-lg"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-neutral-black">
-                        {new Date(availability.date).toLocaleDateString(
-                          "en-US",
-                          {
-                            weekday: "short",
-                            month: "short",
-                            day: "numeric",
-                          }
-                        )}
-                      </h4>
-                      <div className="flex items-center space-x-2">
-                        <Button size="sm" variant="ghost">
-                          <Edit3 className="w-3 h-3" />
-                        </Button>
-                        <Button size="sm" variant="ghost">
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
+                {loading ? (
+                  <div className="text-center py-8">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-400"></div>
+                    <p className="text-neutral-grey mt-2">
+                      Loading availability...
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Mentor Availability */}
+                    {mentorAvailability.filter((s) => s.is_active).length >
+                      0 && (
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-semibold text-neutral-grey flex items-center">
+                          <GraduationCap className="w-4 h-4 mr-1" />
+                          Mentoring Slots
+                        </h4>
+                        {mentorAvailability
+                          .filter((s) => s.is_active)
+                          .slice(0, 3)
+                          .map((slot, index) => (
+                            <motion.div
+                              key={`mentor-${slot.availability_id}`}
+                              initial={{ opacity: 0, x: 20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: index * 0.1 }}
+                              className="p-3 bg-blue-50 border border-blue-200 rounded-lg"
+                            >
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="font-medium text-neutral-black text-sm">
+                                    {
+                                      [
+                                        "Sunday",
+                                        "Monday",
+                                        "Tuesday",
+                                        "Wednesday",
+                                        "Thursday",
+                                        "Friday",
+                                        "Saturday",
+                                      ][slot.day_of_week]
+                                    }
+                                  </p>
+                                  <p className="text-xs text-neutral-grey">
+                                    {slot.start_time} - {slot.end_time}
+                                  </p>
+                                </div>
+                                <div className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                                  Mentoring
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
                       </div>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="text-neutral-grey">
-                        {availability.timeSlots.length} slots
+                    )}
+
+                    {/* Tutor Availability */}
+                    {tutorAvailability.filter((s) => s.is_active).length >
+                      0 && (
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-semibold text-neutral-grey flex items-center">
+                          <BookOpen className="w-4 h-4 mr-1" />
+                          Tutoring Slots
+                        </h4>
+                        {tutorAvailability
+                          .filter((s) => s.is_active)
+                          .slice(0, 3)
+                          .map((slot, index) => (
+                            <motion.div
+                              key={`tutor-${slot.availability_id}`}
+                              initial={{ opacity: 0, x: 20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: index * 0.1 }}
+                              className="p-3 bg-green-50 border border-green-200 rounded-lg"
+                            >
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="font-medium text-neutral-black text-sm">
+                                    {
+                                      [
+                                        "Sunday",
+                                        "Monday",
+                                        "Tuesday",
+                                        "Wednesday",
+                                        "Thursday",
+                                        "Friday",
+                                        "Saturday",
+                                      ][slot.day_of_week]
+                                    }
+                                  </p>
+                                  <p className="text-xs text-neutral-grey">
+                                    {slot.start_time} - {slot.end_time}
+                                  </p>
+                                  {slot.subject_name && (
+                                    <p className="text-xs text-green-700 font-medium">
+                                      {slot.subject_name}
+                                    </p>
+                                  )}
+                                </div>
+                                <div className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                                  Tutoring
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-success">
-                          {availability.available} available
-                        </span>
-                        <span className="text-neutral-light-grey">•</span>
-                        <span className="text-info">
-                          {availability.booked} booked
-                        </span>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
+                    )}
+
+                    {mentorAvailability.filter((s) => s.is_active).length ===
+                      0 &&
+                      tutorAvailability.filter((s) => s.is_active).length ===
+                        0 && (
+                        <div className="text-center py-8">
+                          <Clock className="w-12 h-12 text-neutral-light-grey mx-auto mb-4" />
+                          <p className="text-neutral-grey">
+                            No availability slots set
+                          </p>
+                          <p className="text-sm text-neutral-grey mt-1">
+                            Go to Availability tab to set your schedule
+                          </p>
+                        </div>
+                      )}
+                  </>
+                )}
               </CardContent>
             </Card>
 
@@ -427,68 +760,317 @@ export default function CalendarPage() {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Eye className="w-5 h-5 text-primary-600" />
-                  <span>Today's Events</span>
+                  <span>Today's Sessions</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {events
-                  .filter((event) => {
-                    const eventDate = new Date(event.date);
-                    const today = new Date();
-                    return eventDate.toDateString() === today.toDateString();
-                  })
-                  .map((event, index) => (
-                    <motion.div
-                      key={event.id}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="p-4 border border-neutral-light-grey rounded-lg"
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h4 className="font-medium text-neutral-black">
-                            {event.title}
-                          </h4>
-                          <p className="text-sm text-neutral-grey">
-                            {event.student}
-                          </p>
-                        </div>
-                        <span
-                          className={`text-xs px-2 py-1 rounded-full ${
-                            event.status === "confirmed"
-                              ? "bg-success/20 text-success"
-                              : "bg-warning/20 text-yellow-600"
+                {loading ? (
+                  <div className="text-center py-8">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-400"></div>
+                    <p className="text-neutral-grey mt-2">
+                      Loading sessions...
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {events
+                      .filter((event) => {
+                        const eventDate = new Date(event.date);
+                        const today = new Date();
+                        return (
+                          eventDate.toDateString() === today.toDateString()
+                        );
+                      })
+                      .map((event, index) => (
+                        <motion.div
+                          key={event.id}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className={`p-4 border rounded-lg ${
+                            event.type === "mentoring"
+                              ? "border-blue-200 bg-blue-50"
+                              : "border-green-200 bg-green-50"
                           }`}
                         >
-                          {event.status}
-                        </span>
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2 mb-1">
+                                {event.type === "mentoring" ? (
+                                  <GraduationCap className="w-4 h-4 text-blue-600" />
+                                ) : (
+                                  <BookOpen className="w-4 h-4 text-green-600" />
+                                )}
+                                <h4 className="font-medium text-neutral-black">
+                                  {event.title}
+                                </h4>
+                              </div>
+                              <p className="text-sm text-neutral-grey">
+                                {event.student}
+                              </p>
+                            </div>
+                            <span
+                              className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${
+                                event.status === "confirmed" ||
+                                event.status === "scheduled" ||
+                                event.status === "active"
+                                  ? "bg-success/20 text-success"
+                                  : event.status === "pending"
+                                  ? "bg-warning/20 text-yellow-600"
+                                  : event.status === "completed"
+                                  ? "bg-blue-100 text-blue-700"
+                                  : "bg-red-100 text-red-700"
+                              }`}
+                            >
+                              {event.status}
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-4 text-sm text-neutral-grey">
+                            <div className="flex items-center space-x-1">
+                              <Clock className="w-3 h-3" />
+                              <span>{event.time}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <CalendarIcon className="w-3 h-3" />
+                              <span>{event.duration}</span>
+                            </div>
+                            <div
+                              className={`text-xs font-medium ${
+                                event.type === "mentoring"
+                                  ? "text-blue-700"
+                                  : "text-green-700"
+                              }`}
+                            >
+                              {event.type === "mentoring"
+                                ? "Mentoring"
+                                : "Tutoring"}
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    {events.filter((event) => {
+                      const eventDate = new Date(event.date);
+                      const today = new Date();
+                      return eventDate.toDateString() === today.toDateString();
+                    }).length === 0 && (
+                      <div className="text-center py-8">
+                        <CalendarIcon className="w-12 h-12 text-neutral-light-grey mx-auto mb-4" />
+                        <p className="text-neutral-grey">No sessions today</p>
                       </div>
-                      <div className="flex items-center space-x-4 text-sm text-neutral-grey">
-                        <div className="flex items-center space-x-1">
-                          <Clock className="w-3 h-3" />
-                          <span>{event.time}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <CalendarIcon className="w-3 h-3" />
-                          <span>{event.duration}</span>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                {events.filter((event) => {
-                  const eventDate = new Date(event.date);
-                  const today = new Date();
-                  return eventDate.toDateString() === today.toDateString();
-                }).length === 0 && (
-                  <div className="text-center py-8">
-                    <CalendarIcon className="w-12 h-12 text-neutral-light-grey mx-auto mb-4" />
-                    <p className="text-neutral-grey">No events today</p>
-                  </div>
+                    )}
+                  </>
                 )}
               </CardContent>
             </Card>
           </div>
+        </div>
+      )}
+
+      {/* All Sessions Tab */}
+      {activeTab === "sessions" && (
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>All Scheduled Sessions</span>
+                <div className="text-sm font-normal text-neutral-grey">
+                  {events.filter((e) => new Date(e.date) >= new Date()).length}{" "}
+                  upcoming sessions
+                </div>
+              </CardTitle>
+              <CardDescription>
+                View all your mentoring and tutoring sessions
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="text-center py-16">
+                  <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-400 mb-4"></div>
+                  <p className="text-neutral-grey">Loading sessions...</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {/* Mentoring Sessions */}
+                  {mentoringSessions.length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-neutral-black mb-4 flex items-center">
+                        <GraduationCap className="w-5 h-5 mr-2 text-blue-600" />
+                        Mentoring Sessions ({mentoringSessions.length})
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {mentoringSessions.map((session) => (
+                          <motion.div
+                            key={session.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="p-4 bg-blue-50 border border-blue-200 rounded-lg hover:shadow-md transition-shadow"
+                          >
+                            <div className="flex items-start justify-between mb-3">
+                              <h4 className="font-medium text-neutral-black">
+                                {session.topic}
+                              </h4>
+                              <span
+                                className={`text-xs px-2 py-1 rounded-full ${
+                                  session.status === "scheduled"
+                                    ? "bg-blue-100 text-blue-700"
+                                    : session.status === "completed"
+                                    ? "bg-green-100 text-green-700"
+                                    : "bg-yellow-100 text-yellow-700"
+                                }`}
+                              >
+                                {session.status}
+                              </span>
+                            </div>
+                            <div className="space-y-2 text-sm text-neutral-grey">
+                              <div className="flex items-center">
+                                <Users className="w-4 h-4 mr-2" />
+                                <span>{session.student}</span>
+                              </div>
+                              <div className="flex items-center">
+                                <CalendarIcon className="w-4 h-4 mr-2" />
+                                <span>
+                                  {new Date(
+                                    session.scheduled_at
+                                  ).toLocaleDateString("en-US", {
+                                    weekday: "short",
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                  })}
+                                </span>
+                              </div>
+                              <div className="flex items-center">
+                                <Clock className="w-4 h-4 mr-2" />
+                                <span>
+                                  {new Date(
+                                    session.scheduled_at
+                                  ).toLocaleTimeString("en-US", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}{" "}
+                                  ({session.duration_minutes || 60} min)
+                                </span>
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Tutoring Bookings */}
+                  {tutoringBookings.length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-neutral-black mb-4 flex items-center">
+                        <BookOpen className="w-5 h-5 mr-2 text-green-600" />
+                        Tutoring Sessions ({tutoringBookings.length})
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {tutoringBookings.map((booking) => (
+                          <motion.div
+                            key={booking.booking_id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="p-4 bg-green-50 border border-green-200 rounded-lg hover:shadow-md transition-shadow"
+                          >
+                            <div className="flex items-start justify-between mb-3">
+                              <div>
+                                <h4 className="font-medium text-neutral-black">
+                                  {booking.topic ||
+                                    booking.subject_name ||
+                                    "Tutoring Session"}
+                                </h4>
+                                {booking.subject_name && (
+                                  <p className="text-xs text-green-700 font-medium mt-1">
+                                    {booking.subject_name}
+                                  </p>
+                                )}
+                              </div>
+                              <span
+                                className={`text-xs px-2 py-1 rounded-full ${
+                                  ["confirmed", "active", "scheduled"].includes(
+                                    booking.status
+                                  )
+                                    ? "bg-green-100 text-green-700"
+                                    : booking.status === "completed"
+                                    ? "bg-blue-100 text-blue-700"
+                                    : booking.status === "pending"
+                                    ? "bg-yellow-100 text-yellow-700"
+                                    : "bg-red-100 text-red-700"
+                                }`}
+                              >
+                                {booking.status}
+                              </span>
+                            </div>
+                            <div className="space-y-2 text-sm text-neutral-grey">
+                              <div className="flex items-center">
+                                <Users className="w-4 h-4 mr-2" />
+                                <span>{booking.student_name || "Student"}</span>
+                              </div>
+                              <div className="flex items-center">
+                                <CalendarIcon className="w-4 h-4 mr-2" />
+                                <span>
+                                  {booking.is_recurring ? "Recurring: " : ""}
+                                  {new Date(
+                                    booking.start_date
+                                  ).toLocaleDateString("en-US", {
+                                    weekday: "short",
+                                    month: "short",
+                                    day: "numeric",
+                                  })}
+                                </span>
+                              </div>
+                              {booking.availability_slot && (
+                                <div className="flex items-center">
+                                  <Clock className="w-4 h-4 mr-2" />
+                                  <span>
+                                    {booking.availability_slot.start_time} -{" "}
+                                    {booking.availability_slot.end_time}
+                                  </span>
+                                </div>
+                              )}
+                              {booking.is_recurring && (
+                                <div className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded inline-block">
+                                  Weekly on{" "}
+                                  {
+                                    [
+                                      "Sun",
+                                      "Mon",
+                                      "Tue",
+                                      "Wed",
+                                      "Thu",
+                                      "Fri",
+                                      "Sat",
+                                    ][
+                                      booking.availability_slot?.day_of_week ||
+                                        0
+                                    ]
+                                  }
+                                </div>
+                              )}
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {mentoringSessions.length === 0 &&
+                    tutoringBookings.length === 0 && (
+                      <div className="text-center py-16">
+                        <CalendarIcon className="w-16 h-16 text-neutral-light-grey mx-auto mb-4" />
+                        <p className="text-neutral-grey text-lg">
+                          No scheduled sessions
+                        </p>
+                        <p className="text-sm text-neutral-grey mt-2">
+                          Sessions will appear here once students book with you
+                        </p>
+                      </div>
+                    )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       )}
 
@@ -497,10 +1079,13 @@ export default function CalendarPage() {
         <div className="space-y-6">
           {/* Mentoring Availability Section */}
           <div>
-            <h2 className="text-xl font-bold text-neutral-black mb-4">Mentoring Availability</h2>
-            <p className="text-neutral-grey mb-4">
-              Manage your one-time mentoring session availability. Students can book individual sessions with you.
-            </p>
+            {/* <h2 className="text-xl font-bold text-neutral-black mb-4">
+              Mentoring Availability
+            </h2> */}
+            {/* <p className="text-neutral-grey mb-4">
+              Manage your one-time mentoring session availability. Students can
+              book individual sessions with you.
+            </p> */}
             <AvailabilityManager mentorId={mentorId} />
           </div>
 
@@ -509,16 +1094,21 @@ export default function CalendarPage() {
 
           {/* Tutoring Availability Section */}
           <div>
-            <h2 className="text-xl font-bold text-neutral-black mb-4">Tutoring Availability (Recurring)</h2>
+            {/* <h2 className="text-xl font-bold text-neutral-black mb-4">
+              Tutoring Availability
+            </h2>
             <p className="text-neutral-grey mb-4">
-              Manage your recurring weekly tutoring slots. Students can book regular tutoring sessions that repeat every week.
-            </p>
+              Manage your recurring weekly tutoring slots. Students can book
+              regular tutoring sessions that repeat every week.
+            </p> */}
             {tutorId ? (
               <TutoringAvailabilityManager tutorId={tutorId} />
             ) : (
               <div className="text-center py-8">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-400 mb-4"></div>
-                <p className="text-neutral-grey">Loading tutor information...</p>
+                <p className="text-neutral-grey">
+                  Loading tutor information...
+                </p>
               </div>
             )}
           </div>
