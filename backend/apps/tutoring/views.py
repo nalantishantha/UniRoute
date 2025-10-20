@@ -588,6 +588,33 @@ def manage_tutor_availability(request, tutor_id):
                     'message': 'Invalid time format. Use HH:MM format'
                 }, status=400)
             
+            # Check for conflicts with mentoring availability
+            from apps.mentoring.models import Mentors, MentorAvailability
+            from django.db.models import Q
+            
+            try:
+                # Find if this user is also a mentor
+                mentor = Mentors.objects.filter(user=tutor.user).first()
+                if mentor:
+                    # Check for overlapping mentoring availability
+                    overlapping_mentoring = MentorAvailability.objects.filter(
+                        mentor=mentor,
+                        day_of_week=data['day_of_week'],
+                        is_active=True
+                    ).filter(
+                        Q(start_time__lt=end_time) & Q(end_time__gt=start_time)
+                    )
+                    
+                    if overlapping_mentoring.exists():
+                        overlap = overlapping_mentoring.first()
+                        return JsonResponse({
+                            'status': 'error',
+                            'message': f'Cannot add tutoring availability. You already have a mentoring session scheduled on this day from {overlap.start_time.strftime("%H:%M")} to {overlap.end_time.strftime("%H:%M")}.'
+                        }, status=400)
+            except Exception as e:
+                # If there's any error checking mentoring availability, log it but continue
+                print(f"Error checking mentoring availability: {str(e)}")
+            
             # Create availability
             from apps.student_results.models import AlSubjects
             subject = None
@@ -664,6 +691,31 @@ def manage_tutor_availability(request, tutor_id):
                         'status': 'error',
                         'message': 'Invalid time format. Use HH:MM format'
                     }, status=400)
+            
+            # Check for conflicts with mentoring availability when updating
+            from apps.mentoring.models import Mentors, MentorAvailability
+            from django.db.models import Q
+            
+            try:
+                mentor = Mentors.objects.filter(user=tutor.user).first()
+                if mentor:
+                    # Check for overlapping mentoring availability (excluding current slot)
+                    overlapping_mentoring = MentorAvailability.objects.filter(
+                        mentor=mentor,
+                        day_of_week=availability.day_of_week,
+                        is_active=True
+                    ).filter(
+                        Q(start_time__lt=availability.end_time) & Q(end_time__gt=availability.start_time)
+                    )
+                    
+                    if overlapping_mentoring.exists():
+                        overlap = overlapping_mentoring.first()
+                        return JsonResponse({
+                            'status': 'error',
+                            'message': f'Cannot update tutoring availability. You have a mentoring session scheduled on this day from {overlap.start_time.strftime("%H:%M")} to {overlap.end_time.strftime("%H:%M")}.'
+                        }, status=400)
+            except Exception as e:
+                print(f"Error checking mentoring availability: {str(e)}")
             
             if 'is_recurring' in data:
                 availability.is_recurring = data['is_recurring']
