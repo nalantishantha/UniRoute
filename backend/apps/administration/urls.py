@@ -29,6 +29,10 @@ urlpatterns = [
     path('internships/<int:internship_id>/delete/', views.delete_internship, name='delete_internship'),
     path('internships/companies/', views.get_companies_for_internships, name='get_companies_for_internships'),
     path('internships/statistics/', views.get_internship_statistics, name='get_internship_statistics'),
+    path('content/published-courses/', views.get_published_courses_overview, name='get_published_courses_overview'),
+    path('content/mentoring-sessions/', views.get_mentoring_sessions_overview, name='get_mentoring_sessions_overview'),
+    path('content/tutoring-sessions/', views.get_tutoring_sessions_overview, name='get_tutoring_sessions_overview'),
+    path('content/internships/overview/', views.get_internships_overview, name='get_internships_overview'),
     
     # Advertisement requests
     path('advertisement-requests/', views.get_advertisement_requests, name='get_advertisement_requests'),

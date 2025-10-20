@@ -8,10 +8,10 @@ import {
   Building2,
   UserCheck,
   UserCog,
+  LifeBuoy,
   BookOpen,
   BarChart3,
   FileText,
-  Briefcase,
   Calendar,
   Plus,
   Send,
@@ -24,9 +24,24 @@ import {
   X,
   User,
   AlertCircle,
-  Loader2
+  Loader2,
+  LogIn,
+  UserPlus,
+  Handshake,
+  NotebookPen,
+  Briefcase
 } from 'lucide-react';
 import AdminLayout from '../../components/common/Admin/AdminLayout';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const ACTIVITY_COUNT_KEYS = [
+  'logins',
+  'registrations',
+  'mentoring_requests',
+  'tutoring_bookings',
+  'courses_published',
+  'mentor_applications'
+];
 
 const AdminDashboard = () => {
   // State for date range reports
@@ -65,22 +80,46 @@ const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:8000/api/administration/dashboard/statistics/');
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch dashboard data');
+      setError(null);
+      const response = await fetch(`${API_BASE_URL}/api/administration/dashboard/statistics/`, {
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+
+      const responseBody = await response.text();
+      let payload = null;
+      if (responseBody) {
+        try {
+          payload = JSON.parse(responseBody);
+        } catch (parseError) {
+          console.warn('Dashboard statistics response could not be parsed as JSON:', parseError, responseBody);
+        }
       }
-      
-      const data = await response.json();
-      
-      if (data.success) {
+
+      if (!response.ok) {
+        let errorMessage = `Failed to fetch dashboard data (HTTP ${response.status})`;
+        if (payload?.message) {
+          errorMessage = payload.message;
+        }
+        throw new Error(errorMessage);
+      }
+
+      if (!payload) {
+        throw new Error('Dashboard data response was empty.');
+      }
+
+      const data = payload;
+
+      if (data?.success) {
         setDashboardData(data.statistics);
         setError(null);
       } else {
-        throw new Error(data.message || 'Failed to fetch dashboard data');
+        throw new Error(data?.message || 'Failed to fetch dashboard data');
       }
     } catch (err) {
-      setError(err.message);
+      const message = err instanceof Error ? err.message : 'Failed to fetch dashboard data';
+      setError(message);
       console.error('Dashboard data fetch error:', err);
     } finally {
       setLoading(false);
@@ -95,6 +134,28 @@ const AdminDashboard = () => {
   // Generate stats data from real dashboard data
   const getStatsData = () => {
     if (!dashboardData) return [];
+
+    const universitiesGrowthValue = Number(dashboardData.universities_growth ?? 0);
+    const companiesGrowthValue = Number(dashboardData.companies_growth ?? 0);
+    const publishedCoursesGrowthValue = Number(dashboardData.published_courses_growth ?? 0);
+
+    const formatDelta = (value) => {
+      const numeric = Number.isFinite(value) ? value : 0;
+      if (numeric === 0) return '0';
+      const formatted = Math.abs(numeric).toLocaleString();
+      return numeric > 0 ? `+${formatted}` : `-${formatted}`;
+    };
+
+    const formatCount = (value) => new Intl.NumberFormat('en-US').format(value || 0);
+
+    const contentSummary = dashboardData.content_management || {};
+    const publishedSummary = contentSummary.published_courses || {
+      total: dashboardData.total_published_courses,
+      growth: publishedCoursesGrowthValue,
+    };
+    const mentoringSummary = contentSummary.mentoring_sessions || dashboardData.mentoring_summary || {};
+    const tutoringSummary = contentSummary.tutoring_sessions || dashboardData.tutoring_summary || {};
+    const internshipsSummary = contentSummary.internships || dashboardData.internships_summary || {};
     
     return [
       {
@@ -139,12 +200,7 @@ const AdminDashboard = () => {
             icon: UserCheck,
             iconBg: 'bg-[#F4D160]',
             link: '/admin/mentors'
-          }
-        ]
-      },
-      {
-        section: 'INSTITUTION MANAGEMENT',
-        cards: [
+          },
           {
             title: 'Tutors',
             value: dashboardData.total_tutors?.toLocaleString() || '0',
@@ -156,35 +212,84 @@ const AdminDashboard = () => {
             link: '/admin/tutors'
           },
           {
-            title: 'Universities',
-            value: dashboardData.total_universities?.toString() || '0',
-            description: 'Partner institutions',
-            change: dashboardData.universities_growth >= 0 ? `+${dashboardData.universities_growth}` : dashboardData.universities_growth.toString(),
-            changeType: dashboardData.universities_growth >= 0 ? 'positive' : 'negative',
+            title: 'Counsellors',
+            value: dashboardData.total_counsellors?.toLocaleString() || '0',
+            description: 'Career counsellors',
+            change: `${dashboardData.counsellors_growth >= 0 ? '+' : ''}${dashboardData.counsellors_growth}%`,
+            changeType: dashboardData.counsellors_growth >= 0 ? 'positive' : 'negative',
+            icon: LifeBuoy,
+            iconBg: 'bg-[#B39DDB]',
+            link: '/admin/counsellors'
+          },
+          {
+            title: 'Partner Universities',
+            value: dashboardData.total_universities?.toLocaleString() || '0',
+            description: 'Institution partners',
+            change: formatDelta(universitiesGrowthValue),
+            changeType: universitiesGrowthValue >= 0 ? 'positive' : 'negative',
             icon: School,
             iconBg: 'bg-[#75C2F6]',
             link: '/admin/universities'
           },
           {
-            title: 'Companies',
-            value: dashboardData.total_companies?.toString() || '0',
-            description: 'Corporate partners',
-            change: dashboardData.companies_growth >= 0 ? `+${dashboardData.companies_growth}` : dashboardData.companies_growth.toString(),
-            changeType: dashboardData.companies_growth >= 0 ? 'positive' : 'negative',
+            title: 'Corporate Partners',
+            value: dashboardData.total_companies?.toLocaleString() || '0',
+            description: 'Active companies',
+            change: formatDelta(companiesGrowthValue),
+            changeType: companiesGrowthValue >= 0 ? 'positive' : 'negative',
             icon: Building2,
-            iconBg: 'bg-[#F4D160]',
+            iconBg: 'bg-[#E57373]',
             link: '/admin/companies'
+          }
+        ]
+      },
+      {
+        section: 'CONTENT MANAGEMENT',
+        cards: [
+          {
+            title: 'Published Courses',
+            value: formatCount(publishedSummary.total),
+            description: 'Pre-university courses live',
+            change: formatDelta(publishedSummary.growth ?? publishedCoursesGrowthValue),
+            changeType: (publishedSummary.growth ?? publishedCoursesGrowthValue) >= 0 ? 'positive' : 'negative',
+            icon: NotebookPen,
+            iconBg: 'bg-[#FFF4E5]',
+            iconColor: 'text-[#C27A02]',
+            link: '/admin/content/published-courses'
           },
           {
-            title: 'Active Programs',
-            value: dashboardData.total_programs?.toString() || '0',
-            description: 'Available programs',
-            change: dashboardData.programs_growth >= 0 ? `+${dashboardData.programs_growth}` : dashboardData.programs_growth.toString(),
-            changeType: dashboardData.programs_growth >= 0 ? 'positive' : 'negative',
-            icon: BookOpen,
-            iconBg: 'bg-[#E7F3FB]',
-            link: '/admin/programs'
-          }
+            title: 'Mentoring Sessions',
+            value: formatCount(mentoringSummary.total || mentoringSummary.total_requests),
+            description: 'Requests and session outcomes',
+            change: `Pending: ${formatCount(mentoringSummary.pending_requests)} • Scheduled: ${formatCount(mentoringSummary.scheduled_sessions)} • Completed: ${formatCount(mentoringSummary.completed_sessions)}`,
+            changeType: 'neutral',
+            icon: Handshake,
+            iconBg: 'bg-[#E8F5E9]',
+            iconColor: 'text-[#2E7D32]',
+            link: '/admin/content/mentoring-sessions'
+          },
+          {
+            title: 'Tutoring Sessions',
+            value: formatCount(tutoringSummary.total),
+            description: 'Tutoring pipeline status',
+            change: `Pending: ${formatCount(tutoringSummary.pending_sessions)} • Scheduled: ${formatCount(tutoringSummary.scheduled_sessions)} • Completed: ${formatCount(tutoringSummary.completed_sessions)}`,
+            changeType: 'neutral',
+            icon: Activity,
+            iconBg: 'bg-[#E0F2F1]',
+            iconColor: 'text-[#00695C]',
+            link: '/admin/content/tutoring-sessions'
+          },
+          {
+            title: 'Internship Opportunities',
+            value: formatCount(internshipsSummary.total),
+            description: 'Partner internship listings',
+            change: `Currently open: ${formatCount(internshipsSummary.currently_open)}`,
+            changeType: 'neutral',
+            icon: Briefcase,
+            iconBg: 'bg-[#FFF3E0]',
+            iconColor: 'text-[#EF6C00]',
+            link: '/admin/jobs'
+          },
         ]
       }
     ];
@@ -199,7 +304,8 @@ const AdminDashboard = () => {
         userGrowthData: [],
         revenueData: [],
         activityData: [],
-        userDistributionData: []
+        userDistributionData: [],
+        activityTimeline: {}
       };
     }
 
@@ -213,11 +319,133 @@ const AdminDashboard = () => {
       userGrowthData: dashboardData.user_growth_data || [],
       revenueData,
       activityData: dashboardData.daily_activity || [],
-      userDistributionData: dashboardData.user_distribution || []
+      userDistributionData: dashboardData.user_distribution || [],
+      activityTimeline: dashboardData.activity_timeline || {}
     };
   };
 
   const chartData = getChartData();
+  const activityTimeline = chartData.activityTimeline || {};
+
+  const getDateKey = (dateObj) => {
+    if (!dateObj) return null;
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const selectedDateKey = getDateKey(selectedDate);
+  const selectedActivityDetails = selectedDateKey ? activityTimeline[selectedDateKey] : null;
+
+  const activityCounts = {
+    logins: selectedActivityDetails?.logins || 0,
+    registrations: selectedActivityDetails?.registrations || 0,
+    mentoring_requests: selectedActivityDetails?.mentoring_requests || 0,
+    tutoring_bookings: selectedActivityDetails?.tutoring_bookings || 0,
+    courses_published: selectedActivityDetails?.courses_published || 0,
+    mentor_applications: selectedActivityDetails?.mentor_applications || 0,
+  };
+
+  const activitySummaryItems = [
+    {
+      key: 'logins',
+      label: 'User logins',
+      value: activityCounts.logins,
+      icon: LogIn,
+      accent: 'bg-[#E7F3FB]',
+      textColor: 'text-[#1D5D9B]'
+    },
+    {
+      key: 'registrations',
+      label: 'New registrations',
+      value: activityCounts.registrations,
+      icon: UserPlus,
+      accent: 'bg-[#E8F5E9]',
+      textColor: 'text-[#2E7D32]'
+    },
+    {
+      key: 'mentoring_requests',
+      label: 'Mentoring session requests',
+      value: activityCounts.mentoring_requests,
+      icon: Handshake,
+      accent: 'bg-[#FFF4E5]',
+      textColor: 'text-[#C27A02]'
+    },
+    {
+      key: 'tutoring_bookings',
+      label: 'Tutoring sessions booked',
+      value: activityCounts.tutoring_bookings,
+      icon: NotebookPen,
+      accent: 'bg-[#F3E5F5]',
+      textColor: 'text-[#7B1FA2]'
+    },
+    {
+      key: 'courses_published',
+      label: 'Pre-university courses published',
+      value: activityCounts.courses_published,
+      icon: BookOpen,
+      accent: 'bg-[#E3F2FD]',
+      textColor: 'text-[#0D47A1]'
+    },
+    {
+      key: 'mentor_applications',
+      label: 'Mentor applications submitted',
+      value: activityCounts.mentor_applications,
+      icon: GraduationCap,
+      accent: 'bg-[#FFF3E0]',
+      textColor: 'text-[#EF6C00]'
+    }
+  ];
+
+  const derivedActivitySum = ACTIVITY_COUNT_KEYS.reduce(
+    (sum, key) => sum + (selectedActivityDetails?.[key] || 0),
+    0
+  );
+
+  const recordedTotalEvents = selectedActivityDetails?.total_events ?? 0;
+
+  const totalActivityEvents = selectedActivityDetails
+    ? recordedTotalEvents > 0
+      ? recordedTotalEvents
+      : derivedActivitySum
+    : 0;
+
+  const formatSelectedDateLabel = () => {
+    if (!selectedDate) return '';
+    return selectedDate.toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
+  const handleDaySelect = (day) => {
+    if (day === null) return;
+    const newSelected = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    setSelectedDate(newSelected);
+  };
+
+  const isSelectedDay = (day) => {
+    if (day === null || !selectedDate) return false;
+    return (
+      day === selectedDate.getDate() &&
+      currentDate.getMonth() === selectedDate.getMonth() &&
+      currentDate.getFullYear() === selectedDate.getFullYear()
+    );
+  };
+
+  const hasActivityForDay = (day) => {
+    if (day === null) return false;
+    const dateKey = getDateKey(new Date(currentDate.getFullYear(), currentDate.getMonth(), day));
+    const details = activityTimeline[dateKey];
+    if (!details) return false;
+    const eventCount = Array.isArray(details.events) ? details.events.length : 0;
+    if (eventCount > 0) return true;
+    const countsTotal = ACTIVITY_COUNT_KEYS.reduce((sum, key) => sum + (details[key] || 0), 0);
+    if (countsTotal > 0) return true;
+    return !!details.total_events;
+  };
 
   const formatNumber = (value) => new Intl.NumberFormat('en-US').format(value || 0);
   const formatCurrency = (value) => new Intl.NumberFormat('en-LK', {
@@ -262,7 +490,7 @@ const AdminDashboard = () => {
     setReportWarning(null);
 
     try {
-      const response = await fetch(`http://localhost:8000/api/admin-reports/overview/?${buildReportQuery()}`);
+  const response = await fetch(`${API_BASE_URL}/api/admin-reports/overview/?${buildReportQuery()}`);
       const data = await response.json();
 
       if (!response.ok || !data.success) {
@@ -289,7 +517,7 @@ const AdminDashboard = () => {
     setReportWarning(null);
 
     try {
-      const response = await fetch('http://localhost:8000/api/admin-reports/export/', {
+  const response = await fetch(`${API_BASE_URL}/api/admin-reports/export/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -341,6 +569,7 @@ const AdminDashboard = () => {
     const newDate = new Date(currentDate);
     newDate.setMonth(currentDate.getMonth() + direction);
     setCurrentDate(newDate);
+    setSelectedDate(new Date(newDate.getFullYear(), newDate.getMonth(), 1));
   };
 
   const getDaysInMonth = (date) => {
@@ -668,6 +897,7 @@ const AdminDashboard = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {section.cards.map((card, cardIndex) => {
                   const Icon = card.icon;
+                  const iconColor = card.iconColor || 'text-white';
                   return (
                     <Link
                       key={cardIndex}
@@ -681,7 +911,11 @@ const AdminDashboard = () => {
                           <p className="text-xs text-[#B0B0B0] mt-1">{card.description}</p>
                           <div className="flex items-center mt-2">
                             <span className={`text-xs font-medium ${
-                              card.changeType === 'positive' ? 'text-[#81C784]' : 'text-[#E57373]'
+                              card.changeType === 'positive'
+                                ? 'text-[#81C784]'
+                                : card.changeType === 'negative'
+                                ? 'text-[#E57373]'
+                                : 'text-[#7F8B99]'
                             }`}>
                               {card.change}
                             </span>
@@ -689,7 +923,7 @@ const AdminDashboard = () => {
                           </div>
                         </div>
                         <div className={`p-3 rounded-lg ${card.iconBg}`}>
-                          <Icon className="h-6 w-6 text-white" />
+                          <Icon className={`h-6 w-6 ${iconColor}`} />
                         </div>
                       </div>
                     </Link>
@@ -700,148 +934,228 @@ const AdminDashboard = () => {
           ))}
         </div>
 
-        {/* Charts Section - 3 charts in first row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* User Growth Chart */}
-          <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-[#263238]">User Growth Trend</h3>
-              <div className="flex items-center space-x-2">
-                <Activity className="h-4 w-4 text-[#717171]" />
-                <span className="text-sm text-[#717171]">6 months</span>
+        {/* Charts Section - Two rows */}
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* User Growth Chart */}
+            <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-[#263238]">User Growth Trend</h3>
+                <div className="flex items-center space-x-2">
+                  <Activity className="h-4 w-4 text-[#717171]" />
+                  <span className="text-sm text-[#717171]">6 months</span>
+                </div>
               </div>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={chartData.userGrowthData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E7F3FB" />
+                  <XAxis dataKey="month" stroke="#717171" />
+                  <YAxis stroke="#717171" />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="users" stroke="#1D5D9B" activeDot={{ r: 8 }} name="Total Users" />
+                  <Line type="monotone" dataKey="students" stroke="#81C784" name="Students" />
+                  <Line type="monotone" dataKey="mentors" stroke="#F4D160" name="Mentors" />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={chartData.userGrowthData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E7F3FB" />
-                <XAxis dataKey="month" stroke="#717171" />
-                <YAxis stroke="#717171" />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="users" stroke="#1D5D9B" strokeWidth={2} />
-                <Line type="monotone" dataKey="students" stroke="#81C784" strokeWidth={2} />
-                <Line type="monotone" dataKey="universityStudents" stroke="#75C2F6" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
+
+            {/* User Distribution */}
+            <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-[#263238]">User Distribution</h3>
+                <div className="flex items-center space-x-2">
+                  <Users className="h-4 w-4 text-[#717171]" />
+                  <span className="text-sm text-[#717171]">Current</span>
+                </div>
+              </div>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={chartData.userDistributionData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {chartData.userDistributionData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
-          {/* Revenue Chart */}
-          <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-[#263238]">Platform Revenue Trend</h3>
-              <div className="flex items-center space-x-2">
-                <BarChart3 className="h-4 w-4 text-[#717171]" />
-                <span className="text-sm text-[#717171]">6 months</span>
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            {/* Transactions Overview */}
+            <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-[#263238]">Monthly Transactions</h3>
+                <div className="flex items-center space-x-2">
+                  <TrendingUp className="h-4 w-4 text-[#717171]" />
+                  <span className="text-sm text-[#717171]">Tutoring Only</span>
+                </div>
               </div>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={chartData.revenueData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E7F3FB" />
+                  <XAxis dataKey="month" stroke="#717171" />
+                  <YAxis stroke="#717171" />
+                  <Tooltip content={renderRevenueTooltip} />
+                  <Bar dataKey="total_amount" fill="#1D5D9B" name="Revenue (LKR)" />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={chartData.revenueData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E7F3FB" />
-                <XAxis dataKey="month" stroke="#717171" />
-                <YAxis stroke="#717171" tickFormatter={(value) => formatCurrency(value)} width={100} />
-                <Tooltip content={renderRevenueTooltip} cursor={{ fill: 'rgba(29, 93, 155, 0.06)' }} />
-                <Bar dataKey="total_amount" fill="#1D5D9B" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {/* Daily Activity Overview */}
+            <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-[#263238]">Daily Activity Overview</h3>
+                <div className="flex items-center space-x-2">
+                  <BarChart3 className="h-4 w-4 text-[#717171]" />
+                  <span className="text-sm text-[#717171]">Last 7 days</span>
+                </div>
+              </div>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={chartData.activityData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E7F3FB" />
+                  <XAxis dataKey="date" stroke="#717171" />
+                  <YAxis stroke="#717171" />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="registrations" fill="#1D5D9B" name="New Registrations" />
+                  <Bar dataKey="logins" fill="#81C784" name="Daily Logins" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
-          {/* User Distribution Pie Chart */}
-          <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-[#263238]">User Distribution</h3>
-              <div className="flex items-center space-x-2">
-                <Users className="h-4 w-4 text-[#717171]" />
-                <span className="text-sm text-[#717171]">Current</span>
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            {/* Activity Calendar */}
+            <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-[#263238]">Activity Calendar</h3>
+                <div className="flex items-center space-x-2">
+                  <button onClick={() => navigateMonth(-1)} className="p-1 hover:bg-[#F5F7FA] rounded">
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+                  <span className="text-sm font-medium">
+                    {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                  </span>
+                  <button onClick={() => navigateMonth(1)} className="p-1 hover:bg-[#F5F7FA] rounded">
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+              <div className="grid grid-cols-7 gap-1 text-center">
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                  <div key={day} className="py-2 text-xs font-medium text-[#717171]">
+                    {day}
+                  </div>
+                ))}
+                {getDaysInMonth(currentDate).map((day, index) => (
+                  <div
+                    key={index}
+                    onClick={day === null ? undefined : () => handleDaySelect(day)}
+                    className={`relative flex flex-col items-center justify-center rounded-lg py-2 transition-colors ${
+                      day === null ? 'cursor-default' : 'cursor-pointer'
+                    } ${
+                      day === null
+                        ? ''
+                        : isSelectedDay(day)
+                        ? 'bg-[#1D5D9B] text-white shadow-sm'
+                        : isToday(day)
+                        ? 'border border-[#1D5D9B] text-[#123460]'
+                        : hasActivityForDay(day)
+                        ? 'bg-[#E7F3FB] text-[#123460]'
+                        : 'text-[#263238] hover:bg-[#F5F7FA]'
+                    }`}
+                  >
+                    <span className={`text-sm font-medium ${day === null ? 'opacity-0' : ''}`}>{day}</span>
+                    {day !== null && hasActivityForDay(day) && (
+                      <span
+                        className={`mt-1 h-1.5 w-1.5 rounded-full ${
+                          isSelectedDay(day) ? 'bg-white' : 'bg-[#1D5D9B]'
+                        }`}
+                      />
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={chartData.userDistributionData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {chartData.userDistributionData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            {/* Activity Details */}
+            <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-[#263238]">Recent Activities</h3>
+                  <p className="text-xs text-[#7F8B99]">{selectedActivityDetails ? formatSelectedDateLabel() : 'Select a day to see details'}</p>
+                </div>
+                {totalActivityEvents > 0 && (
+                  <span className="inline-flex items-center rounded-full bg-[#E7F3FB] px-3 py-1 text-xs font-medium text-[#1D5D9B]">
+                    {totalActivityEvents} events
+                  </span>
+                )}
+              </div>
+
+              {!selectedActivityDetails && (
+                <div className="rounded-lg border border-dashed border-[#E7F3FB] bg-[#F9FCFF] p-6 text-center text-sm text-[#7F8B99]">
+                  Choose a highlighted date to review platform activity captured over the last 60 days.
+                </div>
+              )}
+
+              {selectedActivityDetails && totalActivityEvents === 0 && (
+                <div className="rounded-lg border border-dashed border-[#E7F3FB] bg-[#F9FCFF] p-6 text-center text-sm text-[#7F8B99]">
+                  No activity recorded for this day.
+                </div>
+              )}
+
+              {selectedActivityDetails && totalActivityEvents > 0 && (
+                <div className="space-y-4">
+                  <div className="rounded-lg bg-[#F5F9FD] p-4">
+                    <p className="text-xs uppercase tracking-wide text-[#61748F]">Highlights</p>
+                    <ul className="mt-2 space-y-1 text-sm text-[#263238]">
+                      {(selectedActivityDetails.highlights || []).map((highlight) => (
+                        <li key={highlight.type} className="flex items-center justify-between">
+                          <span>{highlight.label}</span>
+                          <span className="font-semibold text-[#1D5D9B]">{formatNumber(highlight.count)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {activitySummaryItems.map((item) => {
+                      const Icon = item.icon;
+                      const hasValue = item.value > 0;
+                      return (
+                        <div
+                          key={item.key}
+                          className={`flex items-center space-x-3 rounded-lg border border-[#E7F3FB] p-3 ${
+                            hasValue ? 'bg-white' : 'bg-[#F9FCFF]'
+                          }`}
+                        >
+                          <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${item.accent}`}>
+                            <Icon className={`h-5 w-5 ${item.textColor}`} />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-xs font-medium text-[#7F8B99]">{item.label}</p>
+                            <p className={`text-lg font-semibold ${hasValue ? 'text-[#123460]' : 'text-[#B0B0B0]'}`}>
+                              {formatNumber(item.value)}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-
-        {/* Daily Activity Overview - Full Width */}
-        <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-[#263238]">Daily Activity Overview</h3>
-            <div className="flex items-center space-x-2">
-              <BarChart3 className="h-4 w-4 text-[#717171]" />
-              <span className="text-sm text-[#717171]">Last 7 days</span>
-            </div>
-          </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={chartData.activityData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E7F3FB" />
-              <XAxis dataKey="date" stroke="#717171" />
-              <YAxis stroke="#717171" />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="registrations" fill="#1D5D9B" name="New Registrations" />
-              <Bar dataKey="logins" fill="#81C784" name="Daily Logins" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Activity Calendar */}
-        <div className="bg-white rounded-lg shadow-sm border border-[#E7F3FB] p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-[#263238]">Activity Calendar</h3>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => navigateMonth(-1)}
-                  className="p-1 hover:bg-[#F5F7FA] rounded"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
-                <span className="text-sm font-medium">
-                  {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                </span>
-                <button
-                  onClick={() => navigateMonth(1)}
-                  className="p-1 hover:bg-[#F5F7FA] rounded"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-            <div className="grid grid-cols-7 gap-1 text-center">
-              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                <div key={day} className="text-xs font-medium text-[#717171] py-2">
-                  {day}
-                </div>
-              ))}
-              {getDaysInMonth(currentDate).map((day, index) => (
-                <div
-                  key={index}
-                  className={`text-sm py-2 cursor-pointer rounded ${
-                    day === null
-                      ? ''
-                      : isToday(day)
-                      ? 'bg-[#1D5D9B] text-white'
-                      : 'hover:bg-[#F5F7FA] text-[#263238]'
-                  }`}
-                >
-                  {day}
-                </div>
-              ))}
-            </div>
-          </div>
       </div>
       {/* Notification Modal */}
       {showNotificationModal && (

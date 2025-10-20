@@ -13,13 +13,15 @@ import { UniversitiesList, UniversityForm, UniversityView } from '../pages/Admin
 import { CompaniesList, CompanyForm, CompanyView } from '../pages/Admin/Companies';
 import { ProgramsList, ProgramForm, ProgramView } from '../pages/Admin/Programs';
 import { JobList, JobDetails, JobForm } from '../pages/Admin/Jobs';
-import { EventsList, EventView, EventForm } from '../pages/Admin/Events';
 import { Reports, ReportDetails } from '../pages/Admin/Reports'
 import { AdminSettings, AdminReportGenerator } from '../pages/Admin';
 import { RequestsList, RequestDetails } from '../pages/Admin/Requests';
 import AdvertisementRequests from '../pages/Admin/Requests/AdvertisementRequests';
 import UniversityRequests from '../pages/Admin/Requests/UniversityRequests';
 import CompanyRequests from '../pages/Admin/Requests/CompanyRequests';
+import PublishedCourses from '../pages/Admin/Content/PublishedCourses';
+import MentoringSessions from '../pages/Admin/Content/MentoringSessions';
+import TutoringSessions from '../pages/Admin/Content/TutoringSessions';
 
 const AdminRoutes = () => {
   return (
@@ -79,17 +81,11 @@ const AdminRoutes = () => {
         <Route path="/programs/:id" element={<ProgramView />} />
         <Route path="/programs/:id/edit" element={<ProgramForm />} />
 
-        {/* Jobs Management */}
+  {/* Internships Management */}
         <Route path="/jobs" element={<JobList />} />
         <Route path="/jobs/create" element={<JobForm />} />
         <Route path="/jobs/:jobId/edit" element={<JobForm />} />
         <Route path="/jobs/:jobId/view" element={<JobDetails />} />
-
-        {/* Events Management */}
-        <Route path="/events" element={<EventsList />} />
-        <Route path="/events/new" element={<EventForm />} />
-        <Route path="/events/:id" element={<EventView />} />
-        <Route path="/events/:id/edit" element={<EventForm />} />
 
         {/* Requests Management */}
         <Route path="/requests" element={<RequestsList />} />
@@ -101,6 +97,11 @@ const AdminRoutes = () => {
         {/* Report Management */}
         <Route path="/reports" element={<Reports />} />
         <Route path="/reports/:reportId" element={<ReportDetails />} />
+
+  {/* Content Management */}
+  <Route path="/content/published-courses" element={<PublishedCourses />} />
+  <Route path="/content/mentoring-sessions" element={<MentoringSessions />} />
+  <Route path="/content/tutoring-sessions" element={<TutoringSessions />} />
 
         {/* Settings */}
         <Route path="/settings" element={< AdminSettings />} />
