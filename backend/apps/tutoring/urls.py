@@ -25,4 +25,15 @@ urlpatterns = [
     path('bookings/<int:booking_id>/cancel/', views.cancel_tutoring_booking, name='cancel_tutoring_booking'),
     path('bookings/student/<int:student_id>/', views.get_student_bookings, name='get_student_bookings'),
     path('bookings/tutor/<int:tutor_id>/', views.get_tutor_bookings, name='get_tutor_bookings'),
+    path('bookings/<int:booking_id>/mark-completed/', views.mark_session_completed, name='mark_session_completed'),
+    path('bookings/<int:booking_id>/complete/', views.complete_tutoring_booking, name='complete_tutoring_booking'),
+    
+    # Session Rescheduling
+    path('bookings/<int:booking_id>/reschedule/', views.reschedule_tutoring_session, name='reschedule_tutoring_session'),
+    path('bookings/<int:booking_id>/reschedules/', views.get_booking_reschedules, name='get_booking_reschedules'),
+    
+    # Tutor Session Management
+    path('tutor/<int:tutor_id>/sessions/', views.get_tutor_sessions_detailed, name='get_tutor_sessions_detailed'),
+    path('tutor/<int:tutor_id>/stats/', views.get_tutor_stats, name='get_tutor_stats'),
+    path('tutor/by-user/<int:user_id>/', views.get_tutor_by_user_id, name='get_tutor_by_user_id'),
 ]

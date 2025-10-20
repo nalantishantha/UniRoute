@@ -43,6 +43,7 @@ class TutoringBooking(models.Model):
         choices=[
             ('pending', 'Pending Payment'),
             ('confirmed', 'Confirmed'),
+            ('scheduled', 'Scheduled'),
             ('active', 'Active'),
             ('cancelled', 'Cancelled'),
             ('completed', 'Completed')
@@ -72,6 +73,45 @@ class TutoringBooking(models.Model):
 
     def __str__(self):
         return f"Booking {self.booking_id}: {self.student.user.username} with {self.tutor.user.username}"
+
+
+class TutoringSessionReschedule(models.Model):
+    """Track rescheduled tutoring sessions"""
+    reschedule_id = models.AutoField(primary_key=True)
+    booking = models.ForeignKey('tutoring.TutoringBooking', models.CASCADE, related_name='reschedules', db_constraint=False)
+    original_date = models.DateField(help_text="Original session date")
+    new_date = models.DateField(help_text="Rescheduled session date")
+    new_start_time = models.TimeField(help_text="Rescheduled start time")
+    new_end_time = models.TimeField(help_text="Rescheduled end time")
+    reason = models.TextField(blank=True, null=True, help_text="Reason for rescheduling")
+    requested_by = models.CharField(
+        max_length=20,
+        choices=[
+            ('tutor', 'Tutor'),
+            ('student', 'Student')
+        ],
+        help_text="Who requested the reschedule"
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'Pending'),
+            ('approved', 'Approved'),
+            ('completed', 'Completed'),
+            ('cancelled', 'Cancelled')
+        ],
+        default='approved'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        managed = True
+        db_table = 'tutoring_session_reschedules'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Reschedule {self.reschedule_id}: Booking {self.booking_id} from {self.original_date} to {self.new_date}"
 
 
 class TutorFeedback(models.Model):
