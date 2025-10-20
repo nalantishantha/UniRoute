@@ -11,3 +11,16 @@ class Messages(models.Model):
     class Meta:
         managed = True
         db_table = 'messages'
+
+
+class BlockedUser(models.Model):
+    """Represents that blocker has blocked blocked_user."""
+    id = models.AutoField(primary_key=True)
+    blocker = models.ForeignKey('accounts.Users', on_delete=models.CASCADE, related_name='blocker_set')
+    blocked_user = models.ForeignKey('accounts.Users', on_delete=models.CASCADE, related_name='blocked_set')
+    blocked_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        managed = True
+        db_table = 'blocked_users'
+        unique_together = (('blocker', 'blocked_user'),)
