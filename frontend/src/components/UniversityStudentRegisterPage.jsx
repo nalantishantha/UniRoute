@@ -411,29 +411,6 @@ const UniversityStudentRegisterPage = () => {
     }
   };
 
-  const steps = [
-    {
-      id: 'form',
-      title: 'Account Details',
-      description: 'Tell us about your academic journey',
-    },
-    {
-      id: 'otp',
-      title: 'Verify Academic Email',
-      description: 'Confirm your .ac.lk email address',
-    },
-    {
-      id: 'success',
-      title: 'Welcome Aboard',
-      description: 'Access mentorship and career tools',
-    },
-  ];
-
-  const currentStepIndex = Math.max(
-    steps.findIndex((step) => step.id === currentStep),
-    0,
-  );
-
   const headerSubtitleMap = {
     form: 'Connect with opportunities during your studies',
     otp: 'We emailed a 6-digit code to confirm your academic identity',
@@ -487,56 +464,6 @@ const UniversityStudentRegisterPage = () => {
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-lg w-full">
           <div className="bg-white rounded-2xl shadow-xl p-8 border border-[#C8E6C9]">
-            {/* Step Indicator */}
-            <div className="mb-8">
-              <div className="grid grid-cols-3 gap-4">
-                {steps.map((step, index) => {
-                  const isActive = index === currentStepIndex;
-                  const isCompleted = currentStepIndex > index;
-                  const isUpcoming = index > currentStepIndex;
-
-                  return (
-                    <div
-                      key={step.id}
-                      className={`relative rounded-xl border px-4 py-3 transition-all ${
-                        isActive
-                          ? 'border-[#2E7D32] bg-[#E8F5E8] shadow-inner'
-                          : isCompleted
-                          ? 'border-[#81C784] bg-[#81C784]/10'
-                          : 'border-dashed border-[#C8E6C9] bg-white'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white font-semibold ${
-                          isCompleted
-                            ? 'bg-[#2E7D32]'
-                            : isActive
-                            ? 'bg-[#F4D160] text-[#263238]'
-                            : 'bg-[#E0E0E0] text-[#616161]'
-                        }`}>
-                          {isCompleted ? <CheckCircle className="h-5 w-5 text-white" /> : index + 1}
-                        </div>
-                        {isActive && (
-                          <ShieldCheck className="h-5 w-5 text-[#2E7D32]" />
-                        )}
-                        {isUpcoming && !isActive && (
-                          <Clock className="h-5 w-5 text-[#B0BEC5]" />
-                        )}
-                      </div>
-                      <div className="mt-3">
-                        <p className="text-sm font-semibold text-[#263238] leading-tight">
-                          {step.title}
-                        </p>
-                        <p className="text-xs text-[#78909C] leading-snug mt-1">
-                          {step.description}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
             {/* Header */}
             <div className="text-center mb-8">
               <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
