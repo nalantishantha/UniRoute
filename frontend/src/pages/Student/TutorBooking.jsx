@@ -13,14 +13,14 @@ const TutorBooking = () => {
 
   if (!tutor) {
     return (
-      <div className="min-h-screen bg-gradient-to-r from-blue-200 to-primary-100">
+      <div className="min-h-screen bg-gradient-to-r from-primary-50 to-white">
         <StudentNavigation />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
             <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-            <h2 className="font-display font-bold text-3xl text-primary-400 mb-4">Tutor Information Missing</h2>
+            <h2 className="font-display font-bold text-2xl text-primary-600 mb-2">Tutor Information Missing</h2>
             <p className="text-primary-300 mb-6">No tutor information was found. Please go back and select a tutor.</p>
-            <button onClick={() => navigate("/student/tutors")} className="bg-primary-400 text-white px-6 py-3 rounded-lg hover:bg-primary-600 transition-colors">Back to Tutors</button>
+            <button onClick={() => navigate("/student/tutors")} className="bg-primary-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors">Back to Tutors</button>
           </div>
         </div>
       </div>
@@ -29,16 +29,16 @@ const TutorBooking = () => {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-r from-blue-200 to-primary-100">
+      <div className="min-h-screen bg-gradient-to-r from-primary-50 to-white">
         <StudentNavigation />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="max-w-2xl mx-auto text-center">
             <div className="bg-white rounded-2xl shadow-lg p-8 border border-accent-100">
               <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-              <h2 className="font-display font-bold text-3xl text-primary-400 mb-4">Session Booking Sent!</h2>
+              <h2 className="font-display font-bold text-2xl text-primary-600 mb-2">Session Booking Sent!</h2>
               <p className="text-primary-300 mb-6">Your tutoring session request has been sent to {tutor.name}. They will review your request and confirm the session details within 24 hours.</p>
-              <div className="bg-gradient-to-r from-blue-100 to-primary-50 rounded-lg p-4 mb-6">
-                <h3 className="font-semibold text-primary-400 mb-2">What happens next?</h3>
+              <div className="bg-gradient-to-r from-primary-100 to-primary-50 rounded-lg p-4 mb-6">
+                <h3 className="font-semibold text-primary-600 mb-2">What happens next?</h3>
                 <ul className="text-sm text-primary-300 space-y-1">
                   <li>• {tutor.name} will receive your session booking request</li>
                   <li>• They'll review your learning goals and subject needs</li>
@@ -47,8 +47,8 @@ const TutorBooking = () => {
                 </ul>
               </div>
               <div className="flex space-x-4">
-                <button onClick={() => navigate("/student/tutors")} className="flex-1 bg-accent-100 text-primary-400 px-4 py-3 rounded-lg hover:bg-accent-200 transition-colors">Browse More Tutors</button>
-                <button onClick={() => navigate("/student/dashboard")} className="flex-1 bg-primary-400 text-white px-4 py-3 rounded-lg hover:bg-primary-600 transition-colors">Go to Dashboard</button>
+                <button onClick={() => navigate("/student/tutors")} className="flex-1 bg-accent-200 text-primary-600 px-4 py-2 rounded-lg font-medium hover:bg-accent-300 transition-colors">Browse More Tutors</button>
+                <button onClick={() => navigate("/student/dashboard")} className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors">Go to Dashboard</button>
               </div>
             </div>
           </div>
@@ -58,7 +58,7 @@ const TutorBooking = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-200 to-primary-100">
+    <div className="min-h-screen bg-gradient-to-r from-primary-50 to-white">
       {/* Navigation */}
       <StudentNavigation />
 
@@ -67,7 +67,7 @@ const TutorBooking = () => {
         <div className="mb-6">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center space-x-2 text-primary-400 hover:text-primary-600 transition-colors"
+            className="flex items-center space-x-2 text-primary-600 hover:text-primary-700 transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
             <span>Back to Tutors</span>
@@ -136,14 +136,14 @@ const TutorBooking = () => {
               <div className="p-4">
                 {/* Expertise */}
                 <div className="mb-4">
-                  <div className="bg-gradient-to-r from-blue-100 to-primary-50 rounded-lg p-3">
-                    <h4 className="font-semibold text-primary-400 text-sm mb-1">Expertise</h4>
-                    <p className="text-primary-300 text-8xs font-bold">{tutor.expertise}</p>
+                  <div className="bg-gradient-to-r from-primary-100 to-primary-50 rounded-lg p-3 border border-primary-200/50">
+                    <h4 className="font-semibold text-primary-600 text-sm mb-1">Expertise</h4>
+                    <p className="text-primary-600 text-xs font-medium">{tutor.expertise}</p>
                   </div>
                 </div>
 
                 {/* Description */}
-                <p className="text-primary-300 text-5xs mb-4 leading-relaxed">
+                <p className="text-primary-300 text-sm mb-4 leading-relaxed">
                   {tutor.description}
                 </p>
 
@@ -151,11 +151,11 @@ const TutorBooking = () => {
                 <div className="flex items-center justify-between mb-4 text-xs">
                   <div className="flex items-center space-x-3">
                     <div className="flex items-center space-x-1">
-                      <Users className="h-3 w-3 text-primary-300" />
+                      <Users className="h-3 w-3 text-primary-600" />
                       <span className="text-primary-300">{tutor.students} students</span>
                     </div>
                     <div className="flex items-center space-x-1">
-                      <Star className="h-3 w-3 text-accent-400" />
+                      <Star className="h-3 w-3 text-primary-600" />
                       <span className="text-primary-300">({tutor.reviews} reviews)</span>
                     </div>
                   </div>
@@ -169,7 +169,7 @@ const TutorBooking = () => {
             <div className="bg-white rounded-2xl shadow-lg border border-accent-100">
               <div className="p-6">
                 <div className="mb-6">
-                  <h1 className="font-display font-bold text-3xl text-primary-400 mb-2">
+                  <h1 className="font-display font-bold text-2xl text-primary-600 mb-2">
                     Book Session with {tutor.name}
                   </h1>
                   <p className="text-primary-300">

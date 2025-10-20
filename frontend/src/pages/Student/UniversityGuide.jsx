@@ -144,17 +144,17 @@ const UniversityGuide = () => {
     });
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-200 to-blue-100">
+    <div className="min-h-screen bg-gradient-to-r from-primary-50 to-white">
       {/* Navigation */}
       <StudentNavigation />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Title and Description */}
         <div className="text-center mb-8">
-          <h1 className="font-display font-bold text-5xl text-blue-900 mb-6">
+          <h1 className="font-display font-bold text-3xl text-primary-600 mb-2">
             University Guide
           </h1>
-          <p className="text-xl text-blue-800 max-w-3xl mx-auto">
+          <p className="text-primary-400 max-w-3xl mx-auto">
             Explore Sri Lanka's top universities and find the perfect
             institution for your higher education journey. Compare programs,
             facilities, and opportunities.
@@ -165,13 +165,13 @@ const UniversityGuide = () => {
         <div className="bg-white rounded-2xl shadow-lg p-6 border border-accent-100 mb-8">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-800" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-600" />
               <input
                 type="text"
                 placeholder="Search universities, locations, or programs..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
+                className="w-full pl-12 pr-4 py-3 border border-accent-100 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-300"
               />
             </div>
             <div className="flex space-x-3">
@@ -181,8 +181,8 @@ const UniversityGuide = () => {
                   onClick={() => setSelectedType(type.id)}
                   className={`px-4 py-3 rounded-lg font-medium transition-colors ${
                     selectedType === type.id
-                      ? "bg-blue-600 text-white"
-                      : "bg-accent-50 text-blue-900 hover:bg-accent-100"
+                      ? "bg-primary-600 text-white"
+                      : "bg-accent-50 text-primary-600 hover:bg-accent-100"
                   }`}
                 >
                   {type.name}
@@ -276,7 +276,7 @@ const UniversityGuide = () => {
               <div className="p-6">
                 {/* Description */}
                 <div className="mb-6">
-                  <p className="text-blue-900 text-lg leading-relaxed text-sm">
+                  <p className="text-primary-300 leading-relaxed text-sm">
                     {university.description}
                   </p>
                 </div>
@@ -314,7 +314,7 @@ const UniversityGuide = () => {
 
                 {/* Programs Section */}
                 <div className="mb-6">
-                  <h4 className="font-semibold text-blue-900 mb-3 flex items-center space-x-2">
+                  <h4 className="font-semibold text-primary-600 mb-3 flex items-center space-x-2">
                     <BookOpen className="h-5 w-5" />
                     <span>Popular Programs</span>
                   </h4>
@@ -324,7 +324,7 @@ const UniversityGuide = () => {
                       return (
                         <span
                           key={index}
-                          className="bg-gradient-to-r from-accent-400 to-accent-400 text-blue-900 px-3 py-1.5 rounded-full text-sm font-medium border border-accent-200 hover:shadow-sm transition-shadow"
+                          className="bg-gradient-to-r from-accent-400 to-accent-400 text-primary-600 px-3 py-1.5 rounded-full text-sm font-medium border border-accent-200 hover:shadow-sm transition-shadow"
                         >
                           {title}
                         </span>
@@ -333,7 +333,7 @@ const UniversityGuide = () => {
                     {(university.degree_programs_count || (university.programs && university.programs.length) || 0) > 4 && (
                       <button
                         onClick={() => setProgramsModal({ open: true, programs: university.programs || university.degree_programs || [], universityName: university.name })}
-                        className="text-blue-800 text-sm px-3 py-1.5 underline"
+                        className="text-primary-600 text-sm px-3 py-1.5 underline"
                       >
                         View all ({university.degree_programs_count || (university.programs && university.programs.length)})
                       </button>
@@ -343,13 +343,13 @@ const UniversityGuide = () => {
 
                 {/* Facilities Section */}
                 <div className="mb-6">
-                  <h4 className="font-semibold text-blue-900 mb-3 flex items-center space-x-2">
+                  <h4 className="font-semibold text-primary-600 mb-3 flex items-center space-x-2">
                     <Building className="h-5 w-5" />
                     <span>Key Facilities</span>
                   </h4>
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     {university.facilities.slice(0, 4).map((facility, index) => (
-                      <div key={index} className="flex items-center space-x-2 text-blue-800">
+                      <div key={index} className="flex items-center space-x-2 text-primary-300">
                         <div className="w-1.5 h-1.5 bg-accent-400 rounded-full"></div>
                         <span>{facility}</span>
                       </div>
@@ -358,23 +358,23 @@ const UniversityGuide = () => {
                 </div>
 
                 {/* Financial & Application Info */}
-                <div className="bg-gradient-to-r from-blue-100 to-primary-50 rounded-lg p-4 mb-6">
+                <div className="bg-gradient-to-r from-primary-100 to-primary-50 rounded-lg p-4 mb-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div>
-                      <div className="flex items-center space-x-2 text-blue-800 mb-1">
+                      <div className="flex items-center space-x-2 text-primary-600 mb-1">
                         <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                         <span className="font-medium">Tuition Fee</span>
                       </div>
-                      <div className="font-semibold text-blue-900 pl-4">
+                      <div className="font-semibold text-primary-600 pl-4">
                         {university.tuitionFee}
                       </div>
                     </div>
                     <div>
-                      <div className="flex items-center space-x-2 text-blue-800 mb-1">
+                      <div className="flex items-center space-x-2 text-primary-600 mb-1">
                         <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                         <span className="font-medium">Application</span>
                       </div>
-                      <div className="font-semibold text-blue-900 pl-4">
+                      <div className="font-semibold text-primary-600 pl-4">
                         {university.applicationDeadline}
                       </div>
                     </div>
@@ -428,11 +428,11 @@ const UniversityGuide = () => {
 
         {!loading && filteredUniversities.length === 0 && (
           <div className="text-center py-12">
-            <Building className="h-16 w-16 text-blue-300 mx-auto mb-4" />
-            <h3 className="font-display font-semibold text-2xl text-blue-900 mb-2">
+            <Building className="h-16 w-16 text-primary-300 mx-auto mb-4" />
+            <h3 className="font-display font-semibold text-xl text-primary-600 mb-2">
               No Universities Found
             </h3>
-            <p className="text-blue-800">
+            <p className="text-primary-300">
               Try adjusting your search criteria or filters.
             </p>
           </div>
@@ -440,25 +440,25 @@ const UniversityGuide = () => {
 
         {/* Quick Stats */}
         <div className="mt-12 bg-white rounded-2xl shadow-lg p-6 border border-accent-100">
-          <h2 className="font-display font-semibold text-2xl text-blue-900 mb-6 text-center">
+          <h2 className="font-display font-semibold text-xl text-primary-600 mb-6 text-center">
             Sri Lankan Higher Education at a Glance
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-900 mb-2">{loadingStats ? '—' : (quickStats?.universities_count ?? 0)}</div>
-              <div className="text-blue-800">Universities</div>
+              <div className="text-3xl font-bold text-primary-600 mb-2">{loadingStats ? '—' : (quickStats?.universities_count ?? 0)}</div>
+              <div className="text-primary-300">Universities</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-900 mb-2">{loadingStats ? '—' : (quickStats?.faculties_count ?? 0)}</div>
-              <div className="text-blue-800">Faculties</div>
+              <div className="text-3xl font-bold text-primary-600 mb-2">{loadingStats ? '—' : (quickStats?.faculties_count ?? 0)}</div>
+              <div className="text-primary-300">Faculties</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-900 mb-2">{loadingStats ? '—' : (quickStats?.students_count ?? 0).toLocaleString()}</div>
-              <div className="text-blue-800">University Students</div>
+              <div className="text-3xl font-bold text-primary-600 mb-2">{loadingStats ? '—' : (quickStats?.students_count ?? 0).toLocaleString()}</div>
+              <div className="text-primary-300">University Students</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-900 mb-2">{loadingStats ? '—' : (quickStats?.degree_programs_count ?? 0)}</div>
-              <div className="text-blue-800">Degree Programs</div>
+              <div className="text-3xl font-bold text-primary-600 mb-2">{loadingStats ? '—' : (quickStats?.degree_programs_count ?? 0)}</div>
+              <div className="text-primary-300">Degree Programs</div>
             </div>
           </div>
         </div>

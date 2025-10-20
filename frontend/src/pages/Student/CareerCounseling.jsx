@@ -53,17 +53,17 @@ const CareerCounseling = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-200 to-primary-100">
+    <div className="min-h-screen bg-gradient-to-r from-primary-50 to-white">
       {/* Navigation */}
       <StudentNavigation />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Title and Description */}
         <div className="text-center mb-8">
-          <h1 className="font-display font-bold text-5xl text-blue-900 mb-6">
+          <h1 className="font-display font-bold text-3xl text-primary-600 mb-2">
             Career Counseling
           </h1>
-          <p className="text-xl text-blue-800 max-w-3xl mx-auto">
+          <p className="text-primary-400 max-w-3xl mx-auto">
             Get personalized guidance from experienced career counselors to make
             informed decisions about your education and future career path.
           </p>
@@ -73,7 +73,7 @@ const CareerCounseling = () => {
         {loading && (
           <div className="flex flex-col items-center justify-center py-12">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-400"></div>
-            <p className="mt-4 text-blue-800 text-lg">Loading counselors...</p>
+            <p className="mt-4 text-primary-300">Loading counselors...</p>
           </div>
         )}
 
@@ -93,7 +93,7 @@ const CareerCounseling = () => {
         {/* Counselors Section */}
         {!loading && !error && (
         <div className="mb-12">
-          <h2 className="font-display font-semibold text-3xl text-blue-900 mb-8 text-center">
+          <h2 className="font-display font-semibold text-2xl text-primary-600 mb-6 text-center">
             Meet Our Expert Counselors
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -129,18 +129,18 @@ const CareerCounseling = () => {
               return (
               <div
                 key={counselor.counsellor_id}
-                className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
               >
                 {/* Counselor Header */}
-                <div className="relative h-32 bg-gradient-to-r from-blue-500 to-primary-500">
-                  <div className="absolute inset-0 bg-black/20"></div>
+                <div className="relative h-36 bg-gradient-to-br from-indigo-600 via-blue-500 to-primary-500">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
 
                   {/* Available Badge */}
                   {counselor.available_for_sessions && (
-                    <div className="absolute top-2 right-2">
-                      <div className="bg-green-500/25 backdrop-blur-md rounded-lg px-2 py-1 border border-green-300/40">
-                        <span className="text-green-100 font-semibold text-xs drop-shadow-sm">
-                          Available
+                    <div className="absolute top-3 right-3">
+                      <div className="bg-emerald-500/30 backdrop-blur-lg rounded-xl px-3 py-1.5 border border-white/40 shadow-lg">
+                        <span className="text-white font-bold text-xs drop-shadow-md">
+                          Available Now
                         </span>
                       </div>
                     </div>
@@ -148,42 +148,42 @@ const CareerCounseling = () => {
 
                   {/* Experience Badge */}
                   {counselor.experience_years && (
-                    <div className="absolute top-2 left-2">
-                      <span className="bg-green-500/25 text-green-100 border border-green-300/40 px-2 py-1 rounded-full text-xs font-semibold drop-shadow-sm">
-                        {counselor.experience_years} {counselor.experience_years === 1 ? 'year' : 'years'}
+                    <div className="absolute top-3 left-3">
+                      <span className="bg-white/25 text-white border border-white/40 px-3 py-1.5 rounded-full text-xs font-bold backdrop-blur-lg drop-shadow-lg">
+                        {counselor.experience_years} {counselor.experience_years === 1 ? 'year' : 'years'} Experience
                       </span>
                     </div>
                   )}
 
                   {/* Counselor Info */}
                   <div className="absolute bottom-3 left-3 right-3">
-                    <div className="flex items-end justify-between">
-                      <div className="flex items-center space-x-3">
+                    <div className="flex items-center justify-between space-x-4">
+                      <div className="flex-shrink-0">
                         {counselor.user_details?.profile_picture ? (
                           <img 
                             src={counselor.user_details.profile_picture} 
                             alt={counselor.user_details.full_name || counselor.user?.username}
-                            className="w-12 h-12 rounded-full object-cover border-2 border-white/50 shadow-lg"
+                            className="w-16 h-16 rounded-full object-cover border-3 border-white/60 shadow-xl"
                           />
                         ) : (
-                          <div className="w-12 h-12 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center border-2 border-white/50 shadow-lg">
-                            <User className="h-6 w-6 text-white" />
+                          <div className="w-16 h-16 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center border-3 border-white/60 shadow-xl">
+                            <User className="h-8 w-8 text-white" />
                           </div>
                         )}
-                        <div className="flex-1">
-                          <h3 className="font-display font-bold text-lg text-white leading-tight drop-shadow-md">
-                            {counselor.user_details?.full_name || counselor.user?.username || 'Counselor'}
-                          </h3>
-                          <p className="text-white/95 text-sm font-semibold drop-shadow-sm">
-                            Career Counselor
-                          </p>
-                          {/* {counselor.user_details?.is_verified && (
-                            <div className="flex items-center space-x-1 text-white/90 text-xs drop-shadow-sm mt-1">
-                              <CheckCircle className="h-3 w-3" />
-                              <span>Verified</span>
-                            </div>
-                          )} */}
-                        </div>
+                      </div>
+                      <div className="flex-1 text-right">
+                        <h3 className="font-display font-bold text-lg text-white leading-tight drop-shadow-lg mb-0.5">
+                          {counselor.user_details?.full_name || counselor.user?.username || 'Counselor'}
+                        </h3>
+                        <p className="text-white/90 text-xs font-medium drop-shadow-md mb-1">
+                          Professional Career Counselor
+                        </p>
+                        {counselor.user_details?.is_verified && (
+                          <div className="flex items-center justify-end space-x-1 text-white/95 text-xs drop-shadow-md mt-0.5">
+                            <CheckCircle className="h-3 w-3" />
+                            <span className="font-medium">Verified Professional</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -193,12 +193,12 @@ const CareerCounseling = () => {
                   {/* Specialization */}
                   {displaySpecialization && (
                     <div className="mb-4">
-                      <div className="bg-gradient-to-r from-blue-100 to-primary-50 rounded-lg p-3">
-                        <h4 className="font-semibold text-blue-900 mb-1 flex items-center space-x-2">
+                      <div className="bg-gradient-to-r from-primary-100 to-primary-50 rounded-lg p-3 border border-primary-200/50">
+                        <h4 className="font-semibold text-primary-600 mb-1 flex items-center space-x-2">
                           <Award className="h-3 w-3" />
                           <span className="text-sm">Specialization</span>
                         </h4>
-                        <p className="text-blue-800 text-xs leading-relaxed">
+                        <p className="text-primary-600 text-xs leading-relaxed font-medium">
                           {displaySpecialization}
                         </p>
                       </div>
@@ -208,7 +208,7 @@ const CareerCounseling = () => {
                   {/* Bio/Description */}
                   {(counselor.bio || counselor.user_details?.bio) && (
                     <div className="mb-4">
-                      <p className="text-blue-800 leading-relaxed text-xs">
+                      <p className="text-primary-300 leading-relaxed text-sm">
                         {(counselor.bio || counselor.user_details?.bio).substring(0, 120)}
                         {(counselor.bio || counselor.user_details?.bio).length > 120 && '...'}
                       </p>
@@ -244,11 +244,11 @@ const CareerCounseling = () => {
                   {/* Qualifications */}
                   {counselor.qualifications && (
                     <div className="mb-4">
-                      <h4 className="font-semibold text-blue-900 mb-2 flex items-center space-x-2">
+                      <h4 className="font-semibold text-primary-600 mb-2 flex items-center space-x-2">
                         <GraduationCap className="h-3 w-3" />
                         <span className="text-sm">Qualifications</span>
                       </h4>
-                      <p className="text-blue-800 text-xs leading-relaxed">
+                      <p className="text-primary-300 text-sm leading-relaxed">
                         {counselor.qualifications.substring(0, 80)}
                         {counselor.qualifications.length > 80 && '...'}
                       </p>
@@ -258,7 +258,7 @@ const CareerCounseling = () => {
                   {/* Expertise Areas */}
                   {expertiseArray.length > 0 && (
                     <div className="mb-4">
-                      <h4 className="font-semibold text-blue-900 mb-2 flex items-center space-x-2">
+                      <h4 className="font-semibold text-primary-600 mb-2 flex items-center space-x-2">
                         <BookOpen className="h-3 w-3" />
                         <span className="text-sm">Expertise</span>
                       </h4>
@@ -266,13 +266,13 @@ const CareerCounseling = () => {
                         {expertiseArray.slice(0, 3).map((skill, index) => (
                           <span
                             key={index}
-                            className="bg-gradient-to-r from-accent-400 to-accent-400 text-blue-900 px-2 py-1 rounded-full text-xs font-medium border border-accent-200"
+                            className="bg-gradient-to-r from-accent-400 to-accent-400 text-primary-600 px-2 py-1 rounded-full text-xs font-medium border border-accent-200"
                           >
                             {skill}
                           </span>
                         ))}
                         {expertiseArray.length > 3 && (
-                          <span className="text-blue-800 text-xs px-2 py-1">
+                          <span className="text-primary-300 text-xs px-2 py-1">
                             +{expertiseArray.length - 3}
                           </span>
                         )}
@@ -283,7 +283,7 @@ const CareerCounseling = () => {
                   {/* Contact Info */}
                   {counselor.user_details?.contact_number && (
                     <div className="mb-4">
-                      <div className="flex items-center space-x-2 text-blue-700 text-xs">
+                      <div className="flex items-center space-x-2 text-primary-300 text-xs">
                         <Phone className="h-3 w-3" />
                         <span>{counselor.user_details.contact_number}</span>
                       </div>
@@ -293,13 +293,13 @@ const CareerCounseling = () => {
                   {/* Action Buttons */}
                   <div className="border-t border-accent-100 pt-3">
                     <div className="flex space-x-2">
-                      {/* <button className="flex-1 bg-accent-100 text-primary-400 px-3 py-2 rounded-lg hover:bg-accent-200 transition-all duration-200 font-medium text-xs hover:shadow-md">
+                      {/* <button className="flex-1 bg-accent-100 text-primary-600 px-3 py-2 rounded-lg hover:bg-accent-200 transition-all duration-200 font-medium text-xs hover:shadow-md">
                         View Profile
                       </button> */}
                       {counselor.available_for_sessions && (
                         <Link
                           to={`/student/book-counselor-session/${counselor.counsellor_id}`}
-                          className="flex-1 bg-primary-400 text-white px-3 py-2 rounded-lg hover:bg-primary-600 transition-all duration-200 font-medium text-xs hover:shadow-lg text-center"
+                          className="flex-1 bg-primary-600 text-white px-3 py-2 rounded-lg hover:bg-primary-700 transition-all duration-200 font-medium text-sm hover:shadow-lg text-center"
                         >
                           Book Session
                         </Link>

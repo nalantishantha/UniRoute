@@ -585,7 +585,7 @@ const StudentDashboard = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-r from-primary-100 to-white">
+      <div className="min-h-screen bg-gradient-to-r from-primary-50 to-white">
         <StudentNavigation />
         <main className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex items-center justify-center h-64">
@@ -602,7 +602,7 @@ const StudentDashboard = () => {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-r from-primary-100 to-white">
+      <div className="min-h-screen bg-gradient-to-r from-primary-50 to-white">
         <StudentNavigation />
         <main className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="text-center">
@@ -625,7 +625,7 @@ const StudentDashboard = () => {
   // If no student profile data, show default state
   if (!studentProfile) {
     return (
-      <div className="min-h-screen bg-gradient-to-r from-primary-100 to-white">
+      <div className="min-h-screen bg-gradient-to-r from-primary-50 to-white">
         <StudentNavigation />
         <main className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="text-center">
@@ -672,7 +672,7 @@ const StudentDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-primary-100 to-white">
+    <div className="min-h-screen bg-gradient-to-r from-primary-50 to-white">
       {/* Navigation */}
       <StudentNavigation />
 
@@ -703,7 +703,7 @@ const StudentDashboard = () => {
               {studentProfile.profileComplete < 100 && (
                 <Link
                   to="/student/edit-profile"
-                  className="inline-flex items-center px-6 py-3 space-x-2 font-semibold transition-all bg-accent-200 text-primary-400 rounded-xl hover:bg-accent-300"
+                  className="inline-flex items-center px-6 py-3 space-x-2 font-semibold transition-all bg-accent-200 text-primary-600 rounded-xl hover:bg-accent-300"
                 >
                   <Edit className="w-5 h-5" />
                   <span>Complete Profile</span>

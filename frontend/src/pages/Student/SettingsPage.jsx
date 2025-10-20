@@ -165,7 +165,7 @@ const SettingsPage = () => {
                     </p>
                   </div>
                 </div>
-                <button className="bg-accent-200 text-primary-400 px-4 py-2 rounded-lg hover:bg-accent-300 transition-colors">
+                <button className="bg-accent-200 text-primary-600 px-4 py-2 rounded-xl font-semibold hover:bg-accent-300 transition-colors">
                   Change
                 </button>
               </div>
@@ -182,7 +182,7 @@ const SettingsPage = () => {
                     </p>
                   </div>
                 </div>
-                <button className="bg-accent-200 text-primary-400 px-4 py-2 rounded-lg hover:bg-accent-300 transition-colors">
+                <button className="bg-accent-200 text-primary-600 px-4 py-2 rounded-xl font-semibold hover:bg-accent-300 transition-colors">
                   Change
                 </button>
               </div>
@@ -228,7 +228,7 @@ const SettingsPage = () => {
 
         {/* Save Changes */}
         <div className="flex justify-end mt-8">
-          <button className="bg-primary-400 text-white px-8 py-3 rounded-xl font-semibold hover:bg-primary-600 transition-colors">
+          <button className="bg-primary-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-primary-700 transition-colors">
             Save Changes
           </button>
         </div>
