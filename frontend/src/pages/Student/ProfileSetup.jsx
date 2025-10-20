@@ -94,8 +94,8 @@ const ProfileSetup = () => {
             </h3>
 
             <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
-              <div className="w-24 h-24 bg-gradient-to-br from-blue-200 to-blue-300 rounded-full flex items-center justify-center shadow-lg border-4 border-blue-100">
-                <User className="h-12 w-12 text-blue-600" />
+              <div className="w-24 h-24 bg-gradient-to-br from-primary-200 to-primary-300 rounded-full flex items-center justify-center shadow-lg border-4 border-primary-100">
+                <User className="h-12 w-12 text-primary-600" />
               </div>
               <div className="text-center sm:text-left">
                 <button

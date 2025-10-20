@@ -109,8 +109,8 @@ const MentorConnection = () => {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden sticky top-8">
               {/* Mentor Header */}
-              <div className="relative h-32 bg-gradient-to-r from-blue-500 to-primary-500">
-                <div className="absolute inset-0 bg-black/20"></div>
+              <div className="relative h-32 bg-gradient-to-r from-primary-600 via-primary-700 to-primary-600">
+                <div className="absolute inset-0 bg-black/15"></div>
 
                 {/* Rating Badge */}
                 <div className="absolute top-3 right-3">

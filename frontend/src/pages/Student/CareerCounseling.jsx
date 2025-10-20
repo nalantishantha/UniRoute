@@ -132,8 +132,8 @@ const CareerCounseling = () => {
                 className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
               >
                 {/* Counselor Header */}
-                <div className="relative h-36 bg-gradient-to-br from-indigo-600 via-blue-500 to-primary-500">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                <div className="relative h-36 bg-gradient-to-r from-primary-600 via-primary-700 to-primary-600">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
 
                   {/* Available Badge */}
                   {counselor.available_for_sessions && (

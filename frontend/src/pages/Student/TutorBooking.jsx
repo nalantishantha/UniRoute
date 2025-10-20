@@ -79,7 +79,7 @@ const TutorBooking = () => {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden sticky top-8">
               {/* Tutor Header with Gradient */}
-              <div className="relative h-32 bg-gradient-to-r from-blue-500 to-primary-500">
+              <div className="relative h-32 bg-gradient-to-r from-primary-600 to-primary-800">
                 <div className="absolute inset-0 bg-black/10"></div>
                 
                 {/* Rating Badge */}
