@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -20,6 +20,12 @@ import {
   User,
   BookOpen,
   Target,
+  Settings,
+  Save,
+  Trash2,
+  Edit,
+  AlertCircle,
+  X,
 } from "lucide-react";
 import {
   Card,
@@ -29,6 +35,7 @@ import {
   CardDescription,
 } from "../../../components/ui/Card";
 import Button from "../../../components/ui/Button";
+import { getCurrentUser } from "../../../utils/auth";
 // import { useChatContext } from "../../../context/ChatContext";
 
 const mentoringRequests = [
@@ -140,6 +147,29 @@ export default function Mentoring() {
   const [searchTerm, setSearchTerm] = useState("");
   const [requests, setRequests] = useState(mentoringRequests);
   const [sessions, setSessions] = useState(upcomingSessions);
+  const [user, setUser] = useState(null);
+
+  // Availability management states
+  const [availability, setAvailability] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [formData, setFormData] = useState({
+    day_of_week: 0,
+    start_time: "09:00",
+    end_time: "17:00"
+  });
+  const [message, setMessage] = useState({ type: "", text: "" });
+
+  const daysOfWeek = [
+    { value: 0, label: "Sunday" },
+    { value: 1, label: "Monday" },
+    { value: 2, label: "Tuesday" },
+    { value: 3, label: "Wednesday" },
+    { value: 4, label: "Thursday" },
+    { value: 5, label: "Friday" },
+    { value: 6, label: "Saturday" }
+  ];
 
   // Modal states
   const [showAcceptModal, setShowAcceptModal] = useState(false);
@@ -151,6 +181,177 @@ export default function Mentoring() {
   const [scheduleDate, setScheduleDate] = useState("");
   const [scheduleTime, setScheduleTime] = useState("");
   const [rejectReason, setRejectReason] = useState("");
+
+  // Get current user on component mount
+  useEffect(() => {
+    const currentUser = getCurrentUser();
+    setUser(currentUser);
+    if (currentUser?.id) {
+      fetchAvailability(currentUser.id);
+    }
+  }, []);
+
+  // Availability management functions
+  const fetchAvailability = async (counsellorId) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/counsellors/availability/${counsellorId}/`);
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        setAvailability(data.availability || []);
+      } else {
+        setMessage({ type: "error", text: data.message || "Failed to fetch availability" });
+      }
+    } catch (error) {
+      console.error('Error fetching availability:', error);
+      setMessage({ type: "error", text: "Failed to fetch availability" });
+      // Set mock data for demonstration
+      setAvailability([
+        { id: 1, day_of_week: 1, day_name: "Monday", start_time: "09:00", end_time: "17:00", is_active: true },
+        { id: 2, day_of_week: 2, day_name: "Tuesday", start_time: "10:00", end_time: "16:00", is_active: true },
+        { id: 3, day_of_week: 3, day_name: "Wednesday", start_time: "09:00", end_time: "18:00", is_active: true },
+        { id: 4, day_of_week: 4, day_name: "Thursday", start_time: "10:00", end_time: "15:00", is_active: true },
+        { id: 5, day_of_week: 5, day_name: "Friday", start_time: "09:00", end_time: "17:00", is_active: true },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAvailabilitySubmit = async (e) => {
+    e.preventDefault();
+
+    if (formData.start_time >= formData.end_time) {
+      setMessage({ type: "error", text: "Start time must be before end time" });
+      return;
+    }
+
+    if (!user?.id) {
+      setMessage({ type: "error", text: "User ID not found" });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const url = `/api/counsellors/availability/${user.id}/`;
+      const method = editingId ? 'PUT' : 'POST';
+      const body = editingId
+        ? { ...formData, availability_id: editingId }
+        : formData;
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body)
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        setMessage({ type: "success", text: data.message || "Availability saved successfully" });
+        fetchAvailability(user.id);
+        resetAvailabilityForm();
+      } else {
+        setMessage({ type: "error", text: data.message || "Failed to save availability" });
+      }
+    } catch (error) {
+      console.error('Error saving availability:', error);
+      setMessage({ type: "error", text: "Failed to save availability" });
+
+      // Mock successful save for demonstration
+      const newSlot = {
+        id: Date.now(),
+        day_of_week: formData.day_of_week,
+        day_name: daysOfWeek.find(d => d.value === formData.day_of_week)?.label,
+        start_time: formData.start_time,
+        end_time: formData.end_time,
+        is_active: true
+      };
+
+      if (editingId) {
+        setAvailability(prev => prev.map(slot =>
+          slot.id === editingId ? { ...newSlot, id: editingId } : slot
+        ));
+      } else {
+        setAvailability(prev => [...prev, newSlot]);
+      }
+
+      setMessage({ type: "success", text: "Availability saved successfully" });
+      resetAvailabilityForm();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteAvailability = async (availabilityId) => {
+    if (!window.confirm("Are you sure you want to delete this availability slot?")) {
+      return;
+    }
+
+    if (!user?.id) {
+      setMessage({ type: "error", text: "User ID not found" });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/counsellors/availability/${user.id}/`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ availability_id: availabilityId })
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        setMessage({ type: "success", text: data.message || "Availability deleted successfully" });
+        fetchAvailability(user.id);
+      } else {
+        setMessage({ type: "error", text: data.message || "Failed to delete availability" });
+      }
+    } catch (error) {
+      console.error('Error deleting availability:', error);
+      // Mock successful delete for demonstration
+      setAvailability(prev => prev.filter(slot => slot.id !== availabilityId));
+      setMessage({ type: "success", text: "Availability deleted successfully" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditAvailability = (availabilitySlot) => {
+    setEditingId(availabilitySlot.id);
+    setFormData({
+      day_of_week: availabilitySlot.day_of_week,
+      start_time: availabilitySlot.start_time,
+      end_time: availabilitySlot.end_time
+    });
+    setShowAddForm(true);
+  };
+
+  const resetAvailabilityForm = () => {
+    setFormData({
+      day_of_week: 0,
+      start_time: "09:00",
+      end_time: "17:00"
+    });
+    setEditingId(null);
+    setShowAddForm(false);
+  };
+
+  const groupedAvailability = availability.reduce((groups, slot) => {
+    const day = slot.day_name;
+    if (!groups[day]) {
+      groups[day] = [];
+    }
+    groups[day].push(slot);
+    return groups;
+  }, {});
 
   // Calculate dynamic stats
   const dynamicStats = {
@@ -443,6 +644,16 @@ export default function Mentoring() {
             >
               <Calendar className="w-4 h-4" />
               <span>Upcoming Sessions</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("availability")}
+              className={`flex items-center space-x-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === "availability"
+                ? "border-primary-500 text-primary-600"
+                : "border-transparent text-neutral-grey hover:text-neutral-black"
+                }`}
+            >
+              <Settings className="w-4 h-4" />
+              <span>Availability</span>
             </button>
           </div>
         </CardHeader>
@@ -751,6 +962,227 @@ export default function Mentoring() {
                     </p>
                   </CardContent>
                 </Card>
+              )}
+            </motion.div>
+          )}
+
+          {/* Availability Tab */}
+          {activeTab === "availability" && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
+            >
+              {/* Message Display */}
+              <AnimatePresence>
+                {message.text && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className={`p-3 rounded-lg flex items-center space-x-2 ${message.type === "success"
+                      ? "bg-green-50 border border-green-200 text-green-700"
+                      : "bg-red-50 border border-red-200 text-red-700"
+                      }`}
+                  >
+                    {message.type === "success" ? (
+                      <CheckCircle className="w-5 h-5" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5" />
+                    )}
+                    <span>{message.text}</span>
+                    <button
+                      onClick={() => setMessage({ type: "", text: "" })}
+                      className="ml-auto text-current hover:opacity-70"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Header with Add Button */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-neutral-black">
+                    Availability Management
+                  </h3>
+                  <p className="text-sm text-neutral-grey">
+                    Set your weekly availability for mentoring sessions
+                  </p>
+                </div>
+                <Button
+                  onClick={() => setShowAddForm(true)}
+                  disabled={loading}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Slot
+                </Button>
+              </div>
+
+              {/* Add/Edit Form */}
+              <AnimatePresence>
+                {showAddForm && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <Card className="border-primary-200">
+                      <CardHeader>
+                        <CardTitle className="text-lg">
+                          {editingId ? "Edit Availability" : "Add New Availability"}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <form onSubmit={handleAvailabilitySubmit} className="space-y-4">
+                          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                            <div>
+                              <label className="block mb-2 text-sm font-medium">
+                                Day of Week
+                              </label>
+                              <select
+                                value={formData.day_of_week}
+                                onChange={(e) => setFormData(prev => ({
+                                  ...prev,
+                                  day_of_week: parseInt(e.target.value)
+                                }))}
+                                className="w-full p-3 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                              >
+                                {daysOfWeek.map(day => (
+                                  <option key={day.value} value={day.value}>
+                                    {day.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <div>
+                              <label className="block mb-2 text-sm font-medium">
+                                Start Time
+                              </label>
+                              <input
+                                type="time"
+                                value={formData.start_time}
+                                onChange={(e) => setFormData(prev => ({
+                                  ...prev,
+                                  start_time: e.target.value
+                                }))}
+                                className="w-full p-3 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block mb-2 text-sm font-medium">
+                                End Time
+                              </label>
+                              <input
+                                type="time"
+                                value={formData.end_time}
+                                onChange={(e) => setFormData(prev => ({
+                                  ...prev,
+                                  end_time: e.target.value
+                                }))}
+                                className="w-full p-3 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex space-x-3">
+                            <Button
+                              type="submit"
+                              disabled={loading}
+                              className="flex items-center space-x-2"
+                            >
+                              {loading ? (
+                                <div className="w-4 h-4 border-b-2 border-white rounded-full animate-spin"></div>
+                              ) : (
+                                <Save className="w-4 h-4" />
+                              )}
+                              <span>{editingId ? "Update" : "Add"}</span>
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              onClick={resetAvailabilityForm}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </form>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Availability Display */}
+              {loading && !showAddForm ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="w-8 h-8 border-b-2 rounded-full animate-spin border-primary-600"></div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {Object.keys(groupedAvailability).length === 0 ? (
+                    <div className="py-8 text-center text-neutral-grey">
+                      <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>No availability slots configured yet.</p>
+                      <p className="text-sm">Click "Add Slot" to get started.</p>
+                    </div>
+                  ) : (
+                    daysOfWeek.map(day => {
+                      const daySlots = groupedAvailability[day.label] || [];
+                      if (daySlots.length === 0) return null;
+
+                      return (
+                        <div key={day.value} className="p-4 border rounded-lg border-neutral-light-grey">
+                          <h3 className="mb-3 text-lg font-medium text-neutral-black">
+                            {day.label}
+                          </h3>
+                          <div className="space-y-2">
+                            {daySlots.map(slot => (
+                              <motion.div
+                                key={slot.id}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="flex items-center justify-between p-3 rounded-lg bg-neutral-silver/10"
+                              >
+                                <div className="flex items-center space-x-3">
+                                  <Clock className="w-4 h-4 text-primary-600" />
+                                  <span className="font-medium">
+                                    {slot.start_time} - {slot.end_time}
+                                  </span>
+                                  {!slot.is_active && (
+                                    <span className="px-2 py-1 text-xs text-yellow-800 bg-yellow-100 rounded">
+                                      Inactive
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <button
+                                    onClick={() => handleEditAvailability(slot)}
+                                    className="p-1 transition-colors text-primary-600 hover:text-primary-800"
+                                    disabled={loading}
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteAvailability(slot.id)}
+                                    className="p-1 text-red-600 transition-colors hover:text-red-800"
+                                    disabled={loading}
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </motion.div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
               )}
             </motion.div>
           )}

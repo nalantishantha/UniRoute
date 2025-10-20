@@ -16,4 +16,7 @@ urlpatterns = [
     path('settings/<int:user_id>/update/', views.update_counsellor_settings, name='update_counsellor_settings'),
     path('settings/<int:user_id>/password/', views.change_counsellor_password, name='change_counsellor_password'),
     path('settings/<int:user_id>/delete/', views.delete_counsellor_account, name='delete_counsellor_account'),
+    
+    # Counsellor availability endpoints
+    path('availability/<int:user_id>/', views.manage_counsellor_availability, name='manage_counsellor_availability'),
 ]
