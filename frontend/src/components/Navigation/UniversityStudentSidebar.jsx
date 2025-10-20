@@ -16,6 +16,7 @@ import {
   X,
   ChevronRight,
   Settings,
+  Briefcase,
 } from "lucide-react";
 import { logout, getCurrentUser } from "../../utils/auth"; // ✅ Import logout function
 
@@ -43,6 +44,11 @@ const navigation = [
     name: "Resources",
     href: "/university-student/resources",
     icon: FolderOpen,
+  },
+  {
+    name: "Internships",
+    href: "/university-student/internships",
+    icon: Briefcase,
   },
   { name: "Calendar", href: "/university-student/calendar", icon: Calendar },
   { name: "Earnings", href: "/university-student/earnings", icon: DollarSign },

@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 from .mentor_api_views import MentorByUniversityStudentView
 from .user_mentor_status_view import UserMentorStatusView
+from . import video_call_views
 
 urlpatterns = [
     path('requests/<int:mentor_id>/', views.MentoringRequestsView.as_view(), name='mentoring_requests'),
@@ -13,6 +14,7 @@ urlpatterns = [
     path('sessions/<int:session_id>/reschedule/', views.reschedule_session, name='reschedule_session'),
     path('sessions/<int:session_id>/complete/', views.complete_session, name='complete_session'),
     path('stats/<int:mentor_id>/', views.get_mentor_stats, name='mentor_stats'),
+    path('feedback/<int:mentor_id>/', views.get_mentor_feedback, name='mentor_feedback'),
     
     # Availability management
     path('availability/<int:mentor_id>/', views.MentorAvailabilityView.as_view(), name='mentor_availability'),
@@ -23,4 +25,11 @@ urlpatterns = [
     # Check if a given user (or current user) is a mentor
     path('user-status/', UserMentorStatusView.as_view(), name='user_mentor_status'),
     path('user-status/<int:user_id>/', UserMentorStatusView.as_view(), name='user_mentor_status_by_id'),
+    
+    # Video call endpoints
+    path('video-call/create/', video_call_views.create_video_room, name='create_video_room'),
+    path('video-call/<str:room_id>/', video_call_views.get_video_room, name='get_video_room'),
+    path('video-call/<str:room_id>/join/', video_call_views.join_video_room, name='join_video_room'),
+    path('video-call/<str:room_id>/end/', video_call_views.end_video_room, name='end_video_room'),
+    path('video-call/session/<int:session_id>/', video_call_views.get_room_by_session, name='get_room_by_session'),
 ]

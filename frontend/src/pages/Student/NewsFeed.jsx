@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import StudentNavigation from "../../components/Navigation/StudentNavigation";
 import {
@@ -8,61 +8,62 @@ import {
   Users,
   BookOpen,
   Bell,
-  Heart,
-  Share2,
-  MessageCircle,
   User,
-  Settings,
-  LogOut,
+  Loader2,
 } from "lucide-react";
 
 const NewsFeed = () => {
-  const newsItems = [
-    {
-      id: 1,
-      title: "University of Colombo Opens New Engineering Faculty",
-      summary:
-        "The university announces a new state-of-the-art engineering faculty with cutting-edge laboratories and research facilities.",
-      date: "December 15, 2024",
-      category: "University News",
-      readTime: "3 min read",
-      likes: 156,
-      comments: 23,
-    },
-    {
-      id: 2,
-      title: "2025 A/L Results Expected in March",
-      summary:
-        "Department of Examinations announces the tentative date for A/L results release with new grading system updates.",
-      date: "December 12, 2024",
-      category: "Exam News",
-      readTime: "2 min read",
-      likes: 234,
-      comments: 45,
-    },
-    {
-      id: 3,
-      title: "New Scholarship Program for STEM Students",
-      summary:
-        "Government introduces comprehensive scholarship program covering tuition and living expenses for outstanding STEM students.",
-      date: "December 10, 2024",
-      category: "Scholarships",
-      readTime: "4 min read",
-      likes: 189,
-      comments: 67,
-    },
-    {
-      id: 4,
-      title: "Career Fair 2025: 100+ Companies Participating",
-      summary:
-        "Annual career fair scheduled for February with participation from leading local and international companies.",
-      date: "December 8, 2024",
-      category: "Career Events",
-      readTime: "3 min read",
-      likes: 298,
-      comments: 34,
-    },
-  ];
+  const [announcements, setAnnouncements] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchAnnouncements();
+  }, []);
+
+  const fetchAnnouncements = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:8000/api/students/announcements/');
+      const data = await response.json();
+      
+      if (data.success) {
+        setAnnouncements(data.announcements);
+      } else {
+        setError(data.message || 'Failed to fetch announcements');
+      }
+    } catch (err) {
+      console.error('Error fetching announcements:', err);
+      setError('Failed to load announcements. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Date not available';
+    
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+    const diffMinutes = Math.floor(diffTime / (1000 * 60));
+
+    if (diffMinutes < 60) {
+      return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
+    } else if (diffHours < 24) {
+      return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+    } else if (diffDays < 7) {
+      return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+    } else {
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-200 to-blue-100">
@@ -76,85 +77,71 @@ const NewsFeed = () => {
             News & Updates
           </h1>
           <p className="text-xl text-blue-800">
-            Stay updated with the latest university news, announcements, and
-            opportunities
+            Stay updated with the latest university news and announcements
           </p>
         </div>
 
-        {/* News Items */}
-        <div className="space-y-6">
-          {newsItems.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white rounded-2xl shadow-lg p-6 border border-accent-100 hover:shadow-xl transition-all"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <span className="bg-accent-200 text-blue-900 px-3 py-1 rounded-full text-sm font-medium">
-                      {item.category}
-                    </span>
-                    <div className="flex items-center space-x-1 text-blue-800 text-sm">
-                      <Calendar className="h-4 w-4" />
-                      <span>{item.date}</span>
-                    </div>
-                  </div>
+        {/* Loading State */}
+        {loading && (
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-12 w-12 text-blue-900 animate-spin" />
+          </div>
+        )}
 
-                  <h2 className="font-display font-semibold text-2xl text-blue-900 mb-3">
-                    {item.title}
-                  </h2>
+        {/* Error State */}
+        {error && !loading && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-2xl mb-6">
+            <p>{error}</p>
+          </div>
+        )}
 
-                  <p className="text-blue-800 mb-4 leading-relaxed">
-                    {item.summary}
-                  </p>
-
-                  <div className="flex items-center space-x-4 text-sm text-blue-800">
-                    <span>{item.readTime}</span>
-                    <div className="flex items-center space-x-1">
-                      <Heart className="h-4 w-4" />
-                      <span>{item.likes}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <MessageCircle className="h-4 w-4" />
-                      <span>{item.comments}</span>
-                    </div>
-                  </div>
-                </div>
+        {/* Announcements List */}
+        {!loading && !error && (
+          <div className="space-y-6">
+            {announcements.length === 0 ? (
+              <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+                <Bell className="h-16 w-16 text-blue-300 mx-auto mb-4" />
+                <p className="text-xl text-blue-800">No announcements available at the moment.</p>
               </div>
-
-              <div className="flex items-center justify-between pt-4 border-t border-accent-100">
-                <div className="flex items-center space-x-4">
-                  <button className="flex items-center space-x-2 text-blue-800 hover:text-blue-900 transition-colors">
-                    <Heart className="h-5 w-5" />
-                    <span>Like</span>
-                  </button>
-                  <button className="flex items-center space-x-2 text-blue-800 hover:text-blue-900 transition-colors">
-                    <MessageCircle className="h-5 w-5" />
-                    <span>Comment</span>
-                  </button>
-                  <button className="flex items-center space-x-2 text-blue-800 hover:text-blue-900 transition-colors">
-                    <Share2 className="h-5 w-5" />
-                    <span>Share</span>
-                  </button>
-                </div>
-
-                <Link
-                  to={`/student/news/${item.id}`}
-                  className="bg-primary-400 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors"
+            ) : (
+              announcements.map((announcement) => (
+                <div
+                  key={announcement.announcement_id}
+                  className="bg-white rounded-2xl shadow-lg p-6 border border-accent-100 hover:shadow-xl transition-all"
                 >
-                  Read More
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
+                  {/* Header with University Name and Date */}
+                  <div className="flex items-start justify-between mb-4 pb-4 border-b border-accent-100">
+                    <div className="flex items-center space-x-3">
+                      <div className="bg-blue-100 p-2 rounded-full">
+                        <GraduationCap className="h-6 w-6 text-blue-900" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg text-blue-900">
+                          {announcement.university_name}
+                        </h3>
+                        <div className="flex items-center space-x-1 text-blue-600 text-sm">
+                          <Calendar className="h-4 w-4" />
+                          <span>{formatDate(announcement.created_at)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-        {/* Load More */}
-        <div className="text-center mt-8">
-          <button className="bg-accent-200 text-blue-900 px-8 py-3 rounded-xl font-semibold hover:bg-accent-300 transition-colors">
-            Load More News
-          </button>
-        </div>
+                  {/* Announcement Content */}
+                  <div className="mb-4">
+                    <h2 className="font-display font-semibold text-2xl text-blue-900 mb-3">
+                      {announcement.title}
+                    </h2>
+
+                    <p className="text-blue-800 leading-relaxed whitespace-pre-wrap">
+                      {announcement.message}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

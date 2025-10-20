@@ -37,14 +37,26 @@ const ProfilePage = () => {
         fetchStudentProfile();
       }
     };
-    
+    // Listen for storage events so profile changes in other tabs/components refresh this view
+    const handleStorage = (e) => {
+      // If relevant profile keys were changed, refresh
+      const keysToWatch = ['user', 'student_profile', 'profileUpdated'];
+      if (!e.key) return; // ignore clear() events
+      if (keysToWatch.includes(e.key)) {
+        console.log('Storage change detected for', e.key, 'refreshing profile...');
+        fetchStudentProfile();
+      }
+    };
+
     window.addEventListener('profileUpdated', handleProfileUpdate);
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    
+    window.addEventListener('storage', handleStorage);
+
     // Cleanup
     return () => {
       window.removeEventListener('profileUpdated', handleProfileUpdate);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('storage', handleStorage);
     };
   }, []);
 
@@ -214,10 +226,12 @@ const ProfilePage = () => {
                 <p className="text-white/90 text-lg mb-1">
                   {studentData.current_stage || 'Student'}
                 </p>
-                <p className="text-white/80 text-sm mb-4">
-                  {studentData.school || 'School not specified'} 
-                  {studentData.district && ` • ${studentData.district}`}
-                </p>
+                {(studentData.school || studentData.district) && (
+                  <p className="text-white/80 text-sm mb-4">
+                    {studentData.school}
+                    {studentData.district && ` • ${studentData.district}`}
+                  </p>
+                )}
 
                 {/* Status Badges */}
                 <div className="flex flex-wrap justify-center lg:justify-start gap-2 mt-4">
@@ -226,12 +240,12 @@ const ProfilePage = () => {
                       Status: {studentData.is_active ? 'Active' : 'Inactive'}
                     </span>
                   </div>
-                  {studentData.is_verified && (
+                  {/* {studentData.is_verified && (
                     <div className="inline-flex items-center bg-white/20 backdrop-blur-md rounded-lg px-4 py-2 border border-white/30">
                       <Award className="h-4 w-4 mr-2" />
                       <span className="font-semibold">Verified</span>
                     </div>
-                  )}
+                  )} */}
                 </div>
               </div>
 
@@ -254,15 +268,17 @@ const ProfilePage = () => {
               Contact Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="flex items-center space-x-3 p-4 bg-accent-50 rounded-lg border border-accent-100">
-                <Mail className="h-5 w-5 text-primary-400" />
-                <div>
-                  <p className="text-primary-300 text-sm">Email</p>
-                  <p className="text-primary-400 font-medium text-sm">
-                    {studentData.email || 'Not provided'}
-                  </p>
+              {studentData.email && (
+                <div className="flex items-center space-x-3 p-4 bg-accent-50 rounded-lg border border-accent-100">
+                  <Mail className="h-5 w-5 text-primary-400" />
+                  <div>
+                    <p className="text-primary-300 text-sm">Email</p>
+                    <p className="text-primary-400 font-medium text-sm">
+                      {studentData.email}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
               
               {(studentData.phone || studentData.contact_number) && (
                 <div className="flex items-center space-x-3 p-4 bg-accent-50 rounded-lg border border-accent-100">
@@ -382,11 +398,11 @@ const ProfilePage = () => {
                   }`}>
                     {studentData.is_active ? 'Active' : 'Inactive'}
                   </span>
-                  {studentData.is_verified && (
+                  {/* {studentData.is_verified && (
                     <span className="px-2 py-1 rounded text-sm bg-blue-100 text-blue-800">
                       ✓ Verified
                     </span>
-                  )}
+                  )} */}
                 </div>
               </div>
 

@@ -42,33 +42,33 @@ class Command(BaseCommand):
                     'student': students[0],
                     'topic': 'University Admissions Guidance',
                     'description': 'I need help with university application process and personal statement writing.',
-                    'preferred_time': 'Weekdays 2-4 PM',
+                    'preferred_time': (timezone.now() + timedelta(days=7, hours=14)).isoformat(),  # 7 days ahead at 2 PM
                     'session_type': 'online',
                     'urgency': 'high',
                     'status': 'pending',
-                    'expiry_date': timezone.now() + timedelta(days=7)
+                    'expiry_date': timezone.now() + timedelta(days=7, hours=11)  # 3 hours before preferred time
                 },
                 {
                     'mentor': mentor,
                     'student': students[1] if len(students) > 1 else students[0],
                     'topic': 'Career Planning',
                     'description': 'Looking for guidance on career paths in engineering field.',
-                    'preferred_time': 'Weekends 10-12 AM',
+                    'preferred_time': (timezone.now() + timedelta(days=5, hours=10)).isoformat(),  # 5 days ahead at 10 AM
                     'session_type': 'physical',
                     'urgency': 'medium',
                     'status': 'pending',
-                    'expiry_date': timezone.now() + timedelta(days=5)
+                    'expiry_date': timezone.now() + timedelta(days=5, hours=7)  # 3 hours before preferred time
                 },
                 {
                     'mentor': mentor,
                     'student': students[2] if len(students) > 2 else students[0],
                     'topic': 'Study Strategies',
                     'description': 'Need help with time management and effective study techniques.',
-                    'preferred_time': 'Weekdays 6-8 PM',
+                    'preferred_time': (timezone.now() + timedelta(days=3, hours=18)).isoformat(),  # 3 days ahead at 6 PM
                     'session_type': 'online',
                     'urgency': 'low',
                     'status': 'scheduled',
-                    'expiry_date': timezone.now() + timedelta(days=3)
+                    'expiry_date': timezone.now() + timedelta(days=3, hours=15)  # 3 hours before preferred time
                 },
                 # Two new pending requests
                 {
@@ -76,22 +76,22 @@ class Command(BaseCommand):
                     'student': students[0],
                     'topic': 'Research Methods & Academic Writing',
                     'description': 'Need guidance on research methodology and academic writing for my thesis project.',
-                    'preferred_time': 'Weekdays 1-3 PM',
+                    'preferred_time': (timezone.now() + timedelta(days=10, hours=14)).isoformat(),  # 10 days ahead at 2 PM
                     'session_type': 'online',
                     'urgency': 'medium',
                     'status': 'pending',
-                    'expiry_date': timezone.now() + timedelta(days=10)
+                    'expiry_date': timezone.now() + timedelta(days=10, hours=11)  # 3 hours before preferred time
                 },
                 {
                     'mentor': mentor,
                     'student': students[1] if len(students) > 1 else students[0],
                     'topic': 'Job Interview Preparation',
                     'description': 'Looking for help with mock interviews and tips for technical interviews in software development.',
-                    'preferred_time': 'Weekends 2-5 PM',
+                    'preferred_time': (timezone.now() + timedelta(days=4, hours=15)).isoformat(),  # 4 days ahead at 3 PM
                     'session_type': 'physical',
                     'urgency': 'high',
                     'status': 'pending',
-                    'expiry_date': timezone.now() + timedelta(days=4)
+                    'expiry_date': timezone.now() + timedelta(days=4, hours=12)  # 3 hours before preferred time
                 }
             ]
 
@@ -131,16 +131,17 @@ class Command(BaseCommand):
             )
 
             # Create a completed request
+            past_preferred_time = timezone.now() - timedelta(days=1, hours=14)  # Yesterday at 2 PM
             completed_request = MentoringRequests.objects.create(
                 mentor=mentor,
                 student=students[0],
                 topic='Interview Preparation',
                 description='Mock interviews and feedback for university admissions.',
-                preferred_time='Weekdays 3-5 PM',
+                preferred_time=past_preferred_time.isoformat(),
                 session_type='online',
                 urgency='medium',
                 status='completed',
-                expiry_date=timezone.now() - timedelta(days=3)
+                expiry_date=past_preferred_time - timedelta(hours=3)  # 3 hours before preferred time
             )
 
             SessionDetails.objects.create(

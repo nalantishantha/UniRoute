@@ -8,8 +8,232 @@ from apps.students.models import Students
 from django.utils import timezone
 from datetime import timedelta
 from apps.mentoring.models import Mentors, MentoringSessions, MentoringSessionEnrollments, MentoringRequests
+from apps.universities.models import UniversityAnnouncements
 from .models import Students
 import json
+
+
+def get_student_mentoring_requests_grouped(request):
+    """
+    Returns mentoring requests for a student grouped into three lists:
+    - pending: status == 'pending'
+    - accepted: status == 'scheduled'
+    - completed: status in ['completed', 'declined']
+
+    Expects query param `user_id` (Users.user_id). This is intentionally
+    separate from session enrollments and focuses on MentoringRequests table.
+    """
+    if request.method != 'GET':
+        return JsonResponse({'success': False, 'message': 'Only GET allowed'}, status=405)
+
+    user_id = request.GET.get('user_id')
+    if not user_id:
+        return JsonResponse({'success': False, 'message': 'user_id query parameter is required'}, status=400)
+
+    try:
+        try:
+            student = Students.objects.get(user__user_id=user_id)
+        except Students.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Student not found for given user_id'}, status=404)
+
+        pending = []
+        accepted = []
+        completed = []
+
+        qs = MentoringRequests.objects.select_related('mentor', 'mentor__user').filter(student=student)
+        for r in qs:
+            status = (getattr(r, 'status', '') or '').lower()
+            entry = {
+                'id': getattr(r, 'request_id', r.id if hasattr(r, 'id') else None),
+                'mentor': None,
+                'subject': getattr(r, 'topic', None) or getattr(r, 'description', None) or '',
+                'preferred_time': getattr(r, 'preferred_time', None) or getattr(r, 'requested_date', None) or None,
+                'status': getattr(r, 'status', '') or '',
+                'created_at': getattr(r, 'created_at', None),
+                'session_id': None,  # Will be populated for scheduled requests
+            }
+            
+            # Try to find the associated session for scheduled/accepted requests
+            if status == 'scheduled':
+                try:
+                    from apps.mentoring.models import SessionDetails
+                    session_detail = SessionDetails.objects.select_related('session').filter(request=r).first()
+                    if session_detail and session_detail.session:
+                        entry['session_id'] = session_detail.session.session_id
+                except Exception as e:
+                    print(f"Error finding session for request {r.request_id}: {e}")
+            
+            try:
+                mentor_obj = getattr(r, 'mentor', None)
+                if mentor_obj:
+                    # Try to get a friendly name
+                    ud = None
+                    try:
+                        ud = UserDetails.objects.get(user=mentor_obj.user)
+                    except Exception:
+                        ud = None
+                    if ud and getattr(ud, 'full_name', None):
+                        entry['mentor'] = ud.full_name
+                    elif hasattr(mentor_obj, 'full_name'):
+                        entry['mentor'] = mentor_obj.full_name
+                    elif hasattr(mentor_obj, 'name'):
+                        entry['mentor'] = mentor_obj.name
+                    elif hasattr(mentor_obj, 'user') and hasattr(mentor_obj.user, 'username'):
+                        entry['mentor'] = mentor_obj.user.username
+            except Exception:
+                entry['mentor'] = None
+
+            if status == 'pending':
+                pending.append(entry)
+            elif status == 'scheduled':
+                accepted.append(entry)
+            elif status in ['completed', 'declined']:
+                completed.append(entry)
+            else:
+                # Treat unknown statuses conservatively as pending
+                pending.append(entry)
+
+        return JsonResponse({'success': True, 'pending': pending, 'accepted': accepted, 'completed': completed})
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'success': False, 'message': f'Error retrieving mentoring requests: {str(e)}'}, status=500)
+
+
+def get_student_upcoming_sessions(request):
+    """
+    Return upcoming scheduled mentoring sessions for a student.
+    Filters MentoringSessionEnrollments where session.status == 'scheduled'
+    and session.scheduled_at >= now().
+    Expects query param `user_id` (Users.user_id).
+    """
+    if request.method != 'GET':
+        return JsonResponse({'success': False, 'message': 'Only GET allowed'}, status=405)
+
+    user_id = request.GET.get('user_id')
+    if not user_id:
+        return JsonResponse({'success': False, 'message': 'user_id query parameter is required'}, status=400)
+
+    try:
+        try:
+            student = Students.objects.get(user__user_id=user_id)
+        except Students.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Student not found for given user_id'}, status=404)
+
+        now_dt = timezone.now()
+        upcoming = []
+
+        enrollments = MentoringSessionEnrollments.objects.select_related('session', 'session__mentor', 'session__mentor__user').filter(
+            student=student,
+            session__status='scheduled',
+            session__scheduled_at__gte=now_dt
+        ).order_by('session__scheduled_at')
+
+        for enroll in enrollments:
+            session = enroll.session
+            if not session:
+                continue
+            mentor_name = 'Mentor'
+            try:
+                mentor_obj = getattr(session, 'mentor', None)
+                if mentor_obj:
+                    try:
+                        ud = UserDetails.objects.get(user=mentor_obj.user)
+                    except Exception:
+                        ud = None
+                    if ud and getattr(ud, 'full_name', None):
+                        mentor_name = ud.full_name
+                    elif hasattr(mentor_obj, 'full_name'):
+                        mentor_name = mentor_obj.full_name
+                    elif hasattr(mentor_obj, 'name'):
+                        mentor_name = mentor_obj.name
+                    elif hasattr(mentor_obj, 'user') and hasattr(mentor_obj.user, 'username'):
+                        mentor_name = mentor_obj.user.username
+            except Exception:
+                pass
+
+            upcoming.append({
+                'id': getattr(session, 'session_id', session.id if hasattr(session, 'id') else None),
+                'topic': getattr(session, 'topic', ''),
+                'mentor': mentor_name,
+                'scheduled_at': session.scheduled_at.isoformat() if getattr(session, 'scheduled_at', None) else None,
+                'duration_minutes': getattr(session, 'duration_minutes', None),
+                'status': getattr(session, 'status', '') or '',
+            })
+
+        return JsonResponse({'success': True, 'upcoming': upcoming})
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'success': False, 'message': f'Error retrieving upcoming sessions: {str(e)}'}, status=500)
+
+
+def get_student_upcoming_requests(request):
+    """
+    Return upcoming mentoring requests for a student where status == 'scheduled'
+    and requested_date >= today. Uses MentoringRequests table.
+    Expects query param `user_id` (Users.user_id).
+    NOTE: There is no explicit `session_date` field on MentoringRequests in this schema;
+    we use `requested_date` as the scheduled date for requests marked scheduled.
+    """
+    if request.method != 'GET':
+        return JsonResponse({'success': False, 'message': 'Only GET allowed'}, status=405)
+
+    user_id = request.GET.get('user_id')
+    if not user_id:
+        return JsonResponse({'success': False, 'message': 'user_id query parameter is required'}, status=400)
+
+    try:
+        try:
+            student = Students.objects.get(user__user_id=user_id)
+        except Students.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Student not found for given user_id'}, status=404)
+
+        today = timezone.now().date()
+        upcoming = []
+
+        qs = MentoringRequests.objects.select_related('mentor', 'mentor__user').filter(
+            student=student,
+            status='scheduled',
+            requested_date__date__gte=today
+        ).order_by('requested_date')
+
+        for r in qs:
+            mentor_name = 'Mentor'
+            try:
+                mentor_obj = getattr(r, 'mentor', None)
+                if mentor_obj:
+                    try:
+                        ud = UserDetails.objects.get(user=mentor_obj.user)
+                    except Exception:
+                        ud = None
+                    if ud and getattr(ud, 'full_name', None):
+                        mentor_name = ud.full_name
+                    elif hasattr(mentor_obj, 'full_name'):
+                        mentor_name = mentor_obj.full_name
+                    elif hasattr(mentor_obj, 'name'):
+                        mentor_name = mentor_obj.name
+                    elif hasattr(mentor_obj, 'user') and hasattr(mentor_obj.user, 'username'):
+                        mentor_name = mentor_obj.user.username
+            except Exception:
+                pass
+
+            upcoming.append({
+                'id': getattr(r, 'request_id', r.id if hasattr(r, 'id') else None),
+                'mentor': mentor_name,
+                'subject': getattr(r, 'topic', None) or getattr(r, 'description', None) or '',
+                'session_date': getattr(r, 'requested_date', None).isoformat() if getattr(r, 'requested_date', None) else None,
+                'status': getattr(r, 'status', '') or '',
+            })
+
+        return JsonResponse({'success': True, 'upcoming': upcoming})
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'success': False, 'message': f'Error retrieving upcoming requests: {str(e)}'}, status=500)
 
 
 def students_list(request):
@@ -343,7 +567,8 @@ def mentors_list(request):
 @csrf_exempt
 def create_mentoring_session(request):
     """
-    Create a new mentoring session (Student perspective)
+    Create a new mentoring request (Student perspective)
+    Only creates an entry in mentoring_requests table
     """
     if request.method == 'POST':
         try:
@@ -352,15 +577,17 @@ def create_mentoring_session(request):
             # Extract data from request
             mentor_id = data.get('mentor_id')
             topic = data.get('topic')
-            scheduled_at = data.get('scheduled_at')
+            scheduled_at = data.get('scheduled_at')  # This is the preferred time
             duration_minutes = data.get('duration_minutes')
-            status = data.get('status', 'scheduled')
+            description = data.get('description', f"Mentoring session request for: {topic}")
+            session_type = data.get('session_type', 'online')
+            urgency = data.get('urgency', 'medium')
             
             # Validate required fields
-            if not all([mentor_id, topic, scheduled_at, duration_minutes]):
+            if not all([mentor_id, topic, scheduled_at]):
                 return JsonResponse({
                     'success': False,
-                    'message': 'Missing required fields'
+                    'message': 'Missing required fields (mentor_id, topic, scheduled_at)'
                 }, status=400)
             
             # Check if mentor exists
@@ -372,60 +599,66 @@ def create_mentoring_session(request):
                     'message': 'Mentor not found'
                 }, status=404)
             
-            # Create the mentoring session
-            session = MentoringSessions.objects.create(
+            # Get the student (in production, this would come from the authenticated user)
+            # For demo purposes, we'll try to get the first student
+            try:
+                student = Students.objects.first()
+                if not student:
+                    return JsonResponse({
+                        'success': False,
+                        'message': 'No student found'
+                    }, status=404)
+            except Exception as e:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Error finding student: {str(e)}'
+                }, status=500)
+            
+            # Parse scheduled_at (preferred time) to calculate expiry_date (3 hours before)
+            from datetime import datetime
+            
+            # Parse the scheduled_at datetime string
+            if isinstance(scheduled_at, str):
+                # Use fromisoformat to handle ISO format with timezone
+                preferred_datetime = datetime.fromisoformat(scheduled_at.replace('Z', '+00:00'))
+            else:
+                preferred_datetime = scheduled_at
+            
+            # If the datetime is naive (no timezone), make it timezone-aware using the current timezone
+            if timezone.is_naive(preferred_datetime):
+                preferred_datetime = timezone.make_aware(preferred_datetime)
+            
+            # Calculate expiry date (3 hours before the preferred time)
+            expiry_datetime = preferred_datetime - timedelta(hours=3)
+            
+            # Create only the mentoring request entry
+            mentoring_request = MentoringRequests.objects.create(
+                student=student,
                 mentor=mentor,
                 topic=topic,
-                scheduled_at=scheduled_at,
-                duration_minutes=duration_minutes,
-                status=status,
-                created_at=timezone.now()
+                description=description,
+                preferred_time=preferred_datetime.isoformat(),  # Store as ISO string with timezone
+                session_type=session_type,
+                urgency=urgency,
+                status='pending',
+                requested_date=timezone.now(),  # When the request was created (now)
+                expiry_date=expiry_datetime,  # 3 hours before the preferred time
+                decline_reason=None
             )
-            
-            # Create session enrollment and request
-            try:
-                # For demo purposes, we'll try to get the first student or create a placeholder
-                # In a real application, you would get the student_id from the authenticated user
-                student = Students.objects.first()
-                if student:
-                    MentoringSessionEnrollments.objects.create(
-                        session=session,
-                        student=student,
-                        enrolled_at=timezone.now()
-                    )
-                    
-                    # Also create a mentoring request entry
-                    MentoringRequests.objects.create(
-                        student=student,
-                        mentor=mentor,
-                        topic=topic,
-                        description=f"Mentoring session request for: {topic}",
-                        preferred_time="Flexible",  # We don't have this from the form
-                        session_type="online",  # Default value since not in form
-                        urgency="medium",  # Default value since not in form
-                        status="pending",
-                        requested_date=scheduled_at,
-                        decline_reason=None,
-                        created_at=timezone.now(),
-                        updated_at=timezone.now(),
-                        expiry_date=timezone.now() + timedelta(days=7)  # Expire in 7 days
-                    )
-                    
-            except Exception as e:
-                # Continue even if enrollment creation fails
-                print(f"Warning: Could not create session enrollment: {e}")
-                pass
             
             return JsonResponse({
                 'success': True,
-                'message': 'Mentoring session created successfully',
-                'session': {
-                    'session_id': session.session_id,
+                'message': 'Mentoring request created successfully',
+                'request': {
+                    'request_id': mentoring_request.request_id,
                     'mentor_id': mentor_id,
                     'topic': topic,
-                    'scheduled_at': scheduled_at,
-                    'duration_minutes': duration_minutes,
-                    'status': status
+                    'preferred_time': preferred_datetime.isoformat(),  # Include timezone in response
+                    'requested_date': mentoring_request.requested_date.isoformat(),
+                    'expiry_date': expiry_datetime.isoformat(),  # Include timezone in response
+                    'session_type': session_type,
+                    'urgency': urgency,
+                    'status': 'pending'
                 }
             })
             
@@ -435,14 +668,58 @@ def create_mentoring_session(request):
                 'message': 'Invalid JSON data'
             }, status=400)
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return JsonResponse({
                 'success': False,
-                'message': 'Error creating session',
+                'message': 'Error creating mentoring request',
                 'error': str(e)
             }, status=500)
     
     return JsonResponse({
         'success': False,
         'message': 'Only POST method allowed'
+    }, status=405)
+
+
+def get_published_announcements(request):
+    """
+    Get all published university announcements for news feed (Student perspective)
+    """
+    if request.method == 'GET':
+        try:
+            # Get only published announcements, ordered by newest first
+            announcements = UniversityAnnouncements.objects.filter(
+                announcement_type='published'
+            ).select_related('university').order_by('-created_at')
+            
+            data = []
+            for announcement in announcements:
+                data.append({
+                    'announcement_id': announcement.announcement_id,
+                    'title': announcement.title,
+                    'message': announcement.message,
+                    'university_name': announcement.university.name if announcement.university else 'Unknown University',
+                    'university_id': announcement.university.university_id if announcement.university else None,
+                    'created_at': announcement.created_at.isoformat() if announcement.created_at else None,
+                    'valid_from': announcement.valid_from.isoformat() if announcement.valid_from else None,
+                    'valid_to': announcement.valid_to.isoformat() if announcement.valid_to else None,
+                })
+            
+            return JsonResponse({
+                'success': True,
+                'announcements': data,
+                'count': len(data)
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error fetching announcements: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only GET method allowed'
     }, status=405)
 

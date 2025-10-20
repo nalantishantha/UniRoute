@@ -76,19 +76,29 @@ class Command(BaseCommand):
                     request_data = sample_requests[i]
                     student = students[i % len(students)]  # Rotate through available students
                     
+                    # Calculate preferred_time as a future datetime (e.g., 5-10 days from now)
+                    days_ahead = 5 + i  # Each request has a different future date
+                    hours_ahead = 10 + (i * 2)  # Different times of day
+                    preferred_datetime = timezone.now() + timedelta(days=days_ahead, hours=hours_ahead)
+                    
+                    # Calculate expiry date (3 hours before the preferred time)
+                    expiry_datetime = preferred_datetime - timedelta(hours=3)
+                    
                     request_obj = MentoringRequests.objects.create(
                         mentor=mentor,
                         student=student,
                         topic=request_data['topic'],
                         description=request_data['description'],
-                        preferred_time=request_data['preferred_time'],
+                        preferred_time=preferred_datetime.isoformat(),  # Store as ISO string
                         session_type=request_data['session_type'],
                         urgency=request_data['urgency'],
                         status='pending',
-                        expiry_date=timezone.now() + timedelta(days=7)
+                        expiry_date=expiry_datetime  # 3 hours before preferred time
                     )
                     
                     self.stdout.write(f'Created pending request {created_count + 1}: {request_obj.topic}')
+                    self.stdout.write(f'  Preferred time: {preferred_datetime}')
+                    self.stdout.write(f'  Expiry date: {expiry_datetime}')
                     created_count += 1
 
             self.stdout.write(

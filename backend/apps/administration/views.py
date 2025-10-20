@@ -657,6 +657,7 @@ def get_internships(request):
                     'application_deadline': internship.application_deadline.isoformat() if internship.application_deadline else None,
                     'contact_email': internship.contact_email,
                     'contact_phone': internship.contact_phone,
+                    'image_url': internship.image_url,
                     'company': {
                         'company_id': internship.company.company_id,
                         'name': internship.company.name,
@@ -703,6 +704,7 @@ def get_internship_details(request, internship_id):
                 'application_deadline': internship.application_deadline.isoformat() if internship.application_deadline else None,
                 'contact_email': internship.contact_email,
                 'contact_phone': internship.contact_phone,
+                'image_url': internship.image_url,
                 'company': {
                     'company_id': internship.company.company_id,
                     'name': internship.company.name,

@@ -88,6 +88,8 @@ class CourseVideo(models.Model):
     file_size_bytes = models.BigIntegerField(null=True, blank=True)
     thumbnail_url = models.URLField(blank=True, null=True)
     is_preview = models.BooleanField(default=False)
+    average_rating = models.FloatField(default=0.0)  # Average rating for this video
+    rating_count = models.IntegerField(default=0)  # Number of ratings for this video
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -165,3 +167,23 @@ class VideoProgress(models.Model):
 
     def __str__(self):
         return f"{self.enrollment.student.username} - {self.video.title} progress"
+
+
+class VideoRating(models.Model):
+    """Individual video ratings by students"""
+    id = models.AutoField(primary_key=True)
+    student = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='video_ratings')
+    video = models.ForeignKey(CourseVideo, on_delete=models.CASCADE, related_name='ratings')
+    enrollment = models.ForeignKey(CourseEnrollment, on_delete=models.CASCADE, related_name='video_ratings')
+    rating = models.FloatField()  # 1.0 to 5.0, supports half stars (e.g., 4.5)
+    review = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'video_ratings'
+        unique_together = ['student', 'video']  # One rating per student per video
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.student.username} rated {self.video.title}: {self.rating}/5"

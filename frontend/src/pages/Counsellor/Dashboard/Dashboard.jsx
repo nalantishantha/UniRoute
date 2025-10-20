@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import RecentActivities from "./RecentActivities";
 import UpcomingSessions from "./UpcomingSessions";
-import PerformanceMetrics from "./PerformanceMetrics";
 
 export default function Dashboard() {
   const containerVariants = {
@@ -43,8 +42,6 @@ export default function Dashboard() {
         <UpcomingSessions itemVariants={itemVariants} />
       </div>
 
-      {/* Performance Metrics */}
-      <PerformanceMetrics itemVariants={itemVariants} />
     </motion.div>
   );
 }

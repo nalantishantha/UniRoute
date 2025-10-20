@@ -180,3 +180,52 @@ class MentorAvailabilityExceptions(models.Model):
         if self.start_time and self.end_time:
             time_str = f" {self.start_time}-{self.end_time}"
         return f"{self.mentor} - {self.date}{time_str} ({self.get_exception_type_display()})"
+
+
+class VideoCallRoom(models.Model):
+    """Model to track video call rooms for mentoring sessions"""
+    STATUS_CHOICES = [
+        ('waiting', 'Waiting'),
+        ('active', 'Active'),
+        ('ended', 'Ended'),
+    ]
+    
+    room_id = models.CharField(max_length=100, primary_key=True)
+    session = models.ForeignKey('mentoring.MentoringSessions', models.CASCADE, related_name='video_rooms', null=True, blank=True)
+    mentor = models.ForeignKey('mentoring.Mentors', models.CASCADE, related_name='video_rooms')
+    student = models.ForeignKey('students.Students', models.CASCADE, related_name='video_rooms', null=True, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='waiting')
+    started_at = models.DateTimeField(null=True, blank=True)
+    ended_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        managed = True
+        db_table = 'video_call_rooms'
+        
+    def __str__(self):
+        return f"Room {self.room_id} - {self.mentor} with {self.student}"
+
+
+class VideoCallParticipant(models.Model):
+    """Track participants in video call rooms"""
+    ROLE_CHOICES = [
+        ('mentor', 'Mentor'),
+        ('student', 'Student'),
+    ]
+    
+    participant_id = models.AutoField(primary_key=True)
+    room = models.ForeignKey('mentoring.VideoCallRoom', models.CASCADE, related_name='participants')
+    user_id = models.IntegerField()  # Can be mentor_id or student_id
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES)
+    joined_at = models.DateTimeField(auto_now_add=True)
+    left_at = models.DateTimeField(null=True, blank=True)
+    is_online = models.BooleanField(default=True)
+    
+    class Meta:
+        managed = True
+        db_table = 'video_call_participants'
+        unique_together = ['room', 'user_id', 'role']
+        
+    def __str__(self):
+        return f"{self.role} {self.user_id} in room {self.room.room_id}"
