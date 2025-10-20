@@ -20,7 +20,6 @@ import {
   Settings,
   LogOut,
   Bell,
-  Loader,
   AlertCircle,
 } from "lucide-react";
 
@@ -73,8 +72,8 @@ const CareerCounseling = () => {
         {/* Loading State */}
         {loading && (
           <div className="flex flex-col items-center justify-center py-12">
-            <Loader className="h-12 w-12 text-blue-600 animate-spin mb-4" />
-            <p className="text-blue-800 text-lg">Loading counselors...</p>
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-400"></div>
+            <p className="mt-4 text-blue-800 text-lg">Loading counselors...</p>
           </div>
         )}
 
@@ -178,12 +177,12 @@ const CareerCounseling = () => {
                           <p className="text-white/95 text-sm font-semibold drop-shadow-sm">
                             Career Counselor
                           </p>
-                          {counselor.user_details?.is_verified && (
+                          {/* {counselor.user_details?.is_verified && (
                             <div className="flex items-center space-x-1 text-white/90 text-xs drop-shadow-sm mt-1">
                               <CheckCircle className="h-3 w-3" />
                               <span>Verified</span>
                             </div>
-                          )}
+                          )} */}
                         </div>
                       </div>
                     </div>
