@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 from django.utils import timezone
 import json
-from .models import Mentors, MentoringSessions, MentoringSessionEnrollments, MentoringFeedback, PreMentorApplications
+from .models import Mentors, MentoringSessions, MentoringSessionEnrollments, MentoringFeedback, PreMentorApplications, PreMentors
 from apps.accounts.models import Users, UserDetails
 from apps.students.models import Students
 from apps.university_students.models import UniversityStudents
@@ -375,6 +375,40 @@ def university_mentor_requests(request):
             .filter(Q(mentor__approved=0) | Q(mentor__approved__isnull=True))
             .order_by('-created_at')
         )
+        # If no PreMentorApplications found, try to backfill from legacy pre_mentors table
+        if not apps_qs.exists():
+            legacy = PreMentors.objects.select_related('user', 'university_student__university', 'university_student__degree_program') 
+            legacy = legacy.filter(applied=1, university_student__university_id=uid)
+            for pm in legacy:
+                # find or create related mentor by user
+                mentor = Mentors.objects.filter(user_id=pm.user_id).first()
+                if not mentor:
+                    # if a mentor row doesn't exist, skip (we avoid creating to prevent side-effects)
+                    continue
+                if mentor.approved not in (0, None):
+                    continue
+                # ensure a PreMentorApplications row exists
+                PreMentorApplications.objects.get_or_create(
+                    mentor=mentor,
+                    defaults={
+                        'applied': 1,
+                        'form_data': {
+                            'recommendation_from': pm.recommendation,
+                            'skills': [s.strip() for s in (pm.skills or '').split(',') if s.strip()],
+                        }
+                    }
+                )
+            # reload apps_qs after seeding
+            apps_qs = (
+                PreMentorApplications.objects
+                .select_related('mentor__user', 'mentor__university_student__university', 'mentor__university_student__degree_program')
+                .filter(
+                    applied=1,
+                    mentor__university_student__university_id=uid,
+                )
+                .filter(Q(mentor__approved=0) | Q(mentor__approved__isnull=True))
+                .order_by('-created_at')
+            )
 
         data = []
         for app in apps_qs:
@@ -541,3 +575,45 @@ def pre_mentor_status(request):
         'updated_at': getattr(app, 'updated_at', None) if app else None,
     }
     return JsonResponse({'success': True, 'status': status})
+
+
+@csrf_exempt
+@require_http_methods(["POST"]) 
+def submit_pre_mentor_application(request):
+    """Student submits the mentoring application form.
+
+    Inputs (JSON): { mentor_id? , user_id?, form_data: {...} }
+    Behavior:
+      - Find mentor via mentor_id or user_id
+      - Create or update PreMentorApplications for that mentor
+      - Set applied=1 and persist form_data
+      - Do NOT change mentors.approved (stays 0 until university accepts)
+    """
+    try:
+        body = json.loads(request.body or '{}')
+        mentor_id = body.get('mentor_id')
+        user_id = body.get('user_id')
+        form_data = body.get('form_data') or {}
+
+        if not mentor_id and not user_id:
+            return JsonResponse({'success': False, 'message': 'mentor_id or user_id is required'}, status=400)
+
+        if mentor_id:
+            mentor = Mentors.objects.get(mentor_id=mentor_id)
+        else:
+            mentor = Mentors.objects.get(user_id=user_id)
+
+        app, created = PreMentorApplications.objects.get_or_create(mentor=mentor, defaults={'applied': 1, 'form_data': form_data})
+        if not created:
+            app.applied = 1
+            # merge existing form data with new fields (new overrides old)
+            merged = dict(app.form_data or {})
+            merged.update(form_data or {})
+            app.form_data = merged
+            app.save(update_fields=['applied', 'form_data', 'updated_at'])
+
+        return JsonResponse({'success': True, 'pre_mentor_id': app.pre_mentor_id})
+    except Mentors.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Mentor not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)

@@ -20,4 +20,5 @@ urlpatterns = [
 
     # Student-facing status
     path('pre-mentor/status/', views.pre_mentor_status, name='pre_mentor_status'),
+    path('pre-mentor/submit/', views.submit_pre_mentor_application, name='submit_pre_mentor_application'),
 ]

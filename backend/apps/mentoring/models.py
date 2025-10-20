@@ -36,6 +36,25 @@ class PreMentorApplications(models.Model):
         managed = True
         db_table = 'pre_mentor_applications'
 
+
+class PreMentors(models.Model):
+    """Legacy/alternate pre-mentor table used by some flows.
+    We only read from this table to detect applied=1 submissions.
+    """
+    pre_mentor_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey('accounts.Users', models.DO_NOTHING, db_column='user_id')
+    university_student = models.ForeignKey('university_students.UniversityStudents', models.DO_NOTHING, db_column='university_student_id', blank=True, null=True)
+    status = models.CharField(max_length=20, blank=True, null=True)
+    applied = models.IntegerField(blank=True, null=True)
+    recommendation = models.TextField(blank=True, null=True)
+    skills = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(blank=True, null=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        managed = False  # table exists; don't let Django manage it
+        db_table = 'pre_mentors'
+
 class MentoringFeedback(models.Model):
     feedback_id = models.AutoField(primary_key=True)
     session = models.ForeignKey('mentoring.MentoringSessions', models.DO_NOTHING)
