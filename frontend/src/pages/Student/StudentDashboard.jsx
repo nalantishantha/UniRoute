@@ -39,6 +39,7 @@ const StudentDashboard = () => {
   const [recentActivities, setRecentActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('mentoring'); // 'mentoring' or 'tutoring'
 
   useEffect(() => {
     fetchStudentProfile();
@@ -81,9 +82,16 @@ const StudentDashboard = () => {
       // initial fetch
       fetchUpcomingSessions(currentUser.user_id);
       fetchUpcomingRequests(currentUser.user_id);
+      // Fetch tutoring bookings if student_id is available
+      if (studentProfile.studentId) {
+        fetchTutoringBookings(studentProfile.studentId);
+      }
       intervalId = setInterval(() => {
         fetchUpcomingSessions(currentUser.user_id);
         fetchUpcomingRequests(currentUser.user_id);
+        if (studentProfile.studentId) {
+          fetchTutoringBookings(studentProfile.studentId);
+        }
       }, 30000);
     }
     return () => {
@@ -140,16 +148,21 @@ const StudentDashboard = () => {
           isVerified: data.student_data.is_verified,
           joinedDate: data.student_data.created_at,
           lastUpdated: data.student_data.updated_at,
+          studentId: data.student_data.student_id, // Store student_id
         };
 
         setStudentProfile(profileData);
 
-        // After profile is set, fetch mentoring sessions for this student
+        // After profile is set, fetch mentoring sessions and tutoring bookings for this student
         try {
           const currentUserId = currentUser.user_id;
           fetchGroupedMentoringRequests(currentUserId);
+          // Fetch tutoring bookings if student_id is available
+          if (data.student_data.student_id) {
+            fetchTutoringBookings(data.student_data.student_id);
+          }
         } catch (e) {
-          console.warn('Dashboard: failed to fetch mentoring sessions', e);
+          console.warn('Dashboard: failed to fetch mentoring sessions or tutoring bookings', e);
         }
       } else {
         setError(data.message || 'Failed to load profile data');
@@ -285,6 +298,8 @@ const StudentDashboard = () => {
   // Fetch mentoring requests grouped by status from student endpoint
   const [mentoringGrouped, setMentoringGrouped] = useState({ pending: [], accepted: [], declined: [], completed: [] });
   const [upcomingSessions, setUpcomingSessions] = useState([]);
+  const [tutoringGrouped, setTutoringGrouped] = useState({ pending: [], confirmed: [], completed: [], cancelled: [] });
+  const [upcomingTutoringSessions, setUpcomingTutoringSessions] = useState([]);
 
   const fetchGroupedMentoringRequests = async (studentId) => {
     if (!studentId) return;
@@ -394,6 +409,45 @@ const StudentDashboard = () => {
   };
 
   // upcomingEvents removed; sidebar will show a compact Recent Activities list instead
+
+  // Fetch tutoring bookings for the student
+  const fetchTutoringBookings = async (studentId) => {
+    if (!studentId) return;
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/api/tutoring/bookings/student/${studentId}/`);
+      if (!res.ok) {
+        console.warn('Dashboard: tutoring bookings endpoint returned', res.status);
+        return;
+      }
+      const payload = await res.json();
+      if (payload && payload.status === 'success') {
+        const bookings = Array.isArray(payload.bookings) ? payload.bookings : [];
+        
+        // Group tutoring bookings by status
+        const pending = bookings.filter(b => b.status === 'pending');
+        const confirmed = bookings.filter(b => b.status === 'confirmed');
+        const completed = bookings.filter(b => b.status === 'completed');
+        const cancelled = bookings.filter(b => b.status === 'cancelled');
+        
+        setTutoringGrouped({
+          pending,
+          confirmed,
+          completed,
+          cancelled
+        });
+
+        // Get upcoming tutoring sessions (confirmed bookings with future dates)
+        const now = new Date();
+        const upcoming = confirmed.filter(b => {
+          const sessionDate = new Date(b.start_date);
+          return sessionDate >= now;
+        });
+        setUpcomingTutoringSessions(upcoming);
+      }
+    } catch (err) {
+      console.warn('Dashboard: error fetching tutoring bookings', err);
+    }
+  };
 
   // const featuredMentors = [
   //   {
@@ -672,8 +726,36 @@ const StudentDashboard = () => {
                   <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
+
+              {/* Tabs for Mentoring and Tutoring */}
+              <div className="mb-6">
+                <div className="flex space-x-2 border-b border-accent-200">
+                  <button
+                    onClick={() => setActiveTab('mentoring')}
+                    className={`px-4 py-2 font-medium transition-colors ${
+                      activeTab === 'mentoring'
+                        ? 'text-primary-600 border-b-2 border-primary-600'
+                        : 'text-primary-300 hover:text-primary-500'
+                    }`}
+                  >
+                    Mentoring
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('tutoring')}
+                    className={`px-4 py-2 font-medium transition-colors ${
+                      activeTab === 'tutoring'
+                        ? 'text-primary-600 border-b-2 border-primary-600'
+                        : 'text-primary-300 hover:text-primary-500'
+                    }`}
+                  >
+                    Tutoring
+                  </button>
+                </div>
+              </div>
+
+              {/* Mentoring Tab Content */}
+              {activeTab === 'mentoring' && (
               <div className="space-y-4">
-                {/* Upcoming sessions removed from main card; they are merged into Recent Activities sidebar */}
                 {/* Mentoring Requests grouped by status */}
                 <div className="mb-4">
                   <h4 className="mb-2 font-medium text-primary-400">Pending Requests</h4>
@@ -757,34 +839,113 @@ const StudentDashboard = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+              )}
 
-                {/* {recentActivities.map((activity) => {
-                  const IconComponent = activity.icon;
-                  return (
-                    <div
-                      key={activity.id}
-                      className="flex items-start p-4 space-x-4 transition-colors cursor-pointer bg-accent-50 rounded-xl hover:bg-accent-100"
-                    >
-                      <div
-                        className={`p-2 rounded-full bg-white ${activity.color}`}
-                      >
-                        <IconComponent className="w-5 h-5" />
+              {/* Tutoring Tab Content */}
+              {activeTab === 'tutoring' && (
+              <div className="space-y-4">
+                {/* Tutoring Bookings grouped by status */}
+                <div className="mb-4">
+                  <h4 className="mb-2 font-medium text-primary-400">Pending Bookings</h4>
+                  {tutoringGrouped.pending.length === 0 && (
+                    <p className="mb-2 text-sm text-primary-300">No pending bookings</p>
+                  )}
+                  {tutoringGrouped.pending.map((b) => (
+                    <div key={`tutor-pending-${b.booking_id}`} className="flex items-start p-3 mb-2 space-x-4 bg-accent-50 rounded-xl">
+                      <div className="p-2 text-yellow-500 bg-white rounded-full">
+                        <Clock className="w-5 h-5" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-medium text-primary-400">
-                          {activity.title}
-                        </h3>
-                        <p className="mb-1 text-sm text-primary-300">
-                          {activity.description}
+                        <h5 className="font-medium text-primary-400">{b.tutor_name || 'Tutor'}</h5>
+                        <p className="text-sm text-primary-300">{b.subject_name || b.subject}</p>
+                        <p className="text-xs text-primary-300">
+                          Start: {b.start_date ? new Date(b.start_date).toLocaleDateString() : 'TBD'}
+                          {b.start_time && ` at ${b.start_time}`}
                         </p>
                         <p className="text-xs text-primary-300">
-                          {activity.time}
+                          {b.is_recurring ? `Recurring: ${b.sessions_paid || 0} sessions` : 'One-time session'}
                         </p>
                       </div>
+                      <div className="text-sm font-semibold text-yellow-600">Pending</div>
                     </div>
-                  );
-                })} */}
+                  ))}
+                </div>
+
+                <div className="mb-4">
+                  <h4 className="mb-2 font-medium text-primary-400">Confirmed Bookings</h4>
+                  {tutoringGrouped.confirmed.length === 0 && (
+                    <p className="mb-2 text-sm text-primary-300">No confirmed bookings</p>
+                  )}
+                  {tutoringGrouped.confirmed.map((b) => (
+                    <div key={`tutor-confirmed-${b.booking_id}`} className="flex items-start p-3 mb-2 space-x-4 bg-accent-50 rounded-xl">
+                      <div className="p-2 text-green-500 bg-white rounded-full">
+                        <Check className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1">
+                        <h5 className="font-medium text-primary-400">{b.tutor_name || 'Tutor'}</h5>
+                        <p className="text-sm text-primary-300">{b.subject_name || b.subject}</p>
+                        <p className="text-xs text-primary-300">
+                          Start: {b.start_date ? new Date(b.start_date).toLocaleDateString() : 'TBD'}
+                          {b.start_time && ` at ${b.start_time}`}
+                        </p>
+                        <p className="text-xs text-primary-300">
+                          {b.is_recurring ? `${b.sessions_completed || 0}/${b.sessions_paid || 0} sessions completed` : 'One-time session'}
+                        </p>
+                      </div>
+                      <div className="text-sm font-semibold text-green-600">Confirmed</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mb-4">
+                  <h4 className="mb-2 font-medium text-primary-400">Completed Bookings</h4>
+                  {tutoringGrouped.completed.length === 0 && (
+                    <p className="mb-2 text-sm text-primary-300">No completed bookings</p>
+                  )}
+                  {tutoringGrouped.completed.map((b) => (
+                    <div key={`tutor-completed-${b.booking_id}`} className="flex items-start p-3 mb-2 space-x-4 bg-accent-50 rounded-xl">
+                      <div className="p-2 text-gray-500 bg-white rounded-full">
+                        <Check className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1">
+                        <h5 className="font-medium text-primary-400">{b.tutor_name || 'Tutor'}</h5>
+                        <p className="text-sm text-primary-300">{b.subject_name || b.subject}</p>
+                        <p className="text-xs text-primary-300">
+                          Completed: {b.end_date ? new Date(b.end_date).toLocaleDateString() : 'N/A'}
+                        </p>
+                        <p className="text-xs text-primary-300">
+                          {b.sessions_completed || 0} sessions completed
+                        </p>
+                      </div>
+                      <div className="text-sm font-semibold text-gray-600">Completed</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mb-4">
+                  <h4 className="mb-2 font-medium text-primary-400">Cancelled Bookings</h4>
+                  {tutoringGrouped.cancelled.length === 0 && (
+                    <p className="mb-2 text-sm text-primary-300">No cancelled bookings</p>
+                  )}
+                  {tutoringGrouped.cancelled.map((b) => (
+                    <div key={`tutor-cancelled-${b.booking_id}`} className="flex items-start p-3 mb-2 space-x-4 bg-accent-50 rounded-xl">
+                      <div className="p-2 text-red-500 bg-white rounded-full">
+                        <X className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1">
+                        <h5 className="font-medium text-primary-400">{b.tutor_name || 'Tutor'}</h5>
+                        <p className="text-sm text-primary-300">{b.subject_name || b.subject}</p>
+                        <p className="text-xs text-primary-300">
+                          Cancelled on: {b.updated_at ? new Date(b.updated_at).toLocaleDateString() : 'N/A'}
+                        </p>
+                      </div>
+                      <div className="text-sm font-semibold text-red-600">Cancelled</div>
+                    </div>
+                  ))}
+                </div>
               </div>
+              )}
             </div>
           </div>
 
@@ -838,29 +999,62 @@ const StudentDashboard = () => {
             <div className="p-6 bg-white border shadow-lg rounded-2xl border-accent-100">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-semibold font-display text-primary-400">
-                  Upcoming Sessions
+                  Upcoming {activeTab === 'mentoring' ? 'Mentoring' : 'Tutoring'} Sessions
                 </h3>
               </div>
               <div className="space-y-3">
-                {upcomingSessions.length === 0 && (
-                  <p className="text-sm text-primary-300">No upcoming mentoring sessions</p>
+                {activeTab === 'mentoring' && (
+                  <>
+                    {upcomingSessions.length === 0 && (
+                      <p className="text-sm text-primary-300">No upcoming mentoring sessions</p>
+                    )}
+                    {upcomingSessions.slice(0, 5).map((s) => (
+                      <div
+                        key={`side-up-${s.id}`}
+                        className="p-3 transition-colors border cursor-pointer border-accent-100 rounded-xl hover:bg-accent-50"
+                      >
+                        <div className="flex items-start space-x-3">
+                          <div className={`p-2 rounded-full bg-white text-blue-500`}>
+                            <Calendar className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="mb-1 text-sm font-medium text-primary-400">{`Session with ${s.mentor || 'Mentor'}`}</h4>
+                            <p className="text-xs text-primary-300">{s.session_date ? new Date(s.session_date).toLocaleString() : (s.scheduled_at ? new Date(s.scheduled_at).toLocaleString() : '')}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </>
                 )}
-                {upcomingSessions.slice(0, 5).map((s) => (
-                  <div
-                    key={`side-up-${s.id}`}
-                    className="p-3 transition-colors border cursor-pointer border-accent-100 rounded-xl hover:bg-accent-50"
-                  >
-                    <div className="flex items-start space-x-3">
-                      <div className={`p-2 rounded-full bg-white text-blue-500`}>
-                        <Calendar className="w-4 h-4" />
+                {activeTab === 'tutoring' && (
+                  <>
+                    {upcomingTutoringSessions.length === 0 && (
+                      <p className="text-sm text-primary-300">No upcoming tutoring sessions</p>
+                    )}
+                    {upcomingTutoringSessions.slice(0, 5).map((b) => (
+                      <div
+                        key={`side-tutor-${b.booking_id}`}
+                        className="p-3 transition-colors border cursor-pointer border-accent-100 rounded-xl hover:bg-accent-50"
+                      >
+                        <div className="flex items-start space-x-3">
+                          <div className={`p-2 rounded-full bg-white text-green-500`}>
+                            <BookMarked className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="mb-1 text-sm font-medium text-primary-400">{`${b.subject_name || b.subject} with ${b.tutor_name || 'Tutor'}`}</h4>
+                            <p className="text-xs text-primary-300">
+                              {b.start_date ? new Date(b.start_date).toLocaleDateString() : 'TBD'}
+                              {b.start_time && ` at ${b.start_time}`}
+                            </p>
+                            <p className="text-xs text-primary-300">
+                              {b.is_recurring && `${b.sessions_completed || 0}/${b.sessions_paid || 0} sessions`}
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <h4 className="mb-1 text-sm font-medium text-primary-400">{`Upcoming Mentoring Session with ${s.mentor || 'Mentor'}`}</h4>
-                        <p className="text-xs text-primary-300">{s.session_date ? new Date(s.session_date).toLocaleString() : (s.scheduled_at ? new Date(s.scheduled_at).toLocaleString() : '')}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                    ))}
+                  </>
+                )}
               </div>
             </div>
           </div>
