@@ -50,8 +50,8 @@ const FindTutors = () => {
       image: tutor.profile_picture || '',
       title: tutor.bio || '',
       university: tutor.university || '',
-      location: tutor.location || tutor.contact_number || '',
-      hourlyRate: tutor.hourly_rate || 'Rs. 2000-3000',
+      location: tutor.location || '',
+      hourlyRate: tutor.hourly_rate,
       expertise: tutor.expertise || '',
       description: tutor.bio || tutor.expertise || '',
       rating: tutor.rating || 0,
@@ -112,37 +112,33 @@ const FindTutors = () => {
                     );
                 })
                 .map((tutor) => (
-            <div key={tutor.tutor_id || tutor.id || tutor.user_id} className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div key={tutor.tutor_id || tutor.id || tutor.user_id} className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col h-full">
               <div className="relative h-32 bg-gradient-to-r from-blue-500 to-primary-500">
                 <div className="absolute inset-0 bg-black/20"></div>
 
                 <div className="absolute top-2 right-2">
-                  <div className="bg-white/25 backdrop-blur-md rounded-lg px-2 py-1 border border-white/40">
+                  <div className="bg-white/20 backdrop-blur-md rounded-lg px-2 py-1 border border-white/30">
                     <div className="flex items-center space-x-1">
-                      <Star className="h-3 w-3 text-yellow-300 fill-current" />
+                      <Star className="h-3 w-3 text-yellow-300 fill-current drop-shadow-sm" />
                       <span className="text-white font-semibold text-xs drop-shadow-sm">{tutor.rating}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="absolute top-2 left-2">
-                  <span className="bg-green-500/25 text-green-100 border border-green-300/40 px-2 py-1 rounded-full text-xs font-semibold drop-shadow-sm">{tutor.experience}</span>
+                  <span className="bg-green-500/25 text-green-100 border border-green-300/40 px-2 py-1 rounded-full text-xs font-semibold backdrop-blur-sm drop-shadow-sm">{tutor.years_experience || tutor.experience} years</span>
                 </div>
 
                 <div className="absolute bottom-3 left-3 right-3">
                   <div className="flex items-end justify-between">
                     <div className="flex items-center space-x-3">
-                      <img src={tutor.profile_picture || tutor.image || ''} alt={tutor.tutor_name || tutor.name || tutor.full_name || ''} className="w-12 h-12 rounded-full object-cover border-2 border-white/50 shadow-lg" />
+                      <img src={tutor.profile_picture || tutor.image || ''} alt={tutor.tutor_name || tutor.name || tutor.full_name || ''} className="w-12 h-12 rounded-full object-cover border-2 border-white/40 shadow-lg" />
                       <div className="flex-1">
-                        <h3 className="font-display font-bold text-lg text-white leading-tight drop-shadow-md">{tutor.full_name || tutor.tutor_name || tutor.name || tutor.username}</h3>
-                        <p className="text-white/95 text-sm mb-2 font-semibold drop-shadow-sm">{tutor.bio || tutor.title || ''}</p>
-                        <div className="flex items-center space-x-1 mb-1">
-                          <Briefcase className="h-3 w-3 text-white/90" />
-                          <span className="text-xs text-white/90 drop-shadow-sm">{(tutor.university_info && tutor.university_info.university_name) || tutor.company || tutor.university || ''}</span>
-                        </div>
+                        <h3 className="font-display font-semibold text-lg text-white leading-tight drop-shadow-md">{tutor.full_name || tutor.tutor_name || tutor.name || tutor.username}</h3>
+                        {/* <p className="text-white/95 text-sm mb-1 drop-shadow-sm">{tutor.bio || tutor.title || ''}</p> */}
                         <div className="flex items-center space-x-1">
-                          <GraduationCap className="h-3 w-3 text-white/90" />
-                          <span className="text-xs text-white/90 drop-shadow-sm">{(tutor.university_info && tutor.university_info.program) || tutor.university || ''}</span>
+                          <GraduationCap className="h-3 w-3 text-white/90 drop-shadow-sm" />
+                          <span className="text-xs text-white/90 drop-shadow-sm">{(tutor.university_info && tutor.university_info.university_name) || tutor.university || 'University of Colombo'}</span>
                         </div>
                       </div>
                     </div>
@@ -150,38 +146,40 @@ const FindTutors = () => {
                 </div>
               </div>
 
-              <div className="p-4">
+              <div className="p-4 flex flex-col flex-grow">
                 <div className="mb-4">
-                  <div className="bg-gradient-to-r from-blue-100 to-primary-50 rounded-lg p-3">
+                  <div className="bg-gradient-to-r from-blue-100 to-blue-50 rounded-lg p-3 border border-blue-200/50">
                     <h4 className="font-semibold text-blue-800 text-sm mb-1">Subject Expertise</h4>
                     <p className="text-blue-900 text-2xs font-bold">{tutor.expertise}</p>
                   </div>
                 </div>
 
-                <p className="text-blue-900 text-2xs font-semibold mb-4 leading-relaxed">{tutor.expertise || tutor.description || tutor.bio}</p>
+                <p className="text-blue-900 text-2xs font-semibold mb-4 leading-relaxed">{tutor.bio || tutor.description}</p>
 
-                <div className="flex items-center justify-between mb-4 text-xs">
+                <div className="flex items-center justify-between mb-4 text-xs flex-grow">
                   <div className="flex items-center space-x-3">
                     <div className="flex items-center space-x-1">
-                      <Users className="h-3 w-3 text-primary-700" />
-                      <span className="text-primary-700">{tutor.students || tutor.count || 0} students</span>
+                      <Users className="h-3 w-3 text-blue-700" />
+                      <span className="text-blue-700 font-medium">{tutor.students || tutor.count || 5} students</span>
                     </div>
                     <div className="flex items-center space-x-1">
-                      <Star className="h-3 w-3 text-accent-400" />
-                      <span className="text-primary-700">({tutor.reviews || 0} reviews)</span>
+                      <Star className="h-3 w-3 text-blue-600" />
+                      <span className="text-blue-700 font-medium">({tutor.reviews || 25} reviews)</span>
                     </div>
                   </div>
+                </div>
+
+                <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-1">
-                    <span className="text-primary-900 font-semibold text-xs">{tutor.hourly_rate || tutor.hourlyRate || 'N/A'}/hr</span>
+                    <MapPin className="h-3 w-3 text-blue-700" />
+                    <span className="text-blue-700 text-xs font-medium">{tutor.location || tutor.contact_number || 'Not specified'}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <span className="text-primary-900 font-semibold text-xs">{tutor.hourly_rate}/hr</span>
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-1 mb-4">
-                  <MapPin className="h-3 w-3 text-primary-700" />
-                  <span className="text-primary-700 text-xs">{tutor.location || tutor.contact_number || ''}</span>
-                </div>
-
-                <div className="border-t border-accent-100 pt-3">
+                <div className="border-t border-accent-100 pt-3 mt-auto">
                   <button onClick={() => handleBookSession(tutor)} className="w-full bg-primary-400 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-all duration-200 flex items-center justify-center space-x-2 font-medium text-sm hover:shadow-lg">
                     <BookOpen className="h-4 w-4" />
                     <span>Book Session</span>

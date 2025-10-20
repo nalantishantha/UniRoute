@@ -180,12 +180,12 @@ def get_dashboard_stats(request, user_id):
             tutor = Tutors.objects.filter(university_student=university_student).first()
             if tutor:
                 current_tutoring = TutoringPayments.objects.filter(
-                    session__tutor=tutor,
+                    booking__tutor=tutor,
                     paid_at__gte=current_month_start
                 ).aggregate(total=Sum('amount'))['total'] or 0
                 
                 last_tutoring = TutoringPayments.objects.filter(
-                    session__tutor=tutor,
+                    booking__tutor=tutor,
                     paid_at__gte=last_month_start,
                     paid_at__lt=current_month_start
                 ).aggregate(total=Sum('amount'))['total'] or 0
@@ -483,9 +483,9 @@ def get_recent_payments(university_student, cutoff_date):
         tutor = Tutors.objects.filter(university_student=university_student).first()
         if tutor:
             tutoring_payments = TutoringPayments.objects.filter(
-                session__tutor=tutor,
+                booking__tutor=tutor,
                 paid_at__gte=cutoff_date
-            ).select_related('session', 'student__user').order_by('-paid_at')
+            ).select_related('booking', 'student__user').order_by('-paid_at')
             
             for payment in tutoring_payments:
                 try:
@@ -504,7 +504,8 @@ def get_recent_payments(university_student, cutoff_date):
                             'amount': float(payment.amount),
                             'payment_method': payment.payment_method,
                             'student_name': student_name,
-                            'service_type': 'tutoring'
+                            'service_type': 'tutoring',
+                            'booking_topic': payment.booking.topic if payment.booking else 'N/A'
                         }
                     }
                     activities.append(activity)

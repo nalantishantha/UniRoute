@@ -272,6 +272,47 @@ def login_user(request):
                                     }
                                 except UniversityStudents.DoesNotExist:
                                     pass
+                            
+                            elif user_type_name == 'counsellor':
+                                try:
+                                    from apps.counsellors.models import Counsellors
+                                    counsellor = Counsellors.objects.get(user=user)
+                                    additional_info = {
+                                        'counsellor_id': counsellor.counsellor_id,
+                                        'expertise': counsellor.expertise or '',
+                                        'bio': counsellor.bio or '',
+                                        'experience_years': counsellor.experience_years,
+                                        'qualifications': counsellor.qualifications or '',
+                                        'specializations': counsellor.specializations or '',
+                                        'available_for_sessions': counsellor.available_for_sessions,
+                                        'hourly_rate': float(counsellor.hourly_rate) if counsellor.hourly_rate else None
+                                    }
+                                    print(f"User is a counsellor with ID: {counsellor.counsellor_id}")
+                                except Exception as e:
+                                    print(f"Error getting counsellor info: {str(e)}")
+                                    # If counsellor record doesn't exist, create a basic one
+                                    try:
+                                        from apps.counsellors.models import Counsellors
+                                        counsellor = Counsellors.objects.create(
+                                            user=user,
+                                            expertise='',
+                                            bio=f"Counsellor profile for {user_details.full_name if user_details else user.email}",
+                                            available_for_sessions=True
+                                        )
+                                        additional_info = {
+                                            'counsellor_id': counsellor.counsellor_id,
+                                            'expertise': '',
+                                            'bio': counsellor.bio,
+                                            'experience_years': None,
+                                            'qualifications': '',
+                                            'specializations': '',
+                                            'available_for_sessions': True,
+                                            'hourly_rate': None
+                                        }
+                                        print(f"Created new counsellor record with ID: {counsellor.counsellor_id}")
+                                    except Exception as create_error:
+                                        print(f"Error creating counsellor record: {str(create_error)}")
+                                        additional_info = {}
                     
                     # Determine redirect path and dashboard type based on final user type
                     redirect_path = get_redirect_path(final_user_type)
@@ -354,6 +395,7 @@ def get_redirect_path(user_type):
         'uni_student': '/university-student/dashboard',  # Regular university students
         'university': '/university/dashboard',      # University admins
         'company': '/company/dashboard',           # Company users
+        'counsellor': '/counsellor/dashboard',     # Counsellors
         'admin': '/admin/dashboard'                # System admins
     }
     return redirect_paths.get(user_type, '/dashboard')
@@ -368,6 +410,7 @@ def get_dashboard_type(user_type):
         'uni_student': 'university-student',
         'university': 'university',
         'company': 'company',
+        'counsellor': 'counsellor',     # Counsellors use counsellor dashboard
         'admin': 'admin'
     }
     return dashboard_types.get(user_type, 'default')

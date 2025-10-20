@@ -164,11 +164,19 @@ class MentoringRequestsView(View):
             # Parse the scheduled datetime
             try:
                 scheduled_at = datetime.fromisoformat(data['scheduled_at'].replace('Z', '+00:00'))
+                
+                # If the datetime is naive (no timezone), make it timezone-aware using the current timezone
+                if timezone.is_naive(scheduled_at):
+                    scheduled_at = timezone.make_aware(scheduled_at)
+                    
             except ValueError:
                 return JsonResponse({
                     'status': 'error',
                     'message': 'Invalid datetime format'
                 }, status=400)
+            
+            # Calculate expiry date (3 hours before the preferred time)
+            expiry_datetime = scheduled_at - timedelta(hours=3)
             
             # Create the mentoring request
             mentoring_request = MentoringRequests.objects.create(
@@ -181,7 +189,7 @@ class MentoringRequestsView(View):
                 urgency='normal',
                 status='pending',
                 requested_date=timezone.now(),
-                expiry_date=timezone.now() + timedelta(days=7)  # Expires in 7 days
+                expiry_date=expiry_datetime  # 3 hours before the preferred time
             )
             
             return JsonResponse({
@@ -834,6 +842,33 @@ class MentorAvailabilityView(View):
                     'message': 'This time slot overlaps with existing availability'
                 }, status=400)
             
+            # Check for conflicts with tutoring availability
+            from apps.tutoring.models import Tutors, TutorAvailability
+            
+            try:
+                # Find if this user is also a tutor
+                tutor = Tutors.objects.filter(user=mentor.user).first()
+                if tutor:
+                    # Check for overlapping tutoring availability
+                    overlapping_tutoring = TutorAvailability.objects.filter(
+                        tutor=tutor,
+                        day_of_week=data['day_of_week'],
+                        is_active=True
+                    ).filter(
+                        Q(start_time__lt=end_time) & Q(end_time__gt=start_time)
+                    )
+                    
+                    if overlapping_tutoring.exists():
+                        overlap = overlapping_tutoring.first()
+                        day_names = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+                        return JsonResponse({
+                            'status': 'error',
+                            'message': f'Cannot add mentoring availability. You already have a tutoring session scheduled on {day_names[data["day_of_week"]]} from {overlap.start_time.strftime("%H:%M")} to {overlap.end_time.strftime("%H:%M")}.'
+                        }, status=400)
+            except Exception as e:
+                # If there's any error checking tutoring availability, log it but continue
+                print(f"Error checking tutoring availability: {str(e)}")
+            
             # Create availability
             availability = MentorAvailability.objects.create(
                 mentor=mentor,
@@ -908,6 +943,34 @@ class MentorAvailabilityView(View):
                     'status': 'error',
                     'message': 'Start time must be before end time'
                 }, status=400)
+            
+            # Check for conflicts with tutoring availability when updating
+            from apps.tutoring.models import Tutors, TutorAvailability
+            
+            try:
+                mentor = Mentors.objects.get(mentor_id=mentor_id)
+                tutor = Tutors.objects.filter(user=mentor.user).first()
+                if tutor:
+                    # Check for overlapping tutoring availability
+                    overlapping_tutoring = TutorAvailability.objects.filter(
+                        tutor=tutor,
+                        day_of_week=availability.day_of_week,
+                        is_active=True
+                    ).filter(
+                        Q(start_time__lt=availability.end_time) & Q(end_time__gt=availability.start_time)
+                    )
+                    
+                    if overlapping_tutoring.exists():
+                        overlap = overlapping_tutoring.first()
+                        day_names = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+                        return JsonResponse({
+                            'status': 'error',
+                            'message': f'Cannot update mentoring availability. You have a tutoring session scheduled on {day_names[availability.day_of_week]} from {overlap.start_time.strftime("%H:%M")} to {overlap.end_time.strftime("%H:%M")}.'
+                        }, status=400)
+            except Mentors.DoesNotExist:
+                pass
+            except Exception as e:
+                print(f"Error checking tutoring availability: {str(e)}")
             
             availability.save()
             

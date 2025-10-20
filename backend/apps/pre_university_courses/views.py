@@ -7,7 +7,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.utils.text import slugify
 from django.db import models
-from .models import PreUniversityCourse, CourseVideo, CourseEnrollment
+from .models import PreUniversityCourse, CourseVideo, CourseEnrollment, VideoProgress, VideoRating
 from .serializers import (
     serialize_course, serialize_course_video, serialize_enrollment, 
     validate_course_data
@@ -43,8 +43,27 @@ class CourseListCreateView(View):
             if search:
                 courses = courses.filter(title__icontains=search)
             
+            # Determine whether to include related content (videos, resources)
+            include_related = request.GET.get('include_related', 'false').lower() in ['1', 'true', 'yes']
+
             # Serialize courses
-            courses_data = [serialize_course(course, include_videos=False) for course in courses]
+            courses_data = [serialize_course(course, include_videos=include_related, include_resources=include_related) for course in courses]
+
+            # If a student_id is provided, mark which courses are already enrolled by that student
+            student_id = request.GET.get('student_id')
+            if student_id:
+                try:
+                    enrolled_course_ids = list(CourseEnrollment.objects.filter(student__user_id=student_id, course__in=courses).values_list('course_id', flat=True))
+                    for cd in courses_data:
+                        cd['enrolled_by_current_user'] = cd.get('id') in enrolled_course_ids
+                except Exception:
+                    # If anything goes wrong checking enrollments, default to False
+                    for cd in courses_data:
+                        cd['enrolled_by_current_user'] = False
+            else:
+                for cd in courses_data:
+                    # ensure the flag is present for frontend convenience
+                    cd['enrolled_by_current_user'] = False
             
             return JsonResponse({
                 'success': True,
@@ -367,6 +386,184 @@ def course_levels(request):
     })
 
 
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def video_progress(request, course_id, video_id):
+    """Record video progress for an enrollment. Expects student_id, watched_seconds, completed (bool)."""
+    try:
+        data = json.loads(request.body)
+        student_id = data.get('student_id')
+        watched_seconds = data.get('watched_seconds', 0)
+        completed = data.get('completed', False)
+
+        if not student_id:
+            return JsonResponse({'success': False, 'error': 'student_id is required'}, status=400)
+
+        course = get_object_or_404(PreUniversityCourse, id=course_id)
+        video = get_object_or_404(CourseVideo, id=video_id, course=course)
+
+        try:
+            student = Users.objects.get(user_id=student_id)
+        except Users.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Student not found'}, status=404)
+
+        # Ensure enrollment exists
+        enrollment, created = CourseEnrollment.objects.get_or_create(student=student, course=course)
+
+        # Upsert VideoProgress
+        vp, vp_created = VideoProgress.objects.get_or_create(enrollment=enrollment, video=video, defaults={'watched_seconds': watched_seconds, 'completed': completed})
+        if not vp_created:
+            vp.watched_seconds = max(vp.watched_seconds or 0, int(watched_seconds or 0))
+            # once completed, keep completed True
+            if completed:
+                vp.completed = True
+            vp.save()
+
+        # If completed, optionally mark enrollment.completed True and update progress_percent
+        if completed:
+            try:
+                enrollment.completed = True
+                # compute progress percent as fraction of videos completed
+                total_videos = CourseVideo.objects.filter(course=course).count() or 1
+                completed_count = VideoProgress.objects.filter(enrollment=enrollment, completed=True, video__course=course).count()
+                enrollment.progress_percent = min(100.0, (completed_count / total_videos) * 100.0)
+                enrollment.save()
+            except Exception:
+                pass
+
+        return JsonResponse({'success': True, 'video_progress': {'id': vp.id, 'watched_seconds': vp.watched_seconds, 'completed': vp.completed}})
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def enroll_course(request, course_id):
+    """Enroll a student in a course. Expects JSON body with student_id and optional payment_id."""
+    try:
+        data = json.loads(request.body)
+        student_id = data.get('student_id')
+        payment_id = data.get('payment_id')
+
+        if not student_id:
+            return JsonResponse({'success': False, 'error': 'student_id is required'}, status=400)
+
+        course = get_object_or_404(PreUniversityCourse, id=course_id)
+
+        # Ensure student exists
+        try:
+            student = Users.objects.get(user_id=student_id)
+        except Users.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Student not found'}, status=404)
+
+        # Prevent duplicate enrollments
+        existing = CourseEnrollment.objects.filter(student=student, course=course).first()
+        if existing:
+            return JsonResponse({'success': True, 'message': 'Already enrolled', 'enrollment': serialize_enrollment(existing)})
+
+        enrollment = CourseEnrollment.objects.create(
+            student=student,
+            course=course,
+            payment_id=payment_id
+        )
+
+        # Update course enroll_count
+        try:
+            course.enroll_count = CourseEnrollment.objects.filter(course=course).count()
+            course.save()
+        except Exception:
+            pass
+
+        return JsonResponse({'success': True, 'enrollment': serialize_enrollment(enrollment)}, status=201)
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def rate_course(request, course_id):
+    """Record a student's rating and optional review for a course and update course aggregates."""
+    try:
+        data = json.loads(request.body)
+        student_id = data.get('student_id')
+        rating = data.get('rating')
+        review = data.get('review')
+
+        if not student_id:
+            return JsonResponse({'success': False, 'error': 'student_id is required'}, status=400)
+
+        if rating is None:
+            return JsonResponse({'success': False, 'error': 'rating is required'}, status=400)
+
+        try:
+            rating = float(rating)
+        except Exception:
+            return JsonResponse({'success': False, 'error': 'rating must be a number'}, status=400)
+
+        if rating < 0 or rating > 5:
+            return JsonResponse({'success': False, 'error': 'rating must be between 0 and 5'}, status=400)
+
+        course = get_object_or_404(PreUniversityCourse, id=course_id)
+
+        try:
+            student = Users.objects.get(user_id=student_id)
+        except Users.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Student not found'}, status=404)
+
+        # Ensure there's an enrollment record — create if missing
+        enrollment, created = CourseEnrollment.objects.get_or_create(student=student, course=course)
+
+        # Try to verify student progress (completed videos or enrollment.completed).
+        # If progress verification fails or shows no completed videos, we will still accept the rating
+        # but mark the enrollment as completed (progress_percent=100) to reflect the user's rating action.
+        try:
+            progress_completed = CourseEnrollment.objects.filter(id=enrollment.id, completed=True).exists() or \
+                VideoProgress.objects.filter(enrollment=enrollment, completed=True, video__course=course).exists()
+        except Exception:
+            # If we can't verify progress due to an unexpected error, log and proceed to accept rating
+            progress_completed = False
+
+        if not progress_completed:
+            try:
+                enrollment.completed = True
+                enrollment.progress_percent = 100.0
+                enrollment.save()
+            except Exception:
+                # ignore failures updating enrollment; we'll still attempt to save rating
+                pass
+
+        # Update enrollment rating/review
+        enrollment.rating = int(round(rating)) if rating is not None else None
+        if review is not None:
+            enrollment.review = review
+        enrollment.save()
+
+        # Recalculate course aggregates: rating_count and average_rating
+        try:
+            agg = CourseEnrollment.objects.filter(course=course, rating__isnull=False).aggregate(
+                count=models.Count('id'), avg=models.Avg('rating')
+            )
+            course.rating_count = agg['count'] or 0
+            course.average_rating = float(agg['avg'] or 0)
+            course.save()
+        except Exception:
+            pass
+
+        return JsonResponse({'success': True, 'enrollment': serialize_enrollment(enrollment), 'course': serialize_course(course)})
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
 # =================== COURSE CONTENT UPLOAD API ===================
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -596,3 +793,102 @@ class BulkResourceOrderView(View):
                 'success': False,
                 'error': str(e)
             }, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def rate_video(request, course_id, video_id):
+    """Rate an individual video and update video/course averages"""
+    try:
+        data = json.loads(request.body)
+        student_id = data.get('student_id')
+        rating = data.get('rating')
+        review = data.get('review', '')
+
+        if not student_id:
+            return JsonResponse({'success': False, 'error': 'student_id is required'}, status=400)
+
+        if rating is None:
+            return JsonResponse({'success': False, 'error': 'rating is required'}, status=400)
+
+        try:
+            rating = float(rating)
+        except Exception:
+            return JsonResponse({'success': False, 'error': 'rating must be a number'}, status=400)
+
+        if rating < 0 or rating > 5:
+            return JsonResponse({'success': False, 'error': 'rating must be between 0 and 5'}, status=400)
+
+        course = get_object_or_404(PreUniversityCourse, id=course_id)
+        video = get_object_or_404(CourseVideo, id=video_id, course=course)
+
+        try:
+            student = Users.objects.get(user_id=student_id)
+        except Users.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Student not found'}, status=404)
+
+        # Ensure there's an enrollment record
+        enrollment, created = CourseEnrollment.objects.get_or_create(student=student, course=course)
+
+        # Create or update video rating
+        video_rating, rating_created = VideoRating.objects.update_or_create(
+            student=student,
+            video=video,
+            defaults={
+                'enrollment': enrollment,
+                'rating': rating,
+                'review': review
+            }
+        )
+
+        # Recalculate video average rating
+        # Formula: average_rating = total sum of ratings / number of ratings
+        video_agg = VideoRating.objects.filter(video=video).aggregate(
+            count=models.Count('id'),
+            avg=models.Avg('rating')
+        )
+        video.rating_count = video_agg['count'] or 0
+        video.average_rating = float(video_agg['avg'] or 0)
+        video.save()
+
+        # Recalculate course average rating
+        # Formula: course_rating = (sum of all video ratings across all videos) / (total number of video ratings)
+        # This is the average of ALL individual video ratings in the course, not the average of video averages
+        course_rating_agg = VideoRating.objects.filter(video__course=course).aggregate(
+            count=models.Count('id'),
+            avg=models.Avg('rating')
+        )
+        course.rating_count = course_rating_agg['count'] or 0
+        course.average_rating = float(course_rating_agg['avg'] or 0)
+        course.save()
+
+        # Also update enrollment rating (for backward compatibility)
+        enrollment.rating = int(round(rating))
+        if review:
+            enrollment.review = review
+        enrollment.save()
+
+        return JsonResponse({
+            'success': True,
+            'video_rating': {
+                'id': video_rating.id,
+                'rating': video_rating.rating,
+                'review': video_rating.review,
+                'created_at': video_rating.created_at.isoformat()
+            },
+            'video': {
+                'id': video.id,
+                'average_rating': video.average_rating,
+                'rating_count': video.rating_count
+            },
+            'course': {
+                'id': course.id,
+                'average_rating': course.average_rating,
+                'rating_count': course.rating_count
+            }
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

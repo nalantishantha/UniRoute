@@ -588,6 +588,33 @@ def manage_tutor_availability(request, tutor_id):
                     'message': 'Invalid time format. Use HH:MM format'
                 }, status=400)
             
+            # Check for conflicts with mentoring availability
+            from apps.mentoring.models import Mentors, MentorAvailability
+            from django.db.models import Q
+            
+            try:
+                # Find if this user is also a mentor
+                mentor = Mentors.objects.filter(user=tutor.user).first()
+                if mentor:
+                    # Check for overlapping mentoring availability
+                    overlapping_mentoring = MentorAvailability.objects.filter(
+                        mentor=mentor,
+                        day_of_week=data['day_of_week'],
+                        is_active=True
+                    ).filter(
+                        Q(start_time__lt=end_time) & Q(end_time__gt=start_time)
+                    )
+                    
+                    if overlapping_mentoring.exists():
+                        overlap = overlapping_mentoring.first()
+                        return JsonResponse({
+                            'status': 'error',
+                            'message': f'Cannot add tutoring availability. You already have a mentoring session scheduled on this day from {overlap.start_time.strftime("%H:%M")} to {overlap.end_time.strftime("%H:%M")}.'
+                        }, status=400)
+            except Exception as e:
+                # If there's any error checking mentoring availability, log it but continue
+                print(f"Error checking mentoring availability: {str(e)}")
+            
             # Create availability
             from apps.student_results.models import AlSubjects
             subject = None
@@ -664,6 +691,31 @@ def manage_tutor_availability(request, tutor_id):
                         'status': 'error',
                         'message': 'Invalid time format. Use HH:MM format'
                     }, status=400)
+            
+            # Check for conflicts with mentoring availability when updating
+            from apps.mentoring.models import Mentors, MentorAvailability
+            from django.db.models import Q
+            
+            try:
+                mentor = Mentors.objects.filter(user=tutor.user).first()
+                if mentor:
+                    # Check for overlapping mentoring availability (excluding current slot)
+                    overlapping_mentoring = MentorAvailability.objects.filter(
+                        mentor=mentor,
+                        day_of_week=availability.day_of_week,
+                        is_active=True
+                    ).filter(
+                        Q(start_time__lt=availability.end_time) & Q(end_time__gt=availability.start_time)
+                    )
+                    
+                    if overlapping_mentoring.exists():
+                        overlap = overlapping_mentoring.first()
+                        return JsonResponse({
+                            'status': 'error',
+                            'message': f'Cannot update tutoring availability. You have a mentoring session scheduled on this day from {overlap.start_time.strftime("%H:%M")} to {overlap.end_time.strftime("%H:%M")}.'
+                        }, status=400)
+            except Exception as e:
+                print(f"Error checking mentoring availability: {str(e)}")
             
             if 'is_recurring' in data:
                 availability.is_recurring = data['is_recurring']
@@ -922,9 +974,8 @@ def create_tutoring_booking(request):
             
             booking = TutoringBooking.objects.create(**booking_data)
             
-            # Calculate payment amount
-            # Base rate per session (this should come from tutor's pricing)
-            base_rate = Decimal('2000.00')  # Rs. 2000 per session - should be dynamic
+            # Calculate payment amount using tutor's hourly rate
+            base_rate = booking.tutor.hourly_rate  # Dynamic rate from tutor profile
             
             if payment_type == 'monthly':
                 amount = base_rate * 4 * Decimal('0.95')  # 5% discount
@@ -972,21 +1023,33 @@ def confirm_tutoring_booking_payment(request, booking_id):
             }, status=400)
         
         # Validate payment data
-        required_payment_fields = ['amount', 'payment_method', 'transaction_id']
+        required_payment_fields = ['amount', 'payment_method']
         for field in required_payment_fields:
             if field not in data:
                 return JsonResponse({'status': 'error', 'message': f'{field} is required'}, status=400)
         
         with transaction.atomic():
             # Create payment record
-            payment = TutoringPayments.objects.create(
-                student=booking.student,
-                session=None,  # This is for recurring booking, not single session
-                amount=Decimal(str(data['amount'])),
-                payment_method=data['payment_method'],
-                paid_at=timezone.now(),
-                created_at=timezone.now()
-            )
+            payment_data = {
+                'student': booking.student,
+                'booking': booking,
+                'amount': Decimal(str(data['amount'])),
+                'payment_method': data['payment_method'],
+                'paid_at': timezone.now(),
+                'created_at': timezone.now()
+            }
+            
+            # Add optional card payment details if provided
+            if data.get('card_type'):
+                payment_data['card_type'] = data['card_type']
+            if data.get('card_holder_name'):
+                payment_data['card_holder_name'] = data['card_holder_name']
+            if data.get('card_last_four'):
+                payment_data['card_last_four'] = data['card_last_four']
+            if data.get('transaction_id'):
+                payment_data['transaction_id'] = data['transaction_id']
+            
+            payment = TutoringPayments.objects.create(**payment_data)
             
             # Update booking status to confirmed
             booking.status = 'confirmed'

@@ -240,12 +240,12 @@ const ProfilePage = () => {
                       Status: {studentData.is_active ? 'Active' : 'Inactive'}
                     </span>
                   </div>
-                  {studentData.is_verified && (
+                  {/* {studentData.is_verified && (
                     <div className="inline-flex items-center bg-white/20 backdrop-blur-md rounded-lg px-4 py-2 border border-white/30">
                       <Award className="h-4 w-4 mr-2" />
                       <span className="font-semibold">Verified</span>
                     </div>
-                  )}
+                  )} */}
                 </div>
               </div>
 
@@ -398,11 +398,11 @@ const ProfilePage = () => {
                   }`}>
                     {studentData.is_active ? 'Active' : 'Inactive'}
                   </span>
-                  {studentData.is_verified && (
+                  {/* {studentData.is_verified && (
                     <span className="px-2 py-1 rounded text-sm bg-blue-100 text-blue-800">
                       ✓ Verified
                     </span>
-                  )}
+                  )} */}
                 </div>
               </div>
 

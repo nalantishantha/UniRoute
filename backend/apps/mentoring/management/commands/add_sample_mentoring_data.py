@@ -72,7 +72,14 @@ class Command(BaseCommand):
             
             # Random dates
             requested_date = timezone.now() - timedelta(days=random.randint(1, 30))
-            expiry_date = requested_date + timedelta(days=7)
+            
+            # Calculate preferred_time as a future datetime
+            days_ahead = random.randint(1, 14)
+            hours_ahead = random.randint(9, 17)
+            preferred_datetime = timezone.now() + timedelta(days=days_ahead, hours=hours_ahead)
+            
+            # Calculate expiry date (3 hours before the preferred time)
+            expiry_datetime = preferred_datetime - timedelta(hours=3)
             
             # Random status with realistic distribution
             status_weights = {
@@ -92,18 +99,12 @@ class Command(BaseCommand):
                 student=student,
                 topic=topic,
                 description=description,
-                preferred_time=random.choice([
-                    'Morning (9AM - 12PM)',
-                    'Afternoon (1PM - 5PM)',
-                    'Evening (6PM - 9PM)',
-                    'Weekend mornings',
-                    'Flexible'
-                ]),
+                preferred_time=preferred_datetime.isoformat(),  # Store as ISO string
                 session_type=random.choice(['online', 'physical']),
                 urgency=random.choice(['low', 'medium', 'high']),
                 status=status,
                 requested_date=requested_date,
-                expiry_date=expiry_date,
+                expiry_date=expiry_datetime,  # 3 hours before preferred time
                 decline_reason='Not available during requested time' if status == 'declined' else None
             )
             requests_created += 1

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import {
   Calendar,
   Clock,
@@ -8,32 +8,26 @@ import {
   Send,
   AlertCircle,
   CheckCircle,
-  DollarSign,
   BookOpen,
   Users
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card";
 import Button from "../ui/Button";
 import { tutoringAPI } from "../../utils/tutoringAPI";
+import PaymentModal from "./PaymentModal";
 
 const TutoringSlotBooking = ({ tutorId, tutorName, onBookingSuccess }) => {
   const [availableSlots, setAvailableSlots] = useState([]);
-  const [subjects, setSubjects] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [showBookingForm, setShowBookingForm] = useState(false);
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [pendingBooking, setPendingBooking] = useState(null);
   const [bookingData, setBookingData] = useState({
-    subject_id: "",
     topic: "",
     description: "",
     payment_type: "single",
     start_date: ""
-  });
-  const [paymentData, setPaymentData] = useState({
-    payment_method: "card",
-    transaction_id: ""
   });
   const [message, setMessage] = useState({ type: "", text: "" });
 
@@ -48,28 +42,18 @@ const TutoringSlotBooking = ({ tutorId, tutorName, onBookingSuccess }) => {
   const fetchAvailableSlots = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await tutoringAPI.getAvailableSlots(tutorId, bookingData.subject_id || null);
+      const data = await tutoringAPI.getAvailableSlots(tutorId, null);
       setAvailableSlots(data.available_slots);
     } catch (error) {
       setMessage({ type: "error", text: error.message });
     } finally {
       setLoading(false);
     }
-  }, [tutorId, bookingData.subject_id]);
-
-  const fetchSubjects = useCallback(async () => {
-    try {
-      const data = await tutoringAPI.getSubjects();
-      setSubjects(data.subjects || []);
-    } catch (error) {
-      console.error("Failed to fetch subjects:", error);
-    }
-  }, []);
+  }, [tutorId]);
 
   useEffect(() => {
     fetchAvailableSlots();
-    fetchSubjects();
-  }, [fetchAvailableSlots, fetchSubjects]);
+  }, [fetchAvailableSlots]);
 
   const handleSlotSelect = (slot) => {
     setSelectedSlot(slot);
@@ -119,13 +103,13 @@ const TutoringSlotBooking = ({ tutorId, tutorName, onBookingSuccess }) => {
 
     try {
       setLoading(true);
+      setMessage({ type: "", text: "" }); // Clear previous messages
       
-      // Create booking
-      const data = await tutoringAPI.createBooking({
+      console.log('Creating booking with data:', {
         student_id: user.student_id,
         tutor_id: tutorId,
         availability_slot_id: selectedSlot.availability_id,
-        subject_id: bookingData.subject_id || selectedSlot.subject,
+        subject_id: selectedSlot.subject,
         topic: bookingData.topic,
         description: bookingData.description,
         payment_type: bookingData.payment_type,
@@ -133,40 +117,43 @@ const TutoringSlotBooking = ({ tutorId, tutorName, onBookingSuccess }) => {
         is_recurring: true
       });
       
+      // Create booking
+      const data = await tutoringAPI.createBooking({
+        student_id: user.student_id,
+        tutor_id: tutorId,
+        availability_slot_id: selectedSlot.availability_id,
+        subject_id: selectedSlot.subject,
+        topic: bookingData.topic,
+        description: bookingData.description,
+        payment_type: bookingData.payment_type,
+        start_date: bookingData.start_date,
+        is_recurring: true
+      });
+      
+      console.log('Booking created successfully:', data);
+      
       if (data.status === 'success') {
-        setPendingBooking(data.booking);
-        setShowBookingForm(false);
-        setShowPaymentForm(true);
-        setMessage({ 
-          type: "success", 
-          text: `Booking created! Amount: Rs. ${data.payment_required.amount.toFixed(2)}. Please complete payment to confirm.` 
+        setPendingBooking({
+          ...data.booking,
+          payment_amount: data.payment_required.amount,
+          sessions: data.payment_required.sessions
         });
+        setShowBookingForm(false);
+        setShowPaymentModal(true);
       }
     } catch (error) {
-      setMessage({ type: "error", text: error.message });
+      console.error('Booking creation error:', error);
+      setMessage({ type: "error", text: error.message || "Failed to create booking" });
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePaymentSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!paymentData.transaction_id.trim()) {
-      setMessage({ type: "error", text: "Transaction ID is required" });
-      return;
-    }
-
+  const handlePaymentSuccess = async (paymentDetails) => {
     try {
       setLoading(true);
       
-      const amount = calculateAmount();
-      
-      const data = await tutoringAPI.confirmPayment(pendingBooking.booking_id, {
-        amount: amount,
-        payment_method: paymentData.payment_method,
-        transaction_id: paymentData.transaction_id
-      });
+      const data = await tutoringAPI.confirmPayment(pendingBooking.booking_id, paymentDetails);
       
       if (data.status === 'success') {
         setMessage({ 
@@ -174,13 +161,14 @@ const TutoringSlotBooking = ({ tutorId, tutorName, onBookingSuccess }) => {
           text: "Payment confirmed! Your recurring tutoring session is now active." 
         });
         resetBookingForm();
-        fetchAvailableSlots(); // Refresh slots
+        fetchAvailableSlots(); // Refresh slots to hide booked ones
         if (onBookingSuccess) {
           onBookingSuccess(data);
         }
       }
     } catch (error) {
       setMessage({ type: "error", text: error.message });
+      throw error; // Re-throw to let modal handle it
     } finally {
       setLoading(false);
     }
@@ -189,18 +177,13 @@ const TutoringSlotBooking = ({ tutorId, tutorName, onBookingSuccess }) => {
   const resetBookingForm = () => {
     setSelectedSlot(null);
     setShowBookingForm(false);
-    setShowPaymentForm(false);
+    setShowPaymentModal(false);
     setPendingBooking(null);
     setBookingData({
-      subject_id: "",
       topic: "",
       description: "",
       payment_type: "single",
       start_date: ""
-    });
-    setPaymentData({
-      payment_method: "card",
-      transaction_id: ""
     });
   };
 
@@ -215,46 +198,25 @@ const TutoringSlotBooking = ({ tutorId, tutorName, onBookingSuccess }) => {
   }, {});
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <BookOpen className="w-5 h-5" />
-          <span>Available Recurring Tutoring Slots</span>
-        </CardTitle>
-        {tutorName && (
-          <p className="text-neutral-grey">
-            Book recurring weekly tutoring sessions with {tutorName}
-          </p>
-        )}
-      </CardHeader>
+    <>
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <BookOpen className="w-5 h-5" />
+            <span>Available Recurring Tutoring Slots</span>
+          </CardTitle>
+          {tutorName && (
+            <p className="text-neutral-grey">
+              Book recurring weekly tutoring sessions with {tutorName}
+            </p>
+          )}
+        </CardHeader>
 
       <CardContent className="space-y-6">
-        {/* Subject Filter */}
-        <div>
-          <label className="block text-sm font-medium mb-2">
-            Filter by Subject (Optional)
-          </label>
-          <select
-            value={bookingData.subject_id}
-            onChange={(e) => setBookingData(prev => ({ ...prev, subject_id: e.target.value }))}
-            className="w-full p-3 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
-          >
-            <option value="">All Subjects</option>
-            {subjects.map(subject => (
-              <option key={subject.subject_id} value={subject.subject_id}>
-                {subject.subject_name}
-              </option>
-            ))}
-          </select>
-        </div>
-
         {/* Message Display */}
         <AnimatePresence>
           {message.text && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+            <div
               className={`p-3 rounded-lg flex items-center space-x-2 ${
                 message.type === "success" 
                   ? "bg-green-50 border border-green-200 text-green-700"
@@ -273,12 +235,12 @@ const TutoringSlotBooking = ({ tutorId, tutorName, onBookingSuccess }) => {
               >
                 ×
               </button>
-            </motion.div>
+            </div>
           )}
         </AnimatePresence>
 
         {/* Available Slots */}
-        {loading && !showBookingForm && !showPaymentForm ? (
+        {loading && !showBookingForm ? (
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
           </div>
@@ -302,10 +264,8 @@ const TutoringSlotBooking = ({ tutorId, tutorName, onBookingSuccess }) => {
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {daySlots.map(slot => (
-                      <motion.button
+                      <button
                         key={slot.availability_id}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
                         onClick={() => handleSlotSelect(slot)}
                         className={`p-4 border rounded-lg hover:border-primary-400 hover:bg-primary-50 transition-all text-left ${
                           selectedSlot && selectedSlot.availability_id === slot.availability_id
@@ -331,7 +291,7 @@ const TutoringSlotBooking = ({ tutorId, tutorName, onBookingSuccess }) => {
                             {slot.subject_name}
                           </div>
                         )}
-                      </motion.button>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -342,13 +302,8 @@ const TutoringSlotBooking = ({ tutorId, tutorName, onBookingSuccess }) => {
 
         {/* Booking Form */}
         <AnimatePresence>
-          {showBookingForm && selectedSlot && !showPaymentForm && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden"
-            >
+          {showBookingForm && selectedSlot && (
+            <div className="overflow-hidden">
               <Card className="border-primary-200">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
@@ -452,100 +407,30 @@ const TutoringSlotBooking = ({ tutorId, tutorName, onBookingSuccess }) => {
                   </form>
                 </CardContent>
               </Card>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Payment Form */}
-        <AnimatePresence>
-          {showPaymentForm && pendingBooking && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden"
-            >
-              <Card className="border-green-200">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <DollarSign className="w-5 h-5" />
-                    <span>Complete Payment</span>
-                  </CardTitle>
-                  <p className="text-neutral-grey text-sm">
-                    Amount: Rs. {calculateAmount().toFixed(2)}
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handlePaymentSubmit} className="space-y-4">
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                      <h4 className="font-medium text-blue-900 mb-2">Booking Summary</h4>
-                      <div className="text-sm text-blue-800 space-y-1">
-                        <p>• Day: {pendingBooking.day_of_week}</p>
-                        <p>• Time: {pendingBooking.time_slot}</p>
-                        <p>• Sessions: {pendingBooking.sessions_paid}</p>
-                        <p>• Payment Type: {pendingBooking.payment_type}</p>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Payment Method *
-                      </label>
-                      <select
-                        value={paymentData.payment_method}
-                        onChange={(e) => setPaymentData(prev => ({ ...prev, payment_method: e.target.value }))}
-                        className="w-full p-3 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
-                        required
-                      >
-                        <option value="card">Credit/Debit Card</option>
-                        <option value="bank_transfer">Bank Transfer</option>
-                        <option value="mobile_payment">Mobile Payment</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Transaction ID *
-                      </label>
-                      <input
-                        type="text"
-                        value={paymentData.transaction_id}
-                        onChange={(e) => setPaymentData(prev => ({ ...prev, transaction_id: e.target.value }))}
-                        placeholder="Enter transaction/reference ID"
-                        className="w-full p-3 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
-                        required
-                      />
-                    </div>
-
-                    <div className="flex space-x-3">
-                      <Button
-                        type="submit"
-                        disabled={loading}
-                        className="flex items-center space-x-2 bg-green-600 hover:bg-green-700"
-                      >
-                        {loading ? (
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        ) : (
-                          <CheckCircle className="w-4 h-4" />
-                        )}
-                        <span>Confirm Payment</span>
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={resetBookingForm}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </form>
-                </CardContent>
-              </Card>
-            </motion.div>
+            </div>
           )}
         </AnimatePresence>
       </CardContent>
     </Card>
+
+    {/* Payment Modal - Rendered outside Card to avoid z-index/overflow issues */}
+    {pendingBooking && (
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => {
+          setShowPaymentModal(false);
+          setMessage({ type: "info", text: "Payment cancelled. Booking is pending." });
+        }}
+        bookingDetails={{
+          tutorName: tutorName,
+          packageName: paymentTypes.find(pt => pt.value === bookingData.payment_type)?.label || 'Single Session',
+          sessions: pendingBooking.sessions || 1,
+          amount: pendingBooking.payment_amount || calculateAmount()
+        }}
+        onPaymentSuccess={handlePaymentSuccess}
+      />
+    )}
+  </>
   );
 };
 

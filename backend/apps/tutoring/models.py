@@ -127,6 +127,13 @@ class Tutors(models.Model):
     university_student = models.ForeignKey('university_students.UniversityStudents', models.DO_NOTHING, blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
     expertise = models.CharField(max_length=255, blank=True, null=True)
+    hourly_rate = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=2000.00,
+        validators=[MinValueValidator(0)],
+        help_text="Tutor's rate per hour in LKR"
+    )
     rating = models.DecimalField(max_digits=2, decimal_places=1, blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
 
