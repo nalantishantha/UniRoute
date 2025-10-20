@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import AdminLayout from '../../../components/common/Admin/AdminLayout';
 
 const ProgramForm = () => {
   const { id } = useParams();
@@ -145,19 +146,23 @@ const ProgramForm = () => {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">
-            {isEdit ? 'Edit Program' : 'Add New Program'}
-          </h1>
-          <button
-            onClick={() => navigate('/admin/programs')}
-            className="px-4 py-2 text-gray-600 hover:text-gray-800"
-          >
-            ← Back to Programs
-          </button>
-        </div>
+    <AdminLayout 
+      pageTitle={isEdit ? "Edit Program" : "Add New Program"}
+      pageDescription="Manage academic program information and details"
+    >
+      <div className="max-w-6xl mx-auto">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-2xl font-bold text-gray-900">
+              {isEdit ? 'Edit Program' : 'Add New Program'}
+            </h1>
+            <button
+              onClick={() => navigate('/admin/programs')}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800"
+            >
+              ← Back to Programs
+            </button>
+          </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Basic Information */}
@@ -575,8 +580,9 @@ const ProgramForm = () => {
             </button>
           </div>
         </form>
+        </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 

@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 from django.utils import timezone
+from django.contrib.auth.hashers import make_password
 import json
 from .models import (
     Universities,
@@ -18,16 +19,41 @@ from django.db.utils import OperationalError, ProgrammingError
 
 
 def universities_list(request):
-    universities = Universities.objects.all()[:10]
-    data = []
-    for uni in universities:
-        data.append({
-            'id': uni.university_id,
-            'name': uni.name,
-            'location': uni.location,
-            'district': uni.district
-        })
-    return JsonResponse({'universities': data, 'count': len(data)})
+    """Get all universities"""
+    if request.method == 'GET':
+        try:
+            universities = Universities.objects.filter(is_active=1)
+            data = []
+            for uni in universities:
+                data.append({
+                    'university_id': uni.university_id,
+                    'id': uni.university_id,  # Also include 'id' for compatibility
+                    'name': uni.name,
+                    'location': uni.location,
+                    'district': uni.district,
+                    'address': uni.address,
+                    'description': uni.description,
+                    'contact_email': uni.contact_email,
+                    'phone_number': uni.phone_number,
+                    'website': uni.website,
+                    'ugc_ranking': uni.ugc_ranking
+                })
+            
+            return JsonResponse({
+                'results': data,
+                'count': len(data)
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error fetching universities: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only GET method allowed'
+    }, status=405)
 
 
 # ------------------------- Announcements CRUD -------------------------

@@ -1,0 +1,255 @@
+import { useState, useEffect } from "react";
+import { NavLink } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  LayoutDashboard,
+  GraduationCap,
+  DollarSign,
+  User,
+  Calendar,
+  LogOut,
+  Menu,
+  X,
+  ChevronRight,
+  Settings,
+  Briefcase,
+} from "lucide-react";
+import { logout, getCurrentUser } from "../../utils/auth";
+import { cn } from "../../utils/cn";
+import logo from "../../assets/logo.png";
+
+const navigation = [
+  {
+    name: "Dashboard",
+    href: "/pre-mentor/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    name: "Tutoring",
+    href: "/pre-mentor/tutoring",
+    icon: GraduationCap,
+  },
+  {
+    name: "Internships",
+    href: "/pre-mentor/internships",
+    icon: Briefcase,
+  },
+  {
+    name: "Earnings",
+    href: "/pre-mentor/earnings",
+    icon: DollarSign
+  },
+  {
+    name: "Profile",
+    href: "/pre-mentor/profile",
+    icon: User
+  },
+  {
+    name: "Calendar",
+    href: "/pre-mentor/calendar",
+    icon: Calendar
+  },
+  {
+    name: "Settings",
+    href: "/pre-mentor/settings",
+    icon: Settings
+  },
+];
+
+export default function PreMentorSidebar({ isOpen, setIsOpen }) {
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const checkDesktop = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+
+    checkDesktop();
+    window.addEventListener("resize", checkDesktop);
+
+    return () => window.removeEventListener("resize", checkDesktop);
+  }, []);
+
+  const sidebarVariants = {
+    open: {
+      x: 0,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+      },
+    },
+    closed: {
+      x: "-100%",
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+      },
+    },
+  };
+
+  const itemVariants = {
+    open: {
+      x: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+      },
+    },
+    closed: {
+      x: -20,
+      opacity: 0,
+    },
+  };
+
+
+
+  const handleLogout = async () => {
+    try {
+      const user = getCurrentUser();
+      if (user) {
+        await logout(user.user_id);
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
+  return (
+    <>
+      <AnimatePresence>
+        {isOpen && !isDesktop && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsOpen(false)}
+            className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
+          />
+        )}
+      </AnimatePresence>
+
+      <motion.div
+        variants={!isDesktop ? sidebarVariants : {}}
+        animate={isOpen ? "open" : "closed"}
+        className={cn(
+          "h-full w-72 bg-gradient-to-b from-primary-900 to-primary-800 shadow-2xl",
+          isDesktop ? "relative" : "fixed top-0 left-0 z-50"
+        )}
+      >
+        <div className="flex h-full flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b border-primary-700/50">
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="flex items-center space-x-3"
+            >
+              <div className="overflow-hidden w-11 h-11 bg-gradient-to-br from-secondary to-warning rounded-xl">
+                <img
+                  src={logo}
+                  alt="UniRoutes Logo"
+                  className="object-cover w-full h-full"
+                />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white">UniRoute</h1>
+                <p className="text-sm text-primary-200">Pre-Mentor Portal</p>
+              </div>
+            </motion.div>
+
+            {!isDesktop && (
+              <button
+                onClick={() => setIsOpen(false)}
+                className={cn(
+                  "p-2 rounded-lg hover:bg-primary-700 transition-colors",
+                  isDesktop ? "hidden" : "block"
+                )}
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
+            )}
+          </div>
+
+
+
+          {/* Navigation */}
+          <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+            {navigation.map((item, index) => {
+              return (
+                <motion.div
+                  key={item.name}
+                  variants={itemVariants}
+                  initial="closed"
+                  animate="open"
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <NavLink
+                    to={item.href}
+                    onClick={() => !isDesktop && setIsOpen(false)}
+                    className={({ isActive }) =>
+                      cn(
+                        "group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 relative overflow-hidden",
+                        isActive
+                          ? "bg-gradient-to-r from-secondary to-warning text-neutral-black shadow-lg"
+                          : "text-primary-100 hover:bg-primary-700/50 hover:text-white"
+                      )
+                    }
+                  >
+                    {({ isActive }) => (
+                      <>
+                        {isActive && (
+                          <motion.div
+                            layoutId="activeTab"
+                            className="absolute inset-0 bg-gradient-to-r from-secondary to-warning rounded-xl"
+                            initial={false}
+                            transition={{
+                              type: "spring",
+                              stiffness: 500,
+                              damping: 30,
+                            }}
+                          />
+                        )}
+                        <div className="relative flex items-center w-full">
+                          <item.icon
+                            className={cn(
+                              "w-5 h-5 mr-3 transition-transform group-hover:scale-110",
+                              isActive
+                                ? "text-neutral-black"
+                                : "text-primary-200"
+                            )}
+                          />
+                          <span className="flex-1">{item.name}</span>
+                          {isActive && (
+                            <ChevronRight className="w-4 h-4 text-neutral-black" />
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </NavLink>
+                </motion.div>
+              );
+            })}
+          </nav>
+
+          {/* Logout Button */}
+          <div className="p-4 space-y-2 border-t border-primary-700/50">
+            <motion.button
+              onClick={handleLogout}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex items-center w-full px-4 py-3 text-sm font-medium transition-all duration-200 text-primary-100 hover:bg-primary-700/50 hover:text-white rounded-xl group"
+            >
+              <LogOut className="w-5 h-5 mr-3 transition-transform group-hover:scale-110" />
+              Log Out
+            </motion.button>
+          </div>
+        </div>
+      </motion.div>
+    </>
+  );
+}

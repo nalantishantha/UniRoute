@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { getCurrentUser, requireAuth, logout } from "../../../utils/auth";
 import AdminSidebar from "./Sidebar";
 import AdminHeader from "./AdminHeader";
 
@@ -10,33 +11,54 @@ const AdminLayout = ({
 }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Get user data from localStorage or your auth system
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
-      } catch (error) {
-        console.error("Error parsing user data:", error);
+    // Check authentication and user type
+    const checkAuth = () => {
+      const currentUser = getCurrentUser();
+      
+      if (!currentUser) {
+        console.log('No authenticated user found, redirecting to login');
+        navigate('/login', { replace: true });
+        return;
       }
-    }
-  }, []);
+      
+      if (currentUser.user_type !== 'admin') {
+        console.warn('Access denied: User is not an admin');
+        navigate('/login', { replace: true });
+        return;
+      }
+      
+      setUser(currentUser);
+      setIsLoading(false);
+    };
+
+    checkAuth();
+  }, [navigate]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const handleLogout = () => {
-    // Clear user data
-    localStorage.removeItem("user");
-    localStorage.removeItem("authToken");
-
-    // Redirect to login
-    navigate("/login");
+  const handleLogout = async () => {
+    if (window.confirm('Are you sure you want to logout?')) {
+      await logout();
+    }
   };
+
+  // Show loading while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading admin dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F5F7FA]">

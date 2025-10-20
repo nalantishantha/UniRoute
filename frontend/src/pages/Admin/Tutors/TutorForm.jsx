@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getCurrentUser } from '../../../utils/auth';
+import AdminLayout from '../../../components/common/Admin/AdminLayout';
 import {
   GraduationCap,
   ChevronLeft,
@@ -198,16 +199,23 @@ const TutorForm = () => {
 
   if (loading && isEditMode) {
     return (
-      <div className="p-6">
+      <AdminLayout 
+        pageTitle="Loading..."
+        pageDescription="Loading tutor information"
+      >
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="p-6">
+    <AdminLayout 
+      pageTitle={isEditMode ? "Edit Tutor" : "Add New Tutor"}
+      pageDescription="Manage tutor information and details"
+    >
+      <div className="max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
@@ -623,7 +631,8 @@ const TutorForm = () => {
           </div>
         </div>
       </form>
-    </div>
+      </div>
+    </AdminLayout>
   );
 };
 

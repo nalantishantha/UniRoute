@@ -2,6 +2,11 @@ from django.urls import path
 from . import views as company_views
 
 urlpatterns = [
+    # Company Registration Requests
+    path('requests/', company_views.company_requests_list, name='company_requests_list'),
+    path('requests/<int:request_id>/approve/', company_views.approve_company_request, name='approve_company_request'),
+    path('requests/<int:request_id>/reject/', company_views.reject_company_request, name='reject_company_request'),
+    
     # Company Events
     path('events/', company_views.get_company_events, name='get_company_events'),
     path('events/create/', company_views.create_company_event,

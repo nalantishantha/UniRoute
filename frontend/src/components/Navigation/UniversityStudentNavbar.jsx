@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { MessageSquare } from "lucide-react";
 import { useChatContext } from "../../context/ChatContext";
 
@@ -16,7 +16,8 @@ import {
   Settings,
   UserCircle,
 } from "lucide-react";
-import { logout, getCurrentUser } from "../../utils/auth"; // ✅ Import logout function
+import { logout, getCurrentUser } from "../../utils/auth";
+import { fetchUniversityStudentProfile } from "../../utils/universityStudentApi";
 import { cn } from "../../utils/cn";
 import Chat from "../UniStudents/Chat";
 import CompactCalendar from "../UniStudents/CompactCalendar";
@@ -26,16 +27,37 @@ export default function TopNavigation({ onMenuClick }) {
   const [showChat, setShowChat] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [user, setUser] = useState(null); // ✅ Add user state
+  const [user, setUser] = useState(null);
+  const [profileData, setProfileData] = useState(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const location = useLocation();
+  const navigate = useNavigate();
 
-  // ✅ Get current user on component mount
+  // Fetch current user and complete profile data on component mount
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    setUser(currentUser);
+    const loadUserProfile = async () => {
+      const currentUser = getCurrentUser();
+      setUser(currentUser);
+
+      if (currentUser && currentUser.user_id) {
+        setIsLoadingProfile(true);
+        const profileResponse = await fetchUniversityStudentProfile(
+          currentUser.user_id
+        );
+
+        if (profileResponse.success) {
+          setProfileData(profileResponse.data);
+        } else {
+          console.error("Failed to fetch profile:", profileResponse.error);
+        }
+        setIsLoadingProfile(false);
+      }
+    };
+
+    loadUserProfile();
   }, []);
 
-  // ✅ Handle logout with confirmation
+  // Handle logout with confirmation
   const handleLogout = async () => {
     if (window.confirm("Are you sure you want to logout?")) {
       await logout();
@@ -56,6 +78,8 @@ export default function TopNavigation({ onMenuClick }) {
         return "Pre-Uni Courses";
       case "/university-student/resources":
         return "Resources";
+      case "/university-student/internships":
+        return "Internship-Opportunities";
       case "/university-student/calendar":
         return "Calendar";
       case "/university-student/earnings":
@@ -64,6 +88,8 @@ export default function TopNavigation({ onMenuClick }) {
         return "Feedback";
       case "/university-student/profile":
         return "Profile";
+      case "/university-student/settings":
+        return "Settings";
       default:
         return "university-student/Dashboard";
     }
@@ -83,6 +109,8 @@ export default function TopNavigation({ onMenuClick }) {
         return "Manage pre-university course offerings";
       case "/university-student/resources":
         return "Access and share educational materials";
+      case "/university-student/internships":
+        return "Explore new Internship opportunities";
       case "/university-student/calendar":
         return "Manage your schedule and appointments";
       case "/university-student/earnings":
@@ -90,6 +118,8 @@ export default function TopNavigation({ onMenuClick }) {
       case "/university-student/feedback":
         return "Review student feedback and ratings";
       case "/university-student/profile":
+        return "Manage your account and preferences";
+      case "/university-student/settings":
         return "Manage your account and preferences";
       default:
         return "Track your progress and manage activities";
@@ -102,7 +132,7 @@ export default function TopNavigation({ onMenuClick }) {
     <motion.header
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="bg-white border-b-2 border-neutral-silver/50 shadow-md sticky top-0 z-30 backdrop-blur-sm"
+      className="sticky top-0 z-30 bg-white border-b-2 shadow-md border-neutral-silver/50 backdrop-blur-sm"
     >
       <div className="flex items-center justify-between px-6 py-5">
         <div className="flex items-center space-x-4">
@@ -114,16 +144,16 @@ export default function TopNavigation({ onMenuClick }) {
           </button>
 
           <div className="hidden md:block">
-            <h2 className="text-2xl font-bold text-neutral-black bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
+            <h2 className="text-2xl font-bold text-transparent text-neutral-black bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text">
               {getPageName()}
             </h2>
-            <p className="text-sm text-neutral-grey font-medium">
+            <p className="text-sm font-medium text-neutral-grey">
               {getPageDescription()}
             </p>
           </div>
         </div>
 
-        <div className="hidden md:flex flex-1 max-w-lg mx-8">
+        <div className="flex-1 hidden max-w-lg mx-8 md:flex">
           <div
             className={cn(
               "relative w-full transition-all duration-300",
@@ -139,7 +169,7 @@ export default function TopNavigation({ onMenuClick }) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowCalendar(true)}
-            className="p-3 rounded-xl hover:bg-neutral-silver/70 transition-all duration-200 group hover:shadow-sm"
+            className="p-3 transition-all duration-200 rounded-xl hover:bg-neutral-silver/70 group hover:shadow-sm"
           >
             <Calendar className="w-5 h-5 text-neutral-dark-grey group-hover:text-primary-600" />
           </motion.button>
@@ -148,10 +178,10 @@ export default function TopNavigation({ onMenuClick }) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={toggleChat}
-            className="relative p-2 text-primary-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors duration-200"
+            className="relative p-2 transition-colors duration-200 rounded-lg text-primary-400 hover:text-primary-600 hover:bg-primary-50"
           >
-            <MessageSquare className="h-5 w-5" />
-            <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+            <MessageSquare className="w-5 h-5" />
+            <span className="absolute flex items-center justify-center w-4 h-4 text-xs text-white bg-green-500 rounded-full -top-1 -right-1">
               2
             </span>
           </motion.button>
@@ -159,10 +189,10 @@ export default function TopNavigation({ onMenuClick }) {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="relative p-3 rounded-xl hover:bg-neutral-silver/70 transition-all duration-200 group hover:shadow-sm"
+            className="relative p-3 transition-all duration-200 rounded-xl hover:bg-neutral-silver/70 group hover:shadow-sm"
           >
             <Bell className="w-5 h-5 text-neutral-dark-grey group-hover:text-primary-600" />
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-error rounded-full flex items-center justify-center shadow-sm">
+            <span className="absolute flex items-center justify-center w-4 h-4 rounded-full shadow-sm -top-1 -right-1 bg-error">
               <span className="w-2 h-2 bg-white rounded-full"></span>
             </span>
           </motion.button>
@@ -172,19 +202,23 @@ export default function TopNavigation({ onMenuClick }) {
             <motion.button
               whileHover={{ scale: 1.02 }}
               onClick={() => setShowUserDropdown(!showUserDropdown)}
-              className="flex items-center space-x-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-primary-50 hover:to-primary-100 transition-all duration-200 cursor-pointer group border border-transparent hover:border-primary-200 hover:shadow-sm"
+              className="flex items-center p-3 space-x-3 transition-all duration-200 border border-transparent cursor-pointer rounded-xl hover:bg-gradient-to-r hover:from-primary-50 hover:to-primary-100 group hover:border-primary-200 hover:shadow-sm"
             >
-              <div className="w-9 h-9 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center shadow-sm">
+              <div className="flex items-center justify-center rounded-full shadow-sm w-9 h-9 bg-gradient-to-br from-primary-400 to-primary-600">
                 <User className="w-5 h-5 text-white" />
               </div>
               <div className="hidden sm:block">
                 <p className="text-sm font-semibold text-neutral-black group-hover:text-primary-700">
-                  {user
-                    ? `${user.first_name} ${user.last_name || ""}`.trim()
-                    : "University Student"}
+                  {isLoadingProfile
+                    ? "Loading..."
+                    : profileData?.fullName ||
+                      user?.full_name ||
+                      "University Student"}
                 </p>
-                <p className="text-xs text-neutral-grey font-medium">
-                  {user?.university || "Student Mentor"}
+                <p className="text-xs font-medium text-neutral-grey">
+                  {isLoadingProfile
+                    ? "..."
+                    : profileData?.university || "Student Mentor"}
                 </p>
               </div>
               <ChevronDown
@@ -203,27 +237,33 @@ export default function TopNavigation({ onMenuClick }) {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -10, scale: 0.95 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg  border border-neutral-silver-900 py-2 z-50"
+                  className="absolute right-0 z-50 py-2 mt-2 bg-white border shadow-lg w-80 rounded-xl border-neutral-silver-900"
                 >
                   {/* User Info Header */}
                   <div className="px-4 py-3 border-b border-neutral-silver/30">
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center shadow-sm">
+                      <div className="flex items-center justify-center w-12 h-12 rounded-full shadow-sm bg-gradient-to-br from-primary-400 to-primary-600">
                         <User className="w-6 h-6 text-white" />
                       </div>
                       <div className="flex-1">
                         <h3 className="font-semibold text-neutral-black">
-                          {user
-                            ? `${user.first_name} ${
-                                user.last_name || ""
-                              }`.trim()
-                            : "University Student"}
+                          {isLoadingProfile
+                            ? "Loading..."
+                            : profileData?.fullName ||
+                              user?.full_name ||
+                              "University Student"}
                         </h3>
                         <p className="text-sm text-neutral-grey">
-                          {user?.email || "student@university.edu"}
+                          {isLoadingProfile
+                            ? "..."
+                            : profileData?.email ||
+                              user?.email ||
+                              "student@university.edu"}
                         </p>
                         <p className="text-xs text-neutral-grey">
-                          {user?.university || "University Student"}
+                          {isLoadingProfile
+                            ? "..."
+                            : profileData?.university || "University"}
                         </p>
                       </div>
                     </div>
@@ -234,28 +274,38 @@ export default function TopNavigation({ onMenuClick }) {
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-neutral-grey">Student ID:</span>
-                        <span className="text-neutral-black font-medium">
-                          {user?.student_id || "N/A"}
+                        <span className="font-medium text-neutral-black">
+                          {isLoadingProfile
+                            ? "..."
+                            : profileData?.registrationNumber || "N/A"}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-neutral-grey">Program:</span>
-                        <span className="text-neutral-black font-medium">
-                          {user?.program || "Computer Science"}
+                        <span className="font-medium text-neutral-black">
+                          {isLoadingProfile
+                            ? "..."
+                            : profileData?.degreeProgram || "N/A"}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-neutral-grey">Year:</span>
-                        <span className="text-neutral-black font-medium">
-                          {user?.year || "3rd Year"}
+                        <span className="font-medium text-neutral-black">
+                          {isLoadingProfile
+                            ? "..."
+                            : profileData?.yearOfStudy
+                            ? `${profileData.yearOfStudy}${
+                                profileData.yearOfStudy === 1
+                                  ? "st"
+                                  : profileData.yearOfStudy === 2
+                                  ? "nd"
+                                  : profileData.yearOfStudy === 3
+                                  ? "rd"
+                                  : "th"
+                              } Year`
+                            : "N/A"}
                         </span>
                       </div>
-                      {/* <div className="flex justify-between">
-                        <span className="text-neutral-grey">Status:</span>
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          Active
-                        </span>
-                      </div> */}
                     </div>
                   </div>
 
@@ -264,10 +314,9 @@ export default function TopNavigation({ onMenuClick }) {
                     <button
                       onClick={() => {
                         setShowUserDropdown(false);
-                        // Navigate to profile page
-                        window.location.href = "/university-student/profile";
+                        navigate("/university-student/profile");
                       }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-neutral-black hover:bg-neutral-silver/50 transition-colors duration-200"
+                      className="flex items-center w-full px-4 py-2 space-x-3 text-sm transition-colors duration-200 text-neutral-black hover:bg-neutral-silver/50"
                     >
                       <UserCircle className="w-4 h-4" />
                       <span>View Profile</span>
@@ -276,10 +325,9 @@ export default function TopNavigation({ onMenuClick }) {
                     <button
                       onClick={() => {
                         setShowUserDropdown(false);
-                        // Navigate to settings page
-                        window.location.href = "/university-student/settings";
+                        navigate("/university-student/settings");
                       }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-neutral-black hover:bg-neutral-silver/50 transition-colors duration-200"
+                      className="flex items-center w-full px-4 py-2 space-x-3 text-sm transition-colors duration-200 text-neutral-black hover:bg-neutral-silver/50"
                     >
                       <Settings className="w-4 h-4" />
                       <span>Settings</span>
@@ -287,13 +335,13 @@ export default function TopNavigation({ onMenuClick }) {
                   </div>
 
                   {/* Logout Button */}
-                  <div className="border-t border-neutral-silver/30 pt-2">
+                  <div className="pt-2 border-t border-neutral-silver/30">
                     <button
                       onClick={() => {
                         setShowUserDropdown(false);
                         handleLogout();
                       }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
+                      className="flex items-center w-full px-4 py-2 space-x-3 text-sm text-red-600 transition-colors duration-200 hover:bg-red-50"
                     >
                       <LogOut className="w-4 h-4" />
                       <span className="font-medium">Logout</span>

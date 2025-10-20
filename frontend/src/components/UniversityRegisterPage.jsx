@@ -12,6 +12,7 @@ const UniversityRegisterPage = () => {
   const [formData, setFormData] = useState({
     universityName: '',
     contactPersonName: '',
+    contactPersonTitle: '',
     email: '',
     phoneNumber: '',
     password: '',
@@ -52,6 +53,7 @@ const UniversityRegisterPage = () => {
       const registrationData = {
         universityName: formData.universityName,
         contactPersonName: formData.contactPersonName,
+        contactPersonTitle: formData.contactPersonTitle,
         email: formData.email,
         phoneNumber: formData.phoneNumber,
         password: formData.password,
@@ -212,23 +214,41 @@ const UniversityRegisterPage = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-[#263238] mb-2">
-                    Official Email *
+                  <label htmlFor="contactPersonTitle" className="block text-sm font-medium text-[#263238] mb-2">
+                    Contact Person Title *
                   </label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#717171]" />
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className="w-full pl-10 pr-4 py-3 border border-[#E1BEE7] rounded-xl focus:ring-2 focus:ring-[#7B1FA2] focus:border-[#7B1FA2] transition-all bg-white"
-                      placeholder="official@university.edu"
-                      required
-                      disabled={isLoading}
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    id="contactPersonTitle"
+                    name="contactPersonTitle"
+                    value={formData.contactPersonTitle}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-[#E1BEE7] rounded-xl focus:ring-2 focus:ring-[#7B1FA2] focus:border-[#7B1FA2] transition-all bg-white"
+                    placeholder="e.g. Registrar, Dean, Director"
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
+
+              {/* Official Email */}
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-[#263238] mb-2">
+                  Official Email *
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#717171]" />
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="w-full pl-10 pr-4 py-3 border border-[#E1BEE7] rounded-xl focus:ring-2 focus:ring-[#7B1FA2] focus:border-[#7B1FA2] transition-all bg-white"
+                    placeholder="official@university.edu"
+                    required
+                    disabled={isLoading}
+                  />
                 </div>
               </div>
 

@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { getCurrentUser, clearAuth } from "../utils/auth";
 import {
   GraduationCap,
   Mail,
@@ -24,6 +25,64 @@ const LoginPage = () => {
     password: "",
     rememberMe: false,
   });
+
+  // Check if user is already logged in and redirect accordingly
+  useEffect(() => {
+    const currentUser = getCurrentUser();
+    const logoutTimestamp = localStorage.getItem('logout_timestamp');
+
+    console.log('LoginPage useEffect - Current user:', currentUser, 'Logout timestamp:', logoutTimestamp);
+
+    // If there's a recent logout timestamp, clear any stale user data
+    if (logoutTimestamp) {
+      const logoutTime = parseInt(logoutTimestamp);
+      const currentTime = Date.now();
+
+      // If logout was recent (within 1 hour), don't auto-redirect
+      if (currentTime - logoutTime < 3600000) {
+        console.log('Recent logout detected, clearing any stale auth data');
+        clearAuth();
+        return;
+      }
+    }
+
+    if (currentUser) {
+      const userType = currentUser.user_type;
+      console.log("User already logged in, redirecting to:", userType);
+
+      switch (userType) {
+        case "admin":
+          navigate("/admin/dashboard", { replace: true });
+          break;
+        case "student":
+          navigate("/student/home", { replace: true });
+          break;
+        case "uni_student":
+          navigate("/university-student/dashboard", { replace: true });
+          break;
+        case "mentor":
+          navigate("/university-student/dashboard", { replace: true });
+          break;
+        case "pre_mentor":
+          navigate("/pre-mentor/dashboard", { replace: true });
+          break;
+        case "institution":
+          navigate("/university/dashboard", { replace: true });
+          break;
+        case 'company':
+          navigate('/company/dashboard-edit', { replace: true });
+          break;
+        case 'counsellor':
+          navigate('/counsellor/dashboard', { replace: true });
+          break;
+        default:
+          // Clear invalid session
+          console.log('Invalid user type, clearing auth');
+          clearAuth();
+          break;
+      }
+    }
+  }, [navigate]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -65,30 +124,67 @@ const LoginPage = () => {
           text: "Login successful! Welcome back!",
         });
 
+        console.log('Login successful, clearing old auth data and setting new data...');
+
+        // Clear any previous logout timestamp first - this is critical
+        localStorage.removeItem('logout_timestamp');
+        console.log('Cleared logout timestamp');
+
+        // Clear any existing auth data first
+        localStorage.removeItem('user');
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('refreshToken');
+        sessionStorage.clear();
+        console.log('Cleared old auth data');
+
+        // Set new authentication data
         localStorage.setItem("user", JSON.stringify(data.user));
+        console.log('Set new user data:', data.user.user_type);
+
+        // Set login timestamp for session management
+        localStorage.setItem('login_timestamp', Date.now().toString());
+        console.log('Set login timestamp');
 
         setTimeout(() => {
+          // Double-check that logout timestamp is cleared and user data is set
+          localStorage.removeItem('logout_timestamp');
+          if (!localStorage.getItem('user')) {
+            console.log('Re-setting user data after timeout');
+            localStorage.setItem("user", JSON.stringify(data.user));
+          }
+
           const userType = data.user.user_type;
-          console.log("User type:", userType);
+          console.log("User type for redirect:", userType);
 
           switch (userType) {
             case "admin":
-              navigate("/admin/dashboard");
+              window.location.replace("/admin/dashboard");
               break;
             case "student":
-              navigate("/student/home");
+              window.location.replace("/student/home");
               break;
             case "uni_student":
-              navigate("/university-student/dashboard");
+              window.location.replace("/university-student/dashboard");
+              break;
+            case "mentor":
+              window.location.replace("/university-student/dashboard");
+              break;
+            case "pre_mentor":
+              window.location.replace("/pre-mentor/dashboard");
               break;
             case "institution":
-              navigate("/university/dashboard");
+              window.location.replace("/university/dashboard");
+              break;
+            case 'company':
+              window.location.replace('/company/dashboard-edit');
               break;
             case "company":
               navigate("/company/dashboard-edit");
+            case 'counsellor':
+              window.location.replace('/counsellor/dashboard');
               break;
             default:
-              navigate("/student/home");
+              window.location.replace("/student/home");
               break;
           }
         }, 1000);
@@ -110,24 +206,24 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen backdrop-blur-2xl bg-gradient-to-br  from-primary-50 to-primary-200 flex flex-col">
+    <div className="flex flex-col min-h-screen backdrop-blur-2xl bg-gradient-to-br from-primary-50 to-primary-200">
       {/* Header */}
       <div className="bg-white/95 backdrop-blur-md border-b border-[#C1DBF4]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-20">
             <Link
               to="/"
               className="flex items-center space-x-2 text-[#1D5D9B] hover:text-[#174A7C] transition-colors"
             >
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="w-5 h-5" />
               <span className="font-medium">Back to Home</span>
             </Link>
 
             <div className="flex items-center ">
               <span>
-                <img src={logo} alt="UniRoute Logo" className="h-14 w-full" />{" "}
+                <img src={logo} alt="UniRoute Logo" className="w-full h-14" />{" "}
               </span>
-              <span className="font-bold text-2xl text-primary-900 -ml-3">
+              <span className="-ml-3 text-2xl font-bold text-primary-900">
                 UniRoute
               </span>
             </div>
@@ -147,26 +243,26 @@ const LoginPage = () => {
 
       {/* Main Content */}
 
-      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
-        <div className="max-w-screen-lg w-full">
+      <div className="flex items-center justify-center flex-1 px-4 py-12 sm:px-6 lg:px-8">
+        <div className="w-full max-w-screen-lg">
           <div className=" w-full mx-auto flex flex-col md:flex-row  bg-white rounded-2xl shadow-xl p-8 border border-[#C1DBF4] overflow-hidden">
             {/* Background Image */}
-            <div className=" md:w-1/2 mt-20 w-full object-center border-r">
+            <div className="object-center w-full mt-20 border-r md:w-1/2">
               <img
                 src={loginImage}
                 alt="UniRoute Platform"
-                className="w-full h-auto object-cover"
+                className="object-cover w-full h-auto"
               />
               {/* Overlay for better text readability */}
             </div>
-            <div className="md:w-1/2 w-full p-8 flex flex-col justify-center">
+            <div className="flex flex-col justify-center w-full p-8 md:w-1/2">
               {/* Header */}
               {/* Header */}
-              <div className="text-center mb-8">
+              <div className="mb-8 text-center">
                 <div className="bg-[#E7F3FB] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                   <img src={logo} alt="UniRoute Logo" className="h-18 w-18 " />{" "}
                 </div>
-                <h1 className="font-bold text-3xl text-primary-700 mb-2">
+                <h1 className="mb-2 text-3xl font-bold text-primary-700">
                   Welcome Back!
                 </h1>
                 <p className="text-neutral-500">
@@ -177,11 +273,10 @@ const LoginPage = () => {
               {/* Success/Error Message */}
               {message.text && (
                 <div
-                  className={`mb-6 p-4 rounded-xl flex items-center space-x-3 ${
-                    message.type === "success"
-                      ? "bg-[#81C784]/10 border border-[#81C784]/20"
-                      : "bg-[#E57373]/10 border border-[#E57373]/20"
-                  }`}
+                  className={`mb-6 p-4 rounded-xl flex items-center space-x-3 ${message.type === "success"
+                    ? "bg-[#81C784]/10 border border-[#81C784]/20"
+                    : "bg-[#E57373]/10 border border-[#E57373]/20"
+                    }`}
                 >
                   {message.type === "success" ? (
                     <CheckCircle className="h-5 w-5 text-[#81C784]" />
@@ -189,11 +284,10 @@ const LoginPage = () => {
                     <AlertCircle className="h-5 w-5 text-[#E57373]" />
                   )}
                   <span
-                    className={`text-sm font-medium ${
-                      message.type === "success"
-                        ? "text-[#81C784]"
-                        : "text-[#E57373]"
-                    }`}
+                    className={`text-sm font-medium ${message.type === "success"
+                      ? "text-[#81C784]"
+                      : "text-[#E57373]"
+                      }`}
                   >
                     {message.text}
                   </span>
@@ -254,9 +348,9 @@ const LoginPage = () => {
                       disabled={isLoading}
                     >
                       {showPassword ? (
-                        <EyeOff className="h-5 w-5" />
+                        <EyeOff className="w-5 h-5" />
                       ) : (
-                        <Eye className="h-5 w-5" />
+                        <Eye className="w-5 h-5" />
                       )}
                     </button>
                   </div>
@@ -293,15 +387,14 @@ const LoginPage = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`w-full py-3 px-4 rounded-xl font-semibold focus:ring-2 focus:ring-[#1D5D9B] focus:outline-none transition-all transform hover:-translate-y-0.5 hover:shadow-lg ${
-                    isLoading
-                      ? "bg-[#B0B0B0] cursor-not-allowed text-white"
-                      : "bg-[#1D5D9B] hover:bg-[#174A7C] text-white"
-                  }`}
+                  className={`w-full py-3 px-4 rounded-xl font-semibold focus:ring-2 focus:ring-[#1D5D9B] focus:outline-none transition-all transform hover:-translate-y-0.5 hover:shadow-lg ${isLoading
+                    ? "bg-[#B0B0B0] cursor-not-allowed text-white"
+                    : "bg-[#1D5D9B] hover:bg-[#174A7C] text-white"
+                    }`}
                 >
                   {isLoading ? (
                     <div className="flex items-center justify-center space-x-2">
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-5 h-5 border-2 border-white rounded-full border-t-transparent animate-spin"></div>
                       <span>Signing In...</span>
                     </div>
                   ) : (
