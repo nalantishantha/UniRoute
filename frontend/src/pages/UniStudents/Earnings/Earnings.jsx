@@ -289,7 +289,10 @@ export default function Earnings() {
                   </div>
                 ) : (
                   trend.map((dataPoint, index) => (
-                    <div key={`${dataPoint.label}-${index}`} className="flex flex-col items-center flex-1">
+                    <div
+                      key={`${dataPoint.label}-${index}`}
+                      className="flex flex-col items-center justify-end flex-1 h-full"
+                    >
                       <motion.div
                         initial={{ height: 0 }}
                         animate={{
