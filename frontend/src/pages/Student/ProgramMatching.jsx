@@ -78,7 +78,7 @@ const ProgramMatching = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-200 to-blue-100">
+    <div className="min-h-screen bg-gradient-to-r from-primary-50 to-white">
       {/* Navigation */}
       <StudentNavigation />
 

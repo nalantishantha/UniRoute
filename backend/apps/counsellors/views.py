@@ -11,6 +11,133 @@ from apps.accounts.models import Users, UserDetails, UserTypes
 from apps.counsellors.models import Counsellors
 
 
+def list_counsellors(request):
+    """Public endpoint to list all active counsellors available for sessions"""
+    if request.method == 'GET':
+        try:
+            # Get all active counsellors who are available for sessions
+            counsellors = Counsellors.objects.select_related(
+                'user',
+                'user__userdetails'
+            ).filter(
+                user__is_active=1,
+                available_for_sessions=True
+            ).order_by('-created_at')
+            
+            counsellor_list = []
+            for counsellor in counsellors:
+                try:
+                    user_details = counsellor.user.userdetails
+                except UserDetails.DoesNotExist:
+                    user_details = None
+                
+                counsellor_data = {
+                    'counsellor_id': counsellor.counsellor_id,
+                    'user_id': counsellor.user.user_id,
+                    'expertise': counsellor.expertise,
+                    'bio': counsellor.bio,
+                    'experience_years': counsellor.experience_years,
+                    'qualifications': counsellor.qualifications,
+                    'specializations': counsellor.specializations,
+                    'available_for_sessions': counsellor.available_for_sessions,
+                    'hourly_rate': float(counsellor.hourly_rate) if counsellor.hourly_rate else None,
+                    'created_at': counsellor.created_at.isoformat() if counsellor.created_at else None,
+                    'user': {
+                        'user_id': counsellor.user.user_id,
+                        'username': counsellor.user.username,
+                        'email': counsellor.user.email,
+                        'is_active': counsellor.user.is_active,
+                    },
+                    'user_details': {
+                        'full_name': user_details.full_name if user_details else '',
+                        'profile_picture': user_details.profile_picture if user_details else None,
+                        'bio': user_details.bio if user_details else '',
+                        'contact_number': user_details.contact_number if user_details else '',
+                        'location': user_details.location if user_details else '',
+                        'gender': user_details.gender if user_details else '',
+                        'is_verified': user_details.is_verified if user_details else False,
+                    } if user_details else None
+                }
+                counsellor_list.append(counsellor_data)
+            
+            return JsonResponse(counsellor_list, safe=False, status=200)
+            
+        except Exception as e:
+            print(f"❌ List counsellors error: {str(e)}")
+            return JsonResponse({
+                'error': f'Failed to retrieve counsellors: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'error': 'Only GET method allowed'
+    }, status=405)
+
+
+def get_counsellor_details(request, counsellor_id):
+    """Public endpoint to get details of a specific counsellor"""
+    if request.method == 'GET':
+        try:
+            counsellor = Counsellors.objects.select_related(
+                'user',
+                'user__userdetails'
+            ).get(counsellor_id=counsellor_id)
+            
+            # Check if counsellor is active and available
+            if not counsellor.user.is_active or not counsellor.available_for_sessions:
+                return JsonResponse({
+                    'error': 'Counsellor is not available'
+                }, status=404)
+            
+            try:
+                user_details = counsellor.user.userdetails
+            except UserDetails.DoesNotExist:
+                user_details = None
+            
+            counsellor_data = {
+                'counsellor_id': counsellor.counsellor_id,
+                'user_id': counsellor.user.user_id,
+                'expertise': counsellor.expertise,
+                'bio': counsellor.bio,
+                'experience_years': counsellor.experience_years,
+                'qualifications': counsellor.qualifications,
+                'specializations': counsellor.specializations,
+                'available_for_sessions': counsellor.available_for_sessions,
+                'hourly_rate': float(counsellor.hourly_rate) if counsellor.hourly_rate else None,
+                'created_at': counsellor.created_at.isoformat() if counsellor.created_at else None,
+                'user': {
+                    'user_id': counsellor.user.user_id,
+                    'username': counsellor.user.username,
+                    'email': counsellor.user.email,
+                    'is_active': counsellor.user.is_active,
+                },
+                'user_details': {
+                    'full_name': user_details.full_name if user_details else '',
+                    'profile_picture': user_details.profile_picture if user_details else None,
+                    'bio': user_details.bio if user_details else '',
+                    'contact_number': user_details.contact_number if user_details else '',
+                    'location': user_details.location if user_details else '',
+                    'gender': user_details.gender if user_details else '',
+                    'is_verified': user_details.is_verified if user_details else False,
+                } if user_details else None
+            }
+            
+            return JsonResponse(counsellor_data, status=200)
+            
+        except Counsellors.DoesNotExist:
+            return JsonResponse({
+                'error': 'Counsellor not found'
+            }, status=404)
+        except Exception as e:
+            print(f"❌ Get counsellor details error: {str(e)}")
+            return JsonResponse({
+                'error': f'Failed to retrieve counsellor: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'error': 'Only GET method allowed'
+    }, status=405)
+
+
 @csrf_exempt
 def admin_create_counsellor(request):
     """Admin-only function to create counsellor accounts"""

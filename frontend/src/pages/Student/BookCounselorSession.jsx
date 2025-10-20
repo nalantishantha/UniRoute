@@ -225,7 +225,7 @@ const BookCounselorSession = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-primary-100 to-white">
+    <div className="min-h-screen bg-gradient-to-r from-primary-50 to-white">
       <StudentNavigation />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

@@ -70,7 +70,7 @@ const ProfileSetup = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white">
       {/* Navigation */}
       <StudentNavigation />
 
@@ -94,13 +94,13 @@ const ProfileSetup = () => {
             </h3>
 
             <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
-              <div className="w-24 h-24 bg-gradient-to-br from-blue-200 to-blue-300 rounded-full flex items-center justify-center shadow-lg border-4 border-blue-100">
-                <User className="h-12 w-12 text-blue-600" />
+              <div className="w-24 h-24 bg-gradient-to-br from-primary-200 to-primary-300 rounded-full flex items-center justify-center shadow-lg border-4 border-primary-100">
+                <User className="h-12 w-12 text-primary-600" />
               </div>
               <div className="text-center sm:text-left">
                 <button
                   type="button"
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md"
+                  className="bg-primary-600 text-white px-6 py-3 rounded-xl hover:bg-primary-700 transition-colors font-semibold shadow-md"
                 >
                   Upload Photo
                 </button>
@@ -360,13 +360,13 @@ const ProfileSetup = () => {
           <div className="flex justify-end space-x-4">
             <button
               type="button"
-              className="px-8 py-3 border border-blue-200 text-blue-700 rounded-xl font-semibold hover:bg-blue-50 transition-colors"
+              className="px-8 py-3 border border-accent-200 text-primary-600 rounded-xl font-semibold hover:bg-accent-50 transition-colors"
             >
               Save as Draft
             </button>
             <button
               type="submit"
-              className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg flex items-center space-x-2"
+              className="px-8 py-3 bg-primary-600 text-white rounded-xl font-semibold hover:bg-primary-700 transition-all duration-200 shadow-lg flex items-center space-x-2"
             >
               <span>Complete Profile</span>
               <CheckCircle className="h-5 w-5" />
