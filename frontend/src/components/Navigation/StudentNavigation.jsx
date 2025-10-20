@@ -21,7 +21,7 @@ const StudentNavigation = () => {
   const location = useLocation();
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationRef = useRef(null);
-  const { isChatOpen, toggleChat } = useChatContext();
+  const { isChatOpen, toggleChat, openChat, unreadCount } = useChatContext();
 
   // Sample system alerts data
   const systemAlerts = [
@@ -77,7 +77,7 @@ const StudentNavigation = () => {
     },
   ];
 
-  const unreadCount = systemAlerts.filter((alert) => !alert.isRead).length;
+  const unreadAlerts = systemAlerts.filter((alert) => !alert.isRead).length;
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -199,9 +199,9 @@ const StudentNavigation = () => {
                 className="text-white/90 hover:text-primary-100 transition-colors relative"
               >
                 <Bell className="h-6 w-6" />
-                {unreadCount > 0 && (
+                {unreadAlerts > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {unreadCount}
+                    {unreadAlerts}
                   </span>
                 )}
               </button>
@@ -222,7 +222,7 @@ const StudentNavigation = () => {
                       </button>
                     </div>
                     <p className="text-sm text-blue-700 mt-1">
-                      {unreadCount} unread notifications
+                      {unreadAlerts} unread notifications
                     </p>
                   </div>
 
@@ -312,13 +312,15 @@ const StudentNavigation = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={toggleChat}
+              onClick={() => openChat(null, { showList: true })}
               className="relative p-2 transition-colors duration-200 rounded-lg text-primary-400 hover:text-primary-600 hover:bg-primary-50"
             >
               <MessageSquare className="w-5 h-5" />
-              <span className="absolute flex items-center justify-center w-4 h-4 text-xs text-white bg-green-500 rounded-full -top-1 -right-1">
-                2
-              </span>
+              {unreadCount > 0 && (
+                <span className="absolute flex items-center justify-center w-4 h-4 text-xs text-white bg-green-500 rounded-full -top-1 -right-1">
+                  {unreadCount > 99 ? "99" : unreadCount}
+                </span>
+              )}
             </motion.button>
 
             <Chat isOpen={isChatOpen} onClose={toggleChat} />

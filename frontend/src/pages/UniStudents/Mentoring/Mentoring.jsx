@@ -257,10 +257,9 @@ export default function Mentoring() {
 
   const handleMessage = (studentId, studentName) => {
     openChat({
-      id: studentId,
-      name: studentName,
-      avatar: "",
-      online: true,
+      student_id: studentId,
+      full_name: studentName,
+      user_type: "student",
     });
   };
 
