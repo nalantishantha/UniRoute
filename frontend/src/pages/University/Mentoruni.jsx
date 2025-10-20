@@ -817,7 +817,7 @@ const Mentoruni = () => {
                   <div><strong>Registration Number:</strong> {selectedMentor.form_data?.registration_number || 'N/A'}</div>
                   <div><strong>Academic Year:</strong> {selectedMentor.form_data?.year_of_study || 'N/A'}</div>
                   <div><strong>Email:</strong> {selectedMentor.email || 'N/A'}</div>
-                  <div><strong>Phone:</strong> {selectedMentor.form_data?.phone || 'N/A'}</div>
+                  <div><strong>Phone:</strong> {selectedMentor.form_data?.phone || selectedMentor.phone || 'N/A'}</div>
                   <div style={{ gridColumn: '1 / -1' }}><strong>Education:</strong> {selectedMentor.education || 'N/A'}</div>
                   <div style={{ gridColumn: '1 / -1' }}><strong>Recommendation:</strong> {selectedMentor.form_data?.recommendation_from || 'N/A'}</div>
                 </div>

@@ -45,19 +45,16 @@ const LoginPage = () => {
     try {
       console.log("Login attempt:", formData);
 
-      const response = await fetch(
-        "http://127.0.0.1:8000/api/accounts/login/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: formData.email,
-            password: formData.password,
-          }),
-        }
-      );
+      const response = await fetch("/api/accounts/login/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
 
       const data = await response.json();
       console.log("Login API Response:", data);
@@ -87,8 +84,8 @@ const LoginPage = () => {
             case "institution":
               navigate("/university/dashboard");
               break;
-              case 'company':
-              navigate('/company/dashboard-edit');
+            case "company":
+              navigate("/company/dashboard-edit");
               break;
             default:
               navigate("/student/home");

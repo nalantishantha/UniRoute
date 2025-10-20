@@ -5,6 +5,12 @@ urlpatterns = [
     # Universities
     path('', views.universities_list, name='universities_list'),
 
+    # Announcements
+    path('announcements/', views.announcements_list_create,
+         name='announcements_list_create'),
+    path('announcements/<int:announcement_id>/',
+         views.announcement_update_delete, name='announcement_update_delete'),
+
     # University Dashboard Admin
     path('dashboard-admin/', views.get_university_dashboard_admin,
          name='get_university_dashboard_admin'),

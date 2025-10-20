@@ -17,4 +17,7 @@ urlpatterns = [
     path('university/active-mentors/', views.university_active_mentors, name='university_active_mentors'),
     path('university/mentor-requests/<int:pre_mentor_id>/accept/', views.accept_pre_mentor, name='accept_pre_mentor'),
     path('university/mentor-requests/<int:pre_mentor_id>/reject/', views.reject_pre_mentor, name='reject_pre_mentor'),
+
+    # Student-facing status
+    path('pre-mentor/status/', views.pre_mentor_status, name='pre_mentor_status'),
 ]

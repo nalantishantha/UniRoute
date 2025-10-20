@@ -1,0 +1,160 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Django makemigrations",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoLogo",
+				"-NoProfile",
+				"-Command",
+				"cd \"d:\\3 Year 1\\Graph Theory\\UniRoute\\backend\"; if (-not (Test-Path .venv)) { py -3 -m venv .venv }; .\\.venv\\Scripts\\Activate.ps1; python -m pip install --upgrade pip; pip install -r requirements.txt; python manage.py makemigrations universities"
+			]
+		},
+		{
+			"label": "Django migrate",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoLogo",
+				"-NoProfile",
+				"-Command",
+				"cd \"d:\\3 Year 1\\Graph Theory\\UniRoute\\backend\"; .\\.venv\\Scripts\\Activate.ps1; python manage.py migrate"
+			]
+		},
+		{
+			"label": "Start Django dev server",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoLogo",
+				"-NoProfile",
+				"-Command",
+				"cd \"d:\\3 Year 1\\Graph Theory\\UniRoute\\backend\"; .\\.venv\\Scripts\\Activate.ps1; python manage.py runserver"
+			],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "Install frontend deps and start Vite",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoLogo",
+				"-NoProfile",
+				"-Command",
+				"cd \"d:\\3 Year 1\\Graph Theory\\UniRoute\\frontend\"; if (-not (Test-Path node_modules)) { npm install }; npm run dev"
+			],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "Start Django dev server",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoLogo",
+				"-NoProfile",
+				"-Command",
+				"cd \"d:\\3 Year 1\\Graph Theory\\UniRoute\\backend\"; .\\.venv\\Scripts\\Activate.ps1; python manage.py runserver"
+			],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "Django makemigrations",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoLogo",
+				"-NoProfile",
+				"-Command",
+				"cd \"d:\\3 Year 1\\Graph Theory\\UniRoute\\backend\"; if (-not (Test-Path .venv)) { py -3 -m venv .venv }; .\\.venv\\Scripts\\Activate.ps1; python -m pip install --upgrade pip; pip install -r requirements.txt; python manage.py makemigrations universities"
+			]
+		},
+		{
+			"label": "Django migrate",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoLogo",
+				"-NoProfile",
+				"-Command",
+				"cd \"d:\\3 Year 1\\Graph Theory\\UniRoute\\backend\"; .\\.venv\\Scripts\\Activate.ps1; python manage.py migrate"
+			]
+		},
+		{
+			"label": "Django makemigrations (force)",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoLogo",
+				"-NoProfile",
+				"-Command",
+				"cd \"d:\\3 Year 1\\Graph Theory\\UniRoute\\backend\"; .\\.venv\\Scripts\\Activate.ps1; python manage.py makemigrations"
+			]
+		},
+		{
+			"label": "Django migrate (apply new)",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoLogo",
+				"-NoProfile",
+				"-Command",
+				"cd \"d:\\3 Year 1\\Graph Theory\\UniRoute\\backend\"; .\\.venv\\Scripts\\Activate.ps1; python manage.py migrate"
+			]
+		},
+		{
+			"label": "Django migrate universities 0005",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoLogo",
+				"-NoProfile",
+				"-Command",
+				"cd \"d:\\3 Year 1\\Graph Theory\\UniRoute\\backend\"; .\\.venv\\Scripts\\Activate.ps1; python manage.py migrate universities 0005"
+			]
+		},
+		{
+			"label": "Start Django dev server",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoLogo",
+				"-NoProfile",
+				"-Command",
+				"cd \"d:\\3 Year 1\\Graph Theory\\UniRoute\\backend\"; .\\.venv\\Scripts\\Activate.ps1; python manage.py runserver"
+			],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "Start Django dev server",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoLogo",
+				"-NoProfile",
+				"-Command",
+				"cd \"d:\\3 Year 1\\Graph Theory\\UniRoute\\backend\"; .\\.venv\\Scripts\\Activate.ps1; python manage.py runserver"
+			],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "Install frontend deps and start Vite",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoLogo",
+				"-NoProfile",
+				"-Command",
+				"cd \"d:\\3 Year 1\\Graph Theory\\UniRoute\\frontend\"; if (-not (Test-Path node_modules)) { npm install }; npm run dev"
+			],
+			"isBackground": true,
+			"group": "build"
+		}
+	]
+}

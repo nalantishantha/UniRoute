@@ -9,9 +9,12 @@ from .models import (
     UniversityDashboardAdmin,
     UniversityDashboardA,
     UniversityManagePortfolio,
+    UniversityAnnouncement,
+    UniversityAnnouncements,
 )
 from apps.accounts.models import Users
 from django.utils.timezone import now
+from django.db.utils import OperationalError, ProgrammingError
 
 
 def universities_list(request):
@@ -25,6 +28,205 @@ def universities_list(request):
             'district': uni.district
         })
     return JsonResponse({'universities': data, 'count': len(data)})
+
+
+# ------------------------- Announcements CRUD -------------------------
+
+def _serialize_announcement(a, source='new'):
+    """Serialize both new and legacy announcement models to a unified shape."""
+    if source == 'legacy':
+        # UniversityAnnouncements (legacy) has: title, message, valid_from, created_at, announcement_type
+        date_val = a.valid_from or (
+            a.created_at.date() if a.created_at else None)
+        return {
+            'id': a.announcement_id,
+            'title': a.title,
+            'description': a.message or '',
+            'date': date_val.strftime('%Y-%m-%d') if date_val else None,
+            'author': 'System',
+            'status': (a.announcement_type or 'published').lower(),
+            'university_id': a.university.university_id if a.university else None,
+            'source': 'legacy',
+        }
+    # New model UniversityAnnouncement
+    return {
+        'id': a.announcement_id,
+        'title': a.title,
+        'description': a.description,
+        'date': a.date.strftime('%Y-%m-%d') if a.date else None,
+        'author': a.author,
+        'status': a.status,
+        'university_id': a.university.university_id if a.university else None,
+        'source': 'new',
+    }
+
+
+@csrf_exempt
+def announcements_list_create(request):
+    """GET: list announcements (optionally filtered by university_id)
+    POST: create announcement. Auto-seed defaults if none exist and seed=true
+    is passed or database empty.
+    """
+    if request.method == 'GET':
+        try:
+            university_id = request.GET.get('university_id')
+            try:
+                # Try new table first
+                qs = UniversityAnnouncement.objects.all().order_by('-date', '-created_at')
+                if university_id:
+                    qs = qs.filter(university_id=university_id)
+
+                # Auto-seed only if new table exists and is empty
+                if not qs.exists() and request.GET.get('seed', 'true') == 'true':
+                    uni = None
+                    if university_id:
+                        uni = Universities.objects.filter(
+                            university_id=university_id).first()
+                    defaults = [
+                        {
+                            'title': 'Semester Registration Open',
+                            'description': 'Registration for the new semester is now open. Please complete your registration before the deadline.',
+                            'date': '2025-07-01',
+                            'author': 'Registrar',
+                            'status': 'published'
+                        },
+                        {
+                            'title': 'Library Closed for Renovation',
+                            'description': 'The main library will be closed from July 15 to July 30 for renovation.',
+                            'date': '2025-07-10',
+                            'author': 'Library Admin',
+                            'status': 'draft'
+                        },
+                        {
+                            'title': 'New Cafeteria Menu',
+                            'description': 'The university cafeteria has introduced a new menu starting this week. Check it out for healthy and affordable meals.',
+                            'date': '2025-07-12',
+                            'author': 'Cafeteria Manager',
+                            'status': 'published'
+                        },
+                        {
+                            'title': 'Guest Lecture: AI in Education',
+                            'description': 'Join us for a guest lecture on Artificial Intelligence in Education by Dr. Jane Smith on July 18th at the Main Auditorium.',
+                            'date': '2025-07-18',
+                            'author': 'Academic Affairs',
+                            'status': 'published'
+                        },
+                        {
+                            'title': 'Sports Meet Registration',
+                            'description': 'Registrations for the annual sports meet are now open. Interested students can sign up at the Sports Office.',
+                            'date': '2025-07-20',
+                            'author': 'Sports Coordinator',
+                            'status': 'draft'
+                        }
+                    ]
+                    for d in defaults:
+                        UniversityAnnouncement.objects.create(
+                            university=uni,
+                            title=d['title'],
+                            description=d['description'],
+                            date=d['date'],
+                            author=d['author'],
+                            status=d['status'],
+                        )
+                    qs = UniversityAnnouncement.objects.all().order_by('-date', '-created_at')
+                    if university_id:
+                        qs = qs.filter(university_id=university_id)
+
+                results = [_serialize_announcement(a, 'new') for a in qs]
+            except (OperationalError, ProgrammingError):
+                # New table not present — use legacy instead
+                legacy_qs = UniversityAnnouncements.objects.all().order_by(
+                    '-valid_from', '-created_at')
+                if university_id:
+                    legacy_qs = legacy_qs.filter(university_id=university_id)
+                results = [_serialize_announcement(
+                    a, 'legacy') for a in legacy_qs]
+
+            return JsonResponse({'success': True, 'announcements': results})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body or '{}')
+            university = None
+            uid = data.get('university_id')
+            if uid:
+                university = Universities.objects.filter(
+                    university_id=uid).first()
+            try:
+                a = UniversityAnnouncement.objects.create(
+                    university=university,
+                    title=data['title'],
+                    description=data.get('description', ''),
+                    date=data['date'],
+                    author=data.get('author', ''),
+                    status=data.get('status', 'draft'),
+                )
+                return JsonResponse({'success': True, 'announcement': _serialize_announcement(a, 'new')}, status=201)
+            except (OperationalError, ProgrammingError):
+                # Fallback: create in legacy table
+                a = UniversityAnnouncements.objects.create(
+                    university=university,
+                    title=data['title'],
+                    message=data.get('description', ''),
+                    announcement_type=data.get('status', 'published'),
+                    valid_from=data.get('date') or None,
+                    created_at=timezone.now(),
+                )
+                return JsonResponse({'success': True, 'announcement': _serialize_announcement(a, 'legacy')}, status=201)
+        except KeyError as e:
+            return JsonResponse({'success': False, 'message': f'Missing field: {e}'}, status=400)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+    return JsonResponse({'success': False, 'message': 'Method not allowed'}, status=405)
+
+
+@csrf_exempt
+def announcement_update_delete(request, announcement_id):
+    try:
+        # Decide target model based on ?legacy=true
+        is_legacy = str(request.GET.get('legacy', 'false')).lower() == 'true'
+        if is_legacy:
+            a = UniversityAnnouncements.objects.get(
+                announcement_id=announcement_id)
+        else:
+            a = UniversityAnnouncement.objects.get(
+                announcement_id=announcement_id)
+    except UniversityAnnouncement.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Announcement not found'}, status=404)
+    except UniversityAnnouncements.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Announcement not found'}, status=404)
+
+    if request.method == 'PUT':
+        try:
+            data = json.loads(request.body or '{}')
+            if isinstance(a, UniversityAnnouncement):
+                for field in ['title', 'description', 'date', 'author', 'status']:
+                    if field in data:
+                        setattr(a, field, data[field])
+                a.save()
+                return JsonResponse({'success': True, 'announcement': _serialize_announcement(a, 'new')})
+            else:  # legacy
+                if 'title' in data:
+                    a.title = data['title']
+                if 'description' in data:
+                    a.message = data['description']
+                if 'date' in data and data['date']:
+                    a.valid_from = data['date']
+                if 'status' in data:
+                    a.announcement_type = data['status']
+                a.save()
+                return JsonResponse({'success': True, 'announcement': _serialize_announcement(a, 'legacy')})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+    if request.method == 'DELETE':
+        a.delete()
+        return JsonResponse({'success': True})
+
+    return JsonResponse({'success': False, 'message': 'Method not allowed'}, status=405)
 
 
 @csrf_exempt

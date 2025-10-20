@@ -27,15 +27,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     # Third party apps
     'corsheaders',  # Only one corsheaders entry
-    
-   # Your apps 
+
+    # Your apps
     'apps.accounts',
     'apps.administration',
     'apps.communications',
-    'apps.students', 
+    'apps.students',
     'apps.student_results',
     'apps.university_students',
     'apps.university_programs',
@@ -117,6 +117,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # React dev server
     "http://127.0.0.1:5173",
     "http://localhost:3000",  # Alternative React port
+    "http://localhost:5177",
+    "http://127.0.0.1:5177",
 ]
 
 CORS_ALLOW_CREDENTIALS = True

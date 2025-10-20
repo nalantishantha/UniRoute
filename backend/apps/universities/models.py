@@ -82,6 +82,33 @@ class UniversityServices(models.Model):
         db_table = 'university_services'
 
 
+class UniversityAnnouncement(models.Model):
+    """Stores Announcements for a University.
+
+    This model backs the University Announcement page. It mirrors the
+    frontend shape: {id,title,description,date,author,status} and uses
+    a nullable FK to Universities so it can be scoped per university.
+    Table is explicitly named 'university_announcement' per requirement.
+    """
+    announcement_id = models.AutoField(primary_key=True)
+    university = models.ForeignKey(
+        Universities, models.DO_NOTHING, blank=True, null=True)
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    # store as simple calendar date (YYYY-MM-DD)
+    date = models.DateField()
+    author = models.CharField(max_length=150)
+    # 'draft' or 'published'
+    status = models.CharField(max_length=20, default='draft')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        managed = True
+        db_table = 'university_announcement'
+
+
 class UniversityDashboardAdmin(models.Model):
     """Stores editable content for the University admin dashboard page.
 

@@ -5,7 +5,7 @@ from django.db import transaction
 from django.utils import timezone
 import json
 from .models import Mentors, MentoringSessions, MentoringSessionEnrollments, MentoringFeedback, PreMentorApplications
-from apps.accounts.models import Users
+from apps.accounts.models import Users, UserDetails
 from apps.students.models import Students
 from apps.university_students.models import UniversityStudents
 from django.views.decorators.http import require_http_methods
@@ -354,71 +354,73 @@ def get_mentors(request):
 # University Mentor Admin APIs
 
 @csrf_exempt
-@require_http_methods(["GET"])
+@require_http_methods(["GET"]) 
 def university_mentor_requests(request):
-    """List mentor applications (requests) for a given university.
+    """List mentor requests for a university.
 
-    Query params: university_id (required)
-    Filters: PreMentorApplications.applied=1 and mentor.approved=0
+    Show ONLY when: applied=1 (in pre_mentor_applications) AND mentors.approved in (0, NULL).
+    If a mentor profile exists but has not applied yet (applied=0 or no row), do NOT include.
     """
     uid = request.GET.get('university_id')
     if not uid:
         return JsonResponse({'success': False, 'message': 'university_id is required'}, status=400)
     try:
-        # Gather mentors for this university that are pending (approved is 0 or NULL)
-        mentors_qs = Mentors.objects.select_related('user', 'university_student__university').filter(
-            Q(university_student__university_id=uid) & (Q(approved=0) | Q(approved__isnull=True))
+        apps_qs = (
+            PreMentorApplications.objects
+            .select_related('mentor__user', 'mentor__university_student__university', 'mentor__university_student__degree_program')
+            .filter(
+                applied=1,
+                mentor__university_student__university_id=uid,
+            )
+            .filter(Q(mentor__approved=0) | Q(mentor__approved__isnull=True))
+            .order_by('-created_at')
         )
 
         data = []
-        for mentor in mentors_qs:
-            # Ensure a PreMentorApplications row exists with applied=1
-            app = PreMentorApplications.objects.filter(mentor=mentor, applied=1).order_by('-created_at').first()
-            if app is None:
-                # Build basic form_data from university_student if available
-                fd = {}
-                us = mentor.university_student
-                if us:
-                    fd = {
-                        'registration_number': getattr(us, 'registration_number', None),
-                        'year_of_study': getattr(us, 'year_of_study', None),
-                    }
-                app = PreMentorApplications.objects.create(mentor=mentor, applied=1, form_data=fd)
-
+        for app in apps_qs:
+            mentor = app.mentor
             user = mentor.user
-            # Try user details for nicer name/email/phone
-            try:
-                from apps.accounts.models import UserDetails
-                ud = UserDetails.objects.get(user=user)
-                mentor_name = ud.full_name or f"{ud.first_name} {ud.last_name}".strip()
-                email = getattr(ud, 'email', None) or getattr(user, 'email', '')
-                phone = getattr(ud, 'phone', '')
-            except Exception:
-                mentor_name = getattr(user, 'username', f"mentor_{mentor.mentor_id}")
-                email = getattr(user, 'email', '')
-                phone = ''
 
-            # Education from university_student
-            edu = None
+            # Name & contacts
+            try:
+                ud = UserDetails.objects.get(user=user)
+                mentor_name = ud.full_name or getattr(user, 'username', f"mentor_{mentor.mentor_id}")
+                contact_number = ud.contact_number or ''
+            except UserDetails.DoesNotExist:
+                mentor_name = getattr(user, 'username', f"mentor_{mentor.mentor_id}")
+                contact_number = ''
+            email = getattr(user, 'email', '')
+
+            # Merge form_data with fallbacks from UniversityStudents
+            merged_fd = dict(app.form_data or {})
             us = mentor.university_student
             if us:
+                merged_fd.setdefault('registration_number', getattr(us, 'registration_number', None))
+                merged_fd.setdefault('year_of_study', getattr(us, 'year_of_study', None))
+            # phone fallback from user details
+            phone = merged_fd.get('phone') or merged_fd.get('contact_number') or contact_number
+            # also inject into form_data so UI that reads only form_data sees it
+            if 'phone' not in merged_fd and phone:
+                merged_fd['phone'] = phone
+
+            # Education summary
+            edu = None
+            if us:
                 uni_name = getattr(us.university, 'name', None)
-                try:
-                    degree_title = getattr(us.degree_program, 'title', None)
-                except Exception:
-                    degree_title = None
-                edu = f"{degree_title or ''}{' - ' if degree_title and uni_name else ''}{uni_name or ''}" or None
+                degree_title = getattr(us.degree_program, 'title', None)
+                if degree_title or uni_name:
+                    edu = f"{degree_title or ''}{' - ' if degree_title and uni_name else ''}{uni_name or ''}"
 
             data.append({
                 'pre_mentor_id': app.pre_mentor_id,
                 'mentor_id': mentor.mentor_id,
                 'mentor_name': mentor_name,
                 'email': email,
-                'phone': phone,
+                'phone': phone or '',
                 'education': edu,
                 'bio': mentor.bio,
                 'expertise': mentor.expertise,
-                'form_data': app.form_data,
+                'form_data': merged_fd,
                 'submitted_at': app.created_at,
             })
         return JsonResponse({'success': True, 'requests': data})
@@ -456,6 +458,7 @@ def university_active_mentors(request):
                 'mentor_id': m.mentor_id,
                 'mentor_name': mentor_name,
                 'email': email,
+                'phone': getattr(UserDetails.objects.filter(user=user).first(), 'contact_number', '') or '',
                 'expertise': m.expertise,
                 'bio': m.bio,
                 'approved': m.approved,
@@ -497,12 +500,44 @@ def reject_pre_mentor(request, pre_mentor_id):
         body = json.loads(request.body or '{}')
         reason = body.get('reason', '')
         with transaction.atomic():
-            app = PreMentorApplications.objects.get(pre_mentor_id=pre_mentor_id)
+            app = PreMentorApplications.objects.select_related('mentor').get(pre_mentor_id=pre_mentor_id)
             app.applied = 0
             app.rejection_reason = reason
             app.save(update_fields=['applied', 'rejection_reason', 'updated_at'])
+            # Ensure mentor remains unapproved
+            if app.mentor and app.mentor.approved:
+                m = app.mentor
+                m.approved = 0
+                m.save(update_fields=['approved'])
         return JsonResponse({'success': True})
     except PreMentorApplications.DoesNotExist:
         return JsonResponse({'success': False, 'message': 'Application not found'}, status=404)
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["GET"]) 
+def pre_mentor_status(request):
+    """Student-facing: get latest pre-mentor application status and reason.
+
+    Query params: user_id (required)
+    Returns: {applied, approved, rejection_reason, pre_mentor_id, form_data, updated_at}
+    """
+    user_id = request.GET.get('user_id')
+    if not user_id:
+        return JsonResponse({'success': False, 'message': 'user_id is required'}, status=400)
+    try:
+        mentor = Mentors.objects.select_related('user').get(user_id=user_id)
+    except Mentors.DoesNotExist:
+        return JsonResponse({'success': True, 'status': {'applied': 0, 'approved': 0}})
+    app = PreMentorApplications.objects.filter(mentor=mentor).order_by('-updated_at', '-created_at').first()
+    status = {
+        'applied': int(app.applied) if app else 0,
+        'approved': int(mentor.approved or 0),
+        'rejection_reason': getattr(app, 'rejection_reason', None) if app else None,
+        'pre_mentor_id': getattr(app, 'pre_mentor_id', None) if app else None,
+        'form_data': getattr(app, 'form_data', None) if app else None,
+        'updated_at': getattr(app, 'updated_at', None) if app else None,
+    }
+    return JsonResponse({'success': True, 'status': status})
