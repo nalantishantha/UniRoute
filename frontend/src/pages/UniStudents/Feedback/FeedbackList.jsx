@@ -12,6 +12,8 @@ import {
   Reply,
   Calendar,
   BookOpen,
+  Users,
+  GraduationCap,
 } from "lucide-react";
 import {
   Card,
@@ -19,7 +21,7 @@ import {
 } from "../../../components/ui/Card";
 import Button from "../../../components/ui/Button";
 
-const FeedbackList = ({ feedbackData, filterStatus }) => {
+const FeedbackList = ({ feedbackData, filterStatus, serviceTypeFilter, onRefreshData }) => {
   const [filterSentiment, setFilterSentiment] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -33,8 +35,11 @@ const FeedbackList = ({ feedbackData, filterStatus }) => {
 
   const handleReplyFeedback = (feedback, reply) => {
     // Implement reply logic here (e.g., send to backend)
-    // For now, just log
     console.log("Reply to feedback:", feedback, reply);
+    // Optionally refresh data after reply
+    if (onRefreshData) {
+      onRefreshData();
+    }
   };
 
   const filteredFeedback = feedbackData.filter((feedback) => {
@@ -74,6 +79,28 @@ const FeedbackList = ({ feedbackData, filterStatus }) => {
     }
   };
 
+  const getServiceTypeIcon = (serviceType) => {
+    switch (serviceType) {
+      case "mentoring":
+        return <Users className="w-4 h-4 text-blue-600" />;
+      case "tutoring":
+        return <GraduationCap className="w-4 h-4 text-purple-600" />;
+      default:
+        return <BookOpen className="w-4 h-4 text-neutral-grey" />;
+    }
+  };
+
+  const getServiceTypeColor = (serviceType) => {
+    switch (serviceType) {
+      case "mentoring":
+        return "bg-blue-100 text-blue-700 border-blue-300";
+      case "tutoring":
+        return "bg-purple-100 text-purple-700 border-purple-300";
+      default:
+        return "bg-neutral-100 text-neutral-700 border-neutral-300";
+    }
+  };
+
   const renderStars = (rating) => {
     return Array.from({ length: 5 }).map((_, index) => (
       <Star
@@ -91,22 +118,22 @@ const FeedbackList = ({ feedbackData, filterStatus }) => {
       {/* Filters and Search */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+          <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
             <div className="flex items-center space-x-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-grey" />
+                <Search className="absolute w-4 h-4 transform -translate-y-1/2 left-3 top-1/2 text-neutral-grey" />
                 <input
                   type="text"
                   placeholder="Search feedback..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                  className="py-2 pl-10 pr-4 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
                 />
               </div>
               <select
                 value={filterSentiment}
                 onChange={(e) => setFilterSentiment(e.target.value)}
-                className="px-4 py-2 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                className="px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
               >
                 <option value="all">All Sentiments</option>
                 <option value="positive">Positive</option>
@@ -116,7 +143,7 @@ const FeedbackList = ({ feedbackData, filterStatus }) => {
             </div>
             <div className="text-sm text-neutral-grey">
               Showing {filteredFeedback.length} of {feedbackData.length}{" "}
-              feedback
+              feedback entries
             </div>
           </div>
         </CardContent>
@@ -137,11 +164,19 @@ const FeedbackList = ({ feedbackData, filterStatus }) => {
             >
               <CardContent className="p-6">
                 <div className="flex items-start space-x-4">
-                  <img
-                    src={feedback.avatar}
-                    alt={feedback.student}
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary-100">
+                    {feedback.avatar ? (
+                      <img
+                        src={feedback.avatar}
+                        alt={feedback.student}
+                        className="object-cover w-12 h-12 rounded-full"
+                      />
+                    ) : (
+                      <span className="text-lg font-semibold text-primary-600">
+                        {feedback.student.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between mb-2">
                       <div>
@@ -150,10 +185,20 @@ const FeedbackList = ({ feedbackData, filterStatus }) => {
                             {feedback.student}
                           </h3>
                           {!feedback.isRead && (
-                            <span className="w-2 h-2 bg-primary-500 rounded-full"></span>
+                            <span className="w-2 h-2 rounded-full bg-primary-500"></span>
                           )}
                         </div>
-                        <div className="flex items-center space-x-2 mt-1">
+                        <div className="flex items-center mt-1 space-x-2">
+                          <span
+                            className={`px-2 py-1 text-xs font-medium rounded-full border ${getServiceTypeColor(
+                              feedback.service_type
+                            )}`}
+                          >
+                            <span className="flex items-center space-x-1">
+                              {getServiceTypeIcon(feedback.service_type)}
+                              <span className="capitalize">{feedback.service_type}</span>
+                            </span>
+                          </span>
                           <BookOpen className="w-3 h-3 text-neutral-light-grey" />
                           <span className="text-sm text-neutral-grey">
                             {feedback.course}
@@ -179,7 +224,7 @@ const FeedbackList = ({ feedbackData, filterStatus }) => {
                       </div>
                     </div>
 
-                    <p className="text-neutral-black mb-4 leading-relaxed">
+                    <p className="mb-4 leading-relaxed text-neutral-black">
                       {feedback.comment}
                     </p>
 
@@ -187,12 +232,12 @@ const FeedbackList = ({ feedbackData, filterStatus }) => {
                       <div className="flex items-center space-x-4">
                         <div className="flex items-center space-x-1">
                           {getSentimentIcon(feedback.sentiment)}
-                          <span className="text-sm text-neutral-grey capitalize">
+                          <span className="text-sm capitalize text-neutral-grey">
                             {feedback.sentiment}
                           </span>
                         </div>
                         {feedback.hasReply && (
-                          <span className="text-sm text-primary-600 bg-primary-50 px-2 py-1 rounded-full">
+                          <span className="px-2 py-1 text-sm rounded-full text-primary-600 bg-primary-50">
                             Replied
                           </span>
                         )}
@@ -200,7 +245,7 @@ const FeedbackList = ({ feedbackData, filterStatus }) => {
                       <div className="flex items-center space-x-2">
                         <Button size="sm" variant="outline" onClick={() => handleViewFeedback(feedback)}>
                           <Reply className="w-4 h-4 mr-1" />
-                          Reply
+                          View
                         </Button>
                       </div>
                     </div>
@@ -215,8 +260,8 @@ const FeedbackList = ({ feedbackData, filterStatus }) => {
       {filteredFeedback.length === 0 && (
         <Card>
           <CardContent className="p-12 text-center">
-            <MessageSquare className="w-12 h-12 text-neutral-light-grey mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-neutral-black mb-2">
+            <MessageSquare className="w-12 h-12 mx-auto mb-4 text-neutral-light-grey" />
+            <h3 className="mb-2 text-lg font-medium text-neutral-black">
               No feedback found
             </h3>
             <p className="text-neutral-grey">

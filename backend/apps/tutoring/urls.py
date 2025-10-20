@@ -2,15 +2,27 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Tutoring Sessions
+    # Tutoring Sessions (Legacy)
     path('sessions/', views.get_tutoring_sessions, name='get_tutoring_sessions'),
     path('sessions/create/', views.create_tutoring_session, name='create_tutoring_session'),
     path('sessions/<int:session_id>/update/', views.update_tutoring_session, name='update_tutoring_session'),
     path('sessions/<int:session_id>/delete/', views.delete_tutoring_session, name='delete_tutoring_session'),
     
     # Tutors
-    path('tutors/', views.get_tutors, name='get_tutors'),
+    path('tutors/', views.get_tutors_list, name='get_tutors_list'),
+    path('tutors/available/', views.get_available_tutors, name='get_available_tutors'),
     
     # Subjects
     path('subjects/', views.get_subjects, name='get_subjects'),
+    
+    # Tutor Availability Management (Recurring Slots)
+    path('availability/<int:tutor_id>/', views.manage_tutor_availability, name='manage_tutor_availability'),
+    path('available-slots/<int:tutor_id>/', views.get_tutor_available_slots, name='get_tutor_available_slots'),
+    
+    # Tutoring Bookings (Recurring)
+    path('bookings/create/', views.create_tutoring_booking, name='create_tutoring_booking'),
+    path('bookings/<int:booking_id>/confirm-payment/', views.confirm_tutoring_booking_payment, name='confirm_tutoring_booking_payment'),
+    path('bookings/<int:booking_id>/cancel/', views.cancel_tutoring_booking, name='cancel_tutoring_booking'),
+    path('bookings/student/<int:student_id>/', views.get_student_bookings, name='get_student_bookings'),
+    path('bookings/tutor/<int:tutor_id>/', views.get_tutor_bookings, name='get_tutor_bookings'),
 ]

@@ -13,6 +13,11 @@ urlpatterns = [
     
     # Degree Program Durations
     path('degree-program-durations/', views.degree_program_durations_list, name='degree_program_durations_list'),
+    # Detailed universities endpoint (includes faculties count and degree programs)
+    path('detailed/', views.universities_detailed_list, name='universities_detailed_list'),
+    
+    # Quick statistics
+    path('quick-stats/', views.quick_stats, name='quick_stats'),
     
     # University Events
     path('events/', views.get_university_events, name='get_university_events'),

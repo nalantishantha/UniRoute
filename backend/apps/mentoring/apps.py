@@ -4,3 +4,6 @@ from django.apps import AppConfig
 class MentoringConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'apps.mentoring'
+    
+    def ready(self):
+        import apps.mentoring.signals

@@ -4,6 +4,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password
 import json
+import string
 from .models import Universities, UniversityEvents, Faculties, UniversityRequests
 from apps.university_programs.models import DegreePrograms, DegreeProgramDurations
 from apps.accounts.models import Users, UserDetails, UserTypes
@@ -297,15 +298,27 @@ def degree_programs_list(request):
             university_id = request.GET.get('university_id')
             faculty_id = request.GET.get('faculty_id')
             
-            filters = {'is_active': 1}
+            # Initialize filters dictionary
+            filters = {}
             
+            # If a university_id is provided, return all degree programs for that university
+            # (don't restrict by is_active). When listing without a university filter, default
+            # to only active programs.
             if university_id:
                 filters['university_id'] = university_id
-            
-            # Note: DegreePrograms are linked to university, not faculty directly
-            # If faculty filtering is needed, we'd need to add a faculty field to DegreePrograms
-            # For now, we'll filter by university
-            
+            # If faculty filter provided, include it
+            if faculty_id:
+                filters['faculty_id'] = faculty_id
+            # Allow filtering by subject stream (frontend may pass 'subject_stream')
+            subject_stream = request.GET.get('subject_stream')
+            if subject_stream:
+                # field is subject_stream_required on the model
+                filters['subject_stream_required'] = subject_stream
+                
+            # Default to active programs if no university filter
+            if not university_id:
+                filters['is_active'] = 1
+                
             degree_programs = DegreePrograms.objects.filter(**filters)
             
             data = []
@@ -318,6 +331,8 @@ def degree_programs_list(request):
                     'code': program.code,
                     'university_id': program.university_id,
                     'university_name': program.university.name if program.university else None,
+                    'faculty_id': program.faculty_id if hasattr(program, 'faculty_id') else None,
+                    'faculty_name': program.faculty.name if getattr(program, 'faculty', None) else None,
                     'description': program.description,
                     'subject_stream_required': program.subject_stream_required,
                     'career_paths': program.career_paths
@@ -378,6 +393,88 @@ def degree_program_durations_list(request):
                 'message': f'Error fetching durations: {str(e)}'
             }, status=500)
     
+    return JsonResponse({
+        'success': False,
+        'message': 'Only GET method allowed'
+    }, status=405)
+
+
+def universities_detailed_list(request):
+    """Get universities with extra details: logo, ugc_ranking, faculties count, degree programs list/count"""
+    if request.method == 'GET':
+        try:
+            universities = Universities.objects.filter(is_active=1)
+            data = []
+            # normalization helpers
+            def normalize_title(s):
+                if not s:
+                    return s
+                try:
+                    return string.capwords(s.strip().lower())
+                except Exception:
+                    return s
+
+            def sentence_case(s):
+                if not s:
+                    return s
+                s = s.strip()
+                if len(s) == 0:
+                    return s
+                return s[0].upper() + s[1:].lower()
+
+            # Pre-fetch related info for efficiency
+            from django.db.models import Count
+
+            # Count faculties per university
+            faculty_counts = Faculties.objects.filter(is_active=1).values('university_id').annotate(count=Count('faculty_id'))
+            faculty_map = {f['university_id']: f['count'] for f in faculty_counts}
+
+            # Degree programs grouped per university
+            degree_programs = DegreePrograms.objects.filter(is_active=1).select_related('university')
+            prog_map = {}
+            for prog in degree_programs:
+                u_id = prog.university_id
+                if u_id not in prog_map:
+                    prog_map[u_id] = []
+                prog_map[u_id].append({
+                    'degree_program_id': prog.degree_program_id,
+                    'id': prog.degree_program_id,
+                    'title': normalize_title(prog.title),
+                    'code': prog.code,
+                    'description': sentence_case(prog.description),
+                })
+
+            for uni in universities:
+                uprogs = prog_map.get(uni.university_id, [])
+                data.append({
+                    'university_id': uni.university_id,
+                    'id': uni.university_id,
+                    'name': normalize_title(uni.name),
+                    'location': normalize_title(uni.location) if uni.location else uni.location,
+                    'district': normalize_title(uni.district) if uni.district else uni.district,
+                    'address': uni.address,
+                    'description': sentence_case(uni.description),
+                    'contact_email': uni.contact_email,
+                    'phone_number': uni.phone_number,
+                    'website': uni.website,
+                    'logo': uni.logo,  # frontend will use this as background/logo
+                    'ugc_ranking': uni.ugc_ranking,
+                    'faculties_count': faculty_map.get(uni.university_id, 0),
+                    'degree_programs_count': len(uprogs),
+                    'degree_programs': uprogs,
+                })
+
+            return JsonResponse({
+                'results': data,
+                'count': len(data)
+            })
+
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error fetching detailed universities: {str(e)}'
+            }, status=500)
+
     return JsonResponse({
         'success': False,
         'message': 'Only GET method allowed'
@@ -593,4 +690,50 @@ def reject_university_request(request, request_id):
     return JsonResponse({
         'success': False,
         'message': 'Only POST method allowed'
+    }, status=405)
+
+
+def quick_stats(request):
+    """Get quick statistics for the university guide dashboard"""
+    if request.method == 'GET':
+        try:
+            from apps.university_students.models import UniversityStudents
+            
+            # Count universities
+            universities_count = Universities.objects.filter(is_active=1).count()
+            
+            # Count faculties
+            faculties_count = Faculties.objects.count()
+            
+            # Count university students
+            students_count = UniversityStudents.objects.count()
+            
+            # Count degree programs
+            degree_programs_count = DegreePrograms.objects.count()
+            
+            return JsonResponse({
+                'success': True,
+                'stats': {
+                    'universities_count': universities_count,
+                    'faculties_count': faculties_count,
+                    'students_count': students_count,
+                    'degree_programs_count': degree_programs_count
+                }
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error fetching statistics: {str(e)}',
+                'stats': {
+                    'universities_count': 0,
+                    'faculties_count': 0,
+                    'students_count': 0,
+                    'degree_programs_count': 0
+                }
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only GET method allowed'
     }, status=405)

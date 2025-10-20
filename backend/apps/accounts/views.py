@@ -12,6 +12,7 @@ from apps.students.models import Students
 from apps.university_students.models import UniversityStudents
 from apps.universities.models import Universities, UniversityRequests
 from apps.companies.models import Companies, CompanyRequests
+from apps.pre_mentors.models import PreMentors
 
 @csrf_exempt
 def register_student(request):
@@ -173,18 +174,150 @@ def login_user(request):
                         print("User type not found")
                     
                     # Get additional info based on user type
+                    # Priority order: 1. Approved Mentor, 2. Pre-mentor with pending application, 3. Other types
                     additional_info = {}
+                    final_user_type = user_type_name
                     
-                    if user_type_name == 'student':
+                    # First check if user is an approved mentor (approved=1)
+                    from apps.mentoring.models import Mentors
+                    try:
+                        mentor = Mentors.objects.get(user=user, approved=1)
+                        # User is an approved mentor - should access uni-student dashboard as mentor
                         try:
-                            student = Students.objects.get(user=user)
+                            uni_student = mentor.university_student
+                            final_user_type = 'mentor'  # Override the user type
                             additional_info = {
-                                'student_id': student.student_id,
-                                # 'student_stage': student.student_stage,
-                                'school': student.school
+                                'mentor_id': mentor.mentor_id,
+                                'university_student_id': uni_student.university_student_id,
+                                'university_id': uni_student.university_id,
+                                'faculty_id': uni_student.faculty_id,
+                                'degree_program_id': uni_student.degree_program_id,
+                                'year_of_study': uni_student.year_of_study,
+                                'registration_number': uni_student.registration_number,
+                                'expertise': mentor.expertise,
+                                'bio': mentor.bio,
+                                'approved': mentor.approved
                             }
-                        except Students.DoesNotExist:
-                            pass
+                            print(f"User is an approved mentor with ID: {mentor.mentor_id}")
+                        except Exception as e:
+                            print(f"Error getting mentor uni_student info: {str(e)}")
+                    except Mentors.DoesNotExist:
+                        # Not an approved mentor, check if has pending mentor application and is pre-mentor
+                        pending_mentor = Mentors.objects.filter(user=user, approved=0).first()
+                        
+                        try:
+                            pre_mentor = PreMentors.objects.get(user=user)
+                            uni_student = pre_mentor.university_student
+                            final_user_type = 'pre_mentor'  # Override the user type
+                            
+                            # Auto-create mentor record if it doesn't exist
+                            mentor_record, created = Mentors.objects.get_or_create(
+                                user=user,
+                                defaults={
+                                    'university_student': uni_student,
+                                    'expertise': pre_mentor.skills or "General Mentoring",
+                                    'bio': f"Pre-mentor profile for {user_details.full_name if user_details else user.email}",
+                                    'approved': 0,  # Always start as pending
+                                    'created_at': timezone.now()
+                                }
+                            )
+                            
+                            # Set the foreign key relationship if not already set
+                            if pre_mentor.mentor != mentor_record:
+                                pre_mentor.mentor = mentor_record
+                                pre_mentor.save()
+                            
+                            print(f"Mentor record {'created' if created else 'exists'} for pre-mentor {user.user_id}")
+                            
+                            additional_info = {
+                                'pre_mentor_id': pre_mentor.pre_mentor_id,
+                                'university_student_id': uni_student.university_student_id,
+                                'university_id': uni_student.university_id,
+                                'faculty_id': uni_student.faculty_id,
+                                'degree_program_id': uni_student.degree_program_id,
+                                'year_of_study': uni_student.year_of_study,
+                                'registration_number': uni_student.registration_number,
+                                'skills': pre_mentor.skills or '',
+                                'recommendation': pre_mentor.recommendation or '',
+                                'status': pre_mentor.status,
+                                'applied': pre_mentor.applied,
+                                'has_pending_mentor_application': mentor_record.approved == 0,
+                                'mentor_approved': mentor_record.approved == 1,
+                                'mentor_id': mentor_record.mentor_id
+                            }
+                            print(f"User is a pre-mentor with ID: {pre_mentor.pre_mentor_id}, applied: {pre_mentor.applied}, mentor approved: {mentor_record.approved}")
+                        except PreMentors.DoesNotExist:
+                            # User is not a pre-mentor, check other types
+                            if user_type_name == 'student':
+                                try:
+                                    student = Students.objects.get(user=user)
+                                    additional_info = {
+                                        'student_id': student.student_id,
+                                        # 'student_stage': student.student_stage,
+                                        'school': student.school
+                                    }
+                                except Students.DoesNotExist:
+                                    pass
+                            
+                            elif user_type_name == 'uni_student':
+                                try:
+                                    uni_student = UniversityStudents.objects.get(user=user)
+                                    additional_info = {
+                                        'university_student_id': uni_student.university_student_id,
+                                        'university_id': uni_student.university_id,
+                                        'faculty_id': uni_student.faculty_id,
+                                        'degree_program_id': uni_student.degree_program_id,
+                                        'year_of_study': uni_student.year_of_study,
+                                        'registration_number': uni_student.registration_number
+                                    }
+                                except UniversityStudents.DoesNotExist:
+                                    pass
+                            
+                            elif user_type_name == 'counsellor':
+                                try:
+                                    from apps.counsellors.models import Counsellors
+                                    counsellor = Counsellors.objects.get(user=user)
+                                    additional_info = {
+                                        'counsellor_id': counsellor.counsellor_id,
+                                        'expertise': counsellor.expertise or '',
+                                        'bio': counsellor.bio or '',
+                                        'experience_years': counsellor.experience_years,
+                                        'qualifications': counsellor.qualifications or '',
+                                        'specializations': counsellor.specializations or '',
+                                        'available_for_sessions': counsellor.available_for_sessions,
+                                        'hourly_rate': float(counsellor.hourly_rate) if counsellor.hourly_rate else None
+                                    }
+                                    print(f"User is a counsellor with ID: {counsellor.counsellor_id}")
+                                except Exception as e:
+                                    print(f"Error getting counsellor info: {str(e)}")
+                                    # If counsellor record doesn't exist, create a basic one
+                                    try:
+                                        from apps.counsellors.models import Counsellors
+                                        counsellor = Counsellors.objects.create(
+                                            user=user,
+                                            expertise='',
+                                            bio=f"Counsellor profile for {user_details.full_name if user_details else user.email}",
+                                            available_for_sessions=True
+                                        )
+                                        additional_info = {
+                                            'counsellor_id': counsellor.counsellor_id,
+                                            'expertise': '',
+                                            'bio': counsellor.bio,
+                                            'experience_years': None,
+                                            'qualifications': '',
+                                            'specializations': '',
+                                            'available_for_sessions': True,
+                                            'hourly_rate': None
+                                        }
+                                        print(f"Created new counsellor record with ID: {counsellor.counsellor_id}")
+                                    except Exception as create_error:
+                                        print(f"Error creating counsellor record: {str(create_error)}")
+                                        additional_info = {}
+                    
+                    # Determine redirect path and dashboard type based on final user type
+                    redirect_path = get_redirect_path(final_user_type)
+                    dashboard_type = get_dashboard_type(final_user_type)
+                    
                     
                     return JsonResponse({
                         'success': True,
@@ -195,10 +328,21 @@ def login_user(request):
                             'email': user.email,
                             'full_name': user_details.full_name if user_details else '',
                             'contact_number': user_details.contact_number if user_details else '',
-                            'user_type': user_type_name,
+                            'user_type': final_user_type,  # Use the final determined user type
                             'user_type_id': user.user_type_id,
+                            'redirect_path': redirect_path,  # Add explicit redirect path
+                            'dashboard_type': dashboard_type,  # Add dashboard type
+                            'is_approved_mentor': final_user_type == 'mentor',
+                            'is_pre_mentor': final_user_type == 'pre_mentor',
+                            'login_timestamp': timezone.now().isoformat(),  # Add timestamp to prevent caching
+                            'original_user_type': user_type_name,  # Original user type from database
+                            'decision_reason': get_decision_reason(final_user_type, user_type_name),  # Debug info
                             **additional_info
                         }
+                    }, headers={
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
                     })
                 else:
                     print("Password incorrect - no match")
@@ -230,6 +374,46 @@ def login_user(request):
         'success': False,
         'message': 'Only POST method allowed'
     }, status=405)
+
+
+def get_decision_reason(final_user_type, original_user_type):
+    """Get explanation for why this user type was chosen (for debugging)"""
+    if final_user_type == 'mentor':
+        return f"User has approved mentor status (approved=1), overriding original type '{original_user_type}'"
+    elif final_user_type == 'pre_mentor':
+        return f"User is pre-mentor with pending/no mentor application, overriding original type '{original_user_type}'"
+    else:
+        return f"Using original user type '{original_user_type}'"
+
+
+def get_redirect_path(user_type):
+    """Get the appropriate redirect path based on user type"""
+    redirect_paths = {
+        'mentor': '/university-student/dashboard',  # Approved mentors go to uni-student dashboard
+        'pre_mentor': '/pre-mentor/dashboard',      # Pre-mentors go to pre-mentor dashboard
+        'student': '/student/dashboard',            # Regular students
+        'uni_student': '/university-student/dashboard',  # Regular university students
+        'university': '/university/dashboard',      # University admins
+        'company': '/company/dashboard',           # Company users
+        'counsellor': '/counsellor/dashboard',     # Counsellors
+        'admin': '/admin/dashboard'                # System admins
+    }
+    return redirect_paths.get(user_type, '/dashboard')
+
+
+def get_dashboard_type(user_type):
+    """Get the dashboard type for frontend routing"""
+    dashboard_types = {
+        'mentor': 'university-student',  # Approved mentors use uni-student dashboard
+        'pre_mentor': 'pre-mentor',      # Pre-mentors use pre-mentor dashboard
+        'student': 'student',
+        'uni_student': 'university-student',
+        'university': 'university',
+        'company': 'company',
+        'counsellor': 'counsellor',     # Counsellors use counsellor dashboard
+        'admin': 'admin'
+    }
+    return dashboard_types.get(user_type, 'default')
 
 
 # Add this logout function after the login function
@@ -352,6 +536,7 @@ def register_university_student(request):
                     is_active=1,
                     created_at=timezone.now()
                 )
+                
                 # Create user details
                 user_details = UserDetails.objects.create(
                     user=user,
@@ -360,6 +545,7 @@ def register_university_student(request):
                     is_verified=0,
                     updated_at=timezone.now()
                 )
+                
                 # Create university student record
                 university_student = UniversityStudents.objects.create(
                     user=user,
@@ -371,9 +557,33 @@ def register_university_student(request):
                     registration_number=registration_number
                 )
                 print(f"University student created with ID: {university_student.university_student_id}")
+                
+                # Create pre-mentor record (all university students start as pre-mentors)
+                pre_mentor = PreMentors.objects.create(
+                    user=user,
+                    university_student=university_student,
+                    status='active',
+                    applied=0,  # Not applied for mentor status yet
+                    created_at=timezone.now(),
+                    updated_at=timezone.now()
+                )
+                print(f"Pre-mentor record created with ID: {pre_mentor.pre_mentor_id}")
+                
+                # Create pending mentor record (approved=0)
+                from apps.mentoring.models import Mentors
+                mentor = Mentors.objects.create(
+                    user=user,
+                    university_student=university_student,
+                    expertise='',
+                    bio='',
+                    approved=0,  # Pending approval
+                    created_at=timezone.now()
+                )
+                print(f"Pending mentor record created with ID: {mentor.mentor_id}")
+                
                 return JsonResponse({
                     'success': True,
-                    'message': 'University student registration successful!',
+                    'message': 'University student registration successful! You can now login as a pre-mentor.',
                     'user': {
                         'id': user.user_id,
                         'username': user.username,
@@ -383,6 +593,8 @@ def register_university_student(request):
                         'user_type': 'uni_student',
                         'user_type_id': user.user_type.type_id,
                         'university_student_id': university_student.university_student_id,
+                        'pre_mentor_id': pre_mentor.pre_mentor_id,
+                        'mentor_id': mentor.mentor_id,
                         'university_id': university_id,
                         'faculty_id': faculty_id,
                         'degree_program_id': degree_program_id,
@@ -597,4 +809,184 @@ def register_company(request):
     return JsonResponse({
         'success': False,
         'message': 'Only POST method allowed'
+    }, status=405)
+
+
+@csrf_exempt
+def upgrade_to_pre_mentor(request):
+    """Convert a university student to a pre-mentor"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            university_student_id = data.get('university_student_id')
+            
+            if not university_student_id:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'University student ID is required'
+                }, status=400)
+            
+            # Get university student
+            try:
+                uni_student = UniversityStudents.objects.get(university_student_id=university_student_id)
+            except UniversityStudents.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'University student not found'
+                }, status=404)
+            
+            # Check if already a pre-mentor
+            if PreMentors.objects.filter(university_student=uni_student).exists():
+                return JsonResponse({
+                    'success': False,
+                    'message': 'This university student is already a pre-mentor'
+                }, status=400)
+            
+            with transaction.atomic():
+                # Update user type to pre_mentor
+                pre_mentor_type, _ = UserTypes.objects.get_or_create(type_name='pre_mentor')
+                uni_student.user.user_type = pre_mentor_type
+                uni_student.user.save()
+                
+                # Create pre-mentor record
+                pre_mentor = PreMentors.objects.create(
+                    user=uni_student.user,
+                    university_student=uni_student,
+                    status='active',
+                    applied=0  # Not applied for mentor status yet
+                )
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Successfully upgraded to pre-mentor',
+                    'pre_mentor_id': pre_mentor.pre_mentor_id
+                })
+                
+        except Exception as e:
+            print(f"Upgrade to pre-mentor error: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': f'Upgrade failed: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only POST method allowed'
+    }, status=405)
+
+
+@csrf_exempt
+def get_user_state(request):
+    """Get current user state for debugging login/redirect issues"""
+    if request.method == 'GET':
+        try:
+            user_id = request.GET.get('user_id')
+            email = request.GET.get('email')
+            
+            if not user_id and not email:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'User ID or email is required'
+                }, status=400)
+            
+            # Get user
+            try:
+                if user_id:
+                    user = Users.objects.get(user_id=user_id)
+                else:
+                    user = Users.objects.get(email=email)
+            except Users.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'User not found'
+                }, status=404)
+            
+            # Get user details
+            try:
+                user_details = UserDetails.objects.get(user=user)
+            except UserDetails.DoesNotExist:
+                user_details = None
+            
+            # Get user type name
+            try:
+                user_type_obj = UserTypes.objects.get(type_id=user.user_type_id)
+                user_type_name = user_type_obj.type_name
+            except UserTypes.DoesNotExist:
+                user_type_name = 'unknown'
+            
+            # Check mentor status
+            from apps.mentoring.models import Mentors
+            mentor_info = {}
+            try:
+                mentor = Mentors.objects.get(user=user)
+                mentor_info = {
+                    'has_mentor_record': True,
+                    'mentor_id': mentor.mentor_id,
+                    'approved': mentor.approved,
+                    'approval_status': 'approved' if mentor.approved == 1 else ('rejected' if mentor.approved == -1 else 'pending'),
+                    'created_at': mentor.created_at
+                }
+            except Mentors.DoesNotExist:
+                mentor_info = {'has_mentor_record': False}
+            
+            # Check pre-mentor status
+            pre_mentor_info = {}
+            try:
+                pre_mentor = PreMentors.objects.get(user=user)
+                pre_mentor_info = {
+                    'has_pre_mentor_record': True,
+                    'pre_mentor_id': pre_mentor.pre_mentor_id,
+                    'skills': pre_mentor.skills or '',
+                    'recommendation': pre_mentor.recommendation or '',
+                    'status': pre_mentor.status,
+                    'applied': pre_mentor.applied
+                }
+            except PreMentors.DoesNotExist:
+                pre_mentor_info = {'has_pre_mentor_record': False}
+            
+            # Determine what the login logic would decide
+            final_user_type = user_type_name
+            decision_logic = []
+            
+            if mentor_info.get('has_mentor_record') and mentor_info.get('approved') == 1:
+                final_user_type = 'mentor'
+                decision_logic.append("✅ Has approved mentor record (approved=1)")
+            elif pre_mentor_info.get('has_pre_mentor_record'):
+                final_user_type = 'pre_mentor'
+                decision_logic.append("✅ Has pre-mentor record")
+                if mentor_info.get('has_mentor_record'):
+                    decision_logic.append(f"⏳ Has mentor application with status: {mentor_info.get('approval_status')}")
+            else:
+                decision_logic.append(f"📝 Using original user type: {user_type_name}")
+            
+            return JsonResponse({
+                'success': True,
+                'user_state': {
+                    'user_id': user.user_id,
+                    'email': user.email,
+                    'full_name': user_details.full_name if user_details else '',
+                    'original_user_type': user_type_name,
+                    'final_user_type': final_user_type,
+                    'dashboard_type': get_dashboard_type(final_user_type),
+                    'redirect_path': get_redirect_path(final_user_type),
+                    'mentor_info': mentor_info,
+                    'pre_mentor_info': pre_mentor_info,
+                    'decision_logic': decision_logic,
+                    'should_redirect_to': {
+                        'dashboard': get_dashboard_type(final_user_type),
+                        'path': get_redirect_path(final_user_type)
+                    },
+                    'timestamp': timezone.now().isoformat()
+                }
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error getting user state: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only GET method allowed'
     }, status=405)

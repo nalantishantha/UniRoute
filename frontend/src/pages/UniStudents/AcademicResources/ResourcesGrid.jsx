@@ -19,6 +19,7 @@ import {
   CardContent,
 } from "../../../components/ui/Card";
 import Button from "../../../components/ui/Button";
+import { downloadResource } from "../../../utils/downloadUtils";
 
 const typeIcons = {
   pdf: FileText,
@@ -32,6 +33,7 @@ const ResourcesGrid = ({ resources, categories, setShowUploadModal, onViewResour
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
   const [viewMode, setViewMode] = useState("grid");
+  const [downloadingResources, setDownloadingResources] = useState(new Set());
 
   // Get all unique tags
   const allTags = [...new Set(resources.flatMap((resource) => resource.tags))];
@@ -47,6 +49,66 @@ const ResourcesGrid = ({ resources, categories, setShowUploadModal, onViewResour
       selectedTags.some((tag) => resource.tags.includes(tag));
     return matchesSearch && matchesCategory && matchesTags;
   });
+
+  // Handle download functionality
+  const handleDownload = async (resource) => {
+    try {
+      // Add resource to downloading state
+      setDownloadingResources(prev => new Set([...prev, resource.id]));
+
+      // Get file extension from file_type or default to the original extension
+      let fileExtension = '';
+      if (resource.file_type) {
+        const mimeToExt = {
+          'application/pdf': 'pdf',
+          'application/msword': 'doc',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+          'application/vnd.ms-excel': 'xls',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
+          'application/vnd.ms-powerpoint': 'ppt',
+          'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'pptx',
+          'text/plain': 'txt',
+          'image/jpeg': 'jpg',
+          'image/png': 'png',
+          'image/gif': 'gif',
+          'video/mp4': 'mp4',
+          'video/avi': 'avi',
+        };
+        fileExtension = mimeToExt[resource.file_type] || resource.file_type.split('/').pop() || '';
+      }
+
+      const filename = fileExtension ? `${resource.title}.${fileExtension}` : resource.title;
+
+      // Download the file
+      await downloadResource(resource.id, filename);
+
+      // Show success message (you can integrate with your toast notification system)
+      console.log(`Successfully downloaded: ${resource.title}`);
+
+    } catch (error) {
+      console.error('Download failed:', error);
+
+      // Show user-friendly error messages
+      let errorMessage = 'Download failed. Please try again.';
+      if (error.message.includes('File not found')) {
+        errorMessage = 'The requested file could not be found.';
+      } else if (error.message.includes('Access denied')) {
+        errorMessage = 'You do not have permission to download this file.';
+      } else if (error.message.includes('Network')) {
+        errorMessage = 'Network error. Please check your connection and try again.';
+      }
+
+      // You can replace this alert with your toast notification system
+      alert(errorMessage);
+    } finally {
+      // Remove resource from downloading state
+      setDownloadingResources(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(resource.id);
+        return newSet;
+      });
+    }
+  };
 
   return (
     <>
@@ -168,6 +230,7 @@ const ResourcesGrid = ({ resources, categories, setShowUploadModal, onViewResour
         >
           {filteredResources.map((resource, index) => {
             const IconComponent = typeIcons[resource.type] || FileText;
+            const isDownloading = downloadingResources.has(resource.id);
 
             return (
               <motion.div
@@ -194,9 +257,6 @@ const ResourcesGrid = ({ resources, categories, setShowUploadModal, onViewResour
                             </p>
                           </div>
                         </div>
-                        <button className="p-2 transition-colors rounded-lg hover:bg-neutral-silver">
-                          <MoreHorizontal className="w-4 h-4 text-neutral-grey" />
-                        </button>
                       </div>
 
                       <p className="mb-4 text-sm text-neutral-grey line-clamp-2">
@@ -240,9 +300,14 @@ const ResourcesGrid = ({ resources, categories, setShowUploadModal, onViewResour
                           <Eye className="w-4 h-4 mr-1" />
                           View
                         </Button>
-                        <Button size="sm" className="flex-1">
+                        <Button
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => handleDownload(resource)}
+                          disabled={isDownloading}
+                        >
                           <Download className="w-4 h-4 mr-1" />
-                          Download
+                          {isDownloading ? 'Downloading...' : 'Download'}
                         </Button>
                       </div>
                     </CardContent>
@@ -292,7 +357,13 @@ const ResourcesGrid = ({ resources, categories, setShowUploadModal, onViewResour
                               >
                                 <Eye className="w-4 h-4" />
                               </Button>
-                              <Button size="sm" variant="outline">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDownload(resource)}
+                                disabled={isDownloading}
+                                title={isDownloading ? 'Downloading...' : 'Download'}
+                              >
                                 <Download className="w-4 h-4" />
                               </Button>
                               <Button size="sm" variant="outline">

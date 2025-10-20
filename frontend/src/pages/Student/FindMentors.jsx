@@ -21,7 +21,7 @@ const FindMentors = () => {
   const fetchMentors = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/mentoring/");
+      const response = await fetch("/api/students/mentors/");
       const data = await response.json();
 
       if (data.success) {
