@@ -248,10 +248,6 @@ const TutoringAvailabilityManager = ({ tutorId }) => {
             Add Slot
           </Button>
         </div>
-        <p className="text-sm text-neutral-grey mt-2">
-          Set your recurring weekly availability for tutoring sessions. These
-          slots will be available for students to book every week.
-        </p>
       </CardHeader>
 
       <CardContent className="space-y-6">
