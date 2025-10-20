@@ -164,11 +164,19 @@ class MentoringRequestsView(View):
             # Parse the scheduled datetime
             try:
                 scheduled_at = datetime.fromisoformat(data['scheduled_at'].replace('Z', '+00:00'))
+                
+                # If the datetime is naive (no timezone), make it timezone-aware using the current timezone
+                if timezone.is_naive(scheduled_at):
+                    scheduled_at = timezone.make_aware(scheduled_at)
+                    
             except ValueError:
                 return JsonResponse({
                     'status': 'error',
                     'message': 'Invalid datetime format'
                 }, status=400)
+            
+            # Calculate expiry date (3 hours before the preferred time)
+            expiry_datetime = scheduled_at - timedelta(hours=3)
             
             # Create the mentoring request
             mentoring_request = MentoringRequests.objects.create(
@@ -181,7 +189,7 @@ class MentoringRequestsView(View):
                 urgency='normal',
                 status='pending',
                 requested_date=timezone.now(),
-                expiry_date=timezone.now() + timedelta(days=7)  # Expires in 7 days
+                expiry_date=expiry_datetime  # 3 hours before the preferred time
             )
             
             return JsonResponse({

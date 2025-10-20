@@ -50,7 +50,19 @@ def get_student_mentoring_requests_grouped(request):
                 'preferred_time': getattr(r, 'preferred_time', None) or getattr(r, 'requested_date', None) or None,
                 'status': getattr(r, 'status', '') or '',
                 'created_at': getattr(r, 'created_at', None),
+                'session_id': None,  # Will be populated for scheduled requests
             }
+            
+            # Try to find the associated session for scheduled/accepted requests
+            if status == 'scheduled':
+                try:
+                    from apps.mentoring.models import SessionDetails
+                    session_detail = SessionDetails.objects.select_related('session').filter(request=r).first()
+                    if session_detail and session_detail.session:
+                        entry['session_id'] = session_detail.session.session_id
+                except Exception as e:
+                    print(f"Error finding session for request {r.request_id}: {e}")
+            
             try:
                 mentor_obj = getattr(r, 'mentor', None)
                 if mentor_obj:
@@ -555,7 +567,8 @@ def mentors_list(request):
 @csrf_exempt
 def create_mentoring_session(request):
     """
-    Create a new mentoring session (Student perspective)
+    Create a new mentoring request (Student perspective)
+    Only creates an entry in mentoring_requests table
     """
     if request.method == 'POST':
         try:
@@ -564,15 +577,17 @@ def create_mentoring_session(request):
             # Extract data from request
             mentor_id = data.get('mentor_id')
             topic = data.get('topic')
-            scheduled_at = data.get('scheduled_at')
+            scheduled_at = data.get('scheduled_at')  # This is the preferred time
             duration_minutes = data.get('duration_minutes')
-            status = data.get('status', 'scheduled')
+            description = data.get('description', f"Mentoring session request for: {topic}")
+            session_type = data.get('session_type', 'online')
+            urgency = data.get('urgency', 'medium')
             
             # Validate required fields
-            if not all([mentor_id, topic, scheduled_at, duration_minutes]):
+            if not all([mentor_id, topic, scheduled_at]):
                 return JsonResponse({
                     'success': False,
-                    'message': 'Missing required fields'
+                    'message': 'Missing required fields (mentor_id, topic, scheduled_at)'
                 }, status=400)
             
             # Check if mentor exists
@@ -584,60 +599,66 @@ def create_mentoring_session(request):
                     'message': 'Mentor not found'
                 }, status=404)
             
-            # Create the mentoring session
-            session = MentoringSessions.objects.create(
+            # Get the student (in production, this would come from the authenticated user)
+            # For demo purposes, we'll try to get the first student
+            try:
+                student = Students.objects.first()
+                if not student:
+                    return JsonResponse({
+                        'success': False,
+                        'message': 'No student found'
+                    }, status=404)
+            except Exception as e:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Error finding student: {str(e)}'
+                }, status=500)
+            
+            # Parse scheduled_at (preferred time) to calculate expiry_date (3 hours before)
+            from datetime import datetime
+            
+            # Parse the scheduled_at datetime string
+            if isinstance(scheduled_at, str):
+                # Use fromisoformat to handle ISO format with timezone
+                preferred_datetime = datetime.fromisoformat(scheduled_at.replace('Z', '+00:00'))
+            else:
+                preferred_datetime = scheduled_at
+            
+            # If the datetime is naive (no timezone), make it timezone-aware using the current timezone
+            if timezone.is_naive(preferred_datetime):
+                preferred_datetime = timezone.make_aware(preferred_datetime)
+            
+            # Calculate expiry date (3 hours before the preferred time)
+            expiry_datetime = preferred_datetime - timedelta(hours=3)
+            
+            # Create only the mentoring request entry
+            mentoring_request = MentoringRequests.objects.create(
+                student=student,
                 mentor=mentor,
                 topic=topic,
-                scheduled_at=scheduled_at,
-                duration_minutes=duration_minutes,
-                status=status,
-                created_at=timezone.now()
+                description=description,
+                preferred_time=preferred_datetime.isoformat(),  # Store as ISO string with timezone
+                session_type=session_type,
+                urgency=urgency,
+                status='pending',
+                requested_date=timezone.now(),  # When the request was created (now)
+                expiry_date=expiry_datetime,  # 3 hours before the preferred time
+                decline_reason=None
             )
-            
-            # Create session enrollment and request
-            try:
-                # For demo purposes, we'll try to get the first student or create a placeholder
-                # In a real application, you would get the student_id from the authenticated user
-                student = Students.objects.first()
-                if student:
-                    MentoringSessionEnrollments.objects.create(
-                        session=session,
-                        student=student,
-                        enrolled_at=timezone.now()
-                    )
-                    
-                    # Also create a mentoring request entry
-                    MentoringRequests.objects.create(
-                        student=student,
-                        mentor=mentor,
-                        topic=topic,
-                        description=f"Mentoring session request for: {topic}",
-                        preferred_time="Flexible",  # We don't have this from the form
-                        session_type="online",  # Default value since not in form
-                        urgency="medium",  # Default value since not in form
-                        status="pending",
-                        requested_date=scheduled_at,
-                        decline_reason=None,
-                        created_at=timezone.now(),
-                        updated_at=timezone.now(),
-                        expiry_date=timezone.now() + timedelta(days=7)  # Expire in 7 days
-                    )
-                    
-            except Exception as e:
-                # Continue even if enrollment creation fails
-                print(f"Warning: Could not create session enrollment: {e}")
-                pass
             
             return JsonResponse({
                 'success': True,
-                'message': 'Mentoring session created successfully',
-                'session': {
-                    'session_id': session.session_id,
+                'message': 'Mentoring request created successfully',
+                'request': {
+                    'request_id': mentoring_request.request_id,
                     'mentor_id': mentor_id,
                     'topic': topic,
-                    'scheduled_at': scheduled_at,
-                    'duration_minutes': duration_minutes,
-                    'status': status
+                    'preferred_time': preferred_datetime.isoformat(),  # Include timezone in response
+                    'requested_date': mentoring_request.requested_date.isoformat(),
+                    'expiry_date': expiry_datetime.isoformat(),  # Include timezone in response
+                    'session_type': session_type,
+                    'urgency': urgency,
+                    'status': 'pending'
                 }
             })
             
@@ -647,9 +668,11 @@ def create_mentoring_session(request):
                 'message': 'Invalid JSON data'
             }, status=400)
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return JsonResponse({
                 'success': False,
-                'message': 'Error creating session',
+                'message': 'Error creating mentoring request',
                 'error': str(e)
             }, status=500)
     

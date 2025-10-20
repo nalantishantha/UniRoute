@@ -297,6 +297,10 @@ def degree_programs_list(request):
         try:
             university_id = request.GET.get('university_id')
             faculty_id = request.GET.get('faculty_id')
+            
+            # Initialize filters dictionary
+            filters = {}
+            
             # If a university_id is provided, return all degree programs for that university
             # (don't restrict by is_active). When listing without a university filter, default
             # to only active programs.
@@ -310,6 +314,11 @@ def degree_programs_list(request):
             if subject_stream:
                 # field is subject_stream_required on the model
                 filters['subject_stream_required'] = subject_stream
+                
+            # Default to active programs if no university filter
+            if not university_id:
+                filters['is_active'] = 1
+                
             degree_programs = DegreePrograms.objects.filter(**filters)
             
             data = []
@@ -681,4 +690,50 @@ def reject_university_request(request, request_id):
     return JsonResponse({
         'success': False,
         'message': 'Only POST method allowed'
+    }, status=405)
+
+
+def quick_stats(request):
+    """Get quick statistics for the university guide dashboard"""
+    if request.method == 'GET':
+        try:
+            from apps.university_students.models import UniversityStudents
+            
+            # Count universities
+            universities_count = Universities.objects.filter(is_active=1).count()
+            
+            # Count faculties
+            faculties_count = Faculties.objects.count()
+            
+            # Count university students
+            students_count = UniversityStudents.objects.count()
+            
+            # Count degree programs
+            degree_programs_count = DegreePrograms.objects.count()
+            
+            return JsonResponse({
+                'success': True,
+                'stats': {
+                    'universities_count': universities_count,
+                    'faculties_count': faculties_count,
+                    'students_count': students_count,
+                    'degree_programs_count': degree_programs_count
+                }
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error fetching statistics: {str(e)}',
+                'stats': {
+                    'universities_count': 0,
+                    'faculties_count': 0,
+                    'students_count': 0,
+                    'degree_programs_count': 0
+                }
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only GET method allowed'
     }, status=405)

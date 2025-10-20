@@ -16,6 +16,7 @@ import SettingsPage from "../pages/Student/SettingsPage";
 import ProfileSetup from "../pages/Student/ProfileSetup";
 import ZScoreAnalysis from "../pages/Student/ZScoreAnalysis";
 import PreUniCourses from "../pages/Student/PreUniCourses";
+import CourseVideoPage from "../pages/Student/CourseVideoPage";
 import ProgramMatching from "../pages/Student/ProgramMatching";
 import UniversityGuide from "../pages/Student/UniversityGuide";
 import CareerCounseling from "../pages/Student/CareerCounseling";
@@ -42,7 +43,8 @@ const StudentRoutes = () => {
 
       {/* Academic Services */}
       <Route path="/z-score-analysis" element={<ZScoreAnalysis />} />
-  <Route path="/pre-uni-courses" element={<PreUniCourses />} />
+      <Route path="/pre-uni-courses" element={<PreUniCourses />} />
+      <Route path="/course/:courseId" element={<CourseVideoPage />} />
       <Route path="/program-matching" element={<ProgramMatching />} />
       <Route path="/university-guide" element={<UniversityGuide />} />
 

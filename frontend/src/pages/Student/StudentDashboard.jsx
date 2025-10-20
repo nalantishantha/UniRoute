@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import StudentNavigation from "../../components/Navigation/StudentNavigation";
 import { getCurrentUser } from "../../utils/auth";
+import { joinMentoringVideoCall } from "../../utils/videoCallAPI";
 import {
   GraduationCap,
   User,
@@ -32,6 +33,7 @@ import {
   BookMarked,
   Newspaper,
   Edit,
+  Video,
 } from "lucide-react";
 
 const StudentDashboard = () => {
@@ -39,20 +41,22 @@ const StudentDashboard = () => {
   const [recentActivities, setRecentActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sessionsLoading, setSessionsLoading] = useState(true);
+  const [upcomingLoading, setUpcomingLoading] = useState(true);
 
   useEffect(() => {
     fetchStudentProfile();
 
     // Listen for profile update events
     const handleProfileUpdate = () => {
-      console.log('Dashboard: Profile updated, refreshing data...');
+      console.log("Dashboard: Profile updated, refreshing data...");
       fetchStudentProfile();
     };
 
     // Listen for page visibility changes
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        console.log('Dashboard: Page became visible, refreshing data...');
+        console.log("Dashboard: Page became visible, refreshing data...");
         fetchStudentProfile();
         const currentUser = getCurrentUser();
         if (currentUser && currentUser.user_id) {
@@ -63,33 +67,45 @@ const StudentDashboard = () => {
       }
     };
 
-    window.addEventListener('profileUpdated', handleProfileUpdate);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener("profileUpdated", handleProfileUpdate);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     // Cleanup
     return () => {
-      window.removeEventListener('profileUpdated', handleProfileUpdate);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener("profileUpdated", handleProfileUpdate);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
 
-  // Poll upcoming sessions every 30 seconds when studentProfile exists
-  useEffect(() => {
-    let intervalId = null;
+  // Handle joining video call for mentoring sessions
+  const handleJoinVideoCall = (sessionId) => {
     const currentUser = getCurrentUser();
-    if (studentProfile && currentUser && currentUser.user_id) {
-      // initial fetch
-      fetchUpcomingSessions(currentUser.user_id);
-      fetchUpcomingRequests(currentUser.user_id);
-      intervalId = setInterval(() => {
-        fetchUpcomingSessions(currentUser.user_id);
-        fetchUpcomingRequests(currentUser.user_id);
-      }, 30000);
+    if (!currentUser || !currentUser.user_id) {
+      alert("Please log in to join the video call");
+      return;
     }
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, [studentProfile]);
+
+    // Call the joinMentoringVideoCall function with student role
+    joinMentoringVideoCall(sessionId, currentUser.user_id, "student");
+  };
+
+  // Poll upcoming sessions every 30 seconds when studentProfile exists
+  // useEffect(() => {
+  //   let intervalId = null;
+  //   const currentUser = getCurrentUser();
+  //   if (studentProfile && currentUser && currentUser.user_id) {
+  //     // initial fetch
+  //     fetchUpcomingSessions(currentUser.user_id);
+  //     fetchUpcomingRequests(currentUser.user_id);
+  //     intervalId = setInterval(() => {
+  //       fetchUpcomingSessions(currentUser.user_id);
+  //       fetchUpcomingRequests(currentUser.user_id);
+  //     }, 30000);
+  //   }
+  //   return () => {
+  //     if (intervalId) clearInterval(intervalId);
+  //   };
+  // }, [studentProfile]);
 
   const fetchStudentProfile = async () => {
     try {
@@ -99,36 +115,45 @@ const StudentDashboard = () => {
       const currentUser = getCurrentUser();
 
       if (!currentUser || !currentUser.user_id) {
-        setError('User not authenticated. Please log in.');
+        setError("User not authenticated. Please log in.");
         setLoading(false);
         return;
       }
 
-      console.log('Dashboard: Fetching profile for user:', currentUser.user_id);
+      console.log("Dashboard: Fetching profile for user:", currentUser.user_id);
 
-      const response = await fetch(`http://127.0.0.1:8000/api/students/profile/?user_id=${currentUser.user_id}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/students/profile/?user_id=${currentUser.user_id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log('Dashboard: Profile data received:', data);
+      console.log("Dashboard: Profile data received:", data);
 
       if (data.success) {
         // Process the data for dashboard display
         const profileData = {
-          name: data.student_data.full_name || data.student_data.username || 'Student Name',
+          name:
+            data.student_data.full_name ||
+            data.student_data.username ||
+            "Student Name",
           email: data.student_data.email,
           alStream: data.student_data.current_stage || "Not specified",
           subjects: [], // You can add this later from another table
           zScore: null, // You can add this later from results table
-          district: data.student_data.district || data.student_data.location || "Not specified",
+          district:
+            data.student_data.district ||
+            data.student_data.location ||
+            "Not specified",
           school: data.student_data.school || "Not specified",
           profileImage: data.student_data.profile_picture
             ? (data.student_data.profile_picture.startsWith('http')
@@ -149,14 +174,16 @@ const StudentDashboard = () => {
           const currentUserId = currentUser.user_id;
           fetchGroupedMentoringRequests(currentUserId);
         } catch (e) {
-          console.warn('Dashboard: failed to fetch mentoring sessions', e);
+          console.warn("Dashboard: failed to fetch mentoring sessions", e);
         }
       } else {
-        setError(data.message || 'Failed to load profile data');
+        setError(data.message || "Failed to load profile data");
       }
     } catch (error) {
-      console.error('Dashboard: Error fetching student profile:', error);
-      setError('Failed to connect to server. Please check if the backend is running.');
+      console.error("Dashboard: Error fetching student profile:", error);
+      setError(
+        "Failed to connect to server. Please check if the backend is running."
+      );
     } finally {
       setLoading(false);
     }
@@ -172,7 +199,7 @@ const StudentDashboard = () => {
       data.profile_picture,
       data.current_stage,
       data.district,
-      data.school
+      data.school,
     ];
 
     const filledFields = fields.filter(field => field && field.trim() !== '').length;
@@ -209,7 +236,7 @@ const StudentDashboard = () => {
   useEffect(() => {
     setRecentActivities([
       {
-        id: 'seed-1',
+        id: "seed-1",
         type: "mentor",
         title: "New message from Dr. Samantha Silva",
         description: "Regarding your engineering career path inquiry",
@@ -218,7 +245,7 @@ const StudentDashboard = () => {
         color: "text-blue-500",
       },
       {
-        id: 'seed-2',
+        id: "seed-2",
         type: "news",
         title: "University of Colombo announces new programs",
         description: "New Engineering Faculty to open in 2025",
@@ -227,7 +254,7 @@ const StudentDashboard = () => {
         color: "text-green-500",
       },
       {
-        id: 'seed-3',
+        id: "seed-3",
         type: "recommendation",
         title: "New degree recommendation available",
         description: "Bachelor of Computer Science - University of Moratuwa",
@@ -236,7 +263,7 @@ const StudentDashboard = () => {
         color: "text-purple-500",
       },
       {
-        id: 'seed-4',
+        id: "seed-4",
         type: "tutor",
         title: "Tutor session completed",
         description: "Combined Mathematics with Mr. Kamal Perera",
@@ -251,66 +278,111 @@ const StudentDashboard = () => {
   const fetchAcceptedMentoringSessions = async (studentId) => {
     if (!studentId) return;
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/mentoring/sessions/?student_id=${studentId}`);
+      const res = await fetch(
+        `http://127.0.0.1:8000/api/mentoring/sessions/?student_id=${studentId}`
+      );
       if (!res.ok) {
-        console.warn('Dashboard: mentoring sessions endpoint returned', res.status);
+        console.warn(
+          "Dashboard: mentoring sessions endpoint returned",
+          res.status
+        );
         return;
       }
       const payload = await res.json();
-      const sessions = Array.isArray(payload.sessions) ? payload.sessions : payload || [];
+      const sessions = Array.isArray(payload.sessions)
+        ? payload.sessions
+        : payload || [];
 
       // Filter accepted sessions and map to recent activity items
-      const accepted = sessions.filter((s) => {
-        // handle different backend field names conservatively
-        return s.status === 'accepted' || s.is_accepted === true || s.state === 'accepted';
-      }).map((s) => ({
-        id: `ment-${s.id}`,
-        type: 'mentor',
-        title: s.mentor && (s.mentor.full_name || s.mentor.name) ? `Mentor ${s.mentor.full_name || s.mentor.name} accepted your session` : 'Mentor accepted your session',
-        description: s.subject || s.topic || s.note || (s.mentor ? `Session with ${s.mentor.full_name || s.mentor.name}` : ''),
-        time: s.scheduled_time || s.start_time || s.date || 'Scheduled',
-        icon: UserPlus || MessageCircle,
-        color: 'text-green-500',
-      }));
+      const accepted = sessions
+        .filter((s) => {
+          // handle different backend field names conservatively
+          return (
+            s.status === "accepted" ||
+            s.is_accepted === true ||
+            s.state === "accepted"
+          );
+        })
+        .map((s) => ({
+          id: `ment-${s.id}`,
+          type: "mentor",
+          title:
+            s.mentor && (s.mentor.full_name || s.mentor.name)
+              ? `Mentor ${
+                  s.mentor.full_name || s.mentor.name
+                } accepted your session`
+              : "Mentor accepted your session",
+          description:
+            s.subject ||
+            s.topic ||
+            s.note ||
+            (s.mentor
+              ? `Session with ${s.mentor.full_name || s.mentor.name}`
+              : ""),
+          time: s.scheduled_time || s.start_time || s.date || "Scheduled",
+          icon: UserPlus || MessageCircle,
+          color: "text-green-500",
+        }));
 
       if (accepted.length > 0) {
         // Prepend accepted mentoring sessions to recent activities
         setRecentActivities((prev) => [...accepted, ...prev]);
       }
     } catch (err) {
-      console.warn('Dashboard: error fetching mentoring sessions', err);
+      console.warn("Dashboard: error fetching mentoring sessions", err);
     }
   };
 
   // Fetch mentoring requests grouped by status from student endpoint
-  const [mentoringGrouped, setMentoringGrouped] = useState({ pending: [], accepted: [], completed: [] });
+  const [mentoringGrouped, setMentoringGrouped] = useState({ pending: [], accepted: [], declined: [], completed: [] });
   const [upcomingSessions, setUpcomingSessions] = useState([]);
 
   const fetchGroupedMentoringRequests = async (studentId) => {
     if (!studentId) return;
+    setSessionsLoading(true);
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/students/mentoring/requests-grouped/?user_id=${studentId}`);
+      const res = await fetch(
+        `http://127.0.0.1:8000/api/students/mentoring/requests-grouped/?user_id=${studentId}`
+      );
       if (!res.ok) {
-        console.warn('Dashboard: mentoring requests grouped endpoint returned', res.status);
+        console.warn(
+          "Dashboard: mentoring requests grouped endpoint returned",
+          res.status
+        );
+        setSessionsLoading(false);
         return;
       }
       const payload = await res.json();
       if (payload && payload.success) {
+        // prefer explicit declined list from backend; otherwise infer from completed items
+        const declinedFromPayload = Array.isArray(payload.declined) ? payload.declined : [];
+        const completedFromPayload = Array.isArray(payload.completed) ? payload.completed : [];
+        const inferredDeclined = declinedFromPayload.length > 0 ? declinedFromPayload : completedFromPayload.filter((x) => x.status === 'declined' || x.decline_reason);
+
         setMentoringGrouped({
           pending: Array.isArray(payload.pending) ? payload.pending : [],
           accepted: Array.isArray(payload.accepted) ? payload.accepted : [],
-          completed: Array.isArray(payload.completed) ? payload.completed : [],
+          declined: inferredDeclined,
+          completed: completedFromPayload,
         });
 
         // Merge accepted mentoring requests into recent activities (keep existing seed items)
-        const acceptedItems = (Array.isArray(payload.accepted) ? payload.accepted : []).map((r) => ({
+        const acceptedItems = (
+          Array.isArray(payload.accepted) ? payload.accepted : []
+        ).map((r) => ({
           id: `req-${r.id}`,
-          type: 'mentor',
-          title: r.mentor ? `${r.mentor} accepted your request` : 'Mentor accepted your request',
-          description: r.subject || 'Mentoring request',
-          time: r.preferred_time || (r.created_at ? new Date(r.created_at).toLocaleString() : 'Scheduled'),
+          type: "mentor",
+          title: r.mentor
+            ? `${r.mentor} accepted your request`
+            : "Mentor accepted your request",
+          description: r.subject || "Mentoring request",
+          time:
+            r.preferred_time ||
+            (r.created_at
+              ? new Date(r.created_at).toLocaleString()
+              : "Scheduled"),
           icon: UserPlus,
-          color: 'text-green-500',
+          color: "text-green-500",
         }));
 
         if (acceptedItems.length > 0) {
@@ -318,50 +390,74 @@ const StudentDashboard = () => {
         }
       }
     } catch (err) {
-      console.warn('Dashboard: error fetching grouped mentoring requests', err);
+      console.warn("Dashboard: error fetching grouped mentoring requests", err);
+    } finally {
+      setSessionsLoading(false);
     }
   };
 
   // Fetch upcoming scheduled sessions
   const fetchUpcomingSessions = async (studentId) => {
     if (!studentId) return;
+    setUpcomingLoading(true);
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/students/mentoring/upcoming/?user_id=${studentId}`);
+      const res = await fetch(
+        `http://127.0.0.1:8000/api/students/mentoring/upcoming/?user_id=${studentId}`
+      );
       if (!res.ok) {
-        console.warn('Dashboard: upcoming sessions endpoint returned', res.status);
+        console.warn(
+          "Dashboard: upcoming sessions endpoint returned",
+          res.status
+        );
+        setUpcomingLoading(false);
         return;
       }
       const payload = await res.json();
       if (payload && payload.success) {
-        const upcoming = Array.isArray(payload.upcoming) ? payload.upcoming : [];
+        const upcoming = Array.isArray(payload.upcoming)
+          ? payload.upcoming
+          : [];
         setUpcomingSessions(upcoming);
         // Merge upcoming sessions into recent activities (dedupe by id)
         mergeUpcomingIntoRecent(upcoming);
       }
     } catch (err) {
-      console.warn('Dashboard: error fetching upcoming sessions', err);
+      console.warn("Dashboard: error fetching upcoming sessions", err);
+    } finally {
+      setUpcomingLoading(false);
     }
   };
 
   // Fetch upcoming mentoring requests (status='scheduled') from mentoring_requests
   const fetchUpcomingRequests = async (studentId) => {
     if (!studentId) return;
+    setUpcomingLoading(true);
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/students/mentoring/upcoming-requests/?user_id=${studentId}`);
+      const res = await fetch(
+        `http://127.0.0.1:8000/api/students/mentoring/upcoming-requests/?user_id=${studentId}`
+      );
       if (!res.ok) {
-        console.warn('Dashboard: upcoming requests endpoint returned', res.status);
+        console.warn(
+          "Dashboard: upcoming requests endpoint returned",
+          res.status
+        );
+        setUpcomingLoading(false);
         return;
       }
       const payload = await res.json();
       if (payload && payload.success) {
         // prefer requests if present
-        const upcoming = Array.isArray(payload.upcoming) ? payload.upcoming : [];
+        const upcoming = Array.isArray(payload.upcoming)
+          ? payload.upcoming
+          : [];
         setUpcomingSessions(upcoming);
         // Merge upcoming requested sessions into recent activities (dedupe)
         mergeUpcomingIntoRecent(upcoming);
       }
     } catch (err) {
-      console.warn('Dashboard: error fetching upcoming requests', err);
+      console.warn("Dashboard: error fetching upcoming requests", err);
+    } finally {
+      setUpcomingLoading(false);
     }
   };
 
@@ -373,12 +469,16 @@ const StudentDashboard = () => {
       const newItems = upcomingArr
         .map((s) => ({
           id: `up-${s.id}`,
-          type: 'mentor',
-          title: s.topic || 'Mentoring Session',
-          description: `With ${s.mentor || 'Mentor'}`,
-          time: s.scheduled_at ? new Date(s.scheduled_at).toLocaleString() : (s.session_date ? new Date(s.session_date).toLocaleString() : 'Scheduled'),
+          type: "mentor",
+          title: s.topic || "Mentoring Session",
+          description: `With ${s.mentor || "Mentor"}`,
+          time: s.scheduled_at
+            ? new Date(s.scheduled_at).toLocaleString()
+            : s.session_date
+            ? new Date(s.session_date).toLocaleString()
+            : "Scheduled",
           icon: Calendar,
-          color: 'text-blue-500',
+          color: "text-blue-500",
         }))
         .filter((item) => !existingIds.has(item.id));
 
@@ -667,69 +767,147 @@ const StudentDashboard = () => {
                 </button>
               </div>
               <div className="space-y-4">
-                {/* Upcoming sessions removed from main card; they are merged into Recent Activities sidebar */}
-                {/* Mentoring Requests grouped by status */}
-                <div className="mb-4">
-                  <h4 className="mb-2 font-medium text-primary-400">Pending Requests</h4>
-                  {mentoringGrouped.pending.length === 0 && (
-                    <p className="mb-2 text-sm text-primary-300">No pending requests</p>
-                  )}
-                  {mentoringGrouped.pending.map((r) => (
-                    <div key={`pending-${r.id}`} className="flex items-start p-3 mb-2 space-x-4 bg-accent-50 rounded-xl">
-                      <div className="p-2 text-yellow-500 bg-white rounded-full">
-                        <Clock className="w-5 h-5" />
-                      </div>
-                      <div className="flex-1">
-                        <h5 className="font-medium text-primary-400">{r.mentor || 'Mentor'}</h5>
-                        <p className="text-sm text-primary-300">{r.subject}</p>
-                        <p className="text-xs text-primary-300">{r.preferred_time || (r.created_at ? new Date(r.created_at).toLocaleString() : '')}</p>
-                      </div>
-                      <div className="text-sm font-semibold text-yellow-600">Pending</div>
+                {/* Loading state for sessions */}
+                {sessionsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="text-center">
+                      <Loader2 className="h-6 w-6 animate-spin text-primary-400 mx-auto mb-2" />
+                      <p className="text-primary-300 text-sm">
+                        Loading your sessions...
+                      </p>
                     </div>
-                  ))}
-                </div>
-
-                <div className="mb-4">
-                  <h4 className="mb-2 font-medium text-primary-400">Accepted Requests</h4>
-                  {mentoringGrouped.accepted.length === 0 && (
-                    <p className="mb-2 text-sm text-primary-300">No accepted requests</p>
-                  )}
-                  {mentoringGrouped.accepted.map((r) => (
-                    <div key={`accepted-${r.id}`} className="flex items-start p-3 mb-2 space-x-4 bg-accent-50 rounded-xl">
-                      <div className="p-2 text-green-500 bg-white rounded-full">
-                        <Check className="w-5 h-5" />
-                      </div>
-                      <div className="flex-1">
-                        <h5 className="font-medium text-primary-400">{r.mentor || 'Mentor'}</h5>
-                        <p className="text-sm text-primary-300">{r.subject}</p>
-                        <p className="text-xs text-primary-300">{r.preferred_time || (r.created_at ? new Date(r.created_at).toLocaleString() : '')}</p>
-                      </div>
-                      <div className="text-sm font-semibold text-green-600">Accepted</div>
+                  </div>
+                ) : (
+                  <>
+                    {/* Upcoming sessions removed from main card; they are merged into Recent Activities sidebar */}
+                    {/* Mentoring Requests grouped by status */}
+                    <div className="mb-4">
+                      <h4 className="font-medium text-primary-400 mb-2">
+                        Pending Requests
+                      </h4>
+                      {mentoringGrouped.pending.length === 0 && (
+                        <p className="text-sm text-primary-300 mb-2">
+                          No pending requests
+                        </p>
+                      )}
+                      {mentoringGrouped.pending.map((r) => (
+                        <div
+                          key={`pending-${r.id}`}
+                          className="flex items-start space-x-4 p-3 bg-accent-50 rounded-xl mb-2"
+                        >
+                          <div className="p-2 rounded-full bg-white text-yellow-500">
+                            <Clock className="h-5 w-5" />
+                          </div>
+                          <div className="flex-1">
+                            <h5 className="text-primary-400 font-medium">
+                              {r.mentor || "Mentor"}
+                            </h5>
+                            <p className="text-sm text-primary-300">
+                              {r.subject}
+                            </p>
+                            <p className="text-xs text-primary-300">
+                              {r.preferred_time ||
+                                (r.created_at
+                                  ? new Date(r.created_at).toLocaleString()
+                                  : "")}
+                            </p>
+                          </div>
+                          <div className="text-sm text-yellow-600 font-semibold">
+                            Pending
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
 
-                <div className="mb-4">
-                  <h4 className="mb-2 font-medium text-primary-400">Completed Requests</h4>
-                  {mentoringGrouped.completed.length === 0 && (
-                    <p className="mb-2 text-sm text-primary-300">No completed requests</p>
-                  )}
-                  {mentoringGrouped.completed.map((r) => (
-                    <div key={`completed-${r.id}`} className="flex items-start p-3 mb-2 space-x-4 bg-accent-50 rounded-xl">
-                      <div className="p-2 text-gray-500 bg-white rounded-full">
-                        <Check className="w-5 h-5" />
-                      </div>
-                      <div className="flex-1">
-                        <h5 className="font-medium text-primary-400">{r.mentor || 'Mentor'}</h5>
-                        <p className="text-sm text-primary-300">{r.subject}</p>
-                        <p className="text-xs text-primary-300">{r.preferred_time || (r.created_at ? new Date(r.created_at).toLocaleString() : '')}</p>
-                      </div>
-                      <div className="text-sm font-semibold text-gray-600">Completed</div>
+                    <div className="mb-4">
+                      <h4 className="font-medium text-primary-400 mb-2">
+                        Accepted Requests
+                      </h4>
+                      {mentoringGrouped.accepted.length === 0 && (
+                        <p className="text-sm text-primary-300 mb-2">
+                          No accepted requests
+                        </p>
+                      )}
+                      {mentoringGrouped.accepted.map((r) => (
+                        <div
+                          key={`accepted-${r.id}`}
+                          className="flex items-start space-x-4 p-3 bg-accent-50 rounded-xl mb-2"
+                        >
+                          <div className="p-2 rounded-full bg-white text-green-500">
+                            <Check className="h-5 w-5" />
+                          </div>
+                          <div className="flex-1">
+                            <h5 className="text-primary-400 font-medium">
+                              {r.mentor || "Mentor"}
+                            </h5>
+                            <p className="text-sm text-primary-300">
+                              {r.subject}
+                            </p>
+                            <p className="text-xs text-primary-300">
+                              {r.preferred_time ||
+                                (r.created_at
+                                  ? new Date(r.created_at).toLocaleString()
+                                  : "")}
+                            </p>
+                            {r.session_id && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleJoinVideoCall(r.session_id);
+                                }}
+                                className="mt-2 flex items-center space-x-1 text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg transition-colors"
+                              >
+                                <Video className="h-3 w-3" />
+                                <span>Join Video Meeting</span>
+                              </button>
+                            )}
+                          </div>
+                          <div className="text-sm text-green-600 font-semibold">
+                            Accepted
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
 
-                {/* {recentActivities.map((activity) => {
+                    <div className="mb-4">
+                      <h4 className="font-medium text-primary-400 mb-2">
+                        Completed Requests
+                      </h4>
+                      {mentoringGrouped.completed.length === 0 && (
+                        <p className="text-sm text-primary-300 mb-2">
+                          No completed requests
+                        </p>
+                      )}
+                      {mentoringGrouped.completed.map((r) => (
+                        <div
+                          key={`completed-${r.id}`}
+                          className="flex items-start space-x-4 p-3 bg-accent-50 rounded-xl mb-2"
+                        >
+                          <div className="p-2 rounded-full bg-white text-gray-500">
+                            <Check className="h-5 w-5" />
+                          </div>
+                          <div className="flex-1">
+                            <h5 className="text-primary-400 font-medium">
+                              {r.mentor || "Mentor"}
+                            </h5>
+                            <p className="text-sm text-primary-300">
+                              {r.subject}
+                            </p>
+                            <p className="text-xs text-primary-300">
+                              {r.preferred_time ||
+                                (r.created_at
+                                  ? new Date(r.created_at).toLocaleString()
+                                  : "")}
+                            </p>
+                          </div>
+                          <div className="text-sm text-gray-600 font-semibold">
+                            Completed
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* {recentActivities.map((activity) => {
                   const IconComponent = activity.icon;
                   return (
                     <div
@@ -755,6 +933,8 @@ const StudentDashboard = () => {
                     </div>
                   );
                 })} */}
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -813,25 +993,60 @@ const StudentDashboard = () => {
                 </h3>
               </div>
               <div className="space-y-3">
-                {upcomingSessions.length === 0 && (
-                  <p className="text-sm text-primary-300">No upcoming mentoring sessions</p>
-                )}
-                {upcomingSessions.slice(0, 5).map((s) => (
-                  <div
-                    key={`side-up-${s.id}`}
-                    className="p-3 transition-colors border cursor-pointer border-accent-100 rounded-xl hover:bg-accent-50"
-                  >
-                    <div className="flex items-start space-x-3">
-                      <div className={`p-2 rounded-full bg-white text-blue-500`}>
-                        <Calendar className="w-4 h-4" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="mb-1 text-sm font-medium text-primary-400">{`Upcoming Mentoring Session with ${s.mentor || 'Mentor'}`}</h4>
-                        <p className="text-xs text-primary-300">{s.session_date ? new Date(s.session_date).toLocaleString() : (s.scheduled_at ? new Date(s.scheduled_at).toLocaleString() : '')}</p>
-                      </div>
+                {upcomingLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="text-center">
+                      <Loader2 className="h-6 w-6 animate-spin text-primary-400 mx-auto mb-2" />
+                      <p className="text-primary-300 text-sm">
+                        Loading sessions...
+                      </p>
                     </div>
                   </div>
-                ))}
+                ) : (
+                  <>
+                    {upcomingSessions.length === 0 && (
+                      <p className="text-sm text-primary-300">
+                        No upcoming mentoring sessions
+                      </p>
+                    )}
+                    {upcomingSessions.slice(0, 5).map((s) => (
+                      <div
+                        key={`side-up-${s.id}`}
+                        className="p-3 border border-accent-100 rounded-xl hover:bg-accent-50 transition-colors"
+                      >
+                        <div className="flex items-start space-x-3">
+                          <div
+                            className={`p-2 rounded-full bg-white text-blue-500`}
+                          >
+                            <Calendar className="h-4 w-4" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium text-primary-400 text-sm mb-1">{`Upcoming Mentoring Session with ${
+                              s.mentor || "Mentor"
+                            }`}</h4>
+                            <p className="text-xs text-primary-300">
+                              {s.session_date
+                                ? new Date(s.session_date).toLocaleString()
+                                : s.scheduled_at
+                                ? new Date(s.scheduled_at).toLocaleString()
+                                : ""}
+                            </p>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleJoinVideoCall(s.id);
+                              }}
+                              className="mt-2 flex items-center space-x-1 text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg transition-colors"
+                            >
+                              <Video className="h-3 w-3" />
+                              <span>Join Video Meeting</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                )}
               </div>
             </div>
           </div>
