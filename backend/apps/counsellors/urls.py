@@ -10,4 +10,10 @@ urlpatterns = [
     # Counsellor profile endpoints
     path('profile/<int:user_id>/', views.get_counsellor_profile, name='get_counsellor_profile'),
     path('profile/<int:user_id>/update/', views.update_counsellor_profile, name='update_counsellor_profile'),
+    
+    # Counsellor settings endpoints
+    path('settings/<int:user_id>/', views.get_counsellor_settings, name='get_counsellor_settings'),
+    path('settings/<int:user_id>/update/', views.update_counsellor_settings, name='update_counsellor_settings'),
+    path('settings/<int:user_id>/password/', views.change_counsellor_password, name='change_counsellor_password'),
+    path('settings/<int:user_id>/delete/', views.delete_counsellor_account, name='delete_counsellor_account'),
 ]

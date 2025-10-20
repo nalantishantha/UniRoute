@@ -74,4 +74,83 @@ export const counsellorAPI = {
       throw error;
     }
   },
+
+  // Settings API functions
+  // Get counsellor settings
+  getSettings: async (userId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/counsellors/settings/${userId}/`);
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch settings');
+      }
+      return data;
+    } catch (error) {
+      console.error('Error fetching counsellor settings:', error);
+      throw error;
+    }
+  },
+
+  // Update counsellor settings
+  updateSettings: async (userId, settingsData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/counsellors/settings/${userId}/update/`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(settingsData),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to update settings');
+      }
+      return data;
+    } catch (error) {
+      console.error('Error updating counsellor settings:', error);
+      throw error;
+    }
+  },
+
+  // Change counsellor password
+  changePassword: async (userId, passwordData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/counsellors/settings/${userId}/password/`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(passwordData),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to change password');
+      }
+      return data;
+    } catch (error) {
+      console.error('Error changing password:', error);
+      throw error;
+    }
+  },
+
+  // Delete counsellor account
+  deleteAccount: async (userId, confirmationData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/counsellors/settings/${userId}/delete/`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(confirmationData),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to delete account');
+      }
+      return data;
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      throw error;
+    }
+  },
 };
