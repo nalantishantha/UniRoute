@@ -9,7 +9,8 @@ import json
 
 # Import your custom models
 from apps.accounts.models import Users, UserDetails, UserTypes
-from apps.counsellors.models import Counsellors, CounsellorAvailability
+from apps.counsellors.models import Counsellors, CounsellorAvailability, CounsellingRequests, CounsellingSessions, CounsellingFeedback
+from apps.students.models import Students
 
 
 @csrf_exempt
@@ -1067,3 +1068,451 @@ def manage_counsellor_availability(request, user_id):
             'status': 'error',
             'message': 'Method not allowed'
         }, status=405)
+
+
+@csrf_exempt
+def get_counselling_requests(request, counsellor_id):
+    """Get all counselling requests for a counsellor"""
+    if request.method == 'GET':
+        try:
+            # Update expired requests first
+            update_expired_requests()
+            
+            counsellor = Counsellors.objects.get(counsellor_id=counsellor_id)
+            requests = CounsellingRequests.objects.filter(
+                counsellor=counsellor
+            ).select_related(
+                'student__user',
+                'student__user__userdetails'
+            ).order_by('-created_at')
+            
+            requests_data = []
+            for req in requests:
+                student_user = req.student.user
+                user_details = getattr(student_user, 'userdetails', None)
+                
+                requests_data.append({
+                    'id': req.request_id,
+                    'student_id': req.student.student_id,
+                    'student': user_details.full_name if user_details else student_user.username,
+                    'topic': req.topic,
+                    'description': req.description,
+                    'preferred_time': req.preferred_time,
+                    'session_type': req.session_type,
+                    'urgency': req.urgency,
+                    'status': req.status,
+                    'requested_date': req.requested_date.isoformat(),
+                    'expiry_date': req.expiry_date.isoformat(),
+                    'decline_reason': req.decline_reason,
+                    'avatar': user_details.profile_picture if user_details else None,
+                    'contact': student_user.email,
+                })
+            
+            return JsonResponse({
+                'status': 'success',
+                'requests': requests_data
+            })
+            
+        except Counsellors.DoesNotExist:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Counsellor not found'
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Failed to fetch requests: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Only GET method allowed'
+    }, status=405)
+
+
+@csrf_exempt
+def get_counselling_sessions(request, counsellor_id):
+    """Get all counselling sessions for a counsellor"""
+    if request.method == 'GET':
+        try:
+            counsellor = Counsellors.objects.get(counsellor_id=counsellor_id)
+            sessions = CounsellingSessions.objects.filter(
+                counsellor=counsellor
+            ).select_related(
+                'student__user',
+                'student__user__userdetails'
+            ).order_by('-scheduled_at')
+            
+            sessions_data = []
+            for session in sessions:
+                student_user = session.student.user
+                user_details = getattr(student_user, 'userdetails', None)
+                
+                sessions_data.append({
+                    'id': session.session_id,
+                    'student_id': session.student.student_id,
+                    'student': user_details.full_name if user_details else student_user.username,
+                    'topic': session.topic,
+                    'scheduled_at': session.scheduled_at.isoformat(),
+                    'duration_minutes': session.duration_minutes,
+                    'status': session.status,
+                    'session_type': session.session_type,
+                    'meeting_link': session.meeting_link,
+                    'location': session.location,
+                    'completion_notes': session.completion_notes,
+                    'cancellation_reason': session.cancellation_reason,
+                    'avatar': user_details.profile_picture if user_details else None,
+                    'created_at': session.created_at.isoformat(),
+                })
+            
+            return JsonResponse({
+                'status': 'success',
+                'sessions': sessions_data
+            })
+            
+        except Counsellors.DoesNotExist:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Counsellor not found'
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Failed to fetch sessions: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Only GET method allowed'
+    }, status=405)
+
+
+@csrf_exempt
+def accept_counselling_request(request, request_id):
+    """Accept a counselling request and schedule a session"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            counselling_request = CounsellingRequests.objects.get(request_id=request_id)
+            
+            if counselling_request.status != 'pending':
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Request is not in pending status'
+                }, status=400)
+            
+            # Validate required fields
+            scheduled_at = data.get('scheduled_at')
+            if not scheduled_at:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'scheduled_at is required'
+                }, status=400)
+            
+            # Parse the datetime
+            from datetime import datetime
+            scheduled_datetime = datetime.fromisoformat(scheduled_at.replace('Z', '+00:00'))
+            
+            # Create the session
+            with transaction.atomic():
+                session = CounsellingSessions.objects.create(
+                    counsellor=counselling_request.counsellor,
+                    student=counselling_request.student,
+                    request=counselling_request,
+                    topic=counselling_request.topic,
+                    scheduled_at=scheduled_datetime,
+                    duration_minutes=data.get('duration_minutes', 60),
+                    session_type=counselling_request.session_type,
+                    meeting_link=data.get('meeting_link', ''),
+                    location=data.get('location', ''),
+                    status='scheduled'
+                )
+                
+                # Update request status
+                counselling_request.status = 'scheduled'
+                counselling_request.save()
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Request accepted and session scheduled',
+                'session_id': session.session_id
+            })
+            
+        except CounsellingRequests.DoesNotExist:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Request not found'
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Failed to accept request: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Only POST method allowed'
+    }, status=405)
+
+
+@csrf_exempt
+def decline_counselling_request(request, request_id):
+    """Decline a counselling request"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            counselling_request = CounsellingRequests.objects.get(request_id=request_id)
+            
+            if counselling_request.status != 'pending':
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Request is not in pending status'
+                }, status=400)
+            
+            decline_reason = data.get('decline_reason', '')
+            if not decline_reason.strip():
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Decline reason is required'
+                }, status=400)
+            
+            # Update request
+            counselling_request.status = 'declined'
+            counselling_request.decline_reason = decline_reason
+            counselling_request.save()
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Request declined successfully'
+            })
+            
+        except CounsellingRequests.DoesNotExist:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Request not found'
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Failed to decline request: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Only POST method allowed'
+    }, status=405)
+
+
+@csrf_exempt
+def cancel_counselling_session(request, session_id):
+    """Cancel a counselling session"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            session = CounsellingSessions.objects.get(session_id=session_id)
+            
+            if session.status not in ['scheduled', 'pending']:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Session cannot be cancelled'
+                }, status=400)
+            
+            cancellation_reason = data.get('cancellation_reason', '')
+            
+            # Update session
+            session.status = 'cancelled'
+            session.cancellation_reason = cancellation_reason
+            session.save()
+            
+            # If there's a linked request, set it back to pending
+            if session.request:
+                session.request.status = 'pending'
+                session.request.save()
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Session cancelled successfully'
+            })
+            
+        except CounsellingSessions.DoesNotExist:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Session not found'
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Failed to cancel session: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Only POST method allowed'
+    }, status=405)
+
+
+@csrf_exempt
+def reschedule_counselling_session(request, session_id):
+    """Reschedule a counselling session"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            session = CounsellingSessions.objects.get(session_id=session_id)
+            
+            if session.status not in ['scheduled', 'pending']:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Only scheduled or pending sessions can be rescheduled'
+                }, status=400)
+            
+            # Validate required field
+            new_scheduled_at = data.get('scheduled_at')
+            if not new_scheduled_at:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'New scheduled_at is required'
+                }, status=400)
+            
+            # Parse the datetime
+            from datetime import datetime
+            new_datetime = datetime.fromisoformat(new_scheduled_at.replace('Z', '+00:00'))
+            
+            # Update session
+            session.scheduled_at = new_datetime
+            session.meeting_link = data.get('meeting_link', session.meeting_link)
+            session.location = data.get('location', session.location)
+            session.save()
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Session rescheduled successfully'
+            })
+            
+        except CounsellingSessions.DoesNotExist:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Session not found'
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Failed to reschedule session: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Only POST method allowed'
+    }, status=405)
+
+
+@csrf_exempt
+def complete_counselling_session(request, session_id):
+    """Mark a counselling session as completed"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            session = CounsellingSessions.objects.get(session_id=session_id)
+            
+            if session.status != 'scheduled':
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Only scheduled sessions can be completed'
+                }, status=400)
+            
+            # Update session
+            session.status = 'completed'
+            session.completion_notes = data.get('completion_notes', '')
+            session.save()
+            
+            # Update linked request if exists
+            if session.request:
+                session.request.status = 'completed'
+                session.request.save()
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Session completed successfully'
+            })
+            
+        except CounsellingSessions.DoesNotExist:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Session not found'
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Failed to complete session: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Only POST method allowed'
+    }, status=405)
+
+
+@csrf_exempt
+def get_counselling_stats(request, counsellor_id):
+    """Get counselling statistics for a counsellor"""
+    if request.method == 'GET':
+        try:
+            counsellor = Counsellors.objects.get(counsellor_id=counsellor_id)
+            
+            # Get counts
+            total_requests = CounsellingRequests.objects.filter(counsellor=counsellor).count()
+            pending_requests = CounsellingRequests.objects.filter(counsellor=counsellor, status='pending').count()
+            scheduled_sessions = CounsellingSessions.objects.filter(counsellor=counsellor, status='scheduled').count()
+            completed_sessions = CounsellingSessions.objects.filter(counsellor=counsellor, status='completed').count()
+            
+            # Calculate averages (mock for now - you can implement proper calculation)
+            average_rating = 4.8  # TODO: Calculate from CounsellingFeedback
+            response_rate = 95.0   # TODO: Calculate based on response times
+            
+            stats = {
+                'totalRequests': total_requests,
+                'pendingRequests': pending_requests,
+                'scheduledSessions': scheduled_sessions,
+                'completedSessions': completed_sessions,
+                'averageRating': average_rating,
+                'responseRate': response_rate,
+            }
+            
+            return JsonResponse({
+                'status': 'success',
+                'stats': stats
+            })
+            
+        except Counsellors.DoesNotExist:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Counsellor not found'
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Failed to fetch stats: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Only GET method allowed'
+    }, status=405)
+
+
+def update_expired_requests():
+    """Helper function to update expired counselling requests"""
+    try:
+        expired_requests = CounsellingRequests.objects.filter(
+            status='pending',
+            expiry_date__lt=timezone.now()
+        )
+        expired_requests.update(status='expired')
+        return expired_requests.count()
+    except Exception as e:
+        print(f"Error updating expired requests: {e}")
+        return 0

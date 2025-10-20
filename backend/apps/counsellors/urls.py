@@ -19,4 +19,14 @@ urlpatterns = [
     
     # Counsellor availability endpoints
     path('availability/<int:user_id>/', views.manage_counsellor_availability, name='manage_counsellor_availability'),
+    
+    # Counselling request and session endpoints
+    path('requests/<int:counsellor_id>/', views.get_counselling_requests, name='get_counselling_requests'),
+    path('sessions/<int:counsellor_id>/', views.get_counselling_sessions, name='get_counselling_sessions'),
+    path('requests/<int:request_id>/accept/', views.accept_counselling_request, name='accept_counselling_request'),
+    path('requests/<int:request_id>/decline/', views.decline_counselling_request, name='decline_counselling_request'),
+    path('sessions/<int:session_id>/cancel/', views.cancel_counselling_session, name='cancel_counselling_session'),
+    path('sessions/<int:session_id>/reschedule/', views.reschedule_counselling_session, name='reschedule_counselling_session'),
+    path('sessions/<int:session_id>/complete/', views.complete_counselling_session, name='complete_counselling_session'),
+    path('stats/<int:counsellor_id>/', views.get_counselling_stats, name='get_counselling_stats'),
 ]

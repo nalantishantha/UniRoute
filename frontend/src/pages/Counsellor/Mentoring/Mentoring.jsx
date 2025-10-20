@@ -36,95 +36,10 @@ import {
 } from "../../../components/ui/Card";
 import Button from "../../../components/ui/Button";
 import { getCurrentUser } from "../../../utils/auth";
+import { counsellorAPI } from "../../../utils/counsellorAPI";
 // import { useChatContext } from "../../../context/ChatContext";
 
-const mentoringRequests = [
-  {
-    id: 3,
-    student: "Emily Watson",
-    topic: "Study Strategies",
-    preferredTime: "Weekdays 6-8 PM",
-    sessionType: "online",
-    status: "pending",
-    description:
-      "Struggling with time management and study techniques. Looking for personalized advice on how to improve academic performance.",
-    requestDate: "2024-01-19",
-    urgency: "high",
-    avatar:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
-    contact: "emily.watson@email.com",
-  },
-  {
-    id: 2,
-    student: "Michael Brown",
-    topic: "Career Planning",
-    preferredTime: "Weekends 10-12 AM",
-    sessionType: "physical",
-    status: "accepted",
-    description:
-      "Recent graduate seeking advice on career paths in the tech industry. Want to discuss job search strategies and skill development.",
-    requestDate: "2024-01-18",
-    urgency: "low",
-    avatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
-    contact: "michael.brown@email.com",
-    scheduledDate: "2024-01-25",
-    location: "Campus Library, Room 204",
-  },
-  {
-    id: 3,
-    student: "Emily Watson",
-    topic: "Study Strategies",
-    preferredTime: "Weekdays 6-8 PM",
-    sessionType: "online",
-    status: "pending",
-    description:
-      "Struggling with time management and study techniques. Looking for personalized advice on how to improve academic performance.",
-    requestDate: "2024-01-19",
-    urgency: "high",
-    avatar:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
-    contact: "emily.watson@email.com",
-  },
-];
 
-const upcomingSessions = [
-  {
-    id: 1,
-    student: "Michael Brown",
-    topic: "Career Planning",
-    date: "2024-01-25",
-    time: "10:00 AM",
-    duration: "1 hour",
-    type: "physical",
-    location: "Campus Library, Room 204",
-    status: "confirmed",
-    avatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
-  },
-  {
-    id: 2,
-    student: "Lisa Johnson",
-    topic: "University Admissions",
-    date: "2024-01-26",
-    time: "3:00 PM",
-    duration: "1.5 hours",
-    type: "online",
-    meetingLink: "https://zoom.us/j/123456789",
-    status: "confirmed",
-    avatar:
-      "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=40&h=40&fit=crop&crop=face",
-  },
-];
-
-const stats = {
-  totalRequests: 15,
-  pendingRequests: 3,
-  acceptedSessions: 8,
-  completedSessions: 24,
-  averageRating: 4.8,
-  responseRate: 95,
-};
 
 const urgencyColors = {
   high: "bg-error/20 text-error border-error/30",
@@ -145,9 +60,19 @@ export default function Mentoring() {
   const [activeTab, setActiveTab] = useState("requests");
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const [requests, setRequests] = useState(mentoringRequests);
-  const [sessions, setSessions] = useState(upcomingSessions);
+  const [requests, setRequests] = useState([]);
+  const [sessions, setSessions] = useState([]);
+  const [stats, setStats] = useState({
+    totalRequests: 0,
+    pendingRequests: 0,
+    acceptedSessions: 0,
+    completedSessions: 0,
+    averageRating: 0,
+    responseRate: 0,
+  });
   const [user, setUser] = useState(null);
+  const [dataLoading, setDataLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Availability management states
   const [availability, setAvailability] = useState([]);
@@ -182,14 +107,82 @@ export default function Mentoring() {
   const [scheduleTime, setScheduleTime] = useState("");
   const [rejectReason, setRejectReason] = useState("");
 
-  // Get current user on component mount
+  // Get current user on component mount and fetch data
   useEffect(() => {
     const currentUser = getCurrentUser();
     setUser(currentUser);
-    if (currentUser?.id) {
-      fetchAvailability(currentUser.id);
+    if (currentUser?.user_id) {
+      fetchAvailability(currentUser.user_id);
+      fetchCounsellingData(currentUser.user_id);
     }
   }, []);
+
+  // Fetch all counselling data
+  const fetchCounsellingData = async (counsellorId) => {
+    try {
+      setDataLoading(true);
+      setError(null);
+
+      // Clear existing data first
+      setRequests([]);
+      setSessions([]);
+      setStats({
+        totalRequests: 0,
+        pendingRequests: 0,
+        acceptedSessions: 0,
+        completedSessions: 0,
+        averageRating: 0,
+        responseRate: 0,
+      });
+
+      // Fetch requests, sessions, and stats
+      const [requestsData, sessionsData, statsData] = await Promise.allSettled([
+        counsellorAPI.getRequests(counsellorId),
+        counsellorAPI.getSessions(counsellorId),
+        counsellorAPI.getStats(counsellorId),
+      ]);
+
+      // Handle requests
+      if (requestsData.status === "fulfilled") {
+        const requestsResult = requestsData.value.requests || [];
+        setRequests(requestsResult);
+      } else {
+        console.error("Failed to fetch requests:", requestsData.reason);
+      }
+
+      // Handle sessions
+      if (sessionsData.status === "fulfilled") {
+        const sessionsResult = sessionsData.value.sessions || [];
+        // Filter upcoming sessions
+        const upcoming = sessionsResult.filter(
+          (session) => session.status === "scheduled" || session.status === "confirmed"
+        );
+        setSessions(upcoming);
+      } else {
+        console.error("Failed to fetch sessions:", sessionsData.reason);
+      }
+
+      // Handle stats
+      if (statsData.status === "fulfilled") {
+        const statsResult = statsData.value.stats || {};
+        setStats({
+          totalRequests: statsResult.totalRequests || 0,
+          pendingRequests: statsResult.pendingRequests || 0,
+          acceptedSessions: statsResult.scheduledSessions || 0, // Use scheduledSessions as acceptedSessions
+          completedSessions: statsResult.completedSessions || 0,
+          averageRating: statsResult.averageRating || 0,
+          responseRate: statsResult.responseRate || 0,
+        });
+      } else {
+        console.error("Failed to fetch stats:", statsData.reason);
+      }
+    } catch (error) {
+      console.error("Error fetching counselling data:", error);
+      setError("Failed to load counselling data. Please refresh the page.");
+    } finally {
+      setDataLoading(false);
+    }
+  };
 
   // Availability management functions
   const fetchAvailability = async (counsellorId) => {
@@ -353,21 +346,20 @@ export default function Mentoring() {
     return groups;
   }, {});
 
-  // Calculate dynamic stats
+  // Use stats from backend
   const dynamicStats = {
-    totalRequests: requests.length,
-    pendingRequests: requests.filter((req) => req.status === "pending").length,
-    acceptedSessions: requests.filter((req) => req.status === "accepted")
-      .length,
-    completedSessions: stats.completedSessions, // Keep static for now
-    averageRating: stats.averageRating, // Keep static for now
-    responseRate: stats.responseRate, // Keep static for now
+    totalRequests: stats.totalRequests,
+    pendingRequests: stats.pendingRequests,
+    acceptedSessions: stats.acceptedSessions,
+    completedSessions: stats.completedSessions,
+    averageRating: stats.averageRating,
+    responseRate: stats.responseRate,
   };
 
   const filteredRequests = requests.filter((request) => {
     const matchesSearch =
-      request.student.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.topic.toLowerCase().includes(searchTerm.toLowerCase());
+      (request.student && request.student.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (request.topic && request.topic.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus =
       filterStatus === "all" || request.status === filterStatus;
     return matchesSearch && matchesStatus;
@@ -407,81 +399,71 @@ export default function Mentoring() {
     setShowRejectModal(true);
   };
 
-  const confirmAcceptRequest = () => {
+  const confirmAcceptRequest = async () => {
     if (!selectedRequest || !scheduleDate || !scheduleTime) return;
 
-    // Update the request status to accepted
-    setRequests((prevRequests) =>
-      prevRequests.map((req) =>
-        req.id === selectedRequest.id
-          ? {
-            ...req,
-            status: "accepted",
-            scheduledDate: scheduleDate,
-            scheduledTime: scheduleTime,
-            location:
-              req.sessionType === "physical"
-                ? "Campus Library, Room TBD"
-                : undefined,
-          }
-          : req
-      )
-    );
+    try {
+      setDataLoading(true);
 
-    // Create a new session entry for upcoming sessions
-    const newSession = {
-      id: Date.now(), // Generate unique ID
-      student: selectedRequest.student,
-      topic: selectedRequest.topic,
-      date: scheduleDate,
-      time: scheduleTime,
-      duration: "1 hour",
-      type: selectedRequest.sessionType,
-      location:
-        selectedRequest.sessionType === "physical"
+      const scheduledDateTime = `${scheduleDate} ${scheduleTime}`;
+      await counsellorAPI.acceptRequest(selectedRequest.id, {
+        scheduled_at: scheduledDateTime,
+        location: selectedRequest.sessionType === "physical"
           ? "Campus Library, Room TBD"
-          : undefined,
-      meetingLink:
-        selectedRequest.sessionType === "online"
+          : null,
+        meeting_link: selectedRequest.sessionType === "online"
           ? "https://zoom.us/j/to-be-generated"
-          : undefined,
-      status: "confirmed",
-      avatar: selectedRequest.avatar,
-    };
+          : null,
+      });
 
-    // Add to upcoming sessions
-    setSessions((prevSessions) => [...prevSessions, newSession]);
+      // Refresh data to get updated requests and sessions
+      if (user?.user_id) {
+        await fetchCounsellingData(user.user_id);
+      }
 
-    // Reset modal state
-    setShowAcceptModal(false);
-    setSelectedRequest(null);
-    setScheduleDate("");
-    setScheduleTime("");
+      // Reset modal state
+      setShowAcceptModal(false);
+      setSelectedRequest(null);
+      setScheduleDate("");
+      setScheduleTime("");
 
-    console.log("Request accepted and session scheduled:", selectedRequest.id);
+      console.log("Request accepted and session scheduled:", selectedRequest.id);
+    } catch (error) {
+      console.error("Error accepting request:", error);
+      setError("Failed to accept request. Please try again.");
+    } finally {
+      setDataLoading(false);
+    }
   };
 
-  const confirmRejectRequest = () => {
+  const confirmRejectRequest = async () => {
     if (!selectedRequest || !rejectReason.trim()) return;
 
-    // Update the request status to rejected
-    setRequests((prevRequests) =>
-      prevRequests.map((req) =>
-        req.id === selectedRequest.id
-          ? { ...req, status: "rejected", rejectReason: rejectReason }
-          : req
-      )
-    );
+    try {
+      setDataLoading(true);
 
-    // Reset modal state
-    setShowRejectModal(false);
-    setSelectedRequest(null);
-    setRejectReason("");
+      await counsellorAPI.declineRequest(selectedRequest.id, {
+        rejection_reason: rejectReason.trim(),
+      });
 
-    console.log("Request rejected:", selectedRequest.id, "Reason:", rejectReason);
-  };
+      // Refresh data to get updated requests
+      if (user?.user_id) {
+        await fetchCounsellingData(user.user_id);
+      }
 
-  const handleCancelSession = (sessionId) => {
+      // Reset modal state
+      setShowRejectModal(false);
+      setSelectedRequest(null);
+      setRejectReason("");
+
+      console.log("Request rejected:", selectedRequest.id, "Reason:", rejectReason);
+    } catch (error) {
+      console.error("Error rejecting request:", error);
+      setError("Failed to reject request. Please try again.");
+    } finally {
+      setDataLoading(false);
+    }
+  }; const handleCancelSession = (sessionId) => {
     const sessionToCancel = sessions.find((session) => session.id === sessionId);
     if (!sessionToCancel) return;
 
@@ -489,28 +471,32 @@ export default function Mentoring() {
     setShowCancelModal(true);
   };
 
-  const confirmCancelSession = () => {
+  const confirmCancelSession = async () => {
     if (!selectedSession) return;
 
-    // Remove session from upcoming sessions
-    setSessions((prevSessions) =>
-      prevSessions.filter((session) => session.id !== selectedSession.id)
-    );
+    try {
+      setDataLoading(true);
 
-    // Update corresponding request status back to pending if it exists
-    setRequests((prevRequests) =>
-      prevRequests.map((req) =>
-        req.student === selectedSession.student && req.topic === selectedSession.topic
-          ? { ...req, status: "pending", scheduledDate: undefined, scheduledTime: undefined }
-          : req
-      )
-    );
+      await counsellorAPI.cancelSession(selectedSession.id, {
+        cancellation_reason: "Cancelled by counsellor",
+      });
 
-    // Reset modal state
-    setShowCancelModal(false);
-    setSelectedSession(null);
+      // Refresh data to get updated sessions and requests
+      if (user?.user_id) {
+        await fetchCounsellingData(user.user_id);
+      }
 
-    console.log("Session cancelled:", selectedSession.id);
+      // Reset modal state
+      setShowCancelModal(false);
+      setSelectedSession(null);
+
+      console.log("Session cancelled:", selectedSession.id);
+    } catch (error) {
+      console.error("Error cancelling session:", error);
+      setError("Failed to cancel session. Please try again.");
+    } finally {
+      setDataLoading(false);
+    }
   };
 
   const handleRescheduleSession = (sessionId) => {
@@ -523,34 +509,57 @@ export default function Mentoring() {
     setShowRescheduleModal(true);
   };
 
-  const confirmRescheduleSession = () => {
+  const confirmRescheduleSession = async () => {
     if (!selectedSession || !scheduleDate || !scheduleTime) return;
 
-    // Update session with new date and time
-    setSessions((prevSessions) =>
-      prevSessions.map((session) =>
-        session.id === selectedSession.id
-          ? { ...session, date: scheduleDate, time: scheduleTime }
-          : session
-      )
-    );
+    try {
+      setDataLoading(true);
 
-    // Update corresponding request if it exists
-    setRequests((prevRequests) =>
-      prevRequests.map((req) =>
-        req.student === selectedSession.student && req.topic === selectedSession.topic
-          ? { ...req, scheduledDate: scheduleDate, scheduledTime: scheduleTime }
-          : req
-      )
-    );
+      const newDateTime = `${scheduleDate} ${scheduleTime}`;
+      await counsellorAPI.rescheduleSession(selectedSession.id, {
+        new_scheduled_at: newDateTime,
+      });
 
-    // Reset modal state
-    setShowRescheduleModal(false);
-    setSelectedSession(null);
-    setScheduleDate("");
-    setScheduleTime("");
+      // Refresh data to get updated sessions
+      if (user?.user_id) {
+        await fetchCounsellingData(user.user_id);
+      }
 
-    console.log("Session rescheduled:", selectedSession.id);
+      // Reset modal state
+      setShowRescheduleModal(false);
+      setSelectedSession(null);
+      setScheduleDate("");
+      setScheduleTime("");
+
+      console.log("Session rescheduled:", selectedSession.id);
+    } catch (error) {
+      console.error("Error rescheduling session:", error);
+      setError("Failed to reschedule session. Please try again.");
+    } finally {
+      setDataLoading(false);
+    }
+  };
+
+  const handleCompleteSession = async (sessionId) => {
+    try {
+      setDataLoading(true);
+
+      await counsellorAPI.completeSession(sessionId, {
+        completion_notes: "Session completed by counsellor",
+      });
+
+      // Refresh data to get updated sessions and stats
+      if (user?.user_id) {
+        await fetchCounsellingData(user.user_id);
+      }
+
+      console.log("Session completed:", sessionId);
+    } catch (error) {
+      console.error("Error completing session:", error);
+      setError("Failed to complete session. Please try again.");
+    } finally {
+      setDataLoading(false);
+    }
   };
 
   return (
@@ -559,6 +568,37 @@ export default function Mentoring() {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"
     >
+      {/* Error Message */}
+      {error && (
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-red-500" />
+              <p className="text-red-700">{error}</p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setError(null)}
+                className="ml-auto"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Loading Overlay */}
+      {dataLoading && (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <div className="animate-spin w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full" />
+              <p className="text-blue-700">Loading...</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>

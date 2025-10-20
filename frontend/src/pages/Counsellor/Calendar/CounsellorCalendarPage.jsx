@@ -56,7 +56,7 @@ const mockEvents = [
   {
     id: 2,
     title: "Academic Planning with Sarah",
-    date: "2024-02-16", 
+    date: "2024-02-16",
     time: "10:30",
     duration: "1.5 hours",
     student: "Sarah Johnson",
@@ -101,12 +101,12 @@ const CounsellorCalendarPage = () => {
     console.log('CounsellorCalendarPage - Current user:', currentUser);
     console.log('CounsellorCalendarPage - localStorage user:', localStorage.getItem('user'));
     setUser(currentUser);
-    
+
     // Use user_id which is the correct field from the backend
     const userId = currentUser?.user_id || currentUser?.id;
     console.log('CounsellorCalendarPage - Using user ID:', userId);
     console.log('CounsellorCalendarPage - Available fields:', Object.keys(currentUser || {}));
-    
+
     if (userId) {
       fetchAvailability(userId);
     } else {
@@ -395,22 +395,20 @@ const CounsellorCalendarPage = () => {
           <div className="flex -mb-4 space-x-1 border-b border-neutral-silver">
             <button
               onClick={() => setActiveTab("calendar")}
-              className={`flex items-center space-x-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === "calendar"
+              className={`flex items-center space-x-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === "calendar"
                   ? "border-primary-500 text-primary-600"
                   : "border-transparent text-neutral-grey hover:text-neutral-black"
-              }`}
+                }`}
             >
               <CalendarIcon className="w-4 h-4" />
               <span>Calendar View</span>
             </button>
             <button
               onClick={() => setActiveTab("availability")}
-              className={`flex items-center space-x-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === "availability"
+              className={`flex items-center space-x-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === "availability"
                   ? "border-primary-500 text-primary-600"
                   : "border-transparent text-neutral-grey hover:text-neutral-black"
-              }`}
+                }`}
             >
               <Settings className="w-4 h-4" />
               <span>Manage Availability</span>
@@ -473,11 +471,10 @@ const CounsellorCalendarPage = () => {
                               {event.title}
                             </h4>
                             <span
-                              className={`px-2 py-1 text-xs font-medium rounded ${
-                                event.status === "confirmed"
+                              className={`px-2 py-1 text-xs font-medium rounded ${event.status === "confirmed"
                                   ? "bg-success/20 text-success"
                                   : "bg-warning/20 text-yellow-600"
-                              }`}
+                                }`}
                             >
                               {event.status}
                             </span>
@@ -543,11 +540,10 @@ const CounsellorCalendarPage = () => {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className={`p-3 rounded-lg flex items-center space-x-2 ${
-                    message.type === "success"
+                  className={`p-3 rounded-lg flex items-center space-x-2 ${message.type === "success"
                       ? "bg-green-50 border border-green-200 text-green-700"
                       : "bg-red-50 border border-red-200 text-red-700"
-                  }`}
+                    }`}
                 >
                   {message.type === "success" ? (
                     <CheckCircle className="w-5 h-5" />

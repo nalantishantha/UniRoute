@@ -13,10 +13,12 @@ import {
 } from "lucide-react";
 import { logout, getCurrentUser } from "../../utils/auth";
 import { cn } from "../../utils/cn";
+import CompactCalendar from "../UniStudents/CompactCalendar";
 
 export default function PreMentorNavbar({ onMenuClick }) {
 
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
   const [user, setUser] = useState(null);
   const location = useLocation();
 
@@ -113,25 +115,6 @@ export default function PreMentorNavbar({ onMenuClick }) {
         </div>
 
         <div className="flex items-center space-x-4">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="p-3 transition-all duration-200 rounded-xl hover:bg-neutral-silver/70 group hover:shadow-sm"
-          >
-            <Calendar className="w-5 h-5 text-neutral-dark-grey group-hover:text-primary-600" />
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="relative p-3 transition-all duration-200 rounded-xl hover:bg-neutral-silver/70 group hover:shadow-sm"
-          >
-            <Bell className="w-5 h-5 text-neutral-dark-grey group-hover:text-primary-600" />
-            <span className="absolute flex items-center justify-center w-4 h-4 rounded-full shadow-sm -top-1 -right-1 bg-error">
-              <span className="w-2 h-2 bg-white rounded-full"></span>
-            </span>
-          </motion.button>
-
           {/* User Profile Dropdown */}
           <div className="relative">
             <motion.button
@@ -257,6 +240,12 @@ export default function PreMentorNavbar({ onMenuClick }) {
           </div>
         </div>
       </div>
+
+      {/* Compact Calendar Component */}
+      <CompactCalendar
+        isOpen={showCalendar}
+        onClose={() => setShowCalendar(false)}
+      />
 
       {/* Click outside to close dropdown */}
       {showUserDropdown && (
