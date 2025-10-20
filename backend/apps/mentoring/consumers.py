@@ -105,15 +105,21 @@ class VideoCallConsumer(AsyncWebsocketConsumer):
         self.user_id = data.get('user_id')
         self.role = data.get('role')  # 'mentor' or 'student'
         
+        print(f"🔵 User joining: {self.role} (ID: {self.user_id}) in room {self.room_id}")
+        
         # Add participant to database
         await self.add_participant(self.room_id, self.user_id, self.role)
         
         # Update room status if needed
         participant_count = await self.get_participant_count(self.room_id)
+        print(f"📊 Participant count after join: {participant_count}")
+        
         if participant_count >= 2:
             await self.update_room_status(self.room_id, 'active')
+            print(f"✅ Room {self.room_id} is now active")
         
         # Notify all users in the room
+        print(f"📢 Broadcasting user_joined to group {self.room_group_name}")
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -194,14 +200,18 @@ class VideoCallConsumer(AsyncWebsocketConsumer):
     
     async def user_joined(self, event):
         """Send user joined notification"""
+        print(f"📨 user_joined handler: event user_id={event['user_id']}, self.user_id={getattr(self, 'user_id', None)}")
         # Don't send to self
         if event['user_id'] != getattr(self, 'user_id', None):
+            print(f"✉️ Sending user_joined to this connection (different user)")
             await self.send(text_data=json.dumps({
                 'type': 'user_joined',
                 'user_id': event['user_id'],
                 'role': event['role'],
                 'participant_count': event['participant_count']
             }))
+        else:
+            print(f"🚫 Skipping user_joined for self (same user_id)")
     
     async def user_disconnected(self, event):
         """Send user disconnected notification"""

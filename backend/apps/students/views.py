@@ -50,7 +50,19 @@ def get_student_mentoring_requests_grouped(request):
                 'preferred_time': getattr(r, 'preferred_time', None) or getattr(r, 'requested_date', None) or None,
                 'status': getattr(r, 'status', '') or '',
                 'created_at': getattr(r, 'created_at', None),
+                'session_id': None,  # Will be populated for scheduled requests
             }
+            
+            # Try to find the associated session for scheduled/accepted requests
+            if status == 'scheduled':
+                try:
+                    from apps.mentoring.models import SessionDetails
+                    session_detail = SessionDetails.objects.select_related('session').filter(request=r).first()
+                    if session_detail and session_detail.session:
+                        entry['session_id'] = session_detail.session.session_id
+                except Exception as e:
+                    print(f"Error finding session for request {r.request_id}: {e}")
+            
             try:
                 mentor_obj = getattr(r, 'mentor', None)
                 if mentor_obj:

@@ -29,6 +29,7 @@ export const useWebRTC = (roomId, userId, userRole, websocketUrl) => {
     const localStreamRef = useRef(null);
     const remoteStreamRef = useRef(null);
     const iceCandidatesQueue = useRef([]);
+    const isConnectingRef = useRef(false); // Prevent duplicate connections
 
     // Initialize local media stream
     const initializeLocalStream = useCallback(async () => {
@@ -120,24 +121,31 @@ export const useWebRTC = (roomId, userId, userRole, websocketUrl) => {
     // Create and send offer
     const createOffer = useCallback(async () => {
         try {
+            console.log('📞 createOffer called, creating peer connection...');
             if (!peerConnectionRef.current) {
                 createPeerConnection();
             }
 
+            console.log('📝 Creating WebRTC offer...');
             const offer = await peerConnectionRef.current.createOffer({
                 offerToReceiveAudio: true,
                 offerToReceiveVideo: true
             });
 
             await peerConnectionRef.current.setLocalDescription(offer);
+            console.log('✅ Offer created and set as local description');
 
             if (websocketRef.current?.readyState === WebSocket.OPEN) {
+                console.log('📤 Sending offer via WebSocket...');
                 websocketRef.current.send(JSON.stringify({
                     type: 'offer',
                     offer: offer,
                     sender_id: userId,
                     sender_role: userRole
                 }));
+                console.log('✅ Offer sent successfully');
+            } else {
+                console.error('❌ WebSocket not open, cannot send offer. State:', websocketRef.current?.readyState);
             }
         } catch (err) {
             console.error('Error creating offer:', err);
@@ -148,28 +156,36 @@ export const useWebRTC = (roomId, userId, userRole, websocketUrl) => {
     // Handle incoming offer
     const handleOffer = useCallback(async (offer, senderId, senderRole) => {
         try {
+            console.log('📨 Received offer from:', senderRole, senderId);
             if (!peerConnectionRef.current) {
+                console.log('Creating new peer connection...');
                 createPeerConnection();
             }
 
+            console.log('Setting remote description (offer)...');
             await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(offer));
 
             // Process queued ICE candidates
+            console.log('Processing', iceCandidatesQueue.current.length, 'queued ICE candidates');
             while (iceCandidatesQueue.current.length > 0) {
                 const candidate = iceCandidatesQueue.current.shift();
                 await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
             }
 
+            console.log('Creating answer...');
             const answer = await peerConnectionRef.current.createAnswer();
             await peerConnectionRef.current.setLocalDescription(answer);
+            console.log('✅ Answer created and set as local description');
 
             if (websocketRef.current?.readyState === WebSocket.OPEN) {
+                console.log('📤 Sending answer via WebSocket...');
                 websocketRef.current.send(JSON.stringify({
                     type: 'answer',
                     answer: answer,
                     sender_id: userId,
                     sender_role: userRole
                 }));
+                console.log('✅ Answer sent successfully');
             }
 
             setRemoteUser({ id: senderId, role: senderRole });
@@ -182,16 +198,22 @@ export const useWebRTC = (roomId, userId, userRole, websocketUrl) => {
     // Handle incoming answer
     const handleAnswer = useCallback(async (answer, senderId, senderRole) => {
         try {
+            console.log('📨 Received answer from:', senderRole, senderId);
             if (peerConnectionRef.current) {
+                console.log('Setting remote description (answer)...');
                 await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(answer));
+                console.log('✅ Remote description set successfully');
 
                 // Process queued ICE candidates
+                console.log('Processing', iceCandidatesQueue.current.length, 'queued ICE candidates');
                 while (iceCandidatesQueue.current.length > 0) {
                     const candidate = iceCandidatesQueue.current.shift();
                     await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
                 }
 
                 setRemoteUser({ id: senderId, role: senderRole });
+            } else {
+                console.error('❌ No peer connection to handle answer');
             }
         } catch (err) {
             console.error('Error handling answer:', err);
@@ -220,6 +242,11 @@ export const useWebRTC = (roomId, userId, userRole, websocketUrl) => {
         ws.onopen = () => {
             console.log('WebSocket connected');
 
+            // Mark as connected
+            setIsConnected(true);
+            setIsConnecting(false);
+            isConnectingRef.current = false;
+
             // Join the room
             ws.send(JSON.stringify({
                 type: 'join',
@@ -233,11 +260,27 @@ export const useWebRTC = (roomId, userId, userRole, websocketUrl) => {
             console.log('WebSocket message:', data.type);
 
             switch (data.type) {
+                case 'user_connected':
+                    console.log('Successfully connected to room');
+                    // This is sent when we first connect
+                    break;
+
                 case 'user_joined':
-                    console.log('User joined:', data.role, data.user_id);
-                    // If we're the first user and someone joins, create offer
+                    console.log('User joined:', data.role, data.user_id, 'Participant count:', data.participant_count);
+                    // Update remote user info
+                    setRemoteUser({
+                        user_id: data.user_id,
+                        role: data.role
+                    });
+                    // If we're the mentor and now there are 2 participants, create offer
                     if (data.participant_count === 2 && userRole === 'mentor') {
-                        setTimeout(() => createOffer(), 1000);
+                        console.log('🎬 Mentor creating offer for participant count:', data.participant_count);
+                        setTimeout(() => {
+                            console.log('⏰ Executing delayed createOffer');
+                            createOffer();
+                        }, 1000);
+                    } else {
+                        console.log('Not creating offer. Role:', userRole, 'Count:', data.participant_count);
                     }
                     break;
 
@@ -255,7 +298,7 @@ export const useWebRTC = (roomId, userId, userRole, websocketUrl) => {
 
                 case 'user_left':
                 case 'user_disconnected':
-                    console.log('User left:', data.role, data.user_id);
+                    console.log('User left:', data.role || 'unknown', data.user_id || 'unknown');
                     setRemoteUser(null);
                     if (remoteStreamRef.current) {
                         remoteStreamRef.current.getTracks().forEach(track => track.stop());
@@ -277,11 +320,15 @@ export const useWebRTC = (roomId, userId, userRole, websocketUrl) => {
         ws.onerror = (error) => {
             console.error('WebSocket error:', error);
             setError('WebSocket connection error');
+            setIsConnecting(false);
+            isConnectingRef.current = false;
         };
 
         ws.onclose = () => {
             console.log('WebSocket disconnected');
             setIsConnected(false);
+            setIsConnecting(false);
+            isConnectingRef.current = false;
         };
 
         websocketRef.current = ws;
@@ -290,7 +337,14 @@ export const useWebRTC = (roomId, userId, userRole, websocketUrl) => {
 
     // Connect to room
     const connect = useCallback(async () => {
+        // Prevent duplicate connections
+        if (isConnectingRef.current || websocketRef.current) {
+            console.log('Already connecting or connected, skipping...');
+            return;
+        }
+
         try {
+            isConnectingRef.current = true;
             setError(null);
             setIsConnecting(true);
 
@@ -307,6 +361,7 @@ export const useWebRTC = (roomId, userId, userRole, websocketUrl) => {
             console.error('Error connecting:', err);
             setError('Failed to connect to video call');
             setIsConnecting(false);
+            isConnectingRef.current = false;
         }
     }, [initializeLocalStream, createPeerConnection, initializeWebSocket]);
 
@@ -350,6 +405,7 @@ export const useWebRTC = (roomId, userId, userRole, websocketUrl) => {
         setIsConnected(false);
         setIsConnecting(false);
         setRemoteUser(null);
+        isConnectingRef.current = false; // Reset connection flag
     }, [userId, userRole]);
 
     // Cleanup on unmount

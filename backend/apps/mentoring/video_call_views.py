@@ -145,10 +145,26 @@ def join_video_room(request, room_id):
             }, status=400)
         
         # Verify user is authorized for this room
-        if role == 'mentor' and room.mentor.mentor_id != user_id:
-            return JsonResponse({'error': 'Unauthorized mentor'}, status=403)
-        if role == 'student' and room.student.student_id != user_id:
-            return JsonResponse({'error': 'Unauthorized student'}, status=403)
+        # Note: user_id is Users.user_id, need to compare with mentor/student user_id
+        if role == 'mentor':
+            if not room.mentor or room.mentor.user.user_id != user_id:
+                return JsonResponse({'error': 'Unauthorized mentor'}, status=403)
+        
+        if role == 'student':
+            # If student is not set yet in room, allow any student to join
+            # Otherwise verify the student matches
+            if room.student and room.student.user.user_id != user_id:
+                return JsonResponse({'error': 'Unauthorized student'}, status=403)
+            
+            # If student is None, set it now
+            if not room.student:
+                try:
+                    from apps.students.models import Students
+                    student = Students.objects.get(user__user_id=user_id)
+                    room.student = student
+                    room.save()
+                except Students.DoesNotExist:
+                    return JsonResponse({'error': 'Student not found'}, status=404)
         
         # Add or update participant
         participant, created = VideoCallParticipant.objects.get_or_create(
@@ -175,6 +191,9 @@ def join_video_room(request, room_id):
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
     except Exception as e:
+        import traceback
+        print(f"Error in join_video_room: {e}")
+        traceback.print_exc()
         return JsonResponse({'error': str(e)}, status=500)
 
 

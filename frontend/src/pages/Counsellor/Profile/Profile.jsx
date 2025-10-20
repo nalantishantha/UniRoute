@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   User,
@@ -19,6 +19,8 @@ import {
   BookOpen,
   Award,
   Camera,
+  Clock,
+  DollarSign,
 } from "lucide-react";
 import {
   Card,
@@ -28,98 +30,116 @@ import {
   CardDescription,
 } from "../../../components/ui/Card";
 import Button from "../../../components/ui/Button";
-
-const profileData = {
-  name: "Alex Johnson",
-  email: "alex.johnson@email.com",
-  phone: "+1 (555) 123-4567",
-  location: "New York, NY",
-  joinDate: "January 2023",
-  bio: "Passionate educator with 5+ years of experience in mathematics and physics tutoring. Dedicated to helping students achieve their academic goals and build confidence in STEM subjects.",
-  avatar:
-    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-  education: [
-    {
-      degree: "Master of Science in Mathematics",
-      institution: "Columbia University",
-      year: "2019-2021",
-      gpa: "3.9/4.0",
-    },
-    {
-      degree: "Bachelor of Science in Physics",
-      institution: "MIT",
-      year: "2015-2019",
-      gpa: "3.8/4.0",
-    },
-  ],
-  experience: [
-    {
-      title: "Senior Math Tutor",
-      company: "Academic Excellence Center",
-      period: "2021-Present",
-      description:
-        "Lead mathematics tutor specializing in calculus and linear algebra",
-    },
-    {
-      title: "Physics Teaching Assistant",
-      company: "Columbia University",
-      period: "2019-2021",
-      description: "Assisted professors with undergraduate physics courses",
-    },
-  ],
-  skills: [
-    "Advanced Mathematics",
-    "Physics",
-    "Problem Solving",
-    "Curriculum Development",
-    "Online Teaching",
-    "Student Assessment",
-  ],
-  mentoringPreferences: {
-    topics: [
-      "University Admissions",
-      "Career Planning",
-      "Study Strategies",
-      "STEM Subjects",
-    ],
-    availability: ["Weekdays 9-5", "Weekend Mornings"],
-    location: "Online & NYC Area",
-  },
-  socialLinks: {
-    github: "alexjohnson",
-    twitter: "alexjohnsonmath",
-    linkedin: "alex-johnson-educator",
-  },
-  stats: {
-    totalSessions: 247,
-    studentRating: 4.8,
-    courseRating: 4.9,
-    responseRate: 95,
-  },
-};
+import { counsellorAPI } from "../../../utils/counsellorAPI";
+import { getCurrentUser } from "../../../utils/auth";
 
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("personal");
-  const [formData, setFormData] = useState(profileData);
+  const [formData, setFormData] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+  const [user, setUser] = useState(null);
+
+  // Fetch profile data on component mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        const currentUser = getCurrentUser();
+        if (!currentUser) {
+          setError('User not authenticated');
+          return;
+        }
+
+        setUser(currentUser);
+        const response = await counsellorAPI.getProfile(currentUser.user_id);
+
+        if (response.success) {
+          setFormData(response.profile);
+        } else {
+          setError(response.message || 'Failed to load profile');
+        }
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+        setError('Failed to load profile data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   const tabs = [
     { id: "personal", label: "Personal Info", icon: User },
-    { id: "education", label: "Education", icon: BookOpen },
-    { id: "experience", label: "Experience", icon: Award },
-    { id: "preferences", label: "Mentoring", icon: Users },
-    { id: "social", label: "Social Links", icon: Globe },
+    { id: "professional", label: "Professional", icon: Award },
+    // { id: "preferences", label: "Counselling", icon: Users },
+    // { id: "availability", label: "Availability", icon: Clock },
   ];
 
-  const handleSave = () => {
-    // Save logic here
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      setError(null);
+
+      const response = await counsellorAPI.updateProfile(user.user_id, formData);
+
+      if (response.success) {
+        setIsEditing(false);
+        // Update formData with response data if needed
+        if (response.profile) {
+          setFormData(prevData => ({ ...prevData, ...response.profile }));
+        }
+        alert('Profile updated successfully!');
+      } else {
+        setError(response.message || 'Failed to update profile');
+      }
+    } catch (err) {
+      console.error('Error updating profile:', err);
+      setError('Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleCancel = () => {
-    setFormData(profileData);
+    // Reset form data if needed - for now we'll just exit edit mode
     setIsEditing(false);
+    setError(null);
   };
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <div className="w-8 h-8 mx-auto mb-4 border-4 border-blue-600 rounded-full animate-spin border-t-transparent"></div>
+          <p className="text-neutral-grey">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !formData.user_id) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <p className="mb-4 text-red-600">{error}</p>
+          <Button onClick={() => window.location.reload()}>
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -128,17 +148,26 @@ export default function Profile() {
       className="space-y-6"
     >
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-end">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-neutral-black">My Profile</h1>
+          <p className="text-neutral-grey">Manage your counsellor profile and preferences</p>
+        </div>
         <div className="flex items-center mt-4 space-x-3 lg:mt-0">
+          {error && (
+            <div className="p-2 text-sm text-red-600 rounded-lg bg-red-50">
+              {error}
+            </div>
+          )}
           {isEditing ? (
             <>
-              <Button variant="ghost" onClick={handleCancel}>
+              <Button variant="ghost" onClick={handleCancel} disabled={saving}>
                 <X className="w-4 h-4 mr-2" />
                 Cancel
               </Button>
-              <Button onClick={handleSave}>
+              <Button onClick={handleSave} disabled={saving}>
                 <Save className="w-4 h-4 mr-2" />
-                Save Changes
+                {saving ? 'Saving...' : 'Save Changes'}
               </Button>
             </>
           ) : (
@@ -156,12 +185,16 @@ export default function Profile() {
           <div className="flex flex-col space-y-6 md:flex-row md:items-start md:space-y-0 md:space-x-6">
             {/* Avatar */}
             <div className="relative">
-              <div className="w-32 h-32 overflow-hidden rounded-xl bg-neutral-silver">
-                <img
-                  src={formData.avatar}
-                  alt={formData.name}
-                  className="object-cover w-full h-full"
-                />
+              <div className="flex items-center justify-center w-32 h-32 overflow-hidden rounded-xl bg-neutral-silver">
+                {formData.profile_picture ? (
+                  <img
+                    src={formData.profile_picture}
+                    alt={formData.full_name || 'Counsellor'}
+                    className="object-cover w-full h-full"
+                  />
+                ) : (
+                  <User className="w-16 h-16 text-neutral-grey" />
+                )}
               </div>
               {isEditing && (
                 <button className="absolute flex items-center justify-center w-8 h-8 text-white transition-colors rounded-full bottom-2 right-2 bg-primary-600 hover:bg-primary-700">
@@ -175,18 +208,42 @@ export default function Profile() {
               <div className="flex flex-col md:flex-row md:items-start md:justify-between">
                 <div>
                   <h2 className="text-2xl font-bold text-neutral-black">
-                    {formData.name}
+                    {formData.full_name || 'Counsellor Name'}
                   </h2>
-                  <p className="mt-1 text-neutral-grey">{formData.bio}</p>
+                  <p className="mt-1 text-neutral-grey">
+                    {formData.bio || 'Professional counsellor dedicated to student success'}
+                  </p>
                   <div className="flex items-center mt-4 space-x-4 text-sm text-neutral-grey">
                     <div className="flex items-center space-x-1">
                       <MapPin className="w-4 h-4" />
-                      <span>{formData.location}</span>
+                      <span>{formData.location || 'Location not set'}</span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <Calendar className="w-4 h-4" />
-                      <span>Joined {formData.joinDate}</span>
+                      <span>
+                        Joined {formData.created_at ?
+                          new Date(formData.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) :
+                          'Recently'
+                        }
+                      </span>
                     </div>
+                    {formData.experience_years && (
+                      <div className="flex items-center space-x-1">
+                        <Award className="w-4 h-4" />
+                        <span>{formData.experience_years} years experience</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="mt-4 md:mt-0">
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-neutral-grey">Status</p>
+                    <span className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${formData.available_for_sessions ?
+                      'text-green-800 bg-green-100' :
+                      'text-red-800 bg-red-100'
+                      }`}>
+                      {formData.available_for_sessions ? 'Available' : 'Unavailable'}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -232,25 +289,20 @@ export default function Profile() {
                   </label>
                   <input
                     type="text"
-                    value={formData.name}
+                    value={formData.full_name || ''}
                     disabled={!isEditing}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
+                    onChange={(e) => handleInputChange('full_name', e.target.value)}
                     className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey"
                   />
                 </div>
                 <div>
-                  <label className="block mb-2 text-sm font-medium text-neutral-black email">
+                  <label className="block mb-2 text-sm font-medium text-neutral-black">
                     Email Address
                   </label>
                   <input
                     type="email"
-                    value={formData.email}
-                    disabled={!isEditing}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
+                    value={formData.email || ''}
+                    disabled={true} // Email should not be editable
                     className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey"
                   />
                 </div>
@@ -260,12 +312,10 @@ export default function Profile() {
                   </label>
                   <input
                     type="tel"
-                    value={formData.phone}
+                    value={formData.contact_number || ''}
                     disabled={!isEditing}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey "
+                    onChange={(e) => handleInputChange('contact_number', e.target.value)}
+                    className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey"
                   />
                 </div>
                 <div>
@@ -274,11 +324,36 @@ export default function Profile() {
                   </label>
                   <input
                     type="text"
-                    value={formData.location}
+                    value={formData.location || ''}
                     disabled={!isEditing}
-                    onChange={(e) =>
-                      setFormData({ ...formData, location: e.target.value })
-                    }
+                    onChange={(e) => handleInputChange('location', e.target.value)}
+                    className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-neutral-black">
+                    Gender
+                  </label>
+                  <select
+                    value={formData.gender || ''}
+                    disabled={!isEditing}
+                    onChange={(e) => handleInputChange('gender', e.target.value)}
+                    className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey"
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-neutral-black">
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.username || ''}
+                    disabled={true} // Username should not be editable
                     className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey"
                   />
                 </div>
@@ -289,267 +364,196 @@ export default function Profile() {
                 </label>
                 <textarea
                   rows="4"
-                  value={formData.bio}
+                  value={formData.bio || ''}
                   disabled={!isEditing}
-                  onChange={(e) =>
-                    setFormData({ ...formData, bio: e.target.value })
-                  }
+                  onChange={(e) => handleInputChange('bio', e.target.value)}
+                  placeholder="Tell students about yourself, your background, and your counselling approach..."
                   className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey"
                 />
               </div>
             </motion.div>
           )}
 
-          {/* Education */}
-          {activeTab === "education" && (
+          {/* Professional Information */}
+          {activeTab === "professional" && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="space-y-6"
             >
-              {formData.education.map((edu, index) => (
-                <div
-                  key={index}
-                  className="p-4 border rounded-lg border-neutral-light-grey"
-                >
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div>
-                      <label className="block mb-2 text-sm font-medium text-neutral-black">
-                        Degree
-                      </label>
-                      <input
-                        type="text"
-                        value={edu.degree}
-                        disabled={!isEditing}
-                        className="w-full px-3 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey"
-                      />
-                    </div>
-                    <div>
-                      <label className="block mb-2 text-sm font-medium text-neutral-black">
-                        Institution
-                      </label>
-                      <input
-                        type="text"
-                        value={edu.institution}
-                        disabled={!isEditing}
-                        className="w-full px-3 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey"
-                      />
-                    </div>
-                    <div>
-                      <label className="block mb-2 text-sm font-medium text-neutral-black">
-                        Year
-                      </label>
-                      <input
-                        type="text"
-                        value={edu.year}
-                        disabled={!isEditing}
-                        className="w-full px-3 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey"
-                      />
-                    </div>
-                    <div>
-                      <label className="block mb-2 text-sm font-medium text-neutral-black">
-                        GPA
-                      </label>
-                      <input
-                        type="text"
-                        value={edu.gpa}
-                        disabled={!isEditing}
-                        className="w-full px-3 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey"
-                      />
-                    </div>
-                  </div>
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-neutral-black">
+                    Years of Experience
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="50"
+                    value={formData.experience_years || ''}
+                    disabled={!isEditing}
+                    onChange={(e) => handleInputChange('experience_years', parseInt(e.target.value) || null)}
+                    className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey"
+                  />
                 </div>
-              ))}
-              {isEditing && (
-                <Button variant="outline" className="w-full">
-                  Add Education
-                </Button>
-              )}
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-neutral-black">
+                    Hourly Rate (Rs)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.hourly_rate || ''}
+                    disabled={!isEditing}
+                    onChange={(e) => handleInputChange('hourly_rate', parseFloat(e.target.value) || null)}
+                    className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block mb-2 text-sm font-medium text-neutral-black">
+                  Qualifications
+                </label>
+                <textarea
+                  rows="3"
+                  value={formData.qualifications || ''}
+                  disabled={!isEditing}
+                  onChange={(e) => handleInputChange('qualifications', e.target.value)}
+                  placeholder="List your educational qualifications, certifications, and degrees..."
+                  className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey"
+                />
+              </div>
+              <div>
+                <label className="block mb-2 text-sm font-medium text-neutral-black">
+                  Expertise Areas
+                </label>
+                <textarea
+                  rows="3"
+                  value={formData.expertise || ''}
+                  disabled={!isEditing}
+                  onChange={(e) => handleInputChange('expertise', e.target.value)}
+                  placeholder="Describe your areas of expertise and specialized knowledge..."
+                  className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey"
+                />
+              </div>
+              <div>
+                <label className="block mb-2 text-sm font-medium text-neutral-black">
+                  Specializations
+                </label>
+                <textarea
+                  rows="3"
+                  value={formData.specializations || ''}
+                  disabled={!isEditing}
+                  onChange={(e) => handleInputChange('specializations', e.target.value)}
+                  placeholder="Specify your counselling specializations (e.g., Career guidance, Academic planning, University admissions)..."
+                  className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey"
+                />
+              </div>
             </motion.div>
           )}
 
-          {/* Experience */}
-          {activeTab === "experience" && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="space-y-6"
-            >
-              {formData.experience.map((exp, index) => (
-                <div
-                  key={index}
-                  className="p-4 border rounded-lg border-neutral-light-grey"
-                >
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div>
-                      <label className="block mb-2 text-sm font-medium text-neutral-black">
-                        Job Title
-                      </label>
-                      <input
-                        type="text"
-                        value={exp.title}
-                        disabled={!isEditing}
-                        className="w-full px-3 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey"
-                      />
-                    </div>
-                    <div>
-                      <label className="block mb-2 text-sm font-medium text-neutral-black">
-                        Company
-                      </label>
-                      <input
-                        type="text"
-                        value={exp.company}
-                        disabled={!isEditing}
-                        className="w-full px-3 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey"
-                      />
-                    </div>
-                    <div>
-                      <label className="block mb-2 text-sm font-medium text-neutral-black">
-                        Period
-                      </label>
-                      <input
-                        type="text"
-                        value={exp.period}
-                        disabled={!isEditing}
-                        className="w-full px-3 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey"
-                      />
-                    </div>
-                  </div>
-                  <div className="mt-4">
-                    <label className="block mb-2 text-sm font-medium text-neutral-black">
-                      Description
-                    </label>
-                    <textarea
-                      rows="3"
-                      value={exp.description}
-                      disabled={!isEditing}
-                      className="w-full px-3 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey"
-                    />
-                  </div>
-                </div>
-              ))}
-              {isEditing && (
-                <Button variant="outline" className="w-full">
-                  Add Experience
-                </Button>
-              )}
-            </motion.div>
-          )}
-
-          {/* Mentoring Preferences */}
-          {activeTab === "preferences" && (
+          {/* Counselling Preferences */}
+          {/* {activeTab === "preferences" && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="space-y-6"
             >
               <div>
-                <label className="block mb-2 text-sm font-medium text-neutral-black">
-                  Mentoring Topics
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {formData.mentoringPreferences.topics.map((topic, index) => (
-                    <span
-                      key={index}
-                      className="px-3 py-1 text-sm rounded-full bg-primary-100 text-primary-600"
-                    >
-                      {topic}
+                <div className="flex items-center justify-between mb-4">
+                  <label className="text-sm font-medium text-neutral-black">
+                    Available for New Sessions
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.available_for_sessions || false}
+                      disabled={!isEditing}
+                      onChange={(e) => handleInputChange('available_for_sessions', e.target.checked)}
+                      className="w-4 h-4 border-gray-300 rounded text-primary-600 focus:ring-primary-500"
+                    />
+                    <span className="text-sm text-neutral-grey">
+                      {formData.available_for_sessions ? 'Available' : 'Unavailable'}
                     </span>
-                  ))}
+                  </div>
                 </div>
+                <p className="text-sm text-neutral-grey">
+                  Toggle this setting to control whether students can book new counselling sessions with you.
+                </p>
               </div>
-              <div>
-                <label className="block mb-2 text-sm font-medium text-neutral-black">
-                  Available Times
-                </label>
-                <div className="space-y-2">
-                  {formData.mentoringPreferences.availability.map(
-                    (time, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          checked
-                          disabled={!isEditing}
-                          className="rounded"
-                        />
-                        <span className="text-sm text-neutral-black">
-                          {time}
-                        </span>
-                      </div>
-                    )
-                  )}
+              
+              <div className="p-4 border rounded-lg border-neutral-light-grey bg-neutral-silver/20">
+                <h4 className="mb-2 font-medium text-neutral-black">Session Information</h4>
+                <div className="space-y-2 text-sm text-neutral-grey">
+                  <div className="flex justify-between">
+                    <span>Experience:</span>
+                    <span className="font-medium text-neutral-black">
+                      {formData.experience_years ? `${formData.experience_years} years` : 'Not specified'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Hourly Rate:</span>
+                    <span className="font-medium text-neutral-black">
+                      {formData.hourly_rate ? `$${formData.hourly_rate}` : 'Not set'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Verification Status:</span>
+                    <span className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${
+                      formData.is_verified ? 
+                        'text-green-800 bg-green-100' : 
+                        'text-yellow-800 bg-yellow-100'
+                    }`}>
+                      {formData.is_verified ? 'Verified' : 'Pending Verification'}
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <label className="block mb-2 text-sm font-medium text-neutral-black">
-                  Preferred Location
-                </label>
-                <input
-                  type="text"
-                  value={formData.mentoringPreferences.location}
-                  disabled={!isEditing}
-                  className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey"
-                />
               </div>
             </motion.div>
-          )}
+          )} */}
 
-          {/* Social Links */}
-          {activeTab === "social" && (
+          {/* Availability */}
+          {/* {activeTab === "availability" && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="space-y-6"
             >
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <Github className="w-5 h-5 text-neutral-grey" />
-                  <div className="flex-1">
-                    <label className="block mb-1 text-sm font-medium text-neutral-black">
-                      GitHub
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.socialLinks.github}
-                      disabled={!isEditing}
-                      placeholder="username"
-                      className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey"
-                    />
+              <div>
+                <h4 className="mb-4 font-medium text-neutral-black">Weekly Availability</h4>
+                {formData.availability && formData.availability.length > 0 ? (
+                  <div className="space-y-3">
+                    {formData.availability.map((slot, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg border-neutral-light-grey">
+                        <div>
+                          <span className="font-medium text-neutral-black">{slot.day_name}</span>
+                          <span className="ml-2 text-sm text-neutral-grey">
+                            {slot.start_time} - {slot.end_time}
+                          </span>
+                        </div>
+                        <Clock className="w-4 h-4 text-neutral-grey" />
+                      </div>
+                    ))}
                   </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Twitter className="w-5 h-5 text-neutral-grey" />
-                  <div className="flex-1">
-                    <label className="block mb-1 text-sm font-medium text-neutral-black">
-                      Twitter
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.socialLinks.twitter}
-                      disabled={!isEditing}
-                      placeholder="username"
-                      className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey"
-                    />
+                ) : (
+                  <div className="p-6 text-center border rounded-lg border-neutral-light-grey bg-neutral-silver/20">
+                    <Clock className="w-8 h-8 mx-auto mb-2 text-neutral-grey" />
+                    <p className="text-neutral-grey">No availability schedule set</p>
+                    <p className="text-sm text-neutral-grey">
+                      Set your weekly availability to help students book sessions with you.
+                    </p>
                   </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Linkedin className="w-5 h-5 text-neutral-grey" />
-                  <div className="flex-1">
-                    <label className="block mb-1 text-sm font-medium text-neutral-black">
-                      LinkedIn
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.socialLinks.linkedin}
-                      disabled={!isEditing}
-                      placeholder="username"
-                      className="w-full px-4 py-2 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:bg-neutral-silver disabled:text-neutral-grey"
-                    />
-                  </div>
-                </div>
+                )}
               </div>
+              
+              {isEditing && (
+                <div className="text-sm text-neutral-grey">
+                  <p>💡 To manage your detailed availability schedule, please use the Calendar page.</p>
+                </div>
+              )}
             </motion.div>
-          )}
+          )} */}
         </CardContent>
       </Card>
     </motion.div>

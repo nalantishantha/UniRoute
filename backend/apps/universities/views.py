@@ -297,6 +297,10 @@ def degree_programs_list(request):
         try:
             university_id = request.GET.get('university_id')
             faculty_id = request.GET.get('faculty_id')
+            
+            # Initialize filters dictionary
+            filters = {}
+            
             # If a university_id is provided, return all degree programs for that university
             # (don't restrict by is_active). When listing without a university filter, default
             # to only active programs.
@@ -310,6 +314,11 @@ def degree_programs_list(request):
             if subject_stream:
                 # field is subject_stream_required on the model
                 filters['subject_stream_required'] = subject_stream
+                
+            # Default to active programs if no university filter
+            if not university_id:
+                filters['is_active'] = 1
+                
             degree_programs = DegreePrograms.objects.filter(**filters)
             
             data = []

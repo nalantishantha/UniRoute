@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, check_password
 from django.db import transaction
 from django.utils import timezone
 import json
@@ -448,6 +448,450 @@ def admin_update_counsellor(request):
             return JsonResponse({
                 'success': False,
                 'message': f'Update failed: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only PUT method allowed'
+    }, status=405)
+
+
+@csrf_exempt
+def get_counsellor_profile(request, user_id):
+    """Get counsellor profile by user ID"""
+    if request.method == 'GET':
+        try:
+            # Get the counsellor and related data
+            try:
+                user = Users.objects.get(user_id=user_id)
+                counsellor = Counsellors.objects.get(user=user)
+                user_details = UserDetails.objects.get(user=user)
+            except (Users.DoesNotExist, Counsellors.DoesNotExist, UserDetails.DoesNotExist):
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Counsellor not found'
+                }, status=404)
+            
+            # Get availability data
+            availability = []
+            for avail in counsellor.availability.filter(is_active=True):
+                availability.append({
+                    'day_of_week': avail.day_of_week,
+                    'day_name': avail.get_day_of_week_display(),
+                    'start_time': avail.start_time.strftime('%H:%M') if avail.start_time else None,
+                    'end_time': avail.end_time.strftime('%H:%M') if avail.end_time else None
+                })
+            
+            profile_data = {
+                'user_id': user.user_id,
+                'counsellor_id': counsellor.counsellor_id,
+                'username': user.username,
+                'email': user.email,
+                'full_name': user_details.full_name or '',
+                'profile_picture': user_details.profile_picture or '',
+                'bio': user_details.bio or counsellor.bio or '',
+                'contact_number': user_details.contact_number or '',
+                'location': user_details.location or '',
+                'gender': user_details.gender or '',
+                'is_verified': user_details.is_verified or 0,
+                'expertise': counsellor.expertise or '',
+                'experience_years': counsellor.experience_years,
+                'qualifications': counsellor.qualifications or '',
+                'specializations': counsellor.specializations or '',
+                'available_for_sessions': counsellor.available_for_sessions,
+                'hourly_rate': float(counsellor.hourly_rate) if counsellor.hourly_rate else None,
+                'is_active': user.is_active,
+                'availability': availability,
+                'created_at': counsellor.created_at.isoformat() if counsellor.created_at else None,
+                'updated_at': counsellor.updated_at.isoformat() if counsellor.updated_at else None
+            }
+            
+            return JsonResponse({
+                'success': True,
+                'profile': profile_data
+            })
+            
+        except Exception as e:
+            print(f"❌ Get counsellor profile error: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': f'Failed to get profile: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only GET method allowed'
+    }, status=405)
+
+
+@csrf_exempt
+def update_counsellor_profile(request, user_id):
+    """Update counsellor profile"""
+    if request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            
+            # Get the counsellor and related data
+            try:
+                user = Users.objects.get(user_id=user_id)
+                counsellor = Counsellors.objects.get(user=user)
+                user_details = UserDetails.objects.get(user=user)
+            except (Users.DoesNotExist, Counsellors.DoesNotExist, UserDetails.DoesNotExist):
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Counsellor not found'
+                }, status=404)
+            
+            # Update user details
+            if 'full_name' in data:
+                user_details.full_name = data['full_name']
+            if 'bio' in data:
+                user_details.bio = data['bio']
+            if 'contact_number' in data:
+                user_details.contact_number = data['contact_number']
+            if 'location' in data:
+                user_details.location = data['location']
+            if 'gender' in data:
+                user_details.gender = data['gender']
+            if 'profile_picture' in data:
+                user_details.profile_picture = data['profile_picture']
+            
+            # Update counsellor-specific fields
+            if 'expertise' in data:
+                counsellor.expertise = data['expertise']
+            if 'experience_years' in data:
+                counsellor.experience_years = data['experience_years'] if data['experience_years'] else None
+            if 'qualifications' in data:
+                counsellor.qualifications = data['qualifications']
+            if 'specializations' in data:
+                counsellor.specializations = data['specializations']
+            if 'hourly_rate' in data:
+                counsellor.hourly_rate = data['hourly_rate'] if data['hourly_rate'] else None
+            if 'available_for_sessions' in data:
+                counsellor.available_for_sessions = data['available_for_sessions']
+            
+            # If bio is updated in user_details, also update in counsellor table
+            if 'bio' in data:
+                counsellor.bio = data['bio']
+            
+            # Save changes with transaction
+            with transaction.atomic():
+                user_details.updated_at = timezone.now()
+                user_details.save()
+                counsellor.updated_at = timezone.now()
+                counsellor.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Profile updated successfully',
+                'profile': {
+                    'user_id': user.user_id,
+                    'counsellor_id': counsellor.counsellor_id,
+                    'full_name': user_details.full_name,
+                    'email': user.email,
+                    'bio': user_details.bio,
+                    'contact_number': user_details.contact_number,
+                    'location': user_details.location,
+                    'expertise': counsellor.expertise,
+                    'experience_years': counsellor.experience_years,
+                    'qualifications': counsellor.qualifications,
+                    'specializations': counsellor.specializations,
+                    'hourly_rate': float(counsellor.hourly_rate) if counsellor.hourly_rate else None,
+                    'available_for_sessions': counsellor.available_for_sessions,
+                    'updated_at': counsellor.updated_at.isoformat()
+                }
+            })
+            
+        except Exception as e:
+            print(f"❌ Update counsellor profile error: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': f'Failed to update profile: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only PUT method allowed'
+    }, status=405)
+
+
+@csrf_exempt
+def change_counsellor_password(request, user_id):
+    """Change counsellor password"""
+    if request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            
+            # Get the counsellor
+            try:
+                user = Users.objects.get(user_id=user_id)
+                counsellor = Counsellors.objects.get(user=user)
+            except (Users.DoesNotExist, Counsellors.DoesNotExist):
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Counsellor not found'
+                }, status=404)
+            
+            # Validate required fields
+            current_password = data.get('current_password')
+            new_password = data.get('new_password')
+            
+            if not current_password or not new_password:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Current password and new password are required'
+                }, status=400)
+            
+            # Verify current password
+            if not check_password(current_password, user.password_hash):
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Current password is incorrect'
+                }, status=400)
+            
+            # Validate new password
+            if len(new_password) < 8:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'New password must be at least 8 characters long'
+                }, status=400)
+            
+            # Check if new password is different from current
+            if check_password(new_password, user.password_hash):
+                return JsonResponse({
+                    'success': False,
+                    'message': 'New password must be different from current password'
+                }, status=400)
+            
+            # Update password
+            user.password_hash = make_password(new_password)
+            user.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Password changed successfully'
+            })
+            
+        except Exception as e:
+            print(f"❌ Change counsellor password error: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': f'Failed to change password: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only PUT method allowed'
+    }, status=405)
+
+
+@csrf_exempt
+def delete_counsellor_account(request, user_id):
+    """Delete counsellor account (soft delete or hard delete)"""
+    if request.method == 'DELETE':
+        try:
+            data = json.loads(request.body)
+            
+            # Get the counsellor
+            try:
+                user = Users.objects.get(user_id=user_id)
+                counsellor = Counsellors.objects.get(user=user)
+                user_details = UserDetails.objects.get(user=user)
+            except (Users.DoesNotExist, Counsellors.DoesNotExist, UserDetails.DoesNotExist):
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Counsellor not found'
+                }, status=404)
+            
+            # Validate confirmation text
+            confirmation_text = data.get('confirmation_text', '')
+            if confirmation_text != 'DELETE MY ACCOUNT':
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Invalid confirmation text. Please type "DELETE MY ACCOUNT"'
+                }, status=400)
+            
+            # Perform soft delete by deactivating the account
+            with transaction.atomic():
+                # Deactivate user account
+                user.is_active = 0
+                user.save()
+                
+                # Mark counsellor as unavailable for sessions
+                counsellor.available_for_sessions = False
+                counsellor.updated_at = timezone.now()
+                counsellor.save()
+                
+                # Optional: Add deletion timestamp to user_details
+                user_details.updated_at = timezone.now()
+                user_details.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Account has been successfully deactivated'
+            })
+            
+        except Exception as e:
+            print(f"❌ Delete counsellor account error: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': f'Failed to delete account: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only DELETE method allowed'
+    }, status=405)
+
+
+@csrf_exempt
+def get_counsellor_settings(request, user_id):
+    """Get counsellor settings and preferences"""
+    if request.method == 'GET':
+        try:
+            # Get the counsellor and related data
+            try:
+                user = Users.objects.get(user_id=user_id)
+                counsellor = Counsellors.objects.get(user=user)
+                user_details = UserDetails.objects.get(user=user)
+            except (Users.DoesNotExist, Counsellors.DoesNotExist, UserDetails.DoesNotExist):
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Counsellor not found'
+                }, status=404)
+            
+            settings_data = {
+                'profile_settings': {
+                    'user_id': user.user_id,
+                    'username': user.username,
+                    'email': user.email,
+                    'full_name': user_details.full_name or '',
+                    'profile_picture': user_details.profile_picture or '',
+                    'bio': user_details.bio or '',
+                    'contact_number': user_details.contact_number or '',
+                    'location': user_details.location or '',
+                    'gender': user_details.gender or '',
+                    'is_verified': user_details.is_verified or 0
+                },
+                'counsellor_settings': {
+                    'counsellor_id': counsellor.counsellor_id,
+                    'available_for_sessions': counsellor.available_for_sessions,
+                    'experience_years': counsellor.experience_years,
+                    'hourly_rate': float(counsellor.hourly_rate) if counsellor.hourly_rate else None,
+                    'expertise': counsellor.expertise or '',
+                    'specializations': counsellor.specializations or '',
+                    'qualifications': counsellor.qualifications or ''
+                },
+                'account_settings': {
+                    'is_active': user.is_active,
+                    'created_at': counsellor.created_at.isoformat() if counsellor.created_at else None,
+                    'updated_at': counsellor.updated_at.isoformat() if counsellor.updated_at else None
+                }
+            }
+            
+            return JsonResponse({
+                'success': True,
+                'settings': settings_data
+            })
+            
+        except Exception as e:
+            print(f"❌ Get counsellor settings error: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': f'Failed to get settings: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only GET method allowed'
+    }, status=405)
+
+
+@csrf_exempt
+def update_counsellor_settings(request, user_id):
+    """Update counsellor settings and preferences"""
+    if request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            
+            # Get the counsellor and related data
+            try:
+                user = Users.objects.get(user_id=user_id)
+                counsellor = Counsellors.objects.get(user=user)
+                user_details = UserDetails.objects.get(user=user)
+            except (Users.DoesNotExist, Counsellors.DoesNotExist, UserDetails.DoesNotExist):
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Counsellor not found'
+                }, status=404)
+            
+            # Update profile settings if provided
+            profile_settings = data.get('profile_settings', {})
+            if profile_settings:
+                if 'full_name' in profile_settings:
+                    user_details.full_name = profile_settings['full_name']
+                if 'profile_picture' in profile_settings:
+                    user_details.profile_picture = profile_settings['profile_picture']
+                if 'bio' in profile_settings:
+                    user_details.bio = profile_settings['bio']
+                if 'contact_number' in profile_settings:
+                    user_details.contact_number = profile_settings['contact_number']
+                if 'location' in profile_settings:
+                    user_details.location = profile_settings['location']
+                if 'gender' in profile_settings:
+                    user_details.gender = profile_settings['gender']
+                if 'username' in profile_settings:
+                    # Check if username is unique
+                    if Users.objects.filter(username=profile_settings['username']).exclude(user_id=user_id).exists():
+                        return JsonResponse({
+                            'success': False,
+                            'message': 'Username already exists'
+                        }, status=400)
+                    user.username = profile_settings['username']
+            
+            # Update counsellor-specific settings if provided
+            counsellor_settings = data.get('counsellor_settings', {})
+            if counsellor_settings:
+                if 'available_for_sessions' in counsellor_settings:
+                    counsellor.available_for_sessions = counsellor_settings['available_for_sessions']
+                if 'experience_years' in counsellor_settings:
+                    counsellor.experience_years = counsellor_settings['experience_years']
+                if 'hourly_rate' in counsellor_settings:
+                    counsellor.hourly_rate = counsellor_settings['hourly_rate']
+                if 'expertise' in counsellor_settings:
+                    counsellor.expertise = counsellor_settings['expertise']
+                if 'specializations' in counsellor_settings:
+                    counsellor.specializations = counsellor_settings['specializations']
+                if 'qualifications' in counsellor_settings:
+                    counsellor.qualifications = counsellor_settings['qualifications']
+            
+            # Save changes with transaction
+            with transaction.atomic():
+                if profile_settings:
+                    user_details.updated_at = timezone.now()
+                    user_details.save()
+                    if 'username' in profile_settings:
+                        user.save()
+                
+                if counsellor_settings:
+                    counsellor.updated_at = timezone.now()
+                    counsellor.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Settings updated successfully',
+                'settings': {
+                    'profile_updated': bool(profile_settings),
+                    'counsellor_settings_updated': bool(counsellor_settings),
+                    'updated_at': timezone.now().isoformat()
+                }
+            })
+            
+        except Exception as e:
+            print(f"❌ Update counsellor settings error: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': f'Failed to update settings: {str(e)}'
             }, status=500)
     
     return JsonResponse({
