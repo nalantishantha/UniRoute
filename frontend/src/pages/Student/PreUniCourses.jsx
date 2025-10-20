@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import StudentNavigation from "../../components/Navigation/StudentNavigation";
 import { getCurrentUser } from '../../utils/auth';
@@ -34,6 +34,98 @@ const PreUniCourses = () => {
   const [error, setError] = useState(null);
   const [playing, setPlaying] = useState(null); // { type: 'youtube'|'external', id or url, title }
   const [ratingModal, setRatingModal] = useState(null); // { courseId, rating, review }
+  const ytPlayerRef = useRef(null);
+
+  // Close video modal: record progress (if any) and prompt rating
+  const handleVideoClose = async () => {
+    try {
+      if (playing && playing.videoObj && playing.videoObj.id) {
+        const user = getCurrentUser();
+        if (user && user.user_id) {
+          await fetch(`/api/courses/${playing.videoObj.course_id}/videos/${playing.videoObj.id}/progress/`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ student_id: user.user_id, watched_seconds: playing.videoObj.duration_seconds || 0, completed: true })
+          });
+
+          setCourses(prev => prev.map(c => {
+            if (c.id === playing.videoObj.course_id) {
+              return { ...c, _video_completed: true, progress_percent: 100 };
+            }
+            return c;
+          }));
+
+          // open rating modal and include video id + watched seconds so we can verify progress when submitting
+          setRatingModal({ courseId: playing.videoObj.course_id, videoId: playing.videoObj.id, watched_seconds: playing.videoObj.duration_seconds || 0, rating: 5, review: '' });
+        }
+      }
+    } catch (e) {
+      // ignore errors
+    } finally {
+      setPlaying(null);
+    }
+  };
+
+  // Load YouTube Iframe API helper
+  const loadYouTubeAPI = () => new Promise((resolve, reject) => {
+    if (window.YT && window.YT.Player) return resolve(window.YT);
+    if (document.getElementById('yt-iframe-api')) {
+      // wait for it to be ready
+      const check = () => { if (window.YT && window.YT.Player) resolve(window.YT); else setTimeout(check, 50); };
+      check();
+      return;
+    }
+    const s = document.createElement('script');
+    s.src = 'https://www.youtube.com/iframe_api';
+    s.id = 'yt-iframe-api';
+    s.onload = () => { const check = () => { if (window.YT && window.YT.Player) resolve(window.YT); else setTimeout(check, 50); }; check(); };
+    s.onerror = reject;
+    document.body.appendChild(s);
+  });
+
+  // Create/destroy YT player when playing a YouTube video
+  useEffect(() => {
+    let mounted = true;
+    if (!playing || playing.type !== 'youtube') return;
+
+    const setupPlayer = async () => {
+      try {
+        const YT = await loadYouTubeAPI();
+        // destroy existing
+        if (ytPlayerRef.current) {
+          try { ytPlayerRef.current.destroy(); } catch (e) {}
+          ytPlayerRef.current = null;
+        }
+
+        const player = new YT.Player('yt-player', {
+          videoId: playing.id,
+          playerVars: { rel: 0, autoplay: 1 },
+          events: {
+            onReady: (e) => { try { e.target.playVideo(); } catch {} },
+            onStateChange: (e) => {
+              const ENDED = (window.YT && window.YT.PlayerState && window.YT.PlayerState.ENDED) ? window.YT.PlayerState.ENDED : 0;
+              if (e.data === ENDED) {
+                try { if (ytPlayerRef.current && ytPlayerRef.current._endedHandled) return; if (ytPlayerRef.current) ytPlayerRef.current._endedHandled = true; } catch (err) {}
+                // call close handler to record progress and show rating
+                handleVideoClose();
+              }
+            }
+          }
+        });
+
+        if (mounted) ytPlayerRef.current = player;
+      } catch (err) {
+        console.debug('YT setup failed', err);
+      }
+    };
+
+    setupPlayer();
+
+    return () => {
+      mounted = false;
+      try { if (ytPlayerRef.current) { ytPlayerRef.current.destroy(); ytPlayerRef.current = null; } } catch (e) {}
+    };
+  }, [playing]);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -71,13 +163,24 @@ const PreUniCourses = () => {
       const match = url.match(/(?:v=|\/embed\/|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
       const id = match ? match[1] : video.video_public_id || null;
       if (id) {
-        setPlaying({ type: 'youtube', id, title: video.title });
+        setPlaying({ type: 'youtube', id, title: video.title, videoObj: video });
         return;
       }
     }
 
     // fallback: open external link in new tab
-    setPlaying({ type: 'external', url, title: video.title });
+    setPlaying({ type: 'external', url, title: video.title, videoObj: video });
+  };
+
+  const playCourse = (course) => {
+    // prefer a preview video, else first video
+    const videos = course && course.videos ? course.videos : [];
+    if (videos.length === 0) {
+      alert('No videos available for this course.');
+      return;
+    }
+    const preview = videos.find(v => v.is_preview) || videos[0];
+    if (preview) openVideo(preview);
   };
 
   const enrollInCourse = async (courseId, idx) => {
@@ -95,7 +198,7 @@ const PreUniCourses = () => {
         body: JSON.stringify({ student_id: user.user_id })
       });
       const data = await res.json();
-      if (data && data.success) {
+  if (data && data.success) {
         // update UI: mark enrolled and update enroll_count
         let enrolledCourse = null;
         setCourses((prev) => {
@@ -111,15 +214,7 @@ const PreUniCourses = () => {
 
         // Play a preview or first video if available
         const courseToPlay = enrolledCourse || courses.find(x => x.id === courseId);
-        const videos = courseToPlay && courseToPlay.videos ? courseToPlay.videos : [];
-        if (videos && videos.length > 0) {
-          const preview = videos.find(v => v.is_preview) || videos[0];
-          if (preview) openVideo(preview);
-        } else {
-          // No videos available
-          // You can remove alert if you don't want a message
-          alert('Enrolled successfully — no course videos available to play.');
-        }
+        if (courseToPlay) playCourse(courseToPlay);
       } else {
         alert(data.error || 'Enrollment failed');
       }
@@ -247,8 +342,12 @@ const PreUniCourses = () => {
               <div className="mt-4 flex items-center justify-end">
                 {course._enrolled ? (
                   <div className="flex items-center space-x-2">
-                    <button className="px-3 py-1 rounded bg-success text-white text-sm">Enrolled</button>
-                    <button onClick={() => setRatingModal({ courseId: course.id, rating: 5, review: '' })} className="px-3 py-1 rounded bg-primary-50 text-primary-600 text-sm border">Rate</button>
+                    <button onClick={() => playCourse(course)} className="px-3 py-1 rounded bg-success text-white text-sm">Enrolled</button>
+                    {(course.progress_percent >= 100 || course._video_completed) ? (
+                      <button onClick={() => setRatingModal({ courseId: course.id, rating: 5, review: '' })} className="px-3 py-1 rounded bg-primary-50 text-primary-600 text-sm border">Rate</button>
+                    ) : (
+                      <div className="text-xs text-primary-300">Complete videos to rate</div>
+                    )}
                   </div>
                 ) : (
                   <button onClick={() => enrollInCourse(course.id, courses.indexOf(course))} className="px-3 py-1 rounded bg-primary-600 text-white text-sm">Enroll</button>
@@ -284,12 +383,7 @@ const PreUniCourses = () => {
             <div className="bg-white rounded-lg max-w-4xl w-full overflow-hidden">
               <div className="flex justify-between items-center p-3 border-b">
                 <h3 className="font-semibold text-primary-600">{playing.title || 'Video'}</h3>
-                <button
-                  onClick={() => setPlaying(null)}
-                  className="text-primary-600 px-3 py-1 rounded hover:bg-primary-50"
-                >
-                  Close
-                </button>
+                <button onClick={handleVideoClose} className="text-primary-600 px-3 py-1 rounded hover:bg-primary-50">✕</button>
               </div>
               <div className="aspect-w-16 aspect-h-9">
                 {playing.type === 'youtube' ? (
@@ -306,50 +400,67 @@ const PreUniCourses = () => {
                     <a href={playing.url} target="_blank" rel="noreferrer" className="text-primary-600 underline">Open external video</a>
                   </div>
                 )}
+              </div>
+              <div className="p-3 border-t flex justify-end">
+                <button onClick={handleVideoClose} className="text-primary-600 px-3 py-1 rounded hover:bg-primary-50">Close</button>
+              </div>
+            </div>
+          </div>
+        )}
 
-                {/* Rating modal */}
-                {ratingModal && (
-                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-                    <div className="bg-white rounded-lg max-w-md w-full p-4">
-                      <div className="flex justify-between items-center mb-3">
-                        <h3 className="font-semibold text-primary-600">Rate course</h3>
-                        <button onClick={() => setRatingModal(null)} className="text-primary-600 px-2">Close</button>
-                      </div>
-                      <div className="space-y-3">
-                        <div className="text-sm text-primary-400">Select rating (0-5)</div>
-                        <input type="range" min="0" max="5" step="0.5" value={ratingModal.rating} onChange={(e) => setRatingModal({...ratingModal, rating: parseFloat(e.target.value)})} />
-                        <div className="text-sm">{ratingModal.rating} / 5</div>
-                        <textarea className="w-full border p-2 rounded" rows={4} placeholder="Write a short review (optional)" value={ratingModal.review} onChange={(e) => setRatingModal({...ratingModal, review: e.target.value})} />
-                        <div className="flex justify-end">
-                          <button onClick={async () => {
-                            const user = getCurrentUser();
-                            if (!user || !user.user_id) { window.location.replace('/login'); return; }
+        {/* Rating modal (separate) */}
+        {ratingModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+            <div className="bg-white rounded-lg max-w-md w-full p-4">
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="font-semibold text-primary-600">Rate course</h3>
+                <button onClick={() => setRatingModal(null)} className="text-primary-600 px-2">Close</button>
+              </div>
+              <div className="space-y-3">
+                <div className="text-sm text-primary-400">Select rating (0-5)</div>
+                <input type="range" min="0" max="5" step="0.5" value={ratingModal.rating} onChange={(e) => setRatingModal({...ratingModal, rating: parseFloat(e.target.value)})} />
+                <div className="text-sm">{ratingModal.rating} / 5</div>
+                <textarea className="w-full border p-2 rounded" rows={4} placeholder="Write a short review (optional)" value={ratingModal.review} onChange={(e) => setRatingModal({...ratingModal, review: e.target.value})} />
+                <div className="flex justify-end">
+                  <button onClick={async () => {
+                    const user = getCurrentUser();
+                    if (!user || !user.user_id) { window.location.replace('/login'); return; }
 
-                            try {
-                              const res = await fetch(`/api/courses/${ratingModal.courseId}/rate/`, {
-                                method: 'POST',
-                                headers: {'Content-Type': 'application/json'},
-                                body: JSON.stringify({ student_id: user.user_id, rating: ratingModal.rating, review: ratingModal.review })
-                              });
-                              const data = await res.json();
-                              if (data && data.success) {
-                                // update course aggregate in local state
-                                setCourses(prev => prev.map(c => c.id === data.course.id ? {...c, average_rating: data.course.average_rating, rating_count: data.course.rating_count} : c));
-                                setRatingModal(null);
-                                alert('Thanks for your rating!');
-                              } else {
-                                alert(data.error || 'Failed to submit rating');
-                              }
-                            } catch (err) {
-                              console.error(err);
-                              alert('Failed to submit rating');
-                            }
-                          }} className="px-4 py-2 bg-primary-600 text-white rounded">Submit</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                    // helper to POST JSON and parse response
+                    const postJson = async (url, body) => {
+                      const res = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
+                      const text = await res.text();
+                      try { return { ok: res.ok, status: res.status, data: JSON.parse(text) }; } catch (e) { return { ok: res.ok, status: res.status, data: text }; }
+                    };
+
+                    // 1) Ensure progress is recorded (server may require this)
+                    if (ratingModal && ratingModal.videoId) {
+                      const prog = await postJson(`/api/courses/${ratingModal.courseId}/videos/${ratingModal.videoId}/progress/`, { student_id: user.user_id, watched_seconds: ratingModal.watched_seconds || 0, completed: true });
+                      if (!prog.ok) {
+                        console.warn('progress response', prog);
+                        alert((prog.data && prog.data.error) || 'Could not verify video progress');
+                        return;
+                      }
+                    }
+
+                    // 2) Submit rating — backend will now record rating into course_enrollments (or create enrollment)
+                    const ratingRes = await postJson(`/api/courses/${ratingModal.courseId}/rate/`, { student_id: user.user_id, rating: ratingModal.rating, review: ratingModal.review });
+                    if (!ratingRes.ok) {
+                      console.warn('rating response', ratingRes);
+                      alert((ratingRes.data && ratingRes.data.error) || 'Failed to submit rating');
+                      return;
+                    }
+
+                    const data = ratingRes.data;
+                    if (data && data.success) {
+                      setCourses(prev => prev.map(c => c.id === data.course.id ? {...c, average_rating: data.course.average_rating, rating_count: data.course.rating_count, _video_completed: true, progress_percent: 100 } : c));
+                      setRatingModal(null);
+                      alert('Thanks for your rating!');
+                    } else {
+                      alert((data && data.error) || 'Failed to submit rating');
+                    }
+                  }} className="px-4 py-2 bg-primary-600 text-white rounded">Submit</button>
+                </div>
               </div>
             </div>
           </div>

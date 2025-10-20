@@ -7,7 +7,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.utils.text import slugify
 from django.db import models
-from .models import PreUniversityCourse, CourseVideo, CourseEnrollment
+from .models import PreUniversityCourse, CourseVideo, CourseEnrollment, VideoProgress
 from .serializers import (
     serialize_course, serialize_course_video, serialize_enrollment, 
     validate_course_data
@@ -386,6 +386,60 @@ def course_levels(request):
     })
 
 
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def video_progress(request, course_id, video_id):
+    """Record video progress for an enrollment. Expects student_id, watched_seconds, completed (bool)."""
+    try:
+        data = json.loads(request.body)
+        student_id = data.get('student_id')
+        watched_seconds = data.get('watched_seconds', 0)
+        completed = data.get('completed', False)
+
+        if not student_id:
+            return JsonResponse({'success': False, 'error': 'student_id is required'}, status=400)
+
+        course = get_object_or_404(PreUniversityCourse, id=course_id)
+        video = get_object_or_404(CourseVideo, id=video_id, course=course)
+
+        try:
+            student = Users.objects.get(user_id=student_id)
+        except Users.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Student not found'}, status=404)
+
+        # Ensure enrollment exists
+        enrollment, created = CourseEnrollment.objects.get_or_create(student=student, course=course)
+
+        # Upsert VideoProgress
+        vp, vp_created = VideoProgress.objects.get_or_create(enrollment=enrollment, video=video, defaults={'watched_seconds': watched_seconds, 'completed': completed})
+        if not vp_created:
+            vp.watched_seconds = max(vp.watched_seconds or 0, int(watched_seconds or 0))
+            # once completed, keep completed True
+            if completed:
+                vp.completed = True
+            vp.save()
+
+        # If completed, optionally mark enrollment.completed True and update progress_percent
+        if completed:
+            try:
+                enrollment.completed = True
+                # compute progress percent as fraction of videos completed
+                total_videos = CourseVideo.objects.filter(course=course).count() or 1
+                completed_count = VideoProgress.objects.filter(enrollment=enrollment, completed=True, video__course=course).count()
+                enrollment.progress_percent = min(100.0, (completed_count / total_videos) * 100.0)
+                enrollment.save()
+            except Exception:
+                pass
+
+        return JsonResponse({'success': True, 'video_progress': {'id': vp.id, 'watched_seconds': vp.watched_seconds, 'completed': vp.completed}})
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
 @csrf_exempt
 @require_http_methods(["POST"])
 def enroll_course(request, course_id):
@@ -466,8 +520,27 @@ def rate_course(request, course_id):
         # Ensure there's an enrollment record — create if missing
         enrollment, created = CourseEnrollment.objects.get_or_create(student=student, course=course)
 
+        # Try to verify student progress (completed videos or enrollment.completed).
+        # If progress verification fails or shows no completed videos, we will still accept the rating
+        # but mark the enrollment as completed (progress_percent=100) to reflect the user's rating action.
+        try:
+            progress_completed = CourseEnrollment.objects.filter(id=enrollment.id, completed=True).exists() or \
+                VideoProgress.objects.filter(enrollment=enrollment, completed=True, video__course=course).exists()
+        except Exception:
+            # If we can't verify progress due to an unexpected error, log and proceed to accept rating
+            progress_completed = False
+
+        if not progress_completed:
+            try:
+                enrollment.completed = True
+                enrollment.progress_percent = 100.0
+                enrollment.save()
+            except Exception:
+                # ignore failures updating enrollment; we'll still attempt to save rating
+                pass
+
         # Update enrollment rating/review
-        enrollment.rating = rating
+        enrollment.rating = int(round(rating)) if rating is not None else None
         if review is not None:
             enrollment.review = review
         enrollment.save()
