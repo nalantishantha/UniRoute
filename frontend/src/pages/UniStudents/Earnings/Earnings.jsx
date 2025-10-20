@@ -10,7 +10,6 @@ import {
   Clock,
   PiggyBank,
   BarChart3,
-  Building,
   User,
   Hash,
 } from "lucide-react";
@@ -161,6 +160,66 @@ export default function Earnings() {
     },
   ];
 
+  const handleDownloadReport = () => {
+    const headers = [
+      "Transaction ID",
+      "Booking Topic",
+      "Student Name",
+      "Student Email",
+      "Status",
+      "Amount",
+      "Payment Method",
+      "Card",
+      "Booking ID",
+      "Paid At",
+      "Created At",
+    ];
+
+  const rows = transactions.map((transaction) => {
+      const card = transaction.card_type
+        ? `${transaction.card_type} ****${transaction.card_last_four || ""}`
+        : "";
+      return [
+        transaction.transaction_id || transaction.id,
+        transaction.booking_topic || "",
+        transaction.student_name || "",
+        transaction.student_email || "",
+        transaction.status,
+        Number(transaction.amount || 0),
+        transaction.payment_method || "",
+        card,
+        transaction.booking_id || "",
+        transaction.paid_at ? formatDate(transaction.paid_at) : "",
+        transaction.created_at ? formatDate(transaction.created_at) : "",
+      ];
+    });
+
+  const csvContent = [headers, ...rows]
+      .map((row) =>
+        row
+          .map((cell) => {
+            const value = cell === null || cell === undefined ? "" : cell;
+            const stringValue = String(value).replace(/"/g, '""');
+            return stringValue.includes(",") ? `"${stringValue}"` : stringValue;
+          })
+          .join(",")
+      )
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute(
+      "download",
+      `uni-student-transactions-${new Date().toISOString().slice(0, 10)}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   if (loading) {
     return (
       <motion.div
@@ -221,7 +280,15 @@ export default function Earnings() {
       className="space-y-6"
     >
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-end">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+        <Button
+          variant="outline"
+          className="flex items-center space-x-2 self-start"
+          onClick={handleDownloadReport}
+        >
+          <Download className="w-4 h-4" />
+          <span>Download Transaction Report</span>
+        </Button>
         <div className="flex items-center space-x-3 mt-4 lg:mt-0">
           <select
             value={timeRange}
@@ -266,9 +333,8 @@ export default function Earnings() {
       </div>
 
       {/* Charts and Insights */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <Card>
+      <div className="space-y-6">
+        <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
@@ -313,89 +379,70 @@ export default function Earnings() {
                 )}
               </div>
             </CardContent>
-          </Card>
+        </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Transaction Insights</CardTitle>
-              <CardDescription>Performance and payment method breakdown</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs text-neutral-grey">Monthly Average</p>
-                  <p className="text-lg font-semibold text-neutral-black mt-1">
-                    {formatCurrency(stats.monthly_average)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-neutral-grey">Last Payment</p>
-                  <p className="text-sm text-neutral-black mt-1">
-                    {stats.last_payment
-                      ? `${formatCurrency(stats.last_payment.amount)} • ${formatDate(stats.last_payment.date)}`
-                      : "No payments recorded"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-neutral-grey">Largest Payment</p>
-                  <p className="text-sm text-neutral-black mt-1">
-                    {stats.largest_transaction
-                      ? `${formatCurrency(stats.largest_transaction.amount)} • ${stats.largest_transaction.student_name}`
-                      : "No payment data"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-neutral-grey">Current / Previous Month</p>
-                  <p className="text-sm text-neutral-black mt-1">
-                    {formatCurrency(stats.current_month_total)} • {formatCurrency(stats.previous_month_total)}
-                  </p>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-xs font-medium text-neutral-grey mb-3">Payment Methods</p>
-                {stats.methods && stats.methods.length > 0 ? (
-                  <div className="space-y-2">
-                    {stats.methods.map((method) => (
-                      <div
-                        key={method.method}
-                        className="flex items-center justify-between rounded-lg border border-neutral-silver px-3 py-2"
-                      >
-                        <div>
-                          <p className="text-sm font-medium text-neutral-black">{method.method}</p>
-                          <p className="text-xs text-neutral-grey">
-                            {method.count} {method.count === 1 ? "transaction" : "transactions"}
-                          </p>
-                        </div>
-                        <p className="text-sm font-semibold text-neutral-black">
-                          {formatCurrency(method.amount)}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-neutral-grey">No payment method records available.</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Quick Actions */}
         <Card>
           <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Manage your earnings</CardDescription>
+            <CardTitle>Transaction Insights</CardTitle>
+            <CardDescription>Performance and payment method breakdown</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <Button variant="outline" className="w-full justify-start">
-              <Download className="w-4 h-4 mr-2" />
-              Download Statement
-            </Button>
-            <Button variant="outline" className="w-full justify-start">
-              <Building className="w-4 h-4 mr-2" />
-              Update Bank Details
-            </Button>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs text-neutral-grey">Monthly Average</p>
+                <p className="text-lg font-semibold text-neutral-black mt-1">
+                  {formatCurrency(stats.monthly_average)}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-neutral-grey">Last Payment</p>
+                <p className="text-sm text-neutral-black mt-1">
+                  {stats.last_payment
+                    ? `${formatCurrency(stats.last_payment.amount)} • ${formatDate(stats.last_payment.date)}`
+                    : "No payments recorded"}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-neutral-grey">Largest Payment</p>
+                <p className="text-sm text-neutral-black mt-1">
+                  {stats.largest_transaction
+                    ? `${formatCurrency(stats.largest_transaction.amount)} • ${stats.largest_transaction.student_name}`
+                    : "No payment data"}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-neutral-grey">Current / Previous Month</p>
+                <p className="text-sm text-neutral-black mt-1">
+                  {formatCurrency(stats.current_month_total)} • {formatCurrency(stats.previous_month_total)}
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-medium text-neutral-grey mb-3">Payment Methods</p>
+              {stats.methods && stats.methods.length > 0 ? (
+                <div className="space-y-2">
+                  {stats.methods.map((method) => (
+                    <div
+                      key={method.method}
+                      className="flex items-center justify-between rounded-lg border border-neutral-silver px-3 py-2"
+                    >
+                      <div>
+                        <p className="text-sm font-medium text-neutral-black">{method.method}</p>
+                        <p className="text-xs text-neutral-grey">
+                          {method.count} {method.count === 1 ? "transaction" : "transactions"}
+                        </p>
+                      </div>
+                      <p className="text-sm font-semibold text-neutral-black">
+                        {formatCurrency(method.amount)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-neutral-grey">No payment method records available.</p>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
