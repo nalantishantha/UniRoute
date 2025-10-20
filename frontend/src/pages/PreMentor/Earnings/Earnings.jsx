@@ -88,7 +88,10 @@ export default function Earnings() {
         setLoading(true);
         setError(null);
 
-  const response = await earningsAPI.getEarnings(USER_ID, { timeRange, userType: "pre-mentor" });
+        const response = await earningsAPI.getEarnings(USER_ID, {
+          timeRange,
+          userType: "pre-mentor",
+        });
 
         if (!response.success) {
           throw new Error(response.message || "Unable to fetch earnings data");
@@ -96,7 +99,9 @@ export default function Earnings() {
 
         setStats({ ...INITIAL_STATS, ...(response.stats || {}) });
         setTrend(Array.isArray(response.trend) ? response.trend : []);
-        setTransactions(Array.isArray(response.transactions) ? response.transactions : []);
+        setTransactions(
+          Array.isArray(response.transactions) ? response.transactions : []
+        );
       } catch (err) {
         setStats({ ...INITIAL_STATS });
         setTrend([]);
@@ -112,7 +117,9 @@ export default function Earnings() {
 
   const filteredTransactions = useMemo(() => {
     if (filterStatus === "all") return transactions;
-    return transactions.filter((transaction) => transaction.status === filterStatus);
+    return transactions.filter(
+      (transaction) => transaction.status === filterStatus
+    );
   }, [filterStatus, transactions]);
 
   const maxTrendAmount = trend.length
@@ -127,7 +134,9 @@ export default function Earnings() {
       helper: `${formatNumber(stats.completed_transactions)} completed payouts`,
       change:
         stats.month_over_month !== null
-          ? `${stats.month_over_month > 0 ? "+" : ""}${stats.month_over_month}% MoM`
+          ? `${stats.month_over_month > 0 ? "+" : ""}${
+              stats.month_over_month
+            }% MoM`
           : null,
       icon: DollarSign,
       color: "from-primary-500 to-primary-600",
@@ -175,7 +184,7 @@ export default function Earnings() {
       "Created At",
     ];
 
-  const rows = transactions.map((transaction) => {
+    const rows = transactions.map((transaction) => {
       const card = transaction.card_type
         ? `${transaction.card_type} ****${transaction.card_last_four || ""}`
         : "";
@@ -194,7 +203,7 @@ export default function Earnings() {
       ];
     });
 
-  const csvContent = [headers, ...rows]
+    const csvContent = [headers, ...rows]
       .map((row) =>
         row
           .map((cell) => {
@@ -309,14 +318,22 @@ export default function Earnings() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-neutral-grey">{card.title}</p>
+                  <p className="text-sm font-medium text-neutral-grey">
+                    {card.title}
+                  </p>
                   <div className="flex items-baseline mt-2 space-x-2">
-                    <p className="text-2xl font-bold text-neutral-black">{card.value}</p>
+                    <p className="text-2xl font-bold text-neutral-black">
+                      {card.value}
+                    </p>
                     {card.change && (
-                      <span className="text-sm font-medium text-success">{card.change}</span>
+                      <span className="text-sm font-medium text-success">
+                        {card.change}
+                      </span>
                     )}
                   </div>
-                  <p className="text-xs text-neutral-grey mt-1">{card.helper}</p>
+                  <p className="text-xs text-neutral-grey mt-1">
+                    {card.helper}
+                  </p>
                 </div>
                 <div
                   className={`w-12 h-12 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center`}
@@ -325,7 +342,10 @@ export default function Earnings() {
                 </div>
               </div>
               <div className="w-full h-2 mt-4 rounded-full bg-neutral-silver">
-                <div className={`h-2 rounded-full bg-gradient-to-r ${card.color}`} style={{ width: "80%" }} />
+                <div
+                  className={`h-2 rounded-full bg-gradient-to-r ${card.color}`}
+                  style={{ width: "80%" }}
+                />
               </div>
             </CardContent>
           </Card>
@@ -335,56 +355,64 @@ export default function Earnings() {
       {/* Charts and Insights */}
       <div className="space-y-6">
         <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Earnings Trend</CardTitle>
-                  <CardDescription>Monthly tutoring earnings from confirmed payments</CardDescription>
-                </div>
-                <div className="flex items-center space-x-2 text-sm text-neutral-grey">
-                  <BarChart3 className="w-4 h-4" />
-                  <span>{formatCurrency(stats.current_month_total)} this month</span>
-                </div>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Earnings Trend</CardTitle>
+                <CardDescription>
+                  Monthly tutoring earnings from confirmed payments
+                </CardDescription>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64 flex items-end justify-between space-x-2">
-                {trend.length === 0 ? (
-                  <div className="w-full text-center text-sm text-neutral-grey mt-12">
-                    No earnings recorded for the selected period.
+              <div className="flex items-center space-x-2 text-sm text-neutral-grey">
+                <BarChart3 className="w-4 h-4" />
+                <span>
+                  {formatCurrency(stats.current_month_total)} this month
+                </span>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="h-64 flex items-end justify-between space-x-2">
+              {trend.length === 0 ? (
+                <div className="w-full text-center text-sm text-neutral-grey mt-12">
+                  No earnings recorded for the selected period.
+                </div>
+              ) : (
+                trend.map((dataPoint, index) => (
+                  <div
+                    key={`${dataPoint.label}-${index}`}
+                    className="flex flex-col items-center justify-end flex-1 h-full"
+                  >
+                    <motion.div
+                      initial={{ height: 0 }}
+                      animate={{
+                        height: `${Math.max(
+                          (Number(dataPoint.amount || 0) / normalizedMax) * 100,
+                          4
+                        )}%`,
+                      }}
+                      transition={{ delay: index * 0.1, duration: 0.5 }}
+                      className="w-full bg-gradient-to-t from-primary-600 to-primary-400 rounded-t-lg mb-2"
+                    />
+                    <span className="text-xs text-neutral-grey">
+                      {dataPoint.label}
+                    </span>
+                    <span className="text-xs font-medium text-neutral-black">
+                      {formatCurrency(dataPoint.amount)}
+                    </span>
                   </div>
-                ) : (
-                  trend.map((dataPoint, index) => (
-                    <div
-                      key={`${dataPoint.label}-${index}`}
-                      className="flex flex-col items-center justify-end flex-1 h-full"
-                    >
-                      <motion.div
-                        initial={{ height: 0 }}
-                        animate={{
-                          height: `${Math.max(
-                            (Number(dataPoint.amount || 0) / normalizedMax) * 100,
-                            4,
-                          )}%`,
-                        }}
-                        transition={{ delay: index * 0.1, duration: 0.5 }}
-                        className="w-full bg-gradient-to-t from-primary-600 to-primary-400 rounded-t-lg mb-2"
-                      />
-                      <span className="text-xs text-neutral-grey">{dataPoint.label}</span>
-                      <span className="text-xs font-medium text-neutral-black">
-                        {formatCurrency(dataPoint.amount)}
-                      </span>
-                    </div>
-                  ))
-                )}
-              </div>
-            </CardContent>
+                ))
+              )}
+            </div>
+          </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
             <CardTitle>Transaction Insights</CardTitle>
-            <CardDescription>Performance and payment method breakdown</CardDescription>
+            <CardDescription>
+              Performance and payment method breakdown
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -398,7 +426,9 @@ export default function Earnings() {
                 <p className="text-xs text-neutral-grey">Last Payment</p>
                 <p className="text-sm text-neutral-black mt-1">
                   {stats.last_payment
-                    ? `${formatCurrency(stats.last_payment.amount)} • ${formatDate(stats.last_payment.date)}`
+                    ? `${formatCurrency(
+                        stats.last_payment.amount
+                      )} • ${formatDate(stats.last_payment.date)}`
                     : "No payments recorded"}
                 </p>
               </div>
@@ -406,20 +436,27 @@ export default function Earnings() {
                 <p className="text-xs text-neutral-grey">Largest Payment</p>
                 <p className="text-sm text-neutral-black mt-1">
                   {stats.largest_transaction
-                    ? `${formatCurrency(stats.largest_transaction.amount)} • ${stats.largest_transaction.student_name}`
+                    ? `${formatCurrency(stats.largest_transaction.amount)} • ${
+                        stats.largest_transaction.student_name
+                      }`
                     : "No payment data"}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-neutral-grey">Current / Previous Month</p>
+                <p className="text-xs text-neutral-grey">
+                  Current / Previous Month
+                </p>
                 <p className="text-sm text-neutral-black mt-1">
-                  {formatCurrency(stats.current_month_total)} • {formatCurrency(stats.previous_month_total)}
+                  {formatCurrency(stats.current_month_total)} •{" "}
+                  {formatCurrency(stats.previous_month_total)}
                 </p>
               </div>
             </div>
 
             <div>
-              <p className="text-xs font-medium text-neutral-grey mb-3">Payment Methods</p>
+              <p className="text-xs font-medium text-neutral-grey mb-3">
+                Payment Methods
+              </p>
               {stats.methods && stats.methods.length > 0 ? (
                 <div className="space-y-2">
                   {stats.methods.map((method) => (
@@ -428,9 +465,12 @@ export default function Earnings() {
                       className="flex items-center justify-between rounded-lg border border-neutral-silver px-3 py-2"
                     >
                       <div>
-                        <p className="text-sm font-medium text-neutral-black">{method.method}</p>
+                        <p className="text-sm font-medium text-neutral-black">
+                          {method.method}
+                        </p>
                         <p className="text-xs text-neutral-grey">
-                          {method.count} {method.count === 1 ? "transaction" : "transactions"}
+                          {method.count}{" "}
+                          {method.count === 1 ? "transaction" : "transactions"}
                         </p>
                       </div>
                       <p className="text-sm font-semibold text-neutral-black">
@@ -440,7 +480,9 @@ export default function Earnings() {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-neutral-grey">No payment method records available.</p>
+                <p className="text-sm text-neutral-grey">
+                  No payment method records available.
+                </p>
               )}
             </div>
           </CardContent>
@@ -453,7 +495,9 @@ export default function Earnings() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>Transaction History</CardTitle>
-              <CardDescription>All tutoring payments linked to your sessions</CardDescription>
+              <CardDescription>
+                All tutoring payments linked to your sessions
+              </CardDescription>
             </div>
             <div className="flex items-center space-x-2">
               <select
@@ -505,7 +549,11 @@ export default function Earnings() {
                         <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-grey mt-1">
                           <span className="flex items-center space-x-1">
                             <Calendar className="w-3 h-3" />
-                            <span>{formatDate(transaction.paid_at || transaction.created_at)}</span>
+                            <span>
+                              {formatDate(
+                                transaction.paid_at || transaction.created_at
+                              )}
+                            </span>
                           </span>
                           {transaction.student_name && (
                             <span className="flex items-center space-x-1">
@@ -522,21 +570,31 @@ export default function Earnings() {
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3 text-xs text-neutral-grey">
                           <div>
-                            <span className="font-medium text-neutral-black">Payment Method:</span>{" "}
+                            <span className="font-medium text-neutral-black">
+                              Payment Method:
+                            </span>{" "}
                             {transaction.payment_method || "Not specified"}
                           </div>
                           <div>
-                            <span className="font-medium text-neutral-black">Card:</span>{" "}
+                            <span className="font-medium text-neutral-black">
+                              Card:
+                            </span>{" "}
                             {transaction.card_type
-                              ? `${transaction.card_type} •••• ${transaction.card_last_four || "----"}`
+                              ? `${transaction.card_type} •••• ${
+                                  transaction.card_last_four || "----"
+                                }`
                               : "N/A"}
                           </div>
                           <div>
-                            <span className="font-medium text-neutral-black">Student Email:</span>{" "}
+                            <span className="font-medium text-neutral-black">
+                              Student Email:
+                            </span>{" "}
                             {transaction.student_email || "N/A"}
                           </div>
                           <div>
-                            <span className="font-medium text-neutral-black">Booking ID:</span>{" "}
+                            <span className="font-medium text-neutral-black">
+                              Booking ID:
+                            </span>{" "}
                             {transaction.booking_id || "N/A"}
                           </div>
                         </div>
@@ -553,7 +611,9 @@ export default function Earnings() {
                             : "bg-warning/20 text-yellow-600"
                         }`}
                       >
-                        {transaction.status === "completed" ? "Completed" : "Pending"}
+                        {transaction.status === "completed"
+                          ? "Completed"
+                          : "Pending"}
                       </span>
                     </div>
                   </div>
