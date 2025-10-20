@@ -114,7 +114,15 @@ const StudentNavigation = () => {
   };
 
   const isActive = (path) => {
-    return location.pathname === path;
+    // Exact match for most paths
+    if (location.pathname === path) return true;
+    
+    // Special case: highlight "Pre-Uni Courses" when viewing a course video page
+    if (path === "/student/pre-uni-courses" && location.pathname.startsWith("/student/course/")) {
+      return true;
+    }
+    
+    return false;
   };
 
   // ✅ Handle logout with confirmation

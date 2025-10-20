@@ -682,3 +682,49 @@ def reject_university_request(request, request_id):
         'success': False,
         'message': 'Only POST method allowed'
     }, status=405)
+
+
+def quick_stats(request):
+    """Get quick statistics for the university guide dashboard"""
+    if request.method == 'GET':
+        try:
+            from apps.university_students.models import UniversityStudents
+            
+            # Count universities
+            universities_count = Universities.objects.filter(is_active=1).count()
+            
+            # Count faculties
+            faculties_count = Faculties.objects.count()
+            
+            # Count university students
+            students_count = UniversityStudents.objects.count()
+            
+            # Count degree programs
+            degree_programs_count = DegreePrograms.objects.count()
+            
+            return JsonResponse({
+                'success': True,
+                'stats': {
+                    'universities_count': universities_count,
+                    'faculties_count': faculties_count,
+                    'students_count': students_count,
+                    'degree_programs_count': degree_programs_count
+                }
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error fetching statistics: {str(e)}',
+                'stats': {
+                    'universities_count': 0,
+                    'faculties_count': 0,
+                    'students_count': 0,
+                    'degree_programs_count': 0
+                }
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Only GET method allowed'
+    }, status=405)

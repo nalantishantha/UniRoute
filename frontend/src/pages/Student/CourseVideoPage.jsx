@@ -400,11 +400,11 @@ const CourseVideoPage = () => {
                               </span>
                             )}
                           </div>
-                          {video.average_rating > 0 && (
+                          {/* {video.average_rating > 0 && (
                             <div className="flex items-center gap-1 mt-1">
                               <StarRating rating={video.average_rating} readOnly={true} size="sm" />
                             </div>
-                          )}
+                          )} */}
                         </div>
                       </div>
                     </button>
