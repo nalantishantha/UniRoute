@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction, connection
 from django.utils import timezone
 import json
-from .models import Tutors, TutoringSessions, TutorSubjects, TutorRatings, TutorFeedback, TutorAvailability, TutoringBooking
+from .models import Tutors, TutoringSessions, TutorSubjects, TutorRatings, TutorFeedback, TutorAvailability, TutoringBooking, TutoringSessionReschedule
 from .serializers import serialize_tutor_availability, serialize_tutoring_booking, serialize_tutor_detail
 from apps.accounts.models import Users, UserDetails
 from apps.students.models import Students
@@ -13,6 +13,17 @@ from django.views.decorators.http import require_http_methods
 from django.utils.dateparse import parse_datetime, parse_date
 from datetime import datetime, timedelta, date
 from decimal import Decimal
+
+# Import tutor session management views
+from .views_tutor_sessions import (
+    mark_session_completed,
+    complete_tutoring_booking,
+    reschedule_tutoring_session,
+    get_booking_reschedules,
+    get_tutor_sessions_detailed,
+    get_tutor_stats,
+    get_tutor_by_user_id
+)
 
 
 @csrf_exempt

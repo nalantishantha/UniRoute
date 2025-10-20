@@ -20,8 +20,10 @@ const VideoCallPage = () => {
     // Get parameters from URL
     const roomIdParam = searchParams.get("room_id");
     const sessionIdParam = searchParams.get("session_id");
+    const bookingIdParam = searchParams.get("booking_id");
     const userIdParam = searchParams.get("user_id");
     const userRoleParam = searchParams.get("role");
+    const callTypeParam = searchParams.get("type"); // 'mentoring' or 'tutoring'
 
     if (!userIdParam || !userRoleParam) {
       setError("Missing required parameters: user_id and role");
@@ -37,20 +39,39 @@ const VideoCallPage = () => {
       setRoomId(roomIdParam);
       setLoading(false);
     } else if (sessionIdParam) {
-      // Get/create room for session
-      fetchRoomForSession(sessionIdParam, parseInt(userIdParam), userRoleParam);
+      // Get/create room for mentoring session
+      fetchRoomForSession(
+        sessionIdParam,
+        parseInt(userIdParam),
+        userRoleParam,
+        "mentoring"
+      );
+    } else if (bookingIdParam) {
+      // Get/create room for tutoring booking
+      fetchRoomForSession(
+        bookingIdParam,
+        parseInt(userIdParam),
+        userRoleParam,
+        "tutoring"
+      );
     } else {
-      setError("Missing room_id or session_id parameter");
+      setError("Missing room_id, session_id, or booking_id parameter");
       setLoading(false);
     }
   }, [searchParams]);
 
-  const fetchRoomForSession = async (sessionId, userId, role) => {
+  const fetchRoomForSession = async (id, userId, role, type = "mentoring") => {
     try {
-      // First, get or create room for session
-      const response = await fetch(
-        `http://localhost:8000/api/mentoring/video-call/session/${sessionId}/`
-      );
+      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+      // Determine the API endpoint based on type
+      const endpoint =
+        type === "tutoring"
+          ? `${API_URL}/api/tutoring/video-call/booking/${id}/`
+          : `${API_URL}/api/mentoring/video-call/session/${id}/`;
+
+      // First, get or create room for session/booking
+      const response = await fetch(endpoint);
 
       if (!response.ok) {
         throw new Error("Failed to get video room");
@@ -58,20 +79,22 @@ const VideoCallPage = () => {
 
       const data = await response.json();
 
-      // Join the room
-      const joinResponse = await fetch(
-        `http://localhost:8000/api/mentoring/video-call/${data.room_id}/join/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            user_id: userId,
-            role: role,
-          }),
-        }
-      );
+      // Join the room using the appropriate endpoint
+      const joinEndpoint =
+        type === "tutoring"
+          ? `${API_URL}/api/tutoring/video-call/${data.room_id}/join/`
+          : `${API_URL}/api/mentoring/video-call/${data.room_id}/join/`;
+
+      const joinResponse = await fetch(joinEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          role: role,
+        }),
+      });
 
       if (!joinResponse.ok) {
         throw new Error("Failed to join video room");
@@ -90,15 +113,16 @@ const VideoCallPage = () => {
     // End the room
     if (roomId) {
       try {
-        await fetch(
-          `http://localhost:8000/api/mentoring/video-call/${roomId}/end/`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+        // Try both endpoints (we don't know which type this is)
+        // The backend will handle it the same way for both
+        await fetch(`${API_URL}/api/mentoring/video-call/${roomId}/end/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
       } catch (err) {
         console.error("Error ending call:", err);
       }

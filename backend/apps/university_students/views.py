@@ -3,10 +3,14 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.db import transaction
+from django.db.models import Sum, Count, DateTimeField
+from django.db.models.functions import Coalesce, TruncMonth
 from django.contrib.auth.hashers import check_password, make_password
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
+from django.utils import timezone
+from datetime import datetime
 import json
 import os
 import uuid
@@ -17,6 +21,8 @@ from .models import (
     UniversityStudentSocialLinks
 )
 from ..accounts.models import Users, UserDetails
+from apps.tutoring.models import Tutors
+from apps.payments.models import TutoringPayments
 
 @csrf_exempt
 @require_http_methods(["GET"])
@@ -307,6 +313,243 @@ def get_university_student_by_user(request, user_id):
             'success': False,
             'error': str(e)
         }, status=500)
+
+
+def _build_trend_reference(months=6):
+    """Return list of (key, label) tuples covering the last `months` calendar months."""
+    now = timezone.now()
+    reference = []
+    current_year = now.year
+    current_month = now.month
+
+    for offset in range(months - 1, -1, -1):
+        month = current_month - offset
+        year = current_year
+        while month <= 0:
+            month += 12
+            year -= 1
+
+        key = f"{year}-{month:02d}"
+        label = datetime(year, month, 1).strftime('%b')
+        reference.append((key, label))
+
+    return reference
+
+
+def _default_earnings_response():
+    trend = [{'label': label, 'amount': 0.0} for key, label in _build_trend_reference()]
+    return {
+        'success': True,
+        'stats': {
+            'total_earnings': 0.0,
+            'total_transactions': 0,
+            'average_transaction': 0.0,
+            'monthly_average': 0.0,
+            'completed_transactions': 0,
+            'pending_transactions': 0,
+            'pending_amount': 0.0,
+            'current_month_total': 0.0,
+            'previous_month_total': 0.0,
+            'month_over_month': None,
+            'largest_transaction': None,
+            'last_payment': None,
+            'methods': [],
+        },
+        'trend': trend,
+        'transactions': [],
+    }
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_university_student_earnings(request, user_id):
+    """Return tutoring payment statistics, trends, and transaction details."""
+    try:
+        university_student = UniversityStudents.objects.get(user_id=user_id)
+    except UniversityStudents.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': 'University student not found for this user'
+        }, status=404)
+
+    tutor = Tutors.objects.filter(university_student=university_student).first()
+    if not tutor:
+        return JsonResponse(_default_earnings_response())
+
+    payments_qs = (
+        TutoringPayments.objects
+        .filter(booking__tutor=tutor)
+        .select_related('student__user', 'booking')
+        .annotate(effective_date=Coalesce('paid_at', 'created_at', output_field=DateTimeField()))
+        .order_by('-effective_date')
+    )
+
+    if not payments_qs.exists():
+        return JsonResponse(_default_earnings_response())
+
+    total_transactions = payments_qs.count()
+    completed_qs = payments_qs.filter(paid_at__isnull=False)
+    pending_qs = payments_qs.filter(paid_at__isnull=True)
+
+    total_earnings = completed_qs.aggregate(total=Sum('amount'))['total'] or 0
+    pending_amount = pending_qs.aggregate(total=Sum('amount'))['total'] or 0
+    completed_transactions = completed_qs.count()
+    pending_transactions = pending_qs.count()
+
+    monthly_totals_qs = (
+        payments_qs
+        .annotate(month=TruncMonth('effective_date'))
+        .values('month')
+        .annotate(total=Sum('amount'))
+    )
+
+    monthly_totals = {}
+    for entry in monthly_totals_qs:
+        month = entry.get('month')
+        if month:
+            key = month.strftime('%Y-%m')
+            monthly_totals[key] = float(entry.get('total') or 0)
+
+    trend_reference = _build_trend_reference()
+    trend = [
+        {
+            'label': label,
+            'amount': monthly_totals.get(key, 0.0),
+        }
+        for key, label in trend_reference
+    ]
+
+    current_month_key = trend_reference[-1][0]
+    previous_month_key = trend_reference[-2][0] if len(trend_reference) > 1 else None
+
+    current_month_total = monthly_totals.get(current_month_key, 0.0)
+    previous_month_total = monthly_totals.get(previous_month_key, 0.0) if previous_month_key else 0.0
+
+    if previous_month_total:
+        month_over_month = round(((current_month_total - previous_month_total) / previous_month_total) * 100, 1)
+    else:
+        month_over_month = None
+
+    months_with_activity = len([amount for amount in monthly_totals.values() if amount > 0]) or 1
+    average_transaction = float(total_earnings) / total_transactions if total_transactions else 0.0
+    monthly_average = float(total_earnings) / months_with_activity if months_with_activity else 0.0
+
+    student_user_ids = {
+        payment.student.user_id
+        for payment in payments_qs
+        if payment.student and payment.student.user_id
+    }
+    user_details_map = {
+        details.user_id: details
+        for details in UserDetails.objects.filter(user_id__in=student_user_ids)
+    }
+
+    current_tz = timezone.get_current_timezone()
+
+    def _resolve_effective_date(payment):
+        dt_value = getattr(payment, 'effective_date', None)
+        if not dt_value:
+            return None
+        if timezone.is_naive(dt_value):
+            dt_value = timezone.make_aware(dt_value, current_tz)
+        else:
+            dt_value = dt_value.astimezone(current_tz)
+        return dt_value
+
+    def _student_name(payment):
+        student_user = payment.student.user if payment.student else None
+        if not student_user:
+            return 'Unknown Student'
+        details = user_details_map.get(student_user.user_id)
+        return details.full_name if details and details.full_name else student_user.username
+
+    transactions = []
+    for payment in payments_qs:
+        student_user = payment.student.user if payment.student else None
+        effective_date = _resolve_effective_date(payment)
+
+        transactions.append({
+            'id': payment.payment_id,
+            'amount': float(payment.amount or 0),
+            'status': 'completed' if payment.paid_at else 'pending',
+            'paid_at': payment.paid_at.isoformat() if payment.paid_at else None,
+            'created_at': payment.created_at.isoformat() if payment.created_at else None,
+            'effective_date': effective_date.isoformat() if effective_date else None,
+            'student_name': _student_name(payment),
+            'student_email': student_user.email if student_user else None,
+            'student_id': payment.student.student_id if payment.student else None,
+            'payment_method': payment.payment_method or '',
+            'card_type': payment.card_type or '',
+            'card_last_four': payment.card_last_four or '',
+            'transaction_id': payment.transaction_id or '',
+            'booking_topic': payment.booking.topic if getattr(payment, 'booking', None) else '',
+            'booking_id': payment.booking.booking_id if getattr(payment, 'booking', None) else None,
+        })
+
+    methods_data = []
+    methods_qs = payments_qs.values('payment_method').annotate(
+        count=Count('payment_id'),
+        total=Sum('amount')
+    )
+    for entry in methods_qs:
+        method_name = entry.get('payment_method') or 'Not specified'
+        methods_data.append({
+            'method': method_name,
+            'count': entry.get('count', 0),
+            'amount': float(entry.get('total') or 0)
+        })
+
+    largest_payment = payments_qs.order_by('-amount').first()
+    if largest_payment:
+        largest_effective = _resolve_effective_date(largest_payment)
+        largest_transaction = {
+            'amount': float(largest_payment.amount or 0),
+            'date': largest_effective.isoformat() if largest_effective else None,
+            'student_name': _student_name(largest_payment)
+        }
+    else:
+        largest_transaction = None
+
+    last_payment = completed_qs.order_by('-paid_at').first()
+    if last_payment:
+        last_effective = _resolve_effective_date(last_payment)
+        last_payment_data = {
+            'amount': float(last_payment.amount or 0),
+            'date': last_effective.isoformat() if last_effective else None,
+            'student_name': _student_name(last_payment)
+        }
+    else:
+        fallback_payment = payments_qs.first()
+        fallback_effective = _resolve_effective_date(fallback_payment) if fallback_payment else None
+        last_payment_data = {
+            'amount': float(fallback_payment.amount or 0),
+            'date': fallback_effective.isoformat() if fallback_effective else None,
+            'student_name': _student_name(fallback_payment) if fallback_payment else None
+        } if fallback_payment else None
+
+    response = {
+        'success': True,
+        'stats': {
+            'total_earnings': float(total_earnings or 0),
+            'total_transactions': total_transactions,
+            'average_transaction': round(average_transaction, 2) if average_transaction else 0.0,
+            'monthly_average': round(monthly_average, 2) if monthly_average else 0.0,
+            'completed_transactions': completed_transactions,
+            'pending_transactions': pending_transactions,
+            'pending_amount': float(pending_amount or 0),
+            'current_month_total': round(current_month_total, 2),
+            'previous_month_total': round(previous_month_total, 2),
+            'month_over_month': month_over_month,
+            'largest_transaction': largest_transaction,
+            'last_payment': last_payment_data,
+            'methods': methods_data,
+        },
+        'trend': trend,
+        'transactions': transactions,
+    }
+
+    return JsonResponse(response)
+
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q, F, Value, CharField
