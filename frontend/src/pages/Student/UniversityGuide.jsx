@@ -203,7 +203,7 @@ const UniversityGuide = () => {
           {filteredUniversities.map((university) => (
             <div
               key={university.id}
-              className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+              className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col"
             >
               {/* University Header */}
               <div className="relative h-56 bg-gradient-to-l from-primary-700 to-accent-900 rounded-t-2xl overflow-hidden"
@@ -273,16 +273,16 @@ const UniversityGuide = () => {
                 </div>
               </div>
 
-              <div className="p-6">
+              <div className="p-6 flex flex-col flex-grow">
                 {/* Description */}
-                <div className="mb-6">
+                <div className="mb-4">
                   <p className="text-primary-300 leading-relaxed text-sm">
                     {university.description}
                   </p>
                 </div>
 
                 {/* Key Statistics */}
-                <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-3 gap-4 mb-4">
                   <div className="bg-gradient-to-br from-purple-200 to-purple-300 rounded-lg p-3 text-center border border-purple-200 shadow-md">
                     <div className="flex items-center justify-center w-10 h-10 bg-white rounded-lg mx-auto mb-2 shadow-sm">
                       <Building className="h-5 w-5 text-purple-600" />
@@ -313,8 +313,8 @@ const UniversityGuide = () => {
                 </div>
 
                 {/* Programs Section */}
-                <div className="mb-6">
-                  <h4 className="font-semibold text-primary-600 mb-3 flex items-center space-x-2">
+                <div className="mb-4">
+                  <h4 className="font-semibold text-primary-600 mb-2 flex items-center space-x-2">
                     <BookOpen className="h-5 w-5" />
                     <span>Popular Programs</span>
                   </h4>
@@ -341,75 +341,33 @@ const UniversityGuide = () => {
                   </div>
                 </div>
 
-                {/* Facilities Section */}
-                <div className="mb-6">
-                  <h4 className="font-semibold text-primary-600 mb-3 flex items-center space-x-2">
-                    <Building className="h-5 w-5" />
-                    <span>Key Facilities</span>
-                  </h4>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    {university.facilities.slice(0, 4).map((facility, index) => (
-                      <div key={index} className="flex items-center space-x-2 text-primary-300">
-                        <div className="w-1.5 h-1.5 bg-accent-400 rounded-full"></div>
-                        <span>{facility}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Financial & Application Info */}
-                <div className="bg-gradient-to-r from-primary-100 to-primary-50 rounded-lg p-4 mb-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <div className="flex items-center space-x-2 text-primary-600 mb-1">
-                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                        <span className="font-medium">Tuition Fee</span>
-                      </div>
-                      <div className="font-semibold text-primary-600 pl-4">
-                        {university.tuitionFee}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex items-center space-x-2 text-primary-600 mb-1">
-                        <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                        <span className="font-medium">Application</span>
-                      </div>
-                      <div className="font-semibold text-primary-600 pl-4">
-                        {university.applicationDeadline}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
                 {/* Contact & Actions */}
-                <div className="border-t border-accent-100 pt-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex space-x-4">
-                      <a
-                        href={university.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center space-x-2 text-primary-300 hover:text-primary-400 transition-colors group"
-                        aria-label={`Visit website of ${university.name}`}
-                      >
-                        <div className="p-1.5 bg-accent-100 rounded-lg group-hover:bg-accent-200 transition-colors">
-                          <Globe className="h-4 w-4" />
-                        </div>
-                        <span className="text-sm font-medium">Website</span>
-                      </a>
-                      <a href={`tel:${university.phone}`} className="flex items-center space-x-2 text-primary-300 hover:text-primary-400 transition-colors group" aria-label={`Call ${university.name}`}>
-                        <div className="p-1.5 bg-accent-100 rounded-lg group-hover:bg-accent-200 transition-colors">
-                          <Phone className="h-4 w-4" />
-                        </div>
-                        <span className="text-sm font-medium">Contact</span>
-                      </a>
-                      <a href={`mailto:${university.email}`} className="flex items-center space-x-2 text-primary-300 hover:text-primary-400 transition-colors group" aria-label={`Email ${university.name}`}>
-                        <div className="p-1.5 bg-accent-100 rounded-lg group-hover:bg-accent-200 transition-colors">
-                          <Mail className="h-4 w-4" />
-                        </div>
-                        <span className="text-sm font-medium">Email</span>
-                      </a>
-                    </div>
+                <div className="border-t border-accent-100 pt-3 mt-auto">
+                  <div className="flex items-center space-x-4">
+                    <a
+                      href={university.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-1.5 text-primary-300 hover:text-primary-400 transition-colors group"
+                      aria-label={`Visit website of ${university.name}`}
+                    >
+                      <div className="p-1.5 bg-accent-100 rounded-lg group-hover:bg-accent-200 transition-colors">
+                        <Globe className="h-4 w-4" />
+                      </div>
+                      <span className="text-sm font-medium">Website</span>
+                    </a>
+                    <a href={`tel:${university.phone}`} className="flex items-center space-x-1.5 text-primary-300 hover:text-primary-400 transition-colors group" aria-label={`Call ${university.name}`}>
+                      <div className="p-1.5 bg-accent-100 rounded-lg group-hover:bg-accent-200 transition-colors">
+                        <Phone className="h-4 w-4" />
+                      </div>
+                      <span className="text-sm font-medium">Contact</span>
+                    </a>
+                    <a href={`mailto:${university.email}`} className="flex items-center space-x-1.5 text-primary-300 hover:text-primary-400 transition-colors group" aria-label={`Email ${university.name}`}>
+                      <div className="p-1.5 bg-accent-100 rounded-lg group-hover:bg-accent-200 transition-colors">
+                        <Mail className="h-4 w-4" />
+                      </div>
+                      <span className="text-sm font-medium">Email</span>
+                    </a>
                   </div>
                   
                   {/* <div className="flex space-x-3">
