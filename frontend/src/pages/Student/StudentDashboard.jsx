@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import StudentNavigation from "../../components/Navigation/StudentNavigation";
 import { getCurrentUser } from "../../utils/auth";
 import { joinMentoringVideoCall } from "../../utils/videoCallAPI";
+import StarRating from "../../components/StarRating";
 import {
   GraduationCap,
   User,
@@ -44,6 +45,9 @@ const StudentDashboard = () => {
   const [sessionsLoading, setSessionsLoading] = useState(true);
   const [upcomingLoading, setUpcomingLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('mentoring'); // 'mentoring' or 'tutoring'
+  
+  // Rating modal state
+  const [ratingModal, setRatingModal] = useState(null);
   
   // Tutoring states
   const [tutoringGrouped, setTutoringGrouped] = useState({ 
@@ -97,6 +101,46 @@ const StudentDashboard = () => {
 
     // Call the joinMentoringVideoCall function with student role
     joinMentoringVideoCall(sessionId, currentUser.user_id, "student");
+  };
+
+  // Handle submitting feedback for a completed mentoring session
+  const submitMentoringFeedback = async () => {
+    if (!ratingModal) return;
+    const currentUser = getCurrentUser();
+    if (!currentUser || !currentUser.user_id) {
+      alert("Please log in to submit feedback");
+      return;
+    }
+
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/mentoring/sessions/feedback/submit/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: ratingModal.sessionId,
+          student_id: studentProfile.studentId,
+          rating: ratingModal.rating,
+          feedback: ratingModal.feedback
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.status === 'success') {
+        alert('Thank you for your feedback! 🌟');
+        setRatingModal(null);
+        
+        // Refresh the mentoring requests to update the UI
+        if (currentUser && currentUser.user_id) {
+          fetchGroupedMentoringRequests(currentUser.user_id);
+        }
+      } else {
+        alert(data.message || 'Failed to submit feedback');
+      }
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      alert('Failed to submit feedback. Please try again.');
+    }
   };
 
   // Poll upcoming sessions every 30 seconds when studentProfile exists
@@ -222,32 +266,6 @@ const StudentDashboard = () => {
     return Math.round((filledFields / fields.length) * 100);
   };
 
-  const quickStatss = [
-    {
-      label: "Profile Completion",
-      value: "85%",
-      icon: User,
-      color: "bg-blue-500",
-    },
-    {
-      label: "Recommended Degrees",
-      value: "12",
-      icon: BookOpen,
-      color: "bg-green-500",
-    },
-    {
-      label: "Available Mentors",
-      value: "8",
-      icon: Users,
-      color: "bg-purple-500",
-    },
-    {
-      label: "News Updates",
-      value: "5",
-      icon: Newspaper,
-      color: "bg-orange-500",
-    },
-  ];
   // Seed recent activities with static entries; mentoring sessions will be merged in when fetched
   useEffect(() => {
     setRecentActivities([
@@ -350,7 +368,7 @@ const StudentDashboard = () => {
   };
 
   // Fetch mentoring requests grouped by status from student endpoint
-  const [mentoringGrouped, setMentoringGrouped] = useState({ pending: [], accepted: [], declined: [], completed: [] });
+  const [mentoringGrouped, setMentoringGrouped] = useState({ pending: [], declined: [], completed: [] });
   const [upcomingSessions, setUpcomingSessions] = useState([]);
 
   const fetchGroupedMentoringRequests = async (studentId) => {
@@ -374,18 +392,20 @@ const StudentDashboard = () => {
         const declinedFromPayload = Array.isArray(payload.declined) ? payload.declined : [];
         const completedFromPayload = Array.isArray(payload.completed) ? payload.completed : [];
         const inferredDeclined = declinedFromPayload.length > 0 ? declinedFromPayload : completedFromPayload.filter((x) => x.status === 'declined' || x.decline_reason);
+        const acceptedFromPayload = Array.isArray(payload.accepted) ? payload.accepted : [];
 
+        // Store only pending, declined, and completed in the tab view (exclude accepted)
         setMentoringGrouped({
           pending: Array.isArray(payload.pending) ? payload.pending : [],
-          accepted: Array.isArray(payload.accepted) ? payload.accepted : [],
           declined: inferredDeclined,
           completed: completedFromPayload,
         });
 
+        // Move accepted requests to upcoming sessions
+        setUpcomingSessions(acceptedFromPayload);
+
         // Merge accepted mentoring requests into recent activities (keep existing seed items)
-        const acceptedItems = (
-          Array.isArray(payload.accepted) ? payload.accepted : []
-        ).map((r) => ({
+        const acceptedItems = acceptedFromPayload.map((r) => ({
           id: `req-${r.id}`,
           type: "mentor",
           title: r.mentor
@@ -518,29 +538,37 @@ const StudentDashboard = () => {
       if (payload && payload.status === 'success') {
         const bookings = Array.isArray(payload.bookings) ? payload.bookings : [];
         
-        // Group tutoring bookings by status
-        const pending = bookings.filter(b => b.status === 'pending');
-        const confirmed = bookings.filter(b => b.status === 'confirmed');
-        const completed = bookings.filter(b => b.status === 'completed');
-        const cancelled = bookings.filter(b => b.status === 'cancelled');
-        
-        setTutoringGrouped({
-          pending,
-          confirmed,
-          completed,
-          cancelled
-        });
-
         // Get upcoming tutoring sessions (confirmed bookings with future dates)
         const now = new Date();
-        const upcoming = confirmed.filter(b => {
-          if (b.start_date) {
+        const upcoming = bookings.filter(b => {
+          if (b.status === 'confirmed' && b.start_date) {
             const sessionDate = new Date(b.start_date);
             return sessionDate >= now;
           }
           return false;
         });
         setUpcomingTutoringSessions(upcoming);
+
+        // Filter out upcoming bookings from the confirmed list shown in the tab
+        const confirmedNotUpcoming = bookings.filter(b => {
+          if (b.status === 'confirmed' && b.start_date) {
+            const sessionDate = new Date(b.start_date);
+            return sessionDate < now; // Only past confirmed sessions
+          }
+          return b.status === 'confirmed' && !b.start_date; // Include confirmed without dates
+        });
+
+        // Group tutoring bookings by status (excluding upcoming from confirmed)
+        const pending = bookings.filter(b => b.status === 'pending');
+        const completed = bookings.filter(b => b.status === 'completed');
+        const cancelled = bookings.filter(b => b.status === 'cancelled');
+        
+        setTutoringGrouped({
+          pending,
+          confirmed: confirmedNotUpcoming,
+          completed,
+          cancelled
+        });
       }
     } catch (err) {
       console.warn('Dashboard: error fetching tutoring bookings', err);
@@ -910,56 +938,6 @@ const StudentDashboard = () => {
 
                     <div className="mb-4">
                       <h4 className="font-medium text-primary-400 mb-2">
-                        Accepted Requests
-                      </h4>
-                      {mentoringGrouped.accepted.length === 0 && (
-                        <p className="text-sm text-primary-300 mb-2">
-                          No accepted requests
-                        </p>
-                      )}
-                      {mentoringGrouped.accepted.map((r) => (
-                        <div
-                          key={`accepted-${r.id}`}
-                          className="flex items-start space-x-4 p-3 bg-accent-50 rounded-xl mb-2"
-                        >
-                          <div className="p-2 rounded-full bg-white text-green-500">
-                            <Check className="h-5 w-5" />
-                          </div>
-                          <div className="flex-1">
-                            <h5 className="text-primary-400 font-medium">
-                              {r.mentor || "Mentor"}
-                            </h5>
-                            <p className="text-sm text-primary-300">
-                              {r.subject}
-                            </p>
-                            <p className="text-xs text-primary-300">
-                              {r.preferred_time ||
-                                (r.created_at
-                                  ? new Date(r.created_at).toLocaleString()
-                                  : "")}
-                            </p>
-                            {r.session_id && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleJoinVideoCall(r.session_id);
-                                }}
-                                className="mt-2 flex items-center space-x-1 text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg transition-colors"
-                              >
-                                <Video className="h-3 w-3" />
-                                <span>Join Video Meeting</span>
-                              </button>
-                            )}
-                          </div>
-                          <div className="text-sm text-green-600 font-semibold">
-                            Accepted
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="mb-4">
-                      <h4 className="font-medium text-primary-400 mb-2">
                         Completed Requests
                       </h4>
                       {mentoringGrouped.completed.length === 0 && (
@@ -988,9 +966,76 @@ const StudentDashboard = () => {
                                   ? new Date(r.created_at).toLocaleString()
                                   : "")}
                             </p>
+                            {!r.has_feedback && r.session_id && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setRatingModal({
+                                    sessionId: r.session_id,
+                                    mentorName: r.mentor || "Mentor",
+                                    subject: r.subject,
+                                    rating: 5,
+                                    feedback: ''
+                                  });
+                                }}
+                                className="mt-2 flex items-center space-x-1 text-xs bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded-lg transition-colors"
+                              >
+                                <Star className="h-3 w-3 fill-current" />
+                                <span>Rate Session</span>
+                              </button>
+                            )}
+                            {r.has_feedback && (
+                              <p className="text-xs text-green-600 mt-1 flex items-center">
+                                <Check className="h-3 w-3 mr-1" />
+                                Feedback submitted
+                              </p>
+                            )}
                           </div>
                           <div className="text-sm text-gray-600 font-semibold">
                             Completed
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mb-4">
+                      <h4 className="font-medium text-primary-400 mb-2">
+                        Declined Requests
+                      </h4>
+                      {mentoringGrouped.declined.length === 0 && (
+                        <p className="text-sm text-primary-300 mb-2">
+                          No declined requests
+                        </p>
+                      )}
+                      {mentoringGrouped.declined.map((r) => (
+                        <div
+                          key={`declined-${r.id}`}
+                          className="flex items-start space-x-4 p-3 bg-accent-50 rounded-xl mb-2"
+                        >
+                          <div className="p-2 rounded-full bg-white text-red-500">
+                            <X className="h-5 w-5" />
+                          </div>
+                          <div className="flex-1">
+                            <h5 className="text-primary-400 font-medium">
+                              {r.mentor || "Mentor"}
+                            </h5>
+                            <p className="text-sm text-primary-300">
+                              {r.subject}
+                            </p>
+                            <p className="text-xs text-primary-300">
+                              {r.preferred_time ||
+                                (r.created_at
+                                  ? new Date(r.created_at).toLocaleString()
+                                  : "")}
+                            </p>
+                            {r.decline_reason && (
+                              <p className="text-xs text-red-500 mt-1">
+                                Reason: {r.decline_reason}
+                              </p>
+                            )}
+                          </div>
+                          <div className="text-sm text-red-600 font-semibold">
+                            Declined
                           </div>
                         </div>
                       ))}
@@ -1335,6 +1380,72 @@ const StudentDashboard = () => {
           </div>
         </div>
       </main>
+
+      {/* Rating Modal */}
+      {ratingModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-primary-600">Rate Mentoring Session</h3>
+              <button
+                onClick={() => setRatingModal(null)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="space-y-5">
+              <div className="bg-accent-50 p-3 rounded-lg">
+                <p className="text-sm text-primary-400 font-medium">{ratingModal.mentorName}</p>
+                <p className="text-xs text-primary-300">{ratingModal.subject}</p>
+              </div>
+
+              <div className="text-center">
+                <p className="text-sm text-gray-500 mb-3">How would you rate this session?</p>
+                <div className="flex justify-center mb-2">
+                  <StarRating
+                    rating={ratingModal.rating}
+                    onRatingChange={(value) => setRatingModal({ ...ratingModal, rating: value })}
+                    size="xl"
+                  />
+                </div>
+                <p className="text-2xl font-bold text-primary-600">{ratingModal.rating.toFixed(1)} / 5.0</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Share your feedback (optional)
+                </label>
+                <textarea
+                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                  rows={4}
+                  placeholder="How was your mentoring session? What did you learn?"
+                  value={ratingModal.feedback}
+                  onChange={(e) => setRatingModal({ ...ratingModal, feedback: e.target.value })}
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setRatingModal(null)}
+                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={submitMentoringFeedback}
+                  className="flex-1 px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium shadow-lg"
+                >
+                  Submit Feedback
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
