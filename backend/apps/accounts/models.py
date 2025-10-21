@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 class UserDailyLogin(models.Model):
@@ -48,3 +49,32 @@ class UserDetails(models.Model):
     class Meta:
         managed = True
         db_table = 'user_details'
+
+
+class EmailVerification(models.Model):
+    class Purpose(models.TextChoices):
+        UNI_STUDENT_REGISTRATION = 'uni_student_registration', 'University Student Registration'
+
+    verification_id = models.AutoField(primary_key=True)
+    email = models.CharField(max_length=100, db_index=True)
+    otp = models.CharField(max_length=6)
+    purpose = models.CharField(max_length=64, choices=Purpose.choices)
+    is_verified = models.BooleanField(default=False)
+    attempts = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_sent_at = models.DateTimeField(default=timezone.now)
+    expires_at = models.DateTimeField()
+    verified_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'email_verifications'
+        indexes = [
+            models.Index(fields=['email', 'purpose']),
+        ]
+        constraints = [
+            models.UniqueConstraint(fields=['email', 'purpose'], name='unique_email_purpose'),
+        ]
+
+    def __str__(self):
+        return f"{self.email} ({self.get_purpose_display()})"
