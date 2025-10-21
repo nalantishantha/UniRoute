@@ -298,7 +298,8 @@ const CareerCounseling = () => {
                       </button> */}
                       {counselor.available_for_sessions && (
                         <Link
-                          to={`/student/book-counselor-session/${counselor.counsellor_id}`}
+                          to="/student/counsellor-connection"
+                          state={{ counsellor: counselor }}
                           className="flex-1 bg-primary-600 text-white px-3 py-2 rounded-lg hover:bg-primary-700 transition-all duration-200 font-medium text-sm hover:shadow-lg text-center"
                         >
                           Book Session

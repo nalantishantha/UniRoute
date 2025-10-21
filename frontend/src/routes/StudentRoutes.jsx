@@ -22,6 +22,7 @@ import UniversityGuide from "../pages/Student/UniversityGuide";
 import CareerCounseling from "../pages/Student/CareerCounseling";
 import BookCounselingService from "../pages/Student/BookCounselingService";
 import BookCounselorSession from "../pages/Student/BookCounselorSession";
+import CounsellorConnection from "../pages/Student/CounsellorConnection";
 import ScholarshipInfo from "../pages/Student/ScholarshipInfo";
 import SuccessStories from "../pages/Student/SuccessStories";
 
@@ -55,6 +56,7 @@ const StudentRoutes = () => {
         <Route path="/tutor-booking" element={<TutorBooking />} />
         <Route path="/career-counseling" element={<CareerCounseling />} />
         <Route path="/counseling" element={<CareerCounseling />} />
+        <Route path="/counsellor-connection" element={<CounsellorConnection />} />
         <Route
           path="/book-counseling-service/:serviceId"
           element={<BookCounselingService />}
