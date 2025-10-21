@@ -3,11 +3,13 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
 
     path('admin/', admin.site.urls),
-    
+
     path('api/accounts/', include('apps.accounts.urls')),
     path('api/students/', include('apps.students.urls')),
     path('api/universities/', include('apps.universities.urls')),
@@ -20,15 +22,17 @@ urlpatterns = [
     path('api/mentoring/', include('apps.mentoring.urls')),
     path('api/pre-mentors/', include('apps.pre_mentors.urls')),
     path('api/counsellors/', include('apps.counsellors.urls')),
-    #path('api/communications/', include('apps.communications.urls')),
-    #path('api/payments/', include('apps.payments.urls')),
-    
+    # path('api/communications/', include('apps.communications.urls')),
+    path('api/payments/', include('apps.payments.urls')),
+
     path('api/companies/', include('apps.companies.urls')),
     path('api/advertisements/', include('apps.advertisements.urls')),
-    
+
     path('api/administration/', include('apps.administration.urls')),
     path('api/resources/', include('apps.academic_resources.urls')),
     path('', include('apps.pre_university_courses.urls')),
 ]
 
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)

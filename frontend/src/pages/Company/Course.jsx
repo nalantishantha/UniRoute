@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CompanySidebar from '../../components/Navigation/CompanySidebar'; // CHANGED: Import CompanySidebar
 import CompanyDashboardNavbar from '../../components/Navigation/CompanyDashboardNavbar';
 import './Course.css';
 
 const Course = () => {
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // CHANGED: Rename from isSidebarExpanded to isSidebarOpen
   const [showViewModal, setShowViewModal] = useState(false);
@@ -14,117 +16,19 @@ const Course = () => {
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [selectedLevel, setSelectedLevel] = useState('All Levels');
 
-  // Sample courses data
-  const [courses, setCourses] = useState([
-    {
-      id: 1,
-      title: 'Advanced React Development',
-      description: 'Master advanced React concepts including hooks, context API, performance optimization, and modern React patterns. Build scalable applications with best practices.',
-      category: 'Technology',
-      level: 'Advanced',
-      duration: '12 weeks',
-      price: 299,
-      instructor: 'Dr. Sarah Johnson',
-      prerequisites: 'Basic React, JavaScript ES6',
-      status: 'active',
-      enrollments: 156,
-      rating: 4.8,
-      image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=400&q=80',
-      skills: ['React', 'JavaScript', 'Redux', 'TypeScript','SEO'],
-      startDate: '2024-07-01',
-      endDate: '2024-09-24'
-    },
-    {
-      id: 2,
-      title: 'Digital Marketing Fundamentals',
-      description: 'Learn comprehensive digital marketing strategies including SEO, social media marketing, content marketing, and analytics to grow your business online.',
-      category: 'Marketing',
-      level: 'Beginner',
-      duration: '8 weeks',
-      price: 199,
-      instructor: 'Michael Chen',
-      prerequisites: 'Basic Computer Skills',
-      status: 'active',
-      enrollments: 243,
-      rating: 4.6,
-      image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=400&q=80',
-      skills: ['SEO', 'Social Media', 'Content Marketing', 'Analytics'],
-      startDate: '2024-06-15',
-      endDate: '2024-08-10'
-    },
-    {
-      id: 3,
-      title: 'Data Science with Python',
-      description: 'Comprehensive data science course covering Python programming, statistics, machine learning, and data visualization using popular libraries.',
-      category: 'Technology',
-      level: 'Intermediate',
-      duration: '16 weeks',
-      price: 399,
-      instructor: 'Dr. Emily Rodriguez',
-      prerequisites: 'Basic Programming, Statistics',
-      status: 'active',
-      enrollments: 189,
-      rating: 4.9,
-      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=400&q=80',
-      skills: ['Python', 'Machine Learning', 'Pandas', 'Matplotlib'],
-      startDate: '2024-07-10',
-      endDate: '2024-10-30'
-    },
-    {
-      id: 4,
-      title: 'UX/UI Design Masterclass',
-      description: 'Complete UX/UI design course covering user research, wireframing, prototyping, and design systems. Learn industry-standard design tools.',
-      category: 'Design',
-      level: 'Intermediate',
-      duration: '14 weeks',
-      price: 349,
-      instructor: 'Alexandra Kim',
-      prerequisites: 'Basic Design Knowledge',
-      status: 'draft',
-      enrollments: 0,
-      rating: 0,
-      image: 'https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&w=400&q=80',
-      skills: ['User Research', 'Prototyping', 'Design Systems'],
-      startDate: '2024-08-01',
-      endDate: '2024-11-05'
-    },
-    {
-      id: 5,
-      title: 'Business Strategy & Management',
-      description: 'Learn strategic thinking, business planning, leadership skills, and management techniques to advance your career in business.',
-      category: 'Business',
-      level: 'Advanced',
-      duration: '10 weeks',
-      price: 279,
-      instructor: 'Robert Davis',
-      prerequisites: 'Work Experience, Business Fundamentals',
-      status: 'active',
-      enrollments: 127,
-      rating: 4.5,
-      image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=400&q=80',
-      skills: ['Strategy', 'Leadership', 'Planning', 'Management',],
-      startDate: '2024-06-20',
-      endDate: '2024-08-29'
-    },
-    {
-      id: 6,
-      title: 'Mobile App Development',
-      description: 'Build native mobile applications for iOS and Android using React Native. Learn mobile development best practices and deployment strategies.',
-      category: 'Technology',
-      level: 'Advanced',
-      duration: '18 weeks',
-      price: 449,
-      instructor: 'Jennifer Liu',
-      prerequisites: 'React, JavaScript, Mobile Concepts',
-      status: 'active',
-      enrollments: 98,
-      rating: 4.7,
-      image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=400&q=80',
-      skills: ['React Native', 'Mobile Development', 'iOS', 'Android'],
-      startDate: '2024-07-05',
-      endDate: '2024-11-15'
-    }
-  ]);
+  // Fetch courses from backend
+  useEffect(() => {
+    const fetchCourses = async () => {
+      setLoading(true);
+      const response = await fetch(`/api/companies/company-courses/?company_id=1`);
+      const result = await response.json();
+      if (result.success && result.courses) {
+        setCourses(result.courses);
+      }
+      setLoading(false);
+    };
+    fetchCourses();
+  }, []);
 
   const categories = ['All Categories', 'Technology', 'Marketing', 'Design', 'Business'];
   const levels = ['All Levels', 'Beginner', 'Intermediate', 'Advanced'];
@@ -149,7 +53,9 @@ const Course = () => {
     setSelectedCourse(course);
     setEditFormData({
       ...course,
-      skills: course.skills.join(', ')
+      skills: Array.isArray(course.skills) ? course.skills.join(', ') : course.skills,
+      startDate: course.start_date || '',
+      endDate: course.end_date || ''
     });
     setShowEditModal(true);
   };
@@ -177,40 +83,61 @@ const Course = () => {
     setShowAddModal(true);
   };
 
-  // Handle Delete
-  const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this course?')) {
-      setCourses(courses.filter(course => course.id !== id));
-    }
-  };
-
-  // Handle Save Edit
-  const handleSaveEdit = (e) => {
-    e.preventDefault();
-    const updatedCourse = {
-      ...editFormData,
-      skills: editFormData.skills.split(',').map(skill => skill.trim()),
-      price: parseFloat(editFormData.price)
-    };
-    
-    setCourses(courses.map(course => 
-      course.id === selectedCourse.id ? updatedCourse : course
-    ));
-    setShowEditModal(false);
-    setSelectedCourse(null);
-  };
-
-  // Handle Add New Save
-  const handleAddSave = (e) => {
+  // Add new course
+  const handleAddSave = async (e) => {
     e.preventDefault();
     const newCourse = {
       ...editFormData,
-      skills: editFormData.skills.split(',').map(skill => skill.trim()),
-      price: parseFloat(editFormData.price)
+      skills: editFormData.skills,
+      company_id: 1
     };
-    
-    setCourses([...courses, newCourse]);
-    setShowAddModal(false);
+    const response = await fetch('/api/companies/company-courses/create/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newCourse) // <-- Use newCourse here!
+    });
+    const result = await response.json();
+    if (result.success) {
+      setShowAddModal(false);
+      fetchCourses();
+    }
+  };
+
+  // Handle Delete
+  const handleDelete = async (course_id) => {
+    if (window.confirm('Are you sure you want to delete this course?')) {
+      const response = await fetch(`/api/companies/company-courses/${course_id}/delete/`, {
+        method: 'DELETE'
+      });
+      const result = await response.json();
+      if (result.success) {
+        fetchCourses();
+      }
+    }
+  };
+
+  // Edit course
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
+    const updatedCourse = {
+      ...editFormData,
+      skills: editFormData.skills,
+      start_date: editFormData.startDate,
+      end_date: editFormData.endDate,
+    };
+    delete updatedCourse.startDate;
+    delete updatedCourse.endDate;
+    const response = await fetch(`/api/companies/company-courses/${selectedCourse.course_id}/update/`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedCourse)
+    });
+    const result = await response.json();
+    if (result.success) {
+      setShowEditModal(false);
+      setSelectedCourse(null);
+      fetchCourses();
+    }
   };
 
   // Handle Input Change
@@ -310,7 +237,7 @@ const Course = () => {
               <div key={course.id} className="course-card-unique">
                 <button 
                   className="btn-delete-course"
-                  onClick={() => handleDelete(course.id)}
+                  onClick={() => handleDelete(course.course_id)}
                   title="Delete Course"
                 >
                   ✕

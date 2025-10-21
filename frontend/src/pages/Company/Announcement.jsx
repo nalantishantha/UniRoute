@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CompanySidebar from '../../components/Navigation/CompanySidebar';
 import CompanyDashboardNavbar from '../../components/Navigation/CompanyDashboardNavbar';
 
@@ -666,30 +666,45 @@ const Announcement = () => {
   };
 
   // Handle Save Edit
-  const handleSaveEdit = (e) => {
+  const handleSaveEdit = async (e) => {
     e.preventDefault();
     const updatedAnnouncement = {
       ...editFormData,
-      tags: editFormData.tags.split(',').map(tag => tag.trim())
+      tags: editFormData.tags,
+      company_id: 1 // Replace with actual company_id
     };
-    
-    setAnnouncements(announcements.map(announcement => 
-      announcement.id === selectedAnnouncement.id ? updatedAnnouncement : announcement
-    ));
-    setShowEditModal(false);
-    setSelectedAnnouncement(null);
+    const response = await fetch(`/api/companies/company-announcements/${selectedAnnouncement.id}/update/`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedAnnouncement)
+    });
+    const result = await response.json();
+    if (result.success) {
+      setShowEditModal(false);
+      setSelectedAnnouncement(null);
+      // Optionally, re-fetch announcements here
+    } else {
+      alert(result.message || 'Failed to update announcement');
+    }
   };
 
   // Handle Add New Save
-  const handleAddSave = (e) => {
+  const handleAddSave = async (e) => {
     e.preventDefault();
     const newAnnouncement = {
       ...editFormData,
-      tags: editFormData.tags.split(',').map(tag => tag.trim())
+      tags: editFormData.tags,
+      company_id: 1 // Replace with actual company_id
     };
-    
-    setAnnouncements([...announcements, newAnnouncement]);
-    setShowAddModal(false);
+    const response = await fetch('/api/companies/company-announcements/create/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newAnnouncement)
+    });
+    const result = await response.json();
+    if (result.success) {
+      setShowAddModal(false);
+    }
   };
 
   // Handle Input Change
@@ -702,9 +717,17 @@ const Announcement = () => {
   };
 
   // Handle Delete
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this announcement?')) {
-      setAnnouncements(announcements.filter(announcement => announcement.id !== id));
+      const response = await fetch(`/api/companies/company-announcements/${id}/delete/`, {
+        method: 'DELETE'
+      });
+      const result = await response.json();
+      if (result.success) {
+        // Optionally, re-fetch announcements here
+      } else {
+        alert(result.message || 'Failed to delete announcement');
+      }
     }
   };
 
@@ -726,6 +749,32 @@ const Announcement = () => {
       default: return '#6b7280';
     }
   };
+
+  // Handle Add Announcement
+  const handleAddAnnouncement = async (formData) => {
+    const response = await fetch('/api/companies/company-announcements/create/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    });
+    const result = await response.json();
+    // handle result (show success, update list, close modal, etc.)
+  };
+
+  useEffect(() => {
+    async function fetchAnnouncements() {
+      const response = await fetch('/api/companies/company-announcements/?company_id=1');
+      const result = await response.json();
+      if (result.success) {
+        setAnnouncements(result.announcements.map(a => ({
+          ...a,
+          id: a.announcement_id,
+          tags: Array.isArray(a.tags) ? a.tags : (a.tags ? a.tags.split(',') : [])
+        })));
+      }
+    }
+    fetchAnnouncements();
+  }, []);
 
   return (
     <div style={styles.page}>
@@ -1116,8 +1165,6 @@ const Announcement = () => {
                         <option value="high">High</option>
                       </select>
                     </div>
-                  </div>
-                  <div style={styles.formRow}>
                     <div style={styles.formGroup}>
                       <label style={styles.formGroupLabel}>Date</label>
                       <input

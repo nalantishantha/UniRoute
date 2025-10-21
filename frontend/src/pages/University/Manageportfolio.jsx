@@ -1,13 +1,19 @@
-import React, { useState } from 'react';
-import UniversitySidebar from '../../components/Navigation/UniversitySidebar'; // CHANGED: Import UniversitySidebar
-import UniversityNavbar from '../../components/Navigation/UniversityNavbar';
-import Footer from '../../components/Footer';
-import './Manageportfolio.css';
-import colomboHero from '../../assets/university-image-colombo.jpg';
+import React, { useEffect, useState } from "react";
+import UniversitySidebar from "../../components/Navigation/UniversitySidebar"; // CHANGED: Import UniversitySidebar
+import UniversityNavbar from "../../components/Navigation/UniversityNavbar";
+import Footer from "../../components/Footer";
+import "./Manageportfolio.css";
+import colomboHero from "../../assets/university-image-colombo.jpg";
+import {
+  fetchPortfolio,
+  updatePortfolio,
+} from "../../services/universityPortfolioApi";
 
 const Manageportfolio = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // CHANGED: Rename from isSidebarExpanded to isSidebarOpen
   const [editMode, setEditMode] = useState({});
+  const [saving, setSaving] = useState({}); // per-section saving state
+  const universityId = 1; // replace with actual logged-in university id
 
   // University data - now editable
   const [universityInfo, setUniversityInfo] = useState({
@@ -20,7 +26,7 @@ const Manageportfolio = () => {
     vicechancellor: "Prof. H.D. Karunaratne",
     students: "12,000+",
     faculty: "800+",
-    campuses: "3"
+    campuses: "3",
   });
 
   const [achievements, setAchievements] = useState([
@@ -28,26 +34,26 @@ const Manageportfolio = () => {
       year: "2024",
       title: "QS World University Rankings",
       rank: "#801-850",
-      description: "Maintained position in top global universities"
+      description: "Maintained position in top global universities",
     },
     {
       year: "2023",
       title: "Best University in Sri Lanka",
       rank: "#1",
-      description: "Ranked as the leading university in the country"
+      description: "Ranked as the leading university in the country",
     },
     {
       year: "2023",
       title: "Research Excellence Award",
       rank: "Gold",
-      description: "Outstanding research contributions in multiple fields"
+      description: "Outstanding research contributions in multiple fields",
     },
     {
       year: "2022",
       title: "Green Campus Initiative",
       rank: "Platinum",
-      description: "Awarded for sustainable campus practices"
-    }
+      description: "Awarded for sustainable campus practices",
+    },
   ]);
 
   const [rankingHistory, setRankingHistory] = useState([
@@ -55,59 +61,85 @@ const Manageportfolio = () => {
     { year: "2023", worldRank: "851-900", localRank: "1", score: "84.8" },
     { year: "2022", worldRank: "901-950", localRank: "2", score: "83.5" },
     { year: "2021", worldRank: "951-1000", localRank: "2", score: "82.1" },
-    { year: "2020", worldRank: "1001+", localRank: "3", score: "80.9" }
+    { year: "2020", worldRank: "1001+", localRank: "3", score: "80.9" },
   ]);
 
   const [faculties, setFaculties] = useState([
     {
       name: "Faculty of Medicine",
       established: "1870",
-      departments: ["Anatomy", "Physiology", "Pharmacology", "Pathology", "Surgery"],
+      departments: [
+        "Anatomy",
+        "Physiology",
+        "Pharmacology",
+        "Pathology",
+        "Surgery",
+      ],
       students: "1,200",
-      programs: ["MBBS", "MD", "MS", "PhD"]
+      programs: ["MBBS", "MD", "MS", "PhD"],
     },
     {
       name: "Faculty of Science",
       established: "1942",
-      departments: ["Mathematics", "Physics", "Chemistry", "Biology", "Computer Science"],
+      departments: [
+        "Mathematics",
+        "Physics",
+        "Chemistry",
+        "Biology",
+        "Computer Science",
+      ],
       students: "2,500",
-      programs: ["BSc", "MSc", "PhD", "Diploma"]
+      programs: ["BSc", "MSc", "PhD", "Diploma"],
     },
     {
       name: "Faculty of Arts",
       established: "1921",
       departments: ["English", "Sinhala", "Tamil", "History", "Geography"],
       students: "3,000",
-      programs: ["BA", "MA", "PhD", "Diploma"]
+      programs: ["BA", "MA", "PhD", "Diploma"],
     },
     {
       name: "Faculty of Law",
       established: "1875",
-      departments: ["Public Law", "Private Law", "Commercial Law", "International Law"],
+      departments: [
+        "Public Law",
+        "Private Law",
+        "Commercial Law",
+        "International Law",
+      ],
       students: "800",
-      programs: ["LLB", "LLM", "PhD"]
+      programs: ["LLB", "LLM", "PhD"],
     },
     {
       name: "Faculty of Education",
       established: "1980",
-      departments: ["Educational Psychology", "Curriculum Studies", "Educational Management"],
+      departments: [
+        "Educational Psychology",
+        "Curriculum Studies",
+        "Educational Management",
+      ],
       students: "1,500",
-      programs: ["BEd", "MEd", "PhD", "Diploma"]
+      programs: ["BEd", "MEd", "PhD", "Diploma"],
     },
     {
       name: "Faculty of Management & Finance",
       established: "1992",
-      departments: ["Management Studies", "Finance", "Marketing", "Human Resources"],
+      departments: [
+        "Management Studies",
+        "Finance",
+        "Marketing",
+        "Human Resources",
+      ],
       students: "2,000",
-      programs: ["BBA", "MBA", "PhD", "Professional Diploma"]
-    }
+      programs: ["BBA", "MBA", "PhD", "Professional Diploma"],
+    },
   ]);
 
   const [degreePrograms, setDegreePrograms] = useState([
     { level: "Undergraduate", count: "45", duration: "3-6 years" },
     { level: "Postgraduate", count: "78", duration: "1-3 years" },
     { level: "Doctoral", count: "25", duration: "3-7 years" },
-    { level: "Professional", count: "12", duration: "6 months-2 years" }
+    { level: "Professional", count: "12", duration: "6 months-2 years" },
   ]);
 
   const [recentEvents, setRecentEvents] = useState([
@@ -116,8 +148,9 @@ const Manageportfolio = () => {
       title: "Annual Research Conference 2024",
       date: "March 15-17, 2024",
       type: "Conference",
-      description: "Three-day international research conference featuring latest academic discoveries",
-      image: "🔬"
+      description:
+        "Three-day international research conference featuring latest academic discoveries",
+      image: "🔬",
     },
     {
       id: 2,
@@ -125,52 +158,128 @@ const Manageportfolio = () => {
       date: "December 20, 2023",
       type: "Ceremony",
       description: "Annual graduation ceremony for over 3,000 students",
-      image: "🎓"
+      image: "🎓",
     },
     {
       id: 3,
       title: "International Student Exchange Program",
       date: "September 2023",
       type: "Program",
-      description: "Launch of new exchange program with 15 international universities",
-      image: "🌍"
+      description:
+        "Launch of new exchange program with 15 international universities",
+      image: "🌍",
     },
     {
       id: 4,
       title: "Centenary Celebration",
       date: "July 2021",
       type: "Celebration",
-      description: "100 years of excellence in higher education milestone celebration",
-      image: "🎉"
-    }
+      description:
+        "100 years of excellence in higher education milestone celebration",
+      image: "🎉",
+    },
   ]);
 
   const [facilities, setFacilities] = useState([
-    { name: "Central Library", description: "Over 500,000 books and digital resources", icon: "📚" },
-    { name: "Research Laboratories", description: "State-of-the-art research facilities", icon: "🔬" },
-    { name: "Sports Complex", description: "Olympic-size pool and multi-sport facilities", icon: "🏊‍♂️" },
-    { name: "Medical Center", description: "Full-service healthcare for students and staff", icon: "🏥" },
-    { name: "Student Hostels", description: "Modern accommodation for 3,000+ students", icon: "🏠" },
-    { name: "Computer Centers", description: "24/7 access to computing resources", icon: "💻" }
+    {
+      name: "Central Library",
+      description: "Over 500,000 books and digital resources",
+      icon: "📚",
+    },
+    {
+      name: "Research Laboratories",
+      description: "State-of-the-art research facilities",
+      icon: "🔬",
+    },
+    {
+      name: "Sports Complex",
+      description: "Olympic-size pool and multi-sport facilities",
+      icon: "🏊‍♂️",
+    },
+    {
+      name: "Medical Center",
+      description: "Full-service healthcare for students and staff",
+      icon: "🏥",
+    },
+    {
+      name: "Student Hostels",
+      description: "Modern accommodation for 3,000+ students",
+      icon: "🏠",
+    },
+    {
+      name: "Computer Centers",
+      description: "24/7 access to computing resources",
+      icon: "💻",
+    },
   ]);
 
   // Edit mode functions
   const toggleEditMode = (section) => {
-    setEditMode(prev => ({
+    setEditMode((prev) => ({
       ...prev,
-      [section]: !prev[section]
+      [section]: !prev[section],
     }));
   };
 
+  // Section-level Save/Edit toggle handler
+  const handleSectionAction = async (section) => {
+    // If not in edit mode, toggle to edit
+    if (!editMode[section]) {
+      setEditMode((prev) => ({ ...prev, [section]: true }));
+      return;
+    }
+
+    // Otherwise, save only the relevant section
+    setSaving((prev) => ({ ...prev, [section]: true }));
+    try {
+      let payload = {};
+      switch (section) {
+        case "hero":
+        case "overview":
+          payload = { university_info: universityInfo };
+          break;
+        case "achievements":
+          payload = { achievements };
+          break;
+        case "ranking":
+          payload = { ranking_history: rankingHistory };
+          break;
+        case "faculties":
+          payload = { faculties };
+          break;
+        case "programs":
+          payload = { degree_programs: degreePrograms };
+          break;
+        case "events":
+          payload = { recent_events: recentEvents };
+          break;
+        case "facilities":
+          payload = { facilities };
+          break;
+        default:
+          payload = {};
+      }
+
+      const res = await updatePortfolio(universityId, payload);
+      if (res?.success) {
+        setEditMode((prev) => ({ ...prev, [section]: false }));
+      } else {
+        alert(res?.message || "Failed to save changes");
+      }
+    } finally {
+      setSaving((prev) => ({ ...prev, [section]: false }));
+    }
+  };
+
   const updateUniversityInfo = (field, value) => {
-    setUniversityInfo(prev => ({
+    setUniversityInfo((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const updateAchievement = (index, field, value) => {
-    setAchievements(prev => {
+    setAchievements((prev) => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
       return updated;
@@ -178,20 +287,23 @@ const Manageportfolio = () => {
   };
 
   const addAchievement = () => {
-    setAchievements(prev => [...prev, {
-      year: "2024",
-      title: "New Achievement",
-      rank: "#1",
-      description: "Achievement description"
-    }]);
+    setAchievements((prev) => [
+      ...prev,
+      {
+        year: "2024",
+        title: "New Achievement",
+        rank: "#1",
+        description: "Achievement description",
+      },
+    ]);
   };
 
   const deleteAchievement = (index) => {
-    setAchievements(prev => prev.filter((_, i) => i !== index));
+    setAchievements((prev) => prev.filter((_, i) => i !== index));
   };
 
   const updateRanking = (index, field, value) => {
-    setRankingHistory(prev => {
+    setRankingHistory((prev) => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
       return updated;
@@ -199,7 +311,7 @@ const Manageportfolio = () => {
   };
 
   const updateFaculty = (index, field, value) => {
-    setFaculties(prev => {
+    setFaculties((prev) => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
       return updated;
@@ -207,7 +319,7 @@ const Manageportfolio = () => {
   };
 
   const updateEvent = (index, field, value) => {
-    setRecentEvents(prev => {
+    setRecentEvents((prev) => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
       return updated;
@@ -215,36 +327,68 @@ const Manageportfolio = () => {
   };
 
   const updateFacility = (index, field, value) => {
-    setFacilities(prev => {
+    setFacilities((prev) => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
       return updated;
     });
   };
 
-  const saveChanges = () => {
-    // Here you would typically send data to backend
-    alert('Changes saved successfully!');
-    setEditMode({});
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const res = await fetchPortfolio(universityId);
+      if (!mounted || !res?.success) return;
+      const p = res.portfolio;
+      setUniversityInfo(p.university_info || universityInfo);
+      setAchievements(p.achievements || achievements);
+      setRankingHistory(p.ranking_history || rankingHistory);
+      setFaculties(p.faculties || faculties);
+      setDegreePrograms(p.degree_programs || degreePrograms);
+      setRecentEvents(p.recent_events || recentEvents);
+      setFacilities(p.facilities || facilities);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const saveChanges = async () => {
+    const payload = {
+      university_info: universityInfo,
+      achievements,
+      ranking_history: rankingHistory,
+      faculties,
+      degree_programs: degreePrograms,
+      recent_events: recentEvents,
+      facilities,
+    };
+    const res = await updatePortfolio(universityId, payload);
+    if (res.success) {
+      alert("Changes saved successfully!");
+      setEditMode({});
+    } else {
+      alert(res.message || "Failed to save changes");
+    }
   };
 
   return (
     <div className="manage-portfolio-page">
       {/* SIDEBAR AT THE VERY TOP - OUTSIDE CONTAINER */}
-      <UniversitySidebar 
-        isOpen={isSidebarOpen}
-        setIsOpen={setIsSidebarOpen}
-      />
+      <UniversitySidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
       {/* NAVBAR */}
-      <UniversityNavbar 
+      <UniversityNavbar
         onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
         sidebarExpanded={isSidebarOpen}
       />
 
       {/* MAIN CONTENT */}
-      <main className={`manage-portfolio-main-content ${isSidebarOpen ? 'sidebar-expanded' : 'sidebar-collapsed'}`}>
-        
+      <main
+        className={`manage-portfolio-main-content ${
+          isSidebarOpen ? "sidebar-expanded" : "sidebar-collapsed"
+        }`}
+      >
         {/* Hero Section */}
         <section className="portfolio-hero">
           <div className="hero-background">
@@ -255,24 +399,28 @@ const Manageportfolio = () => {
               <input
                 type="text"
                 value={universityInfo.name}
-                onChange={(e) => updateUniversityInfo('name', e.target.value)}
+                onChange={(e) => updateUniversityInfo("name", e.target.value)}
                 className="manage-edit-input manage-edit-title"
               />
             ) : (
               <h1 className="university-name">{universityInfo.name}</h1>
             )}
-            
+
             <div className="hero-stats">
               <div className="hero-stat">
                 {editMode.hero ? (
                   <input
                     type="text"
                     value={universityInfo.established}
-                    onChange={(e) => updateUniversityInfo('established', e.target.value)}
+                    onChange={(e) =>
+                      updateUniversityInfo("established", e.target.value)
+                    }
                     className="manage-edit-input manage-edit-stat"
                   />
                 ) : (
-                  <span className="stat-number">{universityInfo.established}</span>
+                  <span className="stat-number">
+                    {universityInfo.established}
+                  </span>
                 )}
                 <span className="stat-label">Established</span>
               </div>
@@ -281,7 +429,9 @@ const Manageportfolio = () => {
                   <input
                     type="text"
                     value={universityInfo.students}
-                    onChange={(e) => updateUniversityInfo('students', e.target.value)}
+                    onChange={(e) =>
+                      updateUniversityInfo("students", e.target.value)
+                    }
                     className="manage-edit-input manage-edit-stat"
                   />
                 ) : (
@@ -294,7 +444,9 @@ const Manageportfolio = () => {
                   <input
                     type="text"
                     value={universityInfo.faculty}
-                    onChange={(e) => updateUniversityInfo('faculty', e.target.value)}
+                    onChange={(e) =>
+                      updateUniversityInfo("faculty", e.target.value)
+                    }
                     className="manage-edit-input manage-edit-stat"
                   />
                 ) : (
@@ -304,12 +456,17 @@ const Manageportfolio = () => {
               </div>
             </div>
           </div>
-          
-          <button 
+
+          <button
             className="manage-edit-btn manage-edit-hero-btn"
-            onClick={() => toggleEditMode('hero')}
+            onClick={() => handleSectionAction("hero")}
+            disabled={!!saving.hero}
           >
-            {editMode.hero ? '💾 Save' : '✏️ Edit Hero'}
+            {saving.hero
+              ? "Saving…"
+              : editMode.hero
+              ? "💾 Save"
+              : "✏️ Edit Hero"}
           </button>
         </section>
 
@@ -321,11 +478,16 @@ const Manageportfolio = () => {
                 <h2>🧑‍🎓 University Overview</h2>
                 <p>Learn about our institution's foundation and leadership</p>
               </div>
-              <button 
+              <button
                 className="manage-edit-btn"
-                onClick={() => toggleEditMode('overview')}
+                onClick={() => handleSectionAction("overview")}
+                disabled={!!saving.overview}
               >
-                {editMode.overview ? '💾 Save' : '✏️ Edit'}
+                {saving.overview
+                  ? "Saving…"
+                  : editMode.overview
+                  ? "💾 Save"
+                  : "✏️ Edit"}
               </button>
             </div>
           </div>
@@ -336,7 +498,9 @@ const Manageportfolio = () => {
                 <input
                   type="text"
                   value={universityInfo.location}
-                  onChange={(e) => updateUniversityInfo('location', e.target.value)}
+                  onChange={(e) =>
+                    updateUniversityInfo("location", e.target.value)
+                  }
                   className="manage-edit-input"
                 />
               ) : (
@@ -349,7 +513,7 @@ const Manageportfolio = () => {
                 <input
                   type="text"
                   value={universityInfo.type}
-                  onChange={(e) => updateUniversityInfo('type', e.target.value)}
+                  onChange={(e) => updateUniversityInfo("type", e.target.value)}
                   className="manage-edit-input"
                 />
               ) : (
@@ -362,7 +526,9 @@ const Manageportfolio = () => {
                 <input
                   type="text"
                   value={universityInfo.chancellor}
-                  onChange={(e) => updateUniversityInfo('chancellor', e.target.value)}
+                  onChange={(e) =>
+                    updateUniversityInfo("chancellor", e.target.value)
+                  }
                   className="manage-edit-input"
                 />
               ) : (
@@ -375,7 +541,9 @@ const Manageportfolio = () => {
                 <input
                   type="text"
                   value={universityInfo.vicechancellor}
-                  onChange={(e) => updateUniversityInfo('vicechancellor', e.target.value)}
+                  onChange={(e) =>
+                    updateUniversityInfo("vicechancellor", e.target.value)
+                  }
                   className="manage-edit-input"
                 />
               ) : (
@@ -388,7 +556,9 @@ const Manageportfolio = () => {
                 <input
                   type="text"
                   value={universityInfo.campuses}
-                  onChange={(e) => updateUniversityInfo('campuses', e.target.value)}
+                  onChange={(e) =>
+                    updateUniversityInfo("campuses", e.target.value)
+                  }
                   className="manage-edit-input"
                 />
               ) : (
@@ -408,20 +578,25 @@ const Manageportfolio = () => {
             <div className="manage-section-title-row">
               <div>
                 <h2>🏆 Achievements & Awards</h2>
-                <p>Recognition of our excellence and commitment to quality education</p>
+                <p>
+                  Recognition of our excellence and commitment to quality
+                  education
+                </p>
               </div>
               <div className="manage-section-controls">
-                <button 
+                <button
                   className="manage-edit-btn"
-                  onClick={() => toggleEditMode('achievements')}
+                  onClick={() => handleSectionAction("achievements")}
+                  disabled={!!saving.achievements}
                 >
-                  {editMode.achievements ? '💾 Save' : '✏️ Edit'}
+                  {saving.achievements
+                    ? "Saving…"
+                    : editMode.achievements
+                    ? "💾 Save"
+                    : "✏️ Edit"}
                 </button>
                 {editMode.achievements && (
-                  <button 
-                    className="manage-add-btn"
-                    onClick={addAchievement}
-                  >
+                  <button className="manage-add-btn" onClick={addAchievement}>
                     ➕ Add Achievement
                   </button>
                 )}
@@ -432,50 +607,66 @@ const Manageportfolio = () => {
             {achievements.map((achievement, idx) => (
               <div key={idx} className="manage-achievement-card">
                 {editMode.achievements && (
-                  <button 
+                  <button
                     className="manage-delete-btn"
                     onClick={() => deleteAchievement(idx)}
                   >
                     🗑️
                   </button>
                 )}
-                
+
                 {editMode.achievements ? (
                   <div className="manage-edit-form">
                     <input
                       type="text"
                       value={achievement.year}
-                      onChange={(e) => updateAchievement(idx, 'year', e.target.value)}
+                      onChange={(e) =>
+                        updateAchievement(idx, "year", e.target.value)
+                      }
                       className="manage-edit-input"
                       placeholder="Year"
                     />
                     <input
                       type="text"
                       value={achievement.title}
-                      onChange={(e) => updateAchievement(idx, 'title', e.target.value)}
+                      onChange={(e) =>
+                        updateAchievement(idx, "title", e.target.value)
+                      }
                       className="manage-edit-input"
                       placeholder="Title"
                     />
                     <input
                       type="text"
                       value={achievement.rank}
-                      onChange={(e) => updateAchievement(idx, 'rank', e.target.value)}
+                      onChange={(e) =>
+                        updateAchievement(idx, "rank", e.target.value)
+                      }
                       className="manage-edit-input"
                       placeholder="Rank"
                     />
                     <textarea
                       value={achievement.description}
-                      onChange={(e) => updateAchievement(idx, 'description', e.target.value)}
+                      onChange={(e) =>
+                        updateAchievement(idx, "description", e.target.value)
+                      }
                       className="manage-edit-textarea"
                       placeholder="Description"
                     />
                   </div>
                 ) : (
                   <>
-                    <div className="manage-achievement-year">{achievement.year}</div>
-                    <h3 className="manage-achievement-title">{achievement.title}</h3>
-                    <div className="manage-achievement-rank">{achievement.rank}</div>
-                    <p className="manage-achievement-description">{achievement.description}</p>
+                    <div className="manage-achievement-year">
+                      {achievement.year}
+                    </div>
+                    <h3 className="manage-achievement-title">
+                      {achievement.title}
+                    </h3>
+                    <div className="manage-achievement-rank">
+                      {achievement.rank}
+                    </div>
+                    <p className="manage-achievement-description">
+                      {achievement.description}
+                    </p>
                   </>
                 )}
               </div>
@@ -491,11 +682,16 @@ const Manageportfolio = () => {
                 <h2>📈 Ranking History</h2>
                 <p>Our journey of academic excellence over the years</p>
               </div>
-              <button 
+              <button
                 className="manage-edit-btn"
-                onClick={() => toggleEditMode('ranking')}
+                onClick={() => handleSectionAction("ranking")}
+                disabled={!!saving.ranking}
               >
-                {editMode.ranking ? '💾 Save' : '✏️ Edit'}
+                {saving.ranking
+                  ? "Saving…"
+                  : editMode.ranking
+                  ? "💾 Save"
+                  : "✏️ Edit"}
               </button>
             </div>
           </div>
@@ -514,29 +710,37 @@ const Manageportfolio = () => {
                     <input
                       type="text"
                       value={rank.year}
-                      onChange={(e) => updateRanking(idx, 'year', e.target.value)}
+                      onChange={(e) =>
+                        updateRanking(idx, "year", e.target.value)
+                      }
                       className="manage-edit-input manage-edit-small"
                     />
                     <input
                       type="text"
                       value={rank.worldRank}
-                      onChange={(e) => updateRanking(idx, 'worldRank', e.target.value)}
+                      onChange={(e) =>
+                        updateRanking(idx, "worldRank", e.target.value)
+                      }
                       className="manage-edit-input manage-edit-small"
                     />
                     <input
                       type="text"
                       value={rank.localRank}
-                      onChange={(e) => updateRanking(idx, 'localRank', e.target.value)}
+                      onChange={(e) =>
+                        updateRanking(idx, "localRank", e.target.value)
+                      }
                       className="manage-edit-input manage-edit-small"
                     />
                     <input
                       type="text"
                       value={rank.score}
-                      onChange={(e) => updateRanking(idx, 'score', e.target.value)}
+                      onChange={(e) =>
+                        updateRanking(idx, "score", e.target.value)
+                      }
                       className="manage-edit-input manage-edit-small"
                     />
                     <div className="manage-rank-trend">
-                      {idx < rankingHistory.length - 1 ? '📈' : '📊'}
+                      {idx < rankingHistory.length - 1 ? "📈" : "📊"}
                     </div>
                   </>
                 ) : (
@@ -546,7 +750,7 @@ const Manageportfolio = () => {
                     <div className="manage-rank-local">#{rank.localRank}</div>
                     <div className="manage-rank-score">{rank.score}</div>
                     <div className="manage-rank-trend">
-                      {idx < rankingHistory.length - 1 ? '📈' : '📊'}
+                      {idx < rankingHistory.length - 1 ? "📈" : "📊"}
                     </div>
                   </>
                 )}
@@ -561,13 +765,20 @@ const Manageportfolio = () => {
             <div className="manage-section-title-row">
               <div>
                 <h2>🏫 Faculties & Schools</h2>
-                <p>Comprehensive academic divisions offering diverse programs</p>
+                <p>
+                  Comprehensive academic divisions offering diverse programs
+                </p>
               </div>
-              <button 
+              <button
                 className="manage-edit-btn"
-                onClick={() => toggleEditMode('faculties')}
+                onClick={() => handleSectionAction("faculties")}
+                disabled={!!saving.faculties}
               >
-                {editMode.faculties ? '💾 Save' : '✏️ Edit'}
+                {saving.faculties
+                  ? "Saving…"
+                  : editMode.faculties
+                  ? "💾 Save"
+                  : "✏️ Edit"}
               </button>
             </div>
           </div>
@@ -579,13 +790,17 @@ const Manageportfolio = () => {
                     <input
                       type="text"
                       value={faculty.name}
-                      onChange={(e) => updateFaculty(idx, 'name', e.target.value)}
+                      onChange={(e) =>
+                        updateFaculty(idx, "name", e.target.value)
+                      }
                       className="manage-edit-input"
                     />
                   ) : (
                     <h3>{faculty.name}</h3>
                   )}
-                  <span className="manage-faculty-established">Est. {faculty.established}</span>
+                  <span className="manage-faculty-established">
+                    Est. {faculty.established}
+                  </span>
                 </div>
                 <div className="manage-faculty-stats">
                   <div className="manage-faculty-stat">
@@ -593,24 +808,34 @@ const Manageportfolio = () => {
                       <input
                         type="text"
                         value={faculty.students}
-                        onChange={(e) => updateFaculty(idx, 'students', e.target.value)}
+                        onChange={(e) =>
+                          updateFaculty(idx, "students", e.target.value)
+                        }
                         className="manage-edit-input manage-edit-small"
                       />
                     ) : (
-                      <span className="manage-faculty-stat-number">{faculty.students}</span>
+                      <span className="manage-faculty-stat-number">
+                        {faculty.students}
+                      </span>
                     )}
                     <span className="manage-faculty-stat-label">Students</span>
                   </div>
                   <div className="manage-faculty-stat">
-                    <span className="manage-faculty-stat-number">{faculty.departments.length}</span>
-                    <span className="manage-faculty-stat-label">Departments</span>
+                    <span className="manage-faculty-stat-number">
+                      {faculty.departments.length}
+                    </span>
+                    <span className="manage-faculty-stat-label">
+                      Departments
+                    </span>
                   </div>
                 </div>
                 <div className="manage-faculty-departments">
                   <h4>Departments:</h4>
                   <div className="manage-departments-list">
                     {faculty.departments.map((dept, deptIdx) => (
-                      <span key={deptIdx} className="manage-department-tag">{dept}</span>
+                      <span key={deptIdx} className="manage-department-tag">
+                        {dept}
+                      </span>
                     ))}
                   </div>
                 </div>
@@ -618,7 +843,9 @@ const Manageportfolio = () => {
                   <h4>Programs:</h4>
                   <div className="manage-programs-list">
                     {faculty.programs.map((program, progIdx) => (
-                      <span key={progIdx} className="manage-program-tag">{program}</span>
+                      <span key={progIdx} className="manage-program-tag">
+                        {program}
+                      </span>
                     ))}
                   </div>
                 </div>
@@ -635,11 +862,16 @@ const Manageportfolio = () => {
                 <h2>🎓 Degree Programs</h2>
                 <p>Comprehensive academic offerings across all levels</p>
               </div>
-              <button 
+              <button
                 className="manage-edit-btn"
-                onClick={() => toggleEditMode('programs')}
+                onClick={() => handleSectionAction("programs")}
+                disabled={!!saving.programs}
               >
-                {editMode.programs ? '💾 Save' : '✏️ Edit'}
+                {saving.programs
+                  ? "Saving…"
+                  : editMode.programs
+                  ? "💾 Save"
+                  : "✏️ Edit"}
               </button>
             </div>
           </div>
@@ -650,43 +882,58 @@ const Manageportfolio = () => {
                   <input
                     type="text"
                     value={program.level}
-                    onChange={(e) => setDegreePrograms(prev => {
-                      const updated = [...prev];
-                      updated[idx] = { ...updated[idx], level: e.target.value };
-                      return updated;
-                    })}
+                    onChange={(e) =>
+                      setDegreePrograms((prev) => {
+                        const updated = [...prev];
+                        updated[idx] = {
+                          ...updated[idx],
+                          level: e.target.value,
+                        };
+                        return updated;
+                      })
+                    }
                     className="manage-edit-input"
                   />
                 ) : (
                   <h3>{program.level}</h3>
                 )}
-                
+
                 {editMode.programs ? (
                   <input
                     type="text"
                     value={program.count}
-                    onChange={(e) => setDegreePrograms(prev => {
-                      const updated = [...prev];
-                      updated[idx] = { ...updated[idx], count: e.target.value };
-                      return updated;
-                    })}
+                    onChange={(e) =>
+                      setDegreePrograms((prev) => {
+                        const updated = [...prev];
+                        updated[idx] = {
+                          ...updated[idx],
+                          count: e.target.value,
+                        };
+                        return updated;
+                      })
+                    }
                     className="manage-edit-input manage-edit-count"
                   />
                 ) : (
                   <div className="manage-program-count">{program.count}</div>
                 )}
-                
+
                 <p>Programs Available</p>
                 <div className="manage-program-duration">
                   {editMode.programs ? (
                     <input
                       type="text"
                       value={program.duration}
-                      onChange={(e) => setDegreePrograms(prev => {
-                        const updated = [...prev];
-                        updated[idx] = { ...updated[idx], duration: e.target.value };
-                        return updated;
-                      })}
+                      onChange={(e) =>
+                        setDegreePrograms((prev) => {
+                          const updated = [...prev];
+                          updated[idx] = {
+                            ...updated[idx],
+                            duration: e.target.value,
+                          };
+                          return updated;
+                        })
+                      }
                       className="manage-edit-input"
                       placeholder="Duration"
                     />
@@ -707,11 +954,16 @@ const Manageportfolio = () => {
                 <h2>📅 Recent Events & Milestones</h2>
                 <p>Highlighting our major events and achievements</p>
               </div>
-              <button 
+              <button
                 className="manage-edit-btn"
-                onClick={() => toggleEditMode('events')}
+                onClick={() => handleSectionAction("events")}
+                disabled={!!saving.events}
               >
-                {editMode.events ? '💾 Save' : '✏️ Edit'}
+                {saving.events
+                  ? "Saving…"
+                  : editMode.events
+                  ? "💾 Save"
+                  : "✏️ Edit"}
               </button>
             </div>
           </div>
@@ -725,7 +977,9 @@ const Manageportfolio = () => {
                       <input
                         type="text"
                         value={event.title}
-                        onChange={(e) => updateEvent(idx, 'title', e.target.value)}
+                        onChange={(e) =>
+                          updateEvent(idx, "title", e.target.value)
+                        }
                         className="manage-edit-input"
                       />
                     ) : (
@@ -737,7 +991,7 @@ const Manageportfolio = () => {
                     <input
                       type="text"
                       value={event.date}
-                      onChange={(e) => updateEvent(idx, 'date', e.target.value)}
+                      onChange={(e) => updateEvent(idx, "date", e.target.value)}
                       className="manage-edit-input"
                     />
                   ) : (
@@ -746,11 +1000,15 @@ const Manageportfolio = () => {
                   {editMode.events ? (
                     <textarea
                       value={event.description}
-                      onChange={(e) => updateEvent(idx, 'description', e.target.value)}
+                      onChange={(e) =>
+                        updateEvent(idx, "description", e.target.value)
+                      }
                       className="manage-edit-textarea"
                     />
                   ) : (
-                    <p className="manage-event-description">{event.description}</p>
+                    <p className="manage-event-description">
+                      {event.description}
+                    </p>
                   )}
                 </div>
               </div>
@@ -766,11 +1024,16 @@ const Manageportfolio = () => {
                 <h2>🏢 Campus Facilities</h2>
                 <p>World-class infrastructure supporting academic excellence</p>
               </div>
-              <button 
+              <button
                 className="manage-edit-btn"
-                onClick={() => toggleEditMode('facilities')}
+                onClick={() => handleSectionAction("facilities")}
+                disabled={!!saving.facilities}
               >
-                {editMode.facilities ? '💾 Save' : '✏️ Edit'}
+                {saving.facilities
+                  ? "Saving…"
+                  : editMode.facilities
+                  ? "💾 Save"
+                  : "✏️ Edit"}
               </button>
             </div>
           </div>
@@ -783,12 +1046,16 @@ const Manageportfolio = () => {
                     <input
                       type="text"
                       value={facility.name}
-                      onChange={(e) => updateFacility(idx, 'name', e.target.value)}
+                      onChange={(e) =>
+                        updateFacility(idx, "name", e.target.value)
+                      }
                       className="manage-edit-input"
                     />
                     <textarea
                       value={facility.description}
-                      onChange={(e) => updateFacility(idx, 'description', e.target.value)}
+                      onChange={(e) =>
+                        updateFacility(idx, "description", e.target.value)
+                      }
                       className="manage-edit-textarea"
                     />
                   </>
@@ -804,14 +1071,13 @@ const Manageportfolio = () => {
         </section>
 
         {/* Global Save Button */}
-        {Object.values(editMode).some(mode => mode) && (
+        {Object.values(editMode).some((mode) => mode) && (
           <div className="manage-global-save">
             <button className="manage-global-save-btn" onClick={saveChanges}>
               💾 Save All Changes
             </button>
           </div>
         )}
-
       </main>
 
       <Footer
