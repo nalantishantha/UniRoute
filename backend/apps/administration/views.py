@@ -19,7 +19,7 @@ from apps.universities.models import Universities
 from apps.students.models import Students
 from apps.university_students.models import UniversityStudents
 from apps.tutoring.models import Tutors, TutoringSessions
-from apps.mentoring.models import Mentors, MentoringRequests
+from apps.mentoring.models import Mentors, MentoringRequests, MentoringSessions
 from apps.university_programs.models import DegreePrograms
 from apps.payments.models import TutoringPayments, MentoringPayments
 from apps.pre_university_courses.models import PreUniversityCourse
@@ -1801,6 +1801,193 @@ def get_published_courses_overview(request):
             return JsonResponse({
                 'success': False,
                 'message': f'Failed to fetch published courses: {str(exc)}'
+            }, status=500)
+
+    return JsonResponse({'success': False, 'message': 'Only GET method allowed'}, status=405)
+
+
+@csrf_exempt
+def get_mentors_overview(request):
+    if request.method == 'GET':
+        try:
+            search = request.GET.get('search', '').strip()
+            approved_filter = request.GET.get('approved', 'all').strip().lower()
+            status_filter = request.GET.get('status', 'all').strip().lower()
+            page = int(request.GET.get('page', 1))
+            per_page = int(request.GET.get('per_page', 10))
+
+            mentors_qs = Mentors.objects.select_related(
+                'user__userdetails',
+                'user__user_type',
+                'university_student__university',
+                'university_student__degree_program',
+                'university_student__duration'
+            )
+
+            if approved_filter in ('approved', 'pending'):
+                if approved_filter == 'approved':
+                    mentors_qs = mentors_qs.filter(approved=1)
+                else:
+                    mentors_qs = mentors_qs.filter(Q(approved=0) | Q(approved__isnull=True))
+
+            if status_filter in ('active', 'inactive'):
+                expected_value = 1 if status_filter == 'active' else 0
+                mentors_qs = mentors_qs.filter(user__is_active=expected_value)
+
+            if search:
+                mentors_qs = mentors_qs.filter(
+                    Q(user__username__icontains=search) |
+                    Q(user__email__icontains=search) |
+                    Q(user__userdetails__full_name__icontains=search) |
+                    Q(university_student__university__name__icontains=search) |
+                    Q(university_student__degree_program__title__icontains=search)
+                )
+
+            mentors_qs = mentors_qs.order_by('-created_at', '-mentor_id')
+
+            paginator = Paginator(mentors_qs, per_page)
+            page_obj = paginator.get_page(page)
+
+            mentors_data = []
+            for mentor in page_obj.object_list:
+                user = mentor.user
+                user_details = getattr(user, 'userdetails', None)
+                uni_student = mentor.university_student
+                expertise = mentor.expertise or ''
+                expertise_tags = [item.strip() for item in expertise.split(',') if item.strip()]
+
+                mentors_data.append({
+                    'id': mentor.mentor_id,
+                    'full_name': user_details.full_name if user_details and user_details.full_name else user.username,
+                    'email': user.email,
+                    'contact_number': user_details.contact_number if user_details else '',
+                    'location': user_details.location if user_details else '',
+                    'profile_picture': user_details.profile_picture if user_details else '',
+                    'expertise': expertise,
+                    'expertise_tags': expertise_tags,
+                    'bio': mentor.bio or (user_details.bio if user_details else ''),
+                    'approved': bool(mentor.approved),
+                    'approved_raw': mentor.approved,
+                    'is_active': bool(user.is_active),
+                    'university': uni_student.university.name if uni_student and uni_student.university else '',
+                    'degree_program': uni_student.degree_program.title if uni_student and uni_student.degree_program else '',
+                    'duration_years': uni_student.duration.duration_years if uni_student and uni_student.duration else None,
+                    'created_at': mentor.created_at.isoformat() if mentor.created_at else None,
+                    'user_created_at': user.created_at.isoformat() if user.created_at else None,
+                })
+
+            summary = {
+                'total': Mentors.objects.count(),
+                'approved': Mentors.objects.filter(approved=1).count(),
+                'pending': Mentors.objects.filter(Q(approved=0) | Q(approved__isnull=True)).count(),
+                'active_accounts': Mentors.objects.filter(user__is_active=1).count(),
+            }
+
+            return JsonResponse({
+                'success': True,
+                'mentors': mentors_data,
+                'summary': summary,
+                'pagination': {
+                    'current_page': page_obj.number,
+                    'total_pages': paginator.num_pages,
+                    'total_items': paginator.count,
+                    'has_next': page_obj.has_next(),
+                    'has_previous': page_obj.has_previous(),
+                    'per_page': per_page,
+                }
+            })
+        except Exception as exc:
+            return JsonResponse({
+                'success': False,
+                'message': f'Failed to fetch mentors: {str(exc)}'
+            }, status=500)
+
+    return JsonResponse({'success': False, 'message': 'Only GET method allowed'}, status=405)
+
+
+@csrf_exempt
+def get_mentor_details_admin(request, mentor_id):
+    if request.method == 'GET':
+        try:
+            mentor = Mentors.objects.select_related(
+                'user__userdetails',
+                'user__user_type',
+                'university_student__university',
+                'university_student__degree_program',
+                'university_student__duration'
+            ).get(mentor_id=mentor_id)
+
+            user = mentor.user
+            user_details = getattr(user, 'userdetails', None)
+            uni_student = mentor.university_student
+
+            expertise = mentor.expertise or ''
+            expertise_tags = [item.strip() for item in expertise.split(',') if item.strip()]
+
+            mentor_requests = MentoringRequests.objects.filter(mentor=mentor)
+            sessions_qs = MentoringSessions.objects.filter(mentor=mentor)
+
+            stats = {
+                'total_requests': mentor_requests.count(),
+                'pending_requests': mentor_requests.filter(status__iexact='pending').count(),
+                'scheduled_requests': mentor_requests.filter(status__iexact='scheduled').count(),
+                'completed_requests': mentor_requests.filter(status__iexact='completed').count(),
+                'declined_requests': mentor_requests.filter(status__iexact='declined').count(),
+                'expired_requests': mentor_requests.filter(status__iexact='expired').count(),
+                'total_sessions': sessions_qs.count(),
+                'scheduled_sessions': sessions_qs.filter(status__iexact='scheduled').count(),
+                'completed_sessions': sessions_qs.filter(status__iexact='completed').count(),
+            }
+
+            recent_requests = []
+            for request_obj in mentor_requests.select_related('student__user__userdetails').order_by('-created_at')[:5]:
+                student_user = getattr(request_obj.student, 'user', None) if request_obj.student else None
+                student_details = getattr(student_user, 'userdetails', None) if student_user else None
+                recent_requests.append({
+                    'id': request_obj.request_id,
+                    'topic': request_obj.topic,
+                    'status': request_obj.status,
+                    'session_type': request_obj.session_type,
+                    'requested_at': request_obj.created_at.isoformat() if request_obj.created_at else None,
+                    'student_name': student_details.full_name if student_details and student_details.full_name else getattr(student_user, 'username', None),
+                })
+
+            mentor_data = {
+                'id': mentor.mentor_id,
+                'full_name': user_details.full_name if user_details and user_details.full_name else user.username,
+                'email': user.email,
+                'contact_number': user_details.contact_number if user_details else '',
+                'location': user_details.location if user_details else '',
+                'profile_picture': user_details.profile_picture if user_details else '',
+                'bio': mentor.bio or (user_details.bio if user_details else ''),
+                'expertise': expertise,
+                'expertise_tags': expertise_tags,
+                'approved': bool(mentor.approved),
+                'approved_raw': mentor.approved,
+                'is_active': bool(user.is_active),
+                'user_type': getattr(getattr(user, 'user_type', None), 'type_name', ''),
+                'created_at': mentor.created_at.isoformat() if mentor.created_at else None,
+                'user_created_at': user.created_at.isoformat() if user.created_at else None,
+                'university': uni_student.university.name if uni_student and uni_student.university else '',
+                'degree_program': uni_student.degree_program.title if uni_student and uni_student.degree_program else '',
+                'duration_years': uni_student.duration.duration_years if uni_student and uni_student.duration else None,
+                'stats': stats,
+                'recent_requests': recent_requests,
+            }
+
+            return JsonResponse({
+                'success': True,
+                'mentor': mentor_data
+            })
+        except Mentors.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'Mentor not found'
+            }, status=404)
+        except Exception as exc:
+            return JsonResponse({
+                'success': False,
+                'message': f'Failed to fetch mentor details: {str(exc)}'
             }, status=500)
 
     return JsonResponse({'success': False, 'message': 'Only GET method allowed'}, status=405)

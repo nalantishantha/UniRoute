@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'apps.accounts',
     'apps.administration',
     'apps.communications',
+    'apps.counsellors',
     'apps.students', 
     'apps.student_results',
     'apps.university_students',

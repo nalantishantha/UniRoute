@@ -6,7 +6,9 @@ from .additional_views import (
     update_university_student_status, delete_university_student, get_university_student_details,
     update_university_student, get_university_details, update_university_status, 
     delete_university, update_university, create_university,
-    get_all_companies, get_company_details, update_company, delete_company, create_company
+    get_all_companies, get_company_details, update_company, delete_company, create_company,
+    get_all_counsellors, get_counsellor_details, update_counsellor,
+    update_counsellor_status, delete_counsellor
 )
 
 urlpatterns = [
@@ -30,6 +32,8 @@ urlpatterns = [
     path('internships/companies/', views.get_companies_for_internships, name='get_companies_for_internships'),
     path('internships/statistics/', views.get_internship_statistics, name='get_internship_statistics'),
     path('content/published-courses/', views.get_published_courses_overview, name='get_published_courses_overview'),
+    path('mentors/', views.get_mentors_overview, name='get_mentors_overview'),
+    path('mentors/<int:mentor_id>/', views.get_mentor_details_admin, name='get_mentor_details_admin'),
     path('content/mentoring-sessions/', views.get_mentoring_sessions_overview, name='get_mentoring_sessions_overview'),
     path('content/tutoring-sessions/', views.get_tutoring_sessions_overview, name='get_tutoring_sessions_overview'),
     path('content/internships/overview/', views.get_internships_overview, name='get_internships_overview'),
@@ -64,4 +68,11 @@ urlpatterns = [
     path('companies/<int:company_id>/', get_company_details, name='get_company_details'),
     path('companies/<int:company_id>/update/', update_company, name='update_company'),
     path('companies/<int:company_id>/delete/', delete_company, name='delete_company'),
+
+    # Counsellors management
+    path('counsellors/', get_all_counsellors, name='get_all_counsellors'),
+    path('counsellors/<int:counsellor_id>/', get_counsellor_details, name='get_counsellor_details'),
+    path('counsellors/<int:counsellor_id>/update/', update_counsellor, name='update_counsellor'),
+    path('counsellors/<int:counsellor_id>/status/', update_counsellor_status, name='update_counsellor_status'),
+    path('counsellors/<int:counsellor_id>/delete/', delete_counsellor, name='delete_counsellor'),
 ]

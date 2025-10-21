@@ -7,7 +7,6 @@ import {
   School,
   Building2,
   UserCheck,
-  UserCog,
   LifeBuoy,
   BookOpen,
   BarChart3,
@@ -200,16 +199,6 @@ const AdminDashboard = () => {
             icon: UserCheck,
             iconBg: 'bg-[#F4D160]',
             link: '/admin/mentors'
-          },
-          {
-            title: 'Tutors',
-            value: dashboardData.total_tutors?.toLocaleString() || '0',
-            description: 'Verified tutors',
-            change: `${dashboardData.tutors_growth >= 0 ? '+' : ''}${dashboardData.tutors_growth}%`,
-            changeType: dashboardData.tutors_growth >= 0 ? 'positive' : 'negative',
-            icon: UserCog,
-            iconBg: 'bg-[#4C7FB1]',
-            link: '/admin/tutors'
           },
           {
             title: 'Counsellors',
