@@ -29,6 +29,13 @@ export {
   MentorView 
 } from './Mentors';
 
+// Counsellors Management
+export {
+  CounsellorsList,
+  CounsellorForm,
+  CounsellorView
+} from './Counsellors';
+
 // Tutors Management
 export { 
   TutorsList,

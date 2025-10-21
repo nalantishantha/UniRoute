@@ -7,7 +7,6 @@ import {
   School,
   Building2,
   UserCheck,
-  UserCog,
   Settings,
   User,
   X,
@@ -78,7 +77,6 @@ const AdminSidebar = ({ isSidebarOpen, toggleSidebar, user, handleLogout }) => {
       icon: UserCheck,
       category: "users",
     },
-    { name: "Tutors", path: "/admin/tutors", icon: UserCog, category: "users" },
     {
       name: "Counsellors",
       path: "/admin/counsellors",
