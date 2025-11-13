@@ -10,7 +10,7 @@ import {
   X,
   AlertCircle,
   CheckCircle,
-  BookOpen
+  BookOpen,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card";
 import Button from "../ui/Button";
@@ -29,12 +29,12 @@ const TutoringAvailabilityManager = ({ tutorId }) => {
     is_recurring: true,
     max_students: 1,
     subject: "",
-    is_active: true
+    is_active: true,
   });
   const [message, setMessage] = useState({ type: "", text: "" });
 
   // Debug: Log tutorId
-  console.log('TutoringAvailabilityManager - tutorId:', tutorId);
+  console.log("TutoringAvailabilityManager - tutorId:", tutorId);
 
   const daysOfWeek = [
     { value: 0, label: "Sunday" },
@@ -43,16 +43,16 @@ const TutoringAvailabilityManager = ({ tutorId }) => {
     { value: 3, label: "Wednesday" },
     { value: 4, label: "Thursday" },
     { value: 5, label: "Friday" },
-    { value: 6, label: "Saturday" }
+    { value: 6, label: "Saturday" },
   ];
 
   const fetchAvailability = useCallback(async () => {
     // Don't fetch if tutorId is invalid
-    if (!tutorId || tutorId === 'undefined' || tutorId === 'null') {
-      console.warn('Cannot fetch availability - invalid tutorId:', tutorId);
+    if (!tutorId || tutorId === "undefined" || tutorId === "null") {
+      console.warn("Cannot fetch availability - invalid tutorId:", tutorId);
       return;
     }
-    
+
     try {
       setLoading(true);
       const data = await tutoringAPI.getAvailability(tutorId);
@@ -75,7 +75,7 @@ const TutoringAvailabilityManager = ({ tutorId }) => {
 
   useEffect(() => {
     // Only fetch if tutorId is valid
-    if (tutorId && tutorId !== 'undefined' && tutorId !== 'null') {
+    if (tutorId && tutorId !== "undefined" && tutorId !== "null") {
       fetchAvailability();
     }
     fetchSubjects();
@@ -83,7 +83,7 @@ const TutoringAvailabilityManager = ({ tutorId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (formData.start_time >= formData.end_time) {
       setMessage({ type: "error", text: "Start time must be before end time" });
       return;
@@ -91,23 +91,29 @@ const TutoringAvailabilityManager = ({ tutorId }) => {
 
     try {
       setLoading(true);
-      
+
       const submitData = {
         ...formData,
-        subject: formData.subject || null
+        subject: formData.subject || null,
       };
 
       if (editingId) {
         await tutoringAPI.updateAvailability(tutorId, {
           ...submitData,
-          availability_id: editingId
+          availability_id: editingId,
         });
-        setMessage({ type: "success", text: "Availability updated successfully" });
+        setMessage({
+          type: "success",
+          text: "Availability updated successfully",
+        });
       } else {
         await tutoringAPI.addAvailability(tutorId, submitData);
-        setMessage({ type: "success", text: "Availability added successfully" });
+        setMessage({
+          type: "success",
+          text: "Availability added successfully",
+        });
       }
-      
+
       fetchAvailability();
       resetForm();
     } catch (error) {
@@ -118,14 +124,19 @@ const TutoringAvailabilityManager = ({ tutorId }) => {
   };
 
   const handleDelete = async (availabilityId) => {
-    if (!window.confirm("Are you sure you want to delete this availability slot?")) {
+    if (
+      !window.confirm("Are you sure you want to delete this availability slot?")
+    ) {
       return;
     }
 
     try {
       setLoading(true);
       await tutoringAPI.deleteAvailability(tutorId, availabilityId);
-      setMessage({ type: "success", text: "Availability deleted successfully" });
+      setMessage({
+        type: "success",
+        text: "Availability deleted successfully",
+      });
       fetchAvailability();
     } catch (error) {
       setMessage({ type: "error", text: error.message });
@@ -143,7 +154,7 @@ const TutoringAvailabilityManager = ({ tutorId }) => {
       is_recurring: availability.is_recurring,
       max_students: availability.max_students,
       subject: availability.subject || "",
-      is_active: availability.is_active
+      is_active: availability.is_active,
     });
     setShowAddForm(true);
   };
@@ -156,7 +167,7 @@ const TutoringAvailabilityManager = ({ tutorId }) => {
       is_recurring: true,
       max_students: 1,
       subject: "",
-      is_active: true
+      is_active: true,
     });
     setEditingId(null);
     setShowAddForm(false);
@@ -172,25 +183,46 @@ const TutoringAvailabilityManager = ({ tutorId }) => {
   }, {});
 
   // Check if tutorId is valid before rendering
-  if (!tutorId || tutorId === 'undefined' || tutorId === 'null') {
+  if (!tutorId || tutorId === "undefined" || tutorId === "null") {
     // Get user info for debugging
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+
     return (
       <Card className="w-full">
         <CardContent className="p-8">
           <div className="text-center">
             <AlertCircle className="w-12 h-12 text-warning mx-auto mb-4" />
-            <h3 className="font-semibold text-lg mb-2">Tutor Profile Not Found</h3>
+            <h3 className="font-semibold text-lg mb-2">
+              Tutor Profile Not Found
+            </h3>
             <p className="text-neutral-grey mb-4">
-              You need to be registered as a tutor to manage tutoring availability.
+              You need to be registered as a tutor to manage tutoring
+              availability.
             </p>
             <div className="text-left text-sm text-neutral-grey bg-neutral-silver/50 p-4 rounded space-y-2">
               <p className="font-semibold mb-2">Debug Information:</p>
-              <p>• Tutor ID: <span className="font-mono">{String(tutorId) || 'not set'}</span></p>
-              <p>• User ID: <span className="font-mono">{user.user_id || 'not found'}</span></p>
-              <p>• University Student ID: <span className="font-mono">{user.university_student_id || 'not found'}</span></p>
-              <p>• Username: <span className="font-mono">{user.username || 'not found'}</span></p>
+              <p>
+                • Tutor ID:{" "}
+                <span className="font-mono">
+                  {String(tutorId) || "not set"}
+                </span>
+              </p>
+              <p>
+                • User ID:{" "}
+                <span className="font-mono">{user.user_id || "not found"}</span>
+              </p>
+              <p>
+                • University Student ID:{" "}
+                <span className="font-mono">
+                  {user.university_student_id || "not found"}
+                </span>
+              </p>
+              <p>
+                • Username:{" "}
+                <span className="font-mono">
+                  {user.username || "not found"}
+                </span>
+              </p>
               <div className="mt-3 pt-3 border-t border-neutral-light-grey">
                 <p className="text-xs">
                   Check the browser console (F12) for more detailed logs.
@@ -209,19 +241,13 @@ const TutoringAvailabilityManager = ({ tutorId }) => {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center space-x-2">
             <BookOpen className="w-5 h-5" />
-            <span>Tutoring Availability (Recurring)</span>
+            <span>Tutoring Availability</span>
           </CardTitle>
-          <Button
-            onClick={() => setShowAddForm(true)}
-            disabled={loading}
-          >
+          <Button onClick={() => setShowAddForm(true)} disabled={loading}>
             <Plus className="w-4 h-4 mr-2" />
             Add Slot
           </Button>
         </div>
-        <p className="text-sm text-neutral-grey mt-2">
-          Set your recurring weekly availability for tutoring sessions. These slots will be available for students to book every week.
-        </p>
       </CardHeader>
 
       <CardContent className="space-y-6">
@@ -233,7 +259,7 @@ const TutoringAvailabilityManager = ({ tutorId }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               className={`p-3 rounded-lg flex items-center space-x-2 ${
-                message.type === "success" 
+                message.type === "success"
                   ? "bg-green-50 border border-green-200 text-green-700"
                   : "bg-red-50 border border-red-200 text-red-700"
               }`}
@@ -266,7 +292,9 @@ const TutoringAvailabilityManager = ({ tutorId }) => {
               <Card className="border-primary-200">
                 <CardHeader>
                   <CardTitle className="text-lg">
-                    {editingId ? "Edit Tutoring Availability" : "Add New Tutoring Availability"}
+                    {editingId
+                      ? "Edit Tutoring Availability"
+                      : "Add New Tutoring Availability"}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -278,14 +306,16 @@ const TutoringAvailabilityManager = ({ tutorId }) => {
                         </label>
                         <select
                           value={formData.day_of_week}
-                          onChange={(e) => setFormData(prev => ({
-                            ...prev,
-                            day_of_week: parseInt(e.target.value)
-                          }))}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              day_of_week: parseInt(e.target.value),
+                            }))
+                          }
                           className="w-full p-3 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
                           required
                         >
-                          {daysOfWeek.map(day => (
+                          {daysOfWeek.map((day) => (
                             <option key={day.value} value={day.value}>
                               {day.label}
                             </option>
@@ -299,15 +329,20 @@ const TutoringAvailabilityManager = ({ tutorId }) => {
                         </label>
                         <select
                           value={formData.subject}
-                          onChange={(e) => setFormData(prev => ({
-                            ...prev,
-                            subject: e.target.value
-                          }))}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              subject: e.target.value,
+                            }))
+                          }
                           className="w-full p-3 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
                         >
                           <option value="">All Subjects</option>
-                          {subjects.map(subject => (
-                            <option key={subject.subject_id} value={subject.subject_id}>
+                          {subjects.map((subject) => (
+                            <option
+                              key={subject.subject_id}
+                              value={subject.subject_id}
+                            >
                               {subject.subject_name}
                             </option>
                           ))}
@@ -321,10 +356,12 @@ const TutoringAvailabilityManager = ({ tutorId }) => {
                         <input
                           type="time"
                           value={formData.start_time}
-                          onChange={(e) => setFormData(prev => ({
-                            ...prev,
-                            start_time: e.target.value
-                          }))}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              start_time: e.target.value,
+                            }))
+                          }
                           className="w-full p-3 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
                           required
                         />
@@ -337,10 +374,12 @@ const TutoringAvailabilityManager = ({ tutorId }) => {
                         <input
                           type="time"
                           value={formData.end_time}
-                          onChange={(e) => setFormData(prev => ({
-                            ...prev,
-                            end_time: e.target.value
-                          }))}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              end_time: e.target.value,
+                            }))
+                          }
                           className="w-full p-3 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
                           required
                         />
@@ -355,10 +394,12 @@ const TutoringAvailabilityManager = ({ tutorId }) => {
                           min="1"
                           max="10"
                           value={formData.max_students}
-                          onChange={(e) => setFormData(prev => ({
-                            ...prev,
-                            max_students: parseInt(e.target.value)
-                          }))}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              max_students: parseInt(e.target.value),
+                            }))
+                          }
                           className="w-full p-3 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
                           required
                         />
@@ -369,10 +410,12 @@ const TutoringAvailabilityManager = ({ tutorId }) => {
                           <input
                             type="checkbox"
                             checked={formData.is_recurring}
-                            onChange={(e) => setFormData(prev => ({
-                              ...prev,
-                              is_recurring: e.target.checked
-                            }))}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                is_recurring: e.target.checked,
+                              }))
+                            }
                             className="w-4 h-4 text-primary-600 rounded"
                           />
                           <span className="text-sm">Recurring Weekly</span>
@@ -382,10 +425,12 @@ const TutoringAvailabilityManager = ({ tutorId }) => {
                           <input
                             type="checkbox"
                             checked={formData.is_active}
-                            onChange={(e) => setFormData(prev => ({
-                              ...prev,
-                              is_active: e.target.checked
-                            }))}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                is_active: e.target.checked,
+                              }))
+                            }
                             className="w-4 h-4 text-primary-600 rounded"
                           />
                           <span className="text-sm">Active</span>
@@ -406,11 +451,7 @@ const TutoringAvailabilityManager = ({ tutorId }) => {
                         )}
                         <span>{editingId ? "Update" : "Add"}</span>
                       </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={resetForm}
-                      >
+                      <Button type="button" variant="ghost" onClick={resetForm}>
                         Cancel
                       </Button>
                     </div>
@@ -435,17 +476,20 @@ const TutoringAvailabilityManager = ({ tutorId }) => {
                 <p className="text-sm">Click "Add Slot" to get started.</p>
               </div>
             ) : (
-              daysOfWeek.map(day => {
+              daysOfWeek.map((day) => {
                 const daySlots = groupedAvailability[day.label] || [];
                 if (daySlots.length === 0) return null;
 
                 return (
-                  <div key={day.value} className="border border-neutral-light-grey rounded-lg p-4">
+                  <div
+                    key={day.value}
+                    className="border border-neutral-light-grey rounded-lg p-4"
+                  >
                     <h3 className="font-medium text-lg mb-3 text-neutral-black">
                       {day.label}
                     </h3>
                     <div className="space-y-2">
-                      {daySlots.map(slot => (
+                      {daySlots.map((slot) => (
                         <motion.div
                           key={slot.availability_id}
                           initial={{ opacity: 0, x: -20 }}
@@ -470,7 +514,9 @@ const TutoringAvailabilityManager = ({ tutorId }) => {
                                 {slot.is_recurring && (
                                   <>
                                     <span>•</span>
-                                    <span className="text-green-600">Recurring</span>
+                                    <span className="text-green-600">
+                                      Recurring
+                                    </span>
                                   </>
                                 )}
                               </div>

@@ -1,207 +1,164 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { getCurrentUser } from '../../../utils/auth';
-import {
-  University,
-  Edit,
-  Trash2,
-  ChevronLeft,
-  Mail,
-  Phone,
-  Calendar,
-  User,
-  MapPin,
-  GraduationCap,
-  BookOpen,
-  Clock,
-  Activity,
-  UserCheck,
-  UserX,
-  AlertCircle,
-  CheckCircle,
-  Award,
-  Building,
-  Hash,
-  Target,
-  Users,
-  FileText,
-  TrendingUp,
-  Star
+import { useParams, useNavigate } from 'react-router-dom';
+import { 
+  User, Mail, Phone, Calendar, MapPin, GraduationCap, 
+  University, BookOpen, Clock, Edit, ArrowLeft, AlertTriangle,
+  UserCheck, UserX, Trash2, Loader2, CheckCircle, Hash,
+  Building, Award, Target, Users, FileText, TrendingUp
 } from 'lucide-react';
 import AdminLayout from '../../../components/common/Admin/AdminLayout';
+import { 
+  getUniversityStudentById, 
+  updateUniversityStudentStatus, 
+  deleteUniversityStudent 
+} from '../../../utils/universityStudentsAPI';
 
-const UniversityStudentView = () => {
+const UniversityStudentsView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState({});
+  const [error, setError] = useState('');
   const [message, setMessage] = useState({ type: '', text: '' });
 
-  // Mock university student data
-  const mockUniversityStudent = {
-    id: 1,
-    first_name: 'Thilina',
-    last_name: 'Perera',
-    email: 'thilina.perera@gmail.com',
-    contact_number: '0771234567',
-    student_id: 'CS19001',
-    university: 'University of Colombo',
-    faculty: 'Faculty of Science',
-    degree_program: 'Computer Science',
-    year_of_study: '3',
-    gpa: '3.75',
-    enrollment_date: '2019-01-15',
-    graduation_year: '2023',
-    specialization: 'Machine Learning',
-    thesis_topic: 'Deep Learning Applications in Natural Language Processing',
-    supervisor: 'Dr. Kasun Silva',
-    is_active: true,
-    created_at: '2019-01-15T10:30:00Z',
-    last_login: '2024-07-03T14:20:00Z',
-    activity_log: [
-      {
-        id: 1,
-        action: 'Profile Updated',
-        timestamp: '2024-07-03T14:20:00Z',
-        details: 'Updated thesis topic and supervisor information'
-      },
-      {
-        id: 2,
-        action: 'GPA Updated',
-        timestamp: '2024-07-01T10:15:00Z',
-        details: 'Updated GPA from 3.65 to 3.75'
-      },
-      {
-        id: 3,
-        action: 'Login',
-        timestamp: '2024-06-30T16:45:00Z',
-        details: 'Logged in from university computer lab'
-      },
-      {
-        id: 4,
-        action: 'Course Enrollment',
-        timestamp: '2024-06-28T09:30:00Z',
-        details: 'Enrolled in Advanced Machine Learning course'
-      }
-    ],
-    academic_performance: {
-      total_credits: 90,
-      credits_completed: 78,
-      current_semester: 'Semester 6',
-      courses_this_semester: 5,
-      attendance_rate: 92
-    },
-    research_activities: [
-      {
-        id: 1,
-        title: 'Machine Learning Research Project',
-        status: 'In Progress',
-        start_date: '2024-03-01',
-        description: 'Working on deep learning applications for NLP'
-      },
-      {
-        id: 2,
-        title: 'Data Science Workshop',
-        status: 'Completed',
-        start_date: '2024-01-15',
-        description: 'Participated in advanced data science workshop'
-      }
-    ]
-  };
+  // Modal states
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    if (!currentUser || currentUser.user_type !== 'admin') {
-      navigate('/login');
-      return;
-    }
+    fetchStudentDetails();
+  }, [id]);
 
-    // Simulate API call
-    setTimeout(() => {
-      setStudent(mockUniversityStudent);
+  const fetchStudentDetails = async () => {
+    setLoading(true);
+    setError('');
+    
+    try {
+      const response = await getUniversityStudentById(id);
+      
+      if (response.success) {
+        setStudent(response.university_student);
+      } else {
+        setError(response.message || 'Failed to fetch student details');
+      }
+    } catch (error) {
+      setError('Error loading student details. Please try again.');
+      console.error('Error fetching student:', error);
+    } finally {
       setLoading(false);
-    }, 1000);
-  }, [id, navigate]);
-
-  const handleDeleteStudent = () => {
-    if (window.confirm('Are you sure you want to delete this university student? This action cannot be undone.')) {
-      setMessage({ type: 'success', text: 'University student deleted successfully!' });
-      setTimeout(() => {
-        navigate('/admin/university-students');
-      }, 1500);
     }
   };
 
-  const handleToggleStatus = () => {
-    const action = student.is_active ? 'deactivate' : 'activate';
-    if (window.confirm(`Are you sure you want to ${action} this university student?`)) {
-      setStudent(prev => ({ ...prev, is_active: !prev.is_active }));
-      setMessage({ 
-        type: 'success', 
-        text: `University student ${action}d successfully!` 
-      });
+  const handleStatusToggle = () => {
+    setShowStatusModal(true);
+  };
+
+  const confirmStatusChange = async () => {
+    if (!student) return;
+
+    setActionLoading(prev => ({ ...prev, status: true }));
+
+    try {
+      const response = await updateUniversityStudentStatus(
+        student.university_student_id, 
+        !student.is_active
+      );
+
+      if (response.success) {
+        setStudent(prev => ({
+          ...prev,
+          is_active: !prev.is_active
+        }));
+        setMessage({
+          type: 'success',
+          text: `Student ${!student.is_active ? 'activated' : 'deactivated'} successfully`
+        });
+        setShowStatusModal(false);
+        
+        // Clear message after 3 seconds
+        setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+      } else {
+        setError(response.message || 'Failed to update student status');
+      }
+    } catch (error) {
+      setError('Error updating student status. Please try again.');
+      console.error('Error updating status:', error);
+    } finally {
+      setActionLoading(prev => ({ ...prev, status: false }));
     }
   };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+  const handleDelete = () => {
+    setDeleteConfirmText('');
+    setShowDeleteModal(true);
   };
 
-  const formatDateTime = (dateString) => {
-    return new Date(dateString).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  const confirmDelete = async () => {
+    if (!student || deleteConfirmText !== 'DELETE') return;
+
+    setActionLoading(prev => ({ ...prev, delete: true }));
+
+    try {
+      const response = await deleteUniversityStudent(student.university_student_id);
+
+      if (response.success) {
+        setMessage({
+          type: 'success',
+          text: 'Student deleted successfully'
+        });
+        
+        // Navigate back to list after 2 seconds
+        setTimeout(() => {
+          navigate('/admin/university-students');
+        }, 2000);
+      } else {
+        setError(response.message || 'Failed to delete student');
+      }
+    } catch (error) {
+      setError('Error deleting student. Please try again.');
+      console.error('Error deleting student:', error);
+    } finally {
+      setActionLoading(prev => ({ ...prev, delete: false }));
+    }
   };
 
-  const getGPAColor = (gpa) => {
-    const numericGPA = parseFloat(gpa);
-    if (numericGPA >= 3.7) return 'text-green-600';
-    if (numericGPA >= 3.0) return 'text-yellow-600';
-    return 'text-red-600';
+  const handleEdit = () => {
+    navigate(`/admin/university-students/${id}/edit`);
   };
 
-  const getGPABadgeColor = (gpa) => {
-    const numericGPA = parseFloat(gpa);
-    if (numericGPA >= 3.7) return 'bg-green-100 text-green-800';
-    if (numericGPA >= 3.0) return 'bg-yellow-100 text-yellow-800';
-    return 'bg-red-100 text-red-800';
+  const handleBack = () => {
+    navigate('/admin/university-students');
   };
 
   if (loading) {
     return (
-      <AdminLayout pageTitle="University Student Details" pageDescription="Loading university student information">
-        <div className="flex items-center justify-center h-64">
+      <AdminLayout>
+        <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading university student details...</p>
+            <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
+            <p className="text-gray-600">Loading student details...</p>
           </div>
         </div>
       </AdminLayout>
     );
   }
 
-  if (!student) {
+  if (error && !student) {
     return (
-      <AdminLayout pageTitle="University Student Not Found" pageDescription="University student information not available">
-        <div className="flex items-center justify-center h-64">
+      <AdminLayout>
+        <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
-            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Student Not Found</h2>
-            <p className="text-gray-600 mb-4">The university student you're looking for doesn't exist.</p>
-            <Link
-              to="/admin/university-students"
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+            <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Student Not Found</h2>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <button
+              onClick={handleBack}
+              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
             >
-              Back to University Students
-            </Link>
+              Back to Students
+            </button>
           </div>
         </div>
       </AdminLayout>
@@ -209,259 +166,395 @@ const UniversityStudentView = () => {
   }
 
   return (
-    <AdminLayout pageTitle="University Student Details" pageDescription="View and manage university student information">
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link
-            to="/admin/university-students"
-            className="text-gray-600 hover:text-gray-900"
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </Link>
-          <div className="flex items-center space-x-2">
-            <University className="h-6 w-6 text-blue-500" />
-            <h1 className="text-2xl font-bold text-gray-900">University Student Details</h1>
+    <AdminLayout>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={handleBack}
+                className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 mr-1" />
+                Back to Students
+              </button>
+              <div className="h-6 border-l border-gray-300"></div>
+              <h1 className="text-2xl font-bold text-gray-900">University Student Details</h1>
+            </div>
+            
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={handleEdit}
+                className="bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700 transition-colors flex items-center"
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit
+              </button>
+              <button
+                onClick={handleStatusToggle}
+                disabled={actionLoading.status}
+                className={`px-4 py-2 rounded-md transition-colors flex items-center ${
+                  student?.is_active
+                    ? 'bg-orange-600 text-white hover:bg-orange-700'
+                    : 'bg-green-600 text-white hover:bg-green-700'
+                } disabled:opacity-50`}
+              >
+                {actionLoading.status ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : student?.is_active ? (
+                  <UserX className="w-4 h-4 mr-2" />
+                ) : (
+                  <UserCheck className="w-4 h-4 mr-2" />
+                )}
+                {student?.is_active ? 'Deactivate' : 'Activate'}
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={actionLoading.delete}
+                className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors flex items-center disabled:opacity-50"
+              >
+                {actionLoading.delete ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4 mr-2" />
+                )}
+                Delete
+              </button>
+            </div>
           </div>
         </div>
-        <div className="flex items-center space-x-3">
-          <Link
-            to={`/admin/university-students/${student.id}/edit`}
-            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center space-x-2"
-          >
-            <Edit className="h-4 w-4" />
-            <span>Edit Student</span>
-          </Link>
-          <button
-            onClick={handleToggleStatus}
-            className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
-              student.is_active
-                ? 'bg-orange-500 text-white hover:bg-orange-600'
-                : 'bg-green-500 text-white hover:bg-green-600'
-            }`}
-          >
-            {student.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
-            <span>{student.is_active ? 'Deactivate' : 'Activate'}</span>
-          </button>
-          <button
-            onClick={handleDeleteStudent}
-            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center space-x-2"
-          >
-            <Trash2 className="h-4 w-4" />
-            <span>Delete</span>
-          </button>
-        </div>
-      </div>
 
-      {/* Message */}
-      {message.text && (
-        <div className={`mb-6 p-4 rounded-lg flex items-center space-x-3 ${
-          message.type === 'success' 
-            ? 'bg-green-50 border border-green-200' 
-            : 'bg-red-50 border border-red-200'
-        }`}>
-          {message.type === 'success' ? (
-            <CheckCircle className="h-5 w-5 text-green-600" />
-          ) : (
-            <AlertCircle className="h-5 w-5 text-red-600" />
-          )}
-          <span className={`text-sm font-medium ${
-            message.type === 'success' ? 'text-green-800' : 'text-red-800'
+        {/* Messages */}
+        {message.text && (
+          <div className={`mb-6 p-4 rounded-md ${
+            message.type === 'success' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
           }`}>
-            {message.text}
-          </span>
-        </div>
-      )}
+            <div className="flex">
+              {message.type === 'success' ? (
+                <CheckCircle className="h-5 w-5 text-green-400" />
+              ) : (
+                <AlertTriangle className="h-5 w-5 text-red-400" />
+              )}
+              <div className="ml-3">
+                <p className={`text-sm ${
+                  message.type === 'success' ? 'text-green-800' : 'text-red-800'
+                }`}>
+                  {message.text}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Student Profile Card */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="text-center">
-                <div className="bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <GraduationCap className="h-10 w-10 text-blue-600" />
-                </div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-1">
-                  {student.first_name} {student.last_name}
-                </h2>
-                <p className="text-gray-600 mb-2">{student.email}</p>
-                <p className="text-sm text-gray-500 mb-3">ID: {student.student_id}</p>
-                <div className="flex justify-center mb-4">
-                  <span className="inline-flex px-3 py-1 text-sm font-medium rounded-full bg-blue-100 text-blue-800">
-                    Year {student.year_of_study} Student
-                  </span>
-                </div>
-                <div className="flex justify-center mb-4">
-                  <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${getGPABadgeColor(student.gpa)}`}>
-                    GPA: {student.gpa}
-                  </span>
-                </div>
-                <div className="flex justify-center">
-                  <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${
-                    student.is_active 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+            <div className="flex">
+              <AlertTriangle className="h-5 w-5 text-red-400" />
+              <div className="ml-3">
+                <p className="text-sm text-red-800">{error}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {student && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main Content */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Personal Information */}
+              <div className="bg-white shadow rounded-lg">
+                <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                  <h2 className="text-lg font-medium text-gray-900 flex items-center">
+                    <User className="w-5 h-5 mr-2 text-gray-400" />
+                    Personal Information
+                  </h2>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    student.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                   }`}>
                     {student.is_active ? 'Active' : 'Inactive'}
                   </span>
                 </div>
-              </div>
-
-              <div className="mt-6 border-t border-gray-200 pt-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Contact Information</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-3">
-                    <Mail className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-900">{student.email}</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Phone className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-900">{student.contact_number}</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Calendar className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-900">Enrolled {formatDate(student.enrollment_date)}</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Clock className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-900">Last login {formatDateTime(student.last_login)}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Student Details & Activity */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* University Details */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">University Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center space-x-3">
-                  <Building className="h-4 w-4 text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">University</p>
-                    <p className="text-sm text-gray-600">{student.university}</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <BookOpen className="h-4 w-4 text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Faculty</p>
-                    <p className="text-sm text-gray-600">{student.faculty}</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Award className="h-4 w-4 text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Degree Program</p>
-                    <p className="text-sm text-gray-600">{student.degree_program}</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Target className="h-4 w-4 text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Specialization</p>
-                    <p className="text-sm text-gray-600">{student.specialization}</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Calendar className="h-4 w-4 text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Graduation Year</p>
-                    <p className="text-sm text-gray-600">{student.graduation_year}</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Users className="h-4 w-4 text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Supervisor</p>
-                    <p className="text-sm text-gray-600">{student.supervisor}</p>
-                  </div>
-                </div>
-              </div>
-              {student.thesis_topic && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <p className="text-sm font-medium text-gray-900 mb-2">Thesis Topic</p>
-                  <p className="text-sm text-gray-600">{student.thesis_topic}</p>
-                </div>
-              )}
-            </div>
-
-            {/* Academic Performance */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Academic Performance</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center">
-                  <div className={`text-2xl font-bold ${getGPAColor(student.gpa)}`}>{student.gpa}</div>
-                  <div className="text-sm text-gray-600">Current GPA</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">{student.academic_performance.credits_completed}</div>
-                  <div className="text-sm text-gray-600">Credits Completed</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">{student.academic_performance.attendance_rate}%</div>
-                  <div className="text-sm text-gray-600">Attendance Rate</div>
-                </div>
-              </div>
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Current Semester: {student.academic_performance.current_semester}</span>
-                  <span className="text-gray-600">Courses: {student.academic_performance.courses_this_semester}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Research Activities */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Research Activities</h3>
-              <div className="space-y-4">
-                {student.research_activities.map((activity) => (
-                  <div key={activity.id} className="flex items-start space-x-3">
-                    <div className="bg-purple-100 p-2 rounded-lg">
-                      <FileText className="h-4 w-4 text-purple-600" />
+                <div className="px-6 py-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                      <p className="text-sm text-gray-900">{student.full_name || 'No name provided'}</p>
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium text-gray-900">{activity.title}</p>
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          activity.status === 'Completed' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {activity.status}
-                        </span>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                      <p className="text-sm text-gray-900">@{student.username}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                      <div className="flex items-center">
+                        <Mail className="w-4 h-4 text-gray-400 mr-2" />
+                        <p className="text-sm text-gray-900">{student.email}</p>
                       </div>
-                      <p className="text-sm text-gray-600">{activity.description}</p>
-                      <p className="text-xs text-gray-500 mt-1">Started: {formatDate(activity.start_date)}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
+                      <div className="flex items-center">
+                        <Phone className="w-4 h-4 text-gray-400 mr-2" />
+                        <p className="text-sm text-gray-900">{student.contact_number || 'Not provided'}</p>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                      <p className="text-sm text-gray-900">{student.gender || 'Not specified'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                      <div className="flex items-center">
+                        <MapPin className="w-4 h-4 text-gray-400 mr-2" />
+                        <p className="text-sm text-gray-900">{student.location || 'Not provided'}</p>
+                      </div>
                     </div>
                   </div>
-                ))}
+                  
+                  {student.bio && (
+                    <div className="mt-6">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                      <p className="text-sm text-gray-900">{student.bio}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Academic Information */}
+              <div className="bg-white shadow rounded-lg">
+                <div className="px-6 py-4 border-b border-gray-200">
+                  <h2 className="text-lg font-medium text-gray-900 flex items-center">
+                    <GraduationCap className="w-5 h-5 mr-2 text-gray-400" />
+                    Academic Information
+                  </h2>
+                </div>
+                <div className="px-6 py-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">University</label>
+                      <div className="flex items-center">
+                        <University className="w-4 h-4 text-gray-400 mr-2" />
+                        <p className="text-sm text-gray-900">{student.university}</p>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Faculty</label>
+                      <div className="flex items-center">
+                        <Building className="w-4 h-4 text-gray-400 mr-2" />
+                        <p className="text-sm text-gray-900">{student.faculty || 'Not specified'}</p>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Degree Program</label>
+                      <div className="flex items-center">
+                        <BookOpen className="w-4 h-4 text-gray-400 mr-2" />
+                        <p className="text-sm text-gray-900">{student.degree_program}</p>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Year of Study</label>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <Target className="w-3 h-3 mr-1" />
+                        Year {student.year_of_study}
+                      </span>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Registration Number</label>
+                      <div className="flex items-center">
+                        <Hash className="w-4 h-4 text-gray-400 mr-2" />
+                        <p className="text-sm text-gray-900">{student.registration_number || 'Not provided'}</p>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Enrollment Date</label>
+                      <div className="flex items-center">
+                        <Calendar className="w-4 h-4 text-gray-400 mr-2" />
+                        <p className="text-sm text-gray-900">
+                          {student.enrollment_date 
+                            ? new Date(student.enrollment_date).toLocaleDateString()
+                            : 'Not provided'
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Activity Log */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
-              <div className="space-y-4">
-                {student.activity_log.map((activity) => (
-                  <div key={activity.id} className="flex items-start space-x-3">
-                    <div className="bg-blue-100 p-2 rounded-lg">
-                      <Activity className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">{activity.action}</p>
-                      <p className="text-sm text-gray-600">{activity.details}</p>
-                      <p className="text-xs text-gray-500 mt-1">{formatDateTime(activity.timestamp)}</p>
-                    </div>
+            {/* Sidebar */}
+            <div className="space-y-6">
+              {/* Quick Stats */}
+              <div className="bg-white shadow rounded-lg">
+                <div className="px-6 py-4 border-b border-gray-200">
+                  <h2 className="text-lg font-medium text-gray-900 flex items-center">
+                    <TrendingUp className="w-5 h-5 mr-2 text-gray-400" />
+                    Quick Stats
+                  </h2>
+                </div>
+                <div className="px-6 py-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Status</span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${
+                      student.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {student.is_active ? 'Active' : 'Inactive'}
+                    </span>
                   </div>
-                ))}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Verified</span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${
+                      student.is_verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {student.is_verified ? 'Verified' : 'Pending'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Year</span>
+                    <span className="text-sm font-medium text-gray-900">Year {student.year_of_study}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Registration</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {student.registration_number || 'N/A'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Account Information */}
+              <div className="bg-white shadow rounded-lg">
+                <div className="px-6 py-4 border-b border-gray-200">
+                  <h2 className="text-lg font-medium text-gray-900 flex items-center">
+                    <Clock className="w-5 h-5 mr-2 text-gray-400" />
+                    Account Information
+                  </h2>
+                </div>
+                <div className="px-6 py-4 space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Created At</label>
+                    <p className="text-sm text-gray-900">
+                      {student.created_at 
+                        ? new Date(student.created_at).toLocaleString()
+                        : 'Not available'
+                      }
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Last Updated</label>
+                    <p className="text-sm text-gray-900">
+                      {student.updated_at 
+                        ? new Date(student.updated_at).toLocaleString()
+                        : 'Not available'
+                      }
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">User ID</label>
+                    <p className="text-sm text-gray-900">#{student.user_id}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Student ID</label>
+                    <p className="text-sm text-gray-900">#{student.university_student_id}</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </AdminLayout>
-    );
+        )}
+
+        {/* Status Change Modal */}
+        {showStatusModal && student && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+              <div className="mt-3 text-center">
+                <AlertTriangle className="w-12 h-12 text-yellow-600 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900">
+                  {student.is_active ? 'Deactivate' : 'Activate'} University Student
+                </h3>
+                <p className="mt-2 text-sm text-gray-500">
+                  Are you sure you want to {student.is_active ? 'deactivate' : 'activate'}{' '}
+                  <span className="font-medium">{student.full_name || student.username}</span>?
+                </p>
+                <div className="mt-6 flex justify-center space-x-3">
+                  <button
+                    onClick={() => setShowStatusModal(false)}
+                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmStatusChange}
+                    disabled={actionLoading.status}
+                    className={`px-4 py-2 text-white rounded-md flex items-center ${
+                      student.is_active 
+                        ? 'bg-orange-600 hover:bg-orange-700' 
+                        : 'bg-green-600 hover:bg-green-700'
+                    } disabled:opacity-50`}
+                  >
+                    {actionLoading.status && (
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    )}
+                    {student.is_active ? 'Deactivate' : 'Activate'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && student && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+              <div className="mt-3 text-center">
+                <AlertTriangle className="w-12 h-12 text-red-600 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900">Delete University Student</h3>
+                <p className="mt-2 text-sm text-gray-500">
+                  This action cannot be undone. This will permanently delete{' '}
+                  <span className="font-medium">{student.full_name || student.username}</span>'s account and all associated data.
+                </p>
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Type "DELETE" to confirm:
+                  </label>
+                  <input
+                    type="text"
+                    value={deleteConfirmText}
+                    onChange={(e) => setDeleteConfirmText(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    placeholder="DELETE"
+                  />
+                </div>
+                <div className="mt-6 flex justify-center space-x-3">
+                  <button
+                    onClick={() => {
+                      setShowDeleteModal(false);
+                      setDeleteConfirmText('');
+                    }}
+                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmDelete}
+                    disabled={deleteConfirmText !== 'DELETE' || actionLoading.delete}
+                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                  >
+                    {actionLoading.delete && (
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    )}
+                    Delete Student
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </AdminLayout>
+  );
 };
 
-export default UniversityStudentView;
+export default UniversityStudentsView;

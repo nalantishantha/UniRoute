@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -7,17 +7,15 @@ import {
   School,
   Building2,
   UserCheck,
-  UserCog,
-  BookOpen,
-  BarChart3,
   Settings,
   User,
   X,
   LogOut,
-  FileText,
   Briefcase,
-  Calendar,
   Inbox,
+  NotebookPen,
+  Handshake,
+  Activity,
 } from "lucide-react";
 import logo from "../../../assets/logo.png";
 
@@ -79,38 +77,37 @@ const AdminSidebar = ({ isSidebarOpen, toggleSidebar, user, handleLogout }) => {
       icon: UserCheck,
       category: "users",
     },
-    { name: "Tutors", path: "/admin/tutors", icon: UserCog, category: "users" },
     {
       name: "Counsellors",
       path: "/admin/counsellors",
       icon: UserCheck,
       category: "users",
     },
-    // {
-    //   name: "Courses",
-    //   path: "/admin/programs",
-    //   icon: BookOpen,
-    //   category: "content",
-    // },
-    { name: "Jobs", path: "/admin/jobs", icon: Briefcase, category: "content" },
     {
-      name: "Events",
-      path: "/admin/events",
-      icon: Calendar,
+      name: "Published Courses",
+      path: "/admin/content/published-courses",
+      icon: NotebookPen,
       category: "content",
     },
+    {
+      name: "Mentoring Sessions",
+      path: "/admin/content/mentoring-sessions",
+      icon: Handshake,
+      category: "content",
+    },
+    {
+      name: "Tutoring Sessions",
+      path: "/admin/content/tutoring-sessions",
+      icon: Activity,
+      category: "content",
+    },
+    { name: "Internships", path: "/admin/jobs", icon: Briefcase, category: "content" },
     {
       name: "Requests",
       path: "/admin/requests",
       icon: Inbox,
       category: "Requests",
     },
-    // {
-    //   name: "Reports",
-    //   path: "/admin/reports",
-    //   icon: FileText,
-    //   category: "Requests",
-    // },
     {
       name: "Settings",
       path: "/admin/settings",

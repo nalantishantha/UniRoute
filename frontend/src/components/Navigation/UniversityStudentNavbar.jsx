@@ -126,7 +126,7 @@ export default function TopNavigation({ onMenuClick }) {
     }
   };
 
-  const { toggleChat } = useChatContext();
+  const { isChatOpen, toggleChat, openChat, unreadCount } = useChatContext();
 
   return (
     <motion.header
@@ -177,16 +177,18 @@ export default function TopNavigation({ onMenuClick }) {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={toggleChat}
+            onClick={() => openChat(null, { showList: true })}
             className="relative p-2 transition-colors duration-200 rounded-lg text-primary-400 hover:text-primary-600 hover:bg-primary-50"
           >
             <MessageSquare className="w-5 h-5" />
-            <span className="absolute flex items-center justify-center w-4 h-4 text-xs text-white bg-green-500 rounded-full -top-1 -right-1">
-              2
-            </span>
+            {unreadCount > 0 && (
+              <span className="absolute flex items-center justify-center w-4 h-4 text-xs text-white bg-green-500 rounded-full -top-1 -right-1">
+                {unreadCount > 99 ? "99" : unreadCount}
+              </span>
+            )}
           </motion.button>
 
-          <motion.button
+          {/* <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="relative p-3 transition-all duration-200 rounded-xl hover:bg-neutral-silver/70 group hover:shadow-sm"
@@ -195,7 +197,7 @@ export default function TopNavigation({ onMenuClick }) {
             <span className="absolute flex items-center justify-center w-4 h-4 rounded-full shadow-sm -top-1 -right-1 bg-error">
               <span className="w-2 h-2 bg-white rounded-full"></span>
             </span>
-          </motion.button>
+          </motion.button> */}
 
           {/* User Profile Dropdown */}
           <div className="relative">

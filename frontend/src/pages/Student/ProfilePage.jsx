@@ -123,7 +123,7 @@ const ProfilePage = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-r from-blue-200 to-blue-100">
+      <div className="min-h-screen bg-gradient-to-r from-primary-50 to-white">
         <StudentNavigation />
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-center h-64">
@@ -140,7 +140,7 @@ const ProfilePage = () => {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-r from-blue-200 to-blue-100">
+      <div className="min-h-screen bg-gradient-to-r from-primary-50 to-white">
         <StudentNavigation />
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
@@ -162,7 +162,7 @@ const ProfilePage = () => {
   // No data state
   if (!studentData) {
     return (
-      <div className="min-h-screen bg-gradient-to-r from-blue-200 to-blue-100">
+      <div className="min-h-screen bg-gradient-to-r from-primary-50 to-white">
         <StudentNavigation />
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
@@ -182,7 +182,7 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-200 to-blue-100">
+    <div className="min-h-screen bg-gradient-to-r from-primary-50 to-white">
       {/* Navigation */}
       <StudentNavigation />
 
@@ -201,7 +201,7 @@ const ProfilePage = () => {
         {/* Profile Card */}
         <div className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden mb-8">
           {/* Profile Header */}
-          <div className="relative bg-gradient-to-r from-blue-500 to-primary-500 px-8 py-12">
+          <div className="relative bg-gradient-to-r from-primary-600 via-primary-700 to-primary-600 px-8 py-12">
             <div className="flex flex-col lg:flex-row items-center lg:items-start space-y-6 lg:space-y-0 lg:space-x-8">
               {/* Profile Image */}
               <div className="relative">

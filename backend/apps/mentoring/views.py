@@ -1201,3 +1201,130 @@ class AvailableTimeSlotsView(View):
                 'status': 'error',
                 'message': str(e)
             }, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def submit_session_feedback(request):
+    """Submit feedback and rating for a completed mentoring session"""
+    try:
+        data = parse_request_json(request)
+        
+        # Required fields
+        session_id = data.get('session_id')
+        student_id = data.get('student_id')
+        rating = data.get('rating')
+        feedback_text = data.get('feedback', '')
+        
+        if not session_id or not student_id or rating is None:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'session_id, student_id, and rating are required'
+            }, status=400)
+        
+        # Validate session exists and is completed
+        try:
+            session = MentoringSessions.objects.get(session_id=session_id)
+        except MentoringSessions.DoesNotExist:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Session not found'
+            }, status=404)
+        
+        if session.status != 'completed':
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Can only submit feedback for completed sessions'
+            }, status=400)
+        
+        # Validate student exists
+        try:
+            student = Students.objects.get(student_id=student_id)
+        except Students.DoesNotExist:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Student not found'
+            }, status=404)
+        
+        # Check if feedback already exists for this session and student
+        existing_feedback = MentoringFeedback.objects.filter(
+            session=session,
+            student=student
+        ).first()
+        
+        if existing_feedback:
+            # Update existing feedback
+            existing_feedback.rating = rating
+            existing_feedback.feedback = feedback_text
+            existing_feedback.submitted_at = timezone.now()
+            existing_feedback.save()
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Feedback updated successfully',
+                'feedback_id': existing_feedback.feedback_id
+            })
+        else:
+            # Create new feedback
+            new_feedback = MentoringFeedback.objects.create(
+                session=session,
+                student=student,
+                rating=rating,
+                feedback=feedback_text,
+                submitted_at=timezone.now()
+            )
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Feedback submitted successfully',
+                'feedback_id': new_feedback.feedback_id
+            })
+    
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def check_session_feedback(request, session_id):
+    """Check if feedback exists for a specific session"""
+    try:
+        student_id = request.GET.get('student_id')
+        
+        if not student_id:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'student_id parameter is required'
+            }, status=400)
+        
+        # Check if feedback exists
+        feedback = MentoringFeedback.objects.filter(
+            session_id=session_id,
+            student_id=student_id
+        ).first()
+        
+        if feedback:
+            return JsonResponse({
+                'status': 'success',
+                'has_feedback': True,
+                'feedback': {
+                    'feedback_id': feedback.feedback_id,
+                    'rating': feedback.rating,
+                    'feedback_text': feedback.feedback,
+                    'submitted_at': feedback.submitted_at.isoformat() if feedback.submitted_at else None
+                }
+            })
+        else:
+            return JsonResponse({
+                'status': 'success',
+                'has_feedback': False
+            })
+    
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)

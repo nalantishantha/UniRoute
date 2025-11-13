@@ -27,139 +27,107 @@ const UsersList = () => {
   const [filterType, setFilterType] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [pagination, setPagination] = useState({});
   const navigate = useNavigate();
-
-  // Mock data - All users including students, mentors, etc.
-  const mockUsers = [
-    {
-      id: 1,
-      username: 'john.perera@gmail.com',
-      email: 'john.perera@gmail.com',
-      first_name: 'John',
-      last_name: 'Perera',
-      user_type: 'student',
-      user_type_id: 1,
-      is_active: true,
-      contact_number: '0771234567',
-      created_at: '2024-01-15T10:30:00Z',
-      last_login: '2024-07-01T14:20:00Z'
-    },
-    {
-      id: 2,
-      username: 'sarah.silva@university.lk',
-      email: 'sarah.silva@university.lk',
-      first_name: 'Sarah',
-      last_name: 'Silva',
-      user_type: 'university_student',
-      user_type_id: 2,
-      is_active: true,
-      contact_number: '0772345678',
-      created_at: '2024-02-20T09:15:00Z',
-      last_login: '2024-07-02T11:45:00Z'
-    },
-    {
-      id: 3,
-      username: 'mike.mentor@gmail.com',
-      email: 'mike.mentor@gmail.com',
-      first_name: 'Mike',
-      last_name: 'Johnson',
-      user_type: 'mentor',
-      user_type_id: 3,
-      is_active: true,
-      contact_number: '0773456789',
-      created_at: '2024-03-10T16:45:00Z',
-      last_login: '2024-06-15T12:30:00Z'
-    },
-    {
-      id: 4,
-      username: 'anna.tutor@gmail.com',
-      email: 'anna.tutor@gmail.com',
-      first_name: 'Anna',
-      last_name: 'Williams',
-      user_type: 'tutor',
-      user_type_id: 4,
-      is_active: true,
-      contact_number: '0774567890',
-      created_at: '2024-04-05T14:20:00Z',
-      last_login: '2024-07-03T10:15:00Z'
-    },
-    {
-      id: 11,
-      username: 'admin@uniroute.com',
-      email: 'admin@uniroute.com',
-      first_name: 'Admin',
-      last_name: 'User',
-      user_type: 'admin',
-      user_type_id: 10,
-      is_active: true,
-      contact_number: '0711234567',
-      created_at: '2024-01-01T08:00:00Z',
-      last_login: '2024-07-03T08:30:00Z'
-    }
-  ];
 
   const usersPerPage = 10;
 
-  useEffect(() => {
-    const currentUser = getCurrentUser();
-    if (!currentUser || currentUser.user_type !== 'admin') {
-      navigate('/login');
-      return;
-    }
+  // Fetch users from API
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams({
+        page: currentPage,
+        per_page: usersPerPage,
+        ...(filterType !== 'all' && { type: filterType }),
+        ...(searchTerm && { search: searchTerm })
+      });
 
-    // Simulate API call
-    setTimeout(() => {
-      setUsers(mockUsers);
-      setFilteredUsers(mockUsers);
+      const response = await fetch(`http://localhost:8000/api/administration/users/?${params}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setUsers(data.users);
+        setFilteredUsers(data.users);
+        setPagination(data.pagination);
+        setError(null);
+      } else {
+        throw new Error(data.message || 'Failed to fetch users');
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error('Users fetch error:', err);
+    } finally {
       setLoading(false);
-    }, 1000);
-  }, [navigate]);
-
-  useEffect(() => {
-    let filtered = users;
-
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(user =>
-        user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.username.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Filter by user type
-    if (filterType !== 'all') {
-      filtered = filtered.filter(user => user.user_type === filterType);
-    }
-
-    setFilteredUsers(filtered);
-    setCurrentPage(1);
-  }, [searchTerm, filterType, users]);
-
-  const handleDeleteUser = (userId) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
-      setUsers(users.filter(user => user.id !== userId));
     }
   };
 
-  const handleToggleStatus = (userId) => {
-    setUsers(users.map(user =>
-      user.id === userId ? { ...user, is_active: !user.is_active } : user
-    ));
+  useEffect(() => {
+    fetchUsers();
+  }, [currentPage, filterType, searchTerm]);
+
+  // Handle search with debounce
+  useEffect(() => {
+    const delayedSearch = setTimeout(() => {
+      setCurrentPage(1); // Reset to first page when searching
+      fetchUsers();
+    }, 500);
+
+    return () => clearTimeout(delayedSearch);
+  }, [searchTerm]);
+
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleFilterChange = (e) => {
+    setFilterType(e.target.value);
+    setCurrentPage(1); // Reset to first page when filtering
+  };
+
+  // Pagination handlers
+  const handlePreviousPage = () => {
+    if (pagination.has_previous) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (pagination.has_next) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handleDeleteUser = (userId) => {
+    if (window.confirm('Are you sure you want to delete this user?')) {
+      // Here you would call a delete API endpoint
+      console.log('Delete user:', userId);
+      // After successful deletion, refresh the list
+      fetchUsers();
+    }
   };
 
   const getUserTypeColor = (userType) => {
     switch (userType) {
       case 'admin':
-        return 'bg-red-100 text-red-800';
-      case 'university_student':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-purple-100 text-purple-800';
       case 'student':
         return 'bg-green-100 text-green-800';
+      case 'uni_student':
+        return 'bg-blue-100 text-blue-800';
       case 'mentor':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-yellow-100 text-yellow-800';
       case 'tutor':
+        return 'bg-indigo-100 text-indigo-800';
+      case 'university':
+        return 'bg-cyan-100 text-cyan-800';
+      case 'company':
         return 'bg-orange-100 text-orange-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -168,7 +136,7 @@ const UsersList = () => {
 
   const formatUserType = (userType) => {
     switch (userType) {
-      case 'university_student':
+      case 'uni_student':
         return 'University Student';
       case 'student':
         return 'Student';
@@ -176,6 +144,10 @@ const UsersList = () => {
         return 'Mentor';
       case 'tutor':
         return 'Tutor';
+      case 'university':
+        return 'University';
+      case 'company':
+        return 'Company';
       case 'admin':
         return 'Admin';
       default:
@@ -184,35 +156,47 @@ const UsersList = () => {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString();
   };
 
   const formatDateTime = (dateString) => {
-    return new Date(dateString).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    if (!dateString) return 'Never';
+    return new Date(dateString).toLocaleString();
   };
 
-  // Pagination
-  const indexOfLastUser = currentPage * usersPerPage;
-  const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
-  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+  // Loading state
+  if (loading) {
+    return (
+      <AdminLayout pageTitle="Users Management" pageDescription="Manage all platform users">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading users...</p>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
-  // if (loading) {
-  //   return (
-  //     <AdminLayout pageTitle="Users Management" pageDescription="Manage all platform users">
-  //       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-  //         <div className="text-center">
-  //           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+  // Error state
+  if (error) {
+    return (
+      <AdminLayout pageTitle="Users Management" pageDescription="Manage all platform users">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">Error: {error}</p>
+            <button
+              onClick={fetchUsers}
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
   //           <p className="text-gray-600">Loading users...</p>
   //         </div>
   //       </div>
@@ -221,22 +205,19 @@ const UsersList = () => {
   // }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <AdminLayout pageTitle="Users Management" pageDescription="Manage all platform users">
-      <div className="min-h-screen bg-gray-50">
+    <AdminLayout pageTitle="Users Management" pageDescription="Manage all platform users">
       {/* Main Content */}
       <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <Link
-                to="/admin/dashboard"
-                className="text-gray-600 hover:text-gray-900"
-              >
-                <ChevronLeft className="h-6 w-6" />
-              </Link>
-              <div className="flex items-center space-x-2">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center space-x-4">
+                <Link
+                  to="/admin/dashboard"
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  <ChevronLeft className="h-6 w-6" />
+                </Link>
+                <div className="flex items-center space-x-2">
                 <Users className="h-6 w-6 text-blue-500" />
                 <h1 className="text-2xl font-bold text-gray-900">Users Management</h1>
               </div>
@@ -321,8 +302,8 @@ const UsersList = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {currentUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-gray-50">
+                {users.map((user) => (
+                  <tr key={user.user_id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="bg-blue-100 p-2 rounded-lg mr-3">
@@ -330,7 +311,7 @@ const UsersList = () => {
                         </div>
                         <div>
                           <div className="text-sm font-medium text-gray-900">
-                            {user.first_name} {user.last_name}
+                            {user.full_name || user.username}
                           </div>
                           <div className="text-sm text-gray-500">{user.email}</div>
                         </div>
@@ -353,7 +334,7 @@ const UsersList = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       <div className="flex items-center space-x-2">
                         <Phone className="h-4 w-4 text-gray-400" />
-                        <span>{user.contact_number}</span>
+                        <span>{user.contact_number || 'N/A'}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -368,34 +349,20 @@ const UsersList = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end space-x-2">
                         <Link
-                          to={`/admin/users/${user.id}`}
-                          className="text-blue-600 hover:text-blue-900 p-1 rounded"
-                          title="View"
+                          to={`/admin/users/${user.user_id}`}
+                          className="text-blue-600 hover:text-blue-900"
                         >
                           <Eye className="h-4 w-4" />
                         </Link>
                         <Link
-                          to={`/admin/users/${user.id}/edit`}
-                          className="text-green-600 hover:text-green-900 p-1 rounded"
-                          title="Edit"
+                          to={`/admin/users/${user.user_id}/edit`}
+                          className="text-green-600 hover:text-green-900"
                         >
                           <Edit className="h-4 w-4" />
                         </Link>
                         <button
-                          onClick={() => handleToggleStatus(user.id)}
-                          className={`p-1 rounded ${
-                            user.is_active
-                              ? 'text-orange-600 hover:text-orange-900'
-                              : 'text-green-600 hover:text-green-900'
-                          }`}
-                          title={user.is_active ? 'Deactivate' : 'Activate'}
-                        >
-                          {user.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
-                        </button>
-                        <button
-                          onClick={() => handleDeleteUser(user.id)}
-                          className="text-red-600 hover:text-red-900 p-1 rounded"
-                          title="Delete"
+                          onClick={() => handleDeleteUser(user.user_id)}
+                          className="text-red-600 hover:text-red-900"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -408,44 +375,66 @@ const UsersList = () => {
           </div>
 
           {/* Pagination */}
-          {totalPages > 1 && (
+          {pagination.total_pages > 1 && (
             <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200">
               <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm text-gray-700">
-                    Showing <span className="font-medium">{indexOfFirstUser + 1}</span> to{' '}
-                    <span className="font-medium">{Math.min(indexOfLastUser, filteredUsers.length)}</span> of{' '}
-                    <span className="font-medium">{filteredUsers.length}</span> results
+                    Showing page <span className="font-medium">{pagination.current_page}</span> of{' '}
+                    <span className="font-medium">{pagination.total_pages}</span> ({pagination.total_items} total users)
                   </p>
                 </div>
                 <div>
                   <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
                     <button
-                      onClick={() => setCurrentPage(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                      onClick={handlePreviousPage}
+                      disabled={!pagination.has_previous}
+                      className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 text-sm font-medium ${
+                        !pagination.has_previous
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'bg-white text-gray-500 hover:bg-gray-50'
+                      }`}
                     >
-                      <ChevronLeft className="h-5 w-5" />
+                      <ChevronLeft className="h-4 w-4" />
                     </button>
-                    {[...Array(totalPages)].map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setCurrentPage(index + 1)}
-                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                          currentPage === index + 1
-                            ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                            : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                        }`}
-                      >
-                        {index + 1}
-                      </button>
-                    ))}
+                    
+                    {/* Page numbers */}
+                    {[...Array(Math.min(pagination.total_pages, 5))].map((_, index) => {
+                      let pageNumber;
+                      if (pagination.total_pages <= 5) {
+                        pageNumber = index + 1;
+                      } else {
+                        const start = Math.max(1, pagination.current_page - 2);
+                        pageNumber = start + index;
+                      }
+                      
+                      if (pageNumber > pagination.total_pages) return null;
+                      
+                      return (
+                        <button
+                          key={pageNumber}
+                          onClick={() => setCurrentPage(pageNumber)}
+                          className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                            pagination.current_page === pageNumber
+                              ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                              : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                          }`}
+                        >
+                          {pageNumber}
+                        </button>
+                      );
+                    })}
+
                     <button
-                      onClick={() => setCurrentPage(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                      className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                      onClick={handleNextPage}
+                      disabled={!pagination.has_next}
+                      className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 text-sm font-medium ${
+                        !pagination.has_next
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'bg-white text-gray-500 hover:bg-gray-50'
+                      }`}
                     >
-                      <ChevronRight className="h-5 w-5" />
+                      <ChevronRight className="h-4 w-4" />
                     </button>
                   </nav>
                 </div>
@@ -454,9 +443,7 @@ const UsersList = () => {
           )}
         </div>
       </div>
-      </div>
     </AdminLayout>
-    </div>
   );
 };
 

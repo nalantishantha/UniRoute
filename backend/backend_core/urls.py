@@ -20,7 +20,7 @@ urlpatterns = [
     path('api/mentoring/', include('apps.mentoring.urls')),
     path('api/pre-mentors/', include('apps.pre_mentors.urls')),
     path('api/counsellors/', include('apps.counsellors.urls')),
-    #path('api/communications/', include('apps.communications.urls')),
+    path('api/communications/', include('apps.communications.urls')),
     #path('api/payments/', include('apps.payments.urls')),
     
     path('api/companies/', include('apps.companies.urls')),
@@ -28,6 +28,7 @@ urlpatterns = [
     
     path('api/administration/', include('apps.administration.urls')),
     path('api/resources/', include('apps.academic_resources.urls')),
+    path('api/admin-reports/', include('apps.reports.urls')),
     path('', include('apps.pre_university_courses.urls')),
 ]
 

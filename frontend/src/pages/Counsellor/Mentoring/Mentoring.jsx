@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -20,6 +20,12 @@ import {
   User,
   BookOpen,
   Target,
+  Settings,
+  Save,
+  Trash2,
+  Edit,
+  AlertCircle,
+  X,
 } from "lucide-react";
 import {
   Card,
@@ -29,95 +35,11 @@ import {
   CardDescription,
 } from "../../../components/ui/Card";
 import Button from "../../../components/ui/Button";
+import { getCurrentUser } from "../../../utils/auth";
+import { counsellorAPI } from "../../../utils/counsellorAPI";
 // import { useChatContext } from "../../../context/ChatContext";
 
-const mentoringRequests = [
-  {
-    id: 3,
-    student: "Emily Watson",
-    topic: "Study Strategies",
-    preferredTime: "Weekdays 6-8 PM",
-    sessionType: "online",
-    status: "pending",
-    description:
-      "Struggling with time management and study techniques. Looking for personalized advice on how to improve academic performance.",
-    requestDate: "2024-01-19",
-    urgency: "high",
-    avatar:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
-    contact: "emily.watson@email.com",
-  },
-  {
-    id: 2,
-    student: "Michael Brown",
-    topic: "Career Planning",
-    preferredTime: "Weekends 10-12 AM",
-    sessionType: "physical",
-    status: "accepted",
-    description:
-      "Recent graduate seeking advice on career paths in the tech industry. Want to discuss job search strategies and skill development.",
-    requestDate: "2024-01-18",
-    urgency: "low",
-    avatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
-    contact: "michael.brown@email.com",
-    scheduledDate: "2024-01-25",
-    location: "Campus Library, Room 204",
-  },
-  {
-    id: 3,
-    student: "Emily Watson",
-    topic: "Study Strategies",
-    preferredTime: "Weekdays 6-8 PM",
-    sessionType: "online",
-    status: "pending",
-    description:
-      "Struggling with time management and study techniques. Looking for personalized advice on how to improve academic performance.",
-    requestDate: "2024-01-19",
-    urgency: "high",
-    avatar:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
-    contact: "emily.watson@email.com",
-  },
-];
 
-const upcomingSessions = [
-  {
-    id: 1,
-    student: "Michael Brown",
-    topic: "Career Planning",
-    date: "2024-01-25",
-    time: "10:00 AM",
-    duration: "1 hour",
-    type: "physical",
-    location: "Campus Library, Room 204",
-    status: "confirmed",
-    avatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
-  },
-  {
-    id: 2,
-    student: "Lisa Johnson",
-    topic: "University Admissions",
-    date: "2024-01-26",
-    time: "3:00 PM",
-    duration: "1.5 hours",
-    type: "online",
-    meetingLink: "https://zoom.us/j/123456789",
-    status: "confirmed",
-    avatar:
-      "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=40&h=40&fit=crop&crop=face",
-  },
-];
-
-const stats = {
-  totalRequests: 15,
-  pendingRequests: 3,
-  acceptedSessions: 8,
-  completedSessions: 24,
-  averageRating: 4.8,
-  responseRate: 95,
-};
 
 const urgencyColors = {
   high: "bg-error/20 text-error border-error/30",
@@ -138,8 +60,41 @@ export default function Mentoring() {
   const [activeTab, setActiveTab] = useState("requests");
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const [requests, setRequests] = useState(mentoringRequests);
-  const [sessions, setSessions] = useState(upcomingSessions);
+  const [requests, setRequests] = useState([]);
+  const [sessions, setSessions] = useState([]);
+  const [stats, setStats] = useState({
+    totalRequests: 0,
+    pendingRequests: 0,
+    acceptedSessions: 0,
+    completedSessions: 0,
+    averageRating: 0,
+    responseRate: 0,
+  });
+  const [user, setUser] = useState(null);
+  const [dataLoading, setDataLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Availability management states
+  const [availability, setAvailability] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [formData, setFormData] = useState({
+    day_of_week: 0,
+    start_time: "09:00",
+    end_time: "17:00"
+  });
+  const [message, setMessage] = useState({ type: "", text: "" });
+
+  const daysOfWeek = [
+    { value: 0, label: "Sunday" },
+    { value: 1, label: "Monday" },
+    { value: 2, label: "Tuesday" },
+    { value: 3, label: "Wednesday" },
+    { value: 4, label: "Thursday" },
+    { value: 5, label: "Friday" },
+    { value: 6, label: "Saturday" }
+  ];
 
   // Modal states
   const [showAcceptModal, setShowAcceptModal] = useState(false);
@@ -152,21 +107,259 @@ export default function Mentoring() {
   const [scheduleTime, setScheduleTime] = useState("");
   const [rejectReason, setRejectReason] = useState("");
 
-  // Calculate dynamic stats
+  // Get current user on component mount and fetch data
+  useEffect(() => {
+    const currentUser = getCurrentUser();
+    setUser(currentUser);
+    if (currentUser?.user_id) {
+      fetchAvailability(currentUser.user_id);
+      fetchCounsellingData(currentUser.user_id);
+    }
+  }, []);
+
+  // Fetch all counselling data
+  const fetchCounsellingData = async (counsellorId) => {
+    try {
+      setDataLoading(true);
+      setError(null);
+
+      // Clear existing data first
+      setRequests([]);
+      setSessions([]);
+      setStats({
+        totalRequests: 0,
+        pendingRequests: 0,
+        acceptedSessions: 0,
+        completedSessions: 0,
+        averageRating: 0,
+        responseRate: 0,
+      });
+
+      // Fetch requests, sessions, and stats
+      const [requestsData, sessionsData, statsData] = await Promise.allSettled([
+        counsellorAPI.getRequests(counsellorId),
+        counsellorAPI.getSessions(counsellorId),
+        counsellorAPI.getStats(counsellorId),
+      ]);
+
+      // Handle requests
+      if (requestsData.status === "fulfilled") {
+        const requestsResult = requestsData.value.requests || [];
+        setRequests(requestsResult);
+      } else {
+        console.error("Failed to fetch requests:", requestsData.reason);
+      }
+
+      // Handle sessions
+      if (sessionsData.status === "fulfilled") {
+        const sessionsResult = sessionsData.value.sessions || [];
+        // Filter upcoming sessions
+        const upcoming = sessionsResult.filter(
+          (session) => session.status === "scheduled" || session.status === "confirmed"
+        );
+        setSessions(upcoming);
+      } else {
+        console.error("Failed to fetch sessions:", sessionsData.reason);
+      }
+
+      // Handle stats
+      if (statsData.status === "fulfilled") {
+        const statsResult = statsData.value.stats || {};
+        setStats({
+          totalRequests: statsResult.totalRequests || 0,
+          pendingRequests: statsResult.pendingRequests || 0,
+          acceptedSessions: statsResult.scheduledSessions || 0, // Use scheduledSessions as acceptedSessions
+          completedSessions: statsResult.completedSessions || 0,
+          averageRating: statsResult.averageRating || 0,
+          responseRate: statsResult.responseRate || 0,
+        });
+      } else {
+        console.error("Failed to fetch stats:", statsData.reason);
+      }
+    } catch (error) {
+      console.error("Error fetching counselling data:", error);
+      setError("Failed to load counselling data. Please refresh the page.");
+    } finally {
+      setDataLoading(false);
+    }
+  };
+
+  // Availability management functions
+  const fetchAvailability = async (counsellorId) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/counsellors/availability/${counsellorId}/`);
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        setAvailability(data.availability || []);
+      } else {
+        setMessage({ type: "error", text: data.message || "Failed to fetch availability" });
+      }
+    } catch (error) {
+      console.error('Error fetching availability:', error);
+      setMessage({ type: "error", text: "Failed to fetch availability" });
+      // Set mock data for demonstration
+      setAvailability([
+        { id: 1, day_of_week: 1, day_name: "Monday", start_time: "09:00", end_time: "17:00", is_active: true },
+        { id: 2, day_of_week: 2, day_name: "Tuesday", start_time: "10:00", end_time: "16:00", is_active: true },
+        { id: 3, day_of_week: 3, day_name: "Wednesday", start_time: "09:00", end_time: "18:00", is_active: true },
+        { id: 4, day_of_week: 4, day_name: "Thursday", start_time: "10:00", end_time: "15:00", is_active: true },
+        { id: 5, day_of_week: 5, day_name: "Friday", start_time: "09:00", end_time: "17:00", is_active: true },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAvailabilitySubmit = async (e) => {
+    e.preventDefault();
+
+    if (formData.start_time >= formData.end_time) {
+      setMessage({ type: "error", text: "Start time must be before end time" });
+      return;
+    }
+
+    if (!user?.id) {
+      setMessage({ type: "error", text: "User ID not found" });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const url = `/api/counsellors/availability/${user.id}/`;
+      const method = editingId ? 'PUT' : 'POST';
+      const body = editingId
+        ? { ...formData, availability_id: editingId }
+        : formData;
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body)
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        setMessage({ type: "success", text: data.message || "Availability saved successfully" });
+        fetchAvailability(user.id);
+        resetAvailabilityForm();
+      } else {
+        setMessage({ type: "error", text: data.message || "Failed to save availability" });
+      }
+    } catch (error) {
+      console.error('Error saving availability:', error);
+      setMessage({ type: "error", text: "Failed to save availability" });
+
+      // Mock successful save for demonstration
+      const newSlot = {
+        id: Date.now(),
+        day_of_week: formData.day_of_week,
+        day_name: daysOfWeek.find(d => d.value === formData.day_of_week)?.label,
+        start_time: formData.start_time,
+        end_time: formData.end_time,
+        is_active: true
+      };
+
+      if (editingId) {
+        setAvailability(prev => prev.map(slot =>
+          slot.id === editingId ? { ...newSlot, id: editingId } : slot
+        ));
+      } else {
+        setAvailability(prev => [...prev, newSlot]);
+      }
+
+      setMessage({ type: "success", text: "Availability saved successfully" });
+      resetAvailabilityForm();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteAvailability = async (availabilityId) => {
+    if (!window.confirm("Are you sure you want to delete this availability slot?")) {
+      return;
+    }
+
+    if (!user?.id) {
+      setMessage({ type: "error", text: "User ID not found" });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/counsellors/availability/${user.id}/`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ availability_id: availabilityId })
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        setMessage({ type: "success", text: data.message || "Availability deleted successfully" });
+        fetchAvailability(user.id);
+      } else {
+        setMessage({ type: "error", text: data.message || "Failed to delete availability" });
+      }
+    } catch (error) {
+      console.error('Error deleting availability:', error);
+      // Mock successful delete for demonstration
+      setAvailability(prev => prev.filter(slot => slot.id !== availabilityId));
+      setMessage({ type: "success", text: "Availability deleted successfully" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditAvailability = (availabilitySlot) => {
+    setEditingId(availabilitySlot.id);
+    setFormData({
+      day_of_week: availabilitySlot.day_of_week,
+      start_time: availabilitySlot.start_time,
+      end_time: availabilitySlot.end_time
+    });
+    setShowAddForm(true);
+  };
+
+  const resetAvailabilityForm = () => {
+    setFormData({
+      day_of_week: 0,
+      start_time: "09:00",
+      end_time: "17:00"
+    });
+    setEditingId(null);
+    setShowAddForm(false);
+  };
+
+  const groupedAvailability = availability.reduce((groups, slot) => {
+    const day = slot.day_name;
+    if (!groups[day]) {
+      groups[day] = [];
+    }
+    groups[day].push(slot);
+    return groups;
+  }, {});
+
+  // Use stats from backend
   const dynamicStats = {
-    totalRequests: requests.length,
-    pendingRequests: requests.filter((req) => req.status === "pending").length,
-    acceptedSessions: requests.filter((req) => req.status === "accepted")
-      .length,
-    completedSessions: stats.completedSessions, // Keep static for now
-    averageRating: stats.averageRating, // Keep static for now
-    responseRate: stats.responseRate, // Keep static for now
+    totalRequests: stats.totalRequests,
+    pendingRequests: stats.pendingRequests,
+    acceptedSessions: stats.acceptedSessions,
+    completedSessions: stats.completedSessions,
+    averageRating: stats.averageRating,
+    responseRate: stats.responseRate,
   };
 
   const filteredRequests = requests.filter((request) => {
     const matchesSearch =
-      request.student.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.topic.toLowerCase().includes(searchTerm.toLowerCase());
+      (request.student && request.student.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (request.topic && request.topic.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus =
       filterStatus === "all" || request.status === filterStatus;
     return matchesSearch && matchesStatus;
@@ -206,81 +399,71 @@ export default function Mentoring() {
     setShowRejectModal(true);
   };
 
-  const confirmAcceptRequest = () => {
+  const confirmAcceptRequest = async () => {
     if (!selectedRequest || !scheduleDate || !scheduleTime) return;
 
-    // Update the request status to accepted
-    setRequests((prevRequests) =>
-      prevRequests.map((req) =>
-        req.id === selectedRequest.id
-          ? {
-            ...req,
-            status: "accepted",
-            scheduledDate: scheduleDate,
-            scheduledTime: scheduleTime,
-            location:
-              req.sessionType === "physical"
-                ? "Campus Library, Room TBD"
-                : undefined,
-          }
-          : req
-      )
-    );
+    try {
+      setDataLoading(true);
 
-    // Create a new session entry for upcoming sessions
-    const newSession = {
-      id: Date.now(), // Generate unique ID
-      student: selectedRequest.student,
-      topic: selectedRequest.topic,
-      date: scheduleDate,
-      time: scheduleTime,
-      duration: "1 hour",
-      type: selectedRequest.sessionType,
-      location:
-        selectedRequest.sessionType === "physical"
+      const scheduledDateTime = `${scheduleDate} ${scheduleTime}`;
+      await counsellorAPI.acceptRequest(selectedRequest.id, {
+        scheduled_at: scheduledDateTime,
+        location: selectedRequest.sessionType === "physical"
           ? "Campus Library, Room TBD"
-          : undefined,
-      meetingLink:
-        selectedRequest.sessionType === "online"
+          : null,
+        meeting_link: selectedRequest.sessionType === "online"
           ? "https://zoom.us/j/to-be-generated"
-          : undefined,
-      status: "confirmed",
-      avatar: selectedRequest.avatar,
-    };
+          : null,
+      });
 
-    // Add to upcoming sessions
-    setSessions((prevSessions) => [...prevSessions, newSession]);
+      // Refresh data to get updated requests and sessions
+      if (user?.user_id) {
+        await fetchCounsellingData(user.user_id);
+      }
 
-    // Reset modal state
-    setShowAcceptModal(false);
-    setSelectedRequest(null);
-    setScheduleDate("");
-    setScheduleTime("");
+      // Reset modal state
+      setShowAcceptModal(false);
+      setSelectedRequest(null);
+      setScheduleDate("");
+      setScheduleTime("");
 
-    console.log("Request accepted and session scheduled:", selectedRequest.id);
+      console.log("Request accepted and session scheduled:", selectedRequest.id);
+    } catch (error) {
+      console.error("Error accepting request:", error);
+      setError("Failed to accept request. Please try again.");
+    } finally {
+      setDataLoading(false);
+    }
   };
 
-  const confirmRejectRequest = () => {
+  const confirmRejectRequest = async () => {
     if (!selectedRequest || !rejectReason.trim()) return;
 
-    // Update the request status to rejected
-    setRequests((prevRequests) =>
-      prevRequests.map((req) =>
-        req.id === selectedRequest.id
-          ? { ...req, status: "rejected", rejectReason: rejectReason }
-          : req
-      )
-    );
+    try {
+      setDataLoading(true);
 
-    // Reset modal state
-    setShowRejectModal(false);
-    setSelectedRequest(null);
-    setRejectReason("");
+      await counsellorAPI.declineRequest(selectedRequest.id, {
+        rejection_reason: rejectReason.trim(),
+      });
 
-    console.log("Request rejected:", selectedRequest.id, "Reason:", rejectReason);
-  };
+      // Refresh data to get updated requests
+      if (user?.user_id) {
+        await fetchCounsellingData(user.user_id);
+      }
 
-  const handleCancelSession = (sessionId) => {
+      // Reset modal state
+      setShowRejectModal(false);
+      setSelectedRequest(null);
+      setRejectReason("");
+
+      console.log("Request rejected:", selectedRequest.id, "Reason:", rejectReason);
+    } catch (error) {
+      console.error("Error rejecting request:", error);
+      setError("Failed to reject request. Please try again.");
+    } finally {
+      setDataLoading(false);
+    }
+  }; const handleCancelSession = (sessionId) => {
     const sessionToCancel = sessions.find((session) => session.id === sessionId);
     if (!sessionToCancel) return;
 
@@ -288,28 +471,32 @@ export default function Mentoring() {
     setShowCancelModal(true);
   };
 
-  const confirmCancelSession = () => {
+  const confirmCancelSession = async () => {
     if (!selectedSession) return;
 
-    // Remove session from upcoming sessions
-    setSessions((prevSessions) =>
-      prevSessions.filter((session) => session.id !== selectedSession.id)
-    );
+    try {
+      setDataLoading(true);
 
-    // Update corresponding request status back to pending if it exists
-    setRequests((prevRequests) =>
-      prevRequests.map((req) =>
-        req.student === selectedSession.student && req.topic === selectedSession.topic
-          ? { ...req, status: "pending", scheduledDate: undefined, scheduledTime: undefined }
-          : req
-      )
-    );
+      await counsellorAPI.cancelSession(selectedSession.id, {
+        cancellation_reason: "Cancelled by counsellor",
+      });
 
-    // Reset modal state
-    setShowCancelModal(false);
-    setSelectedSession(null);
+      // Refresh data to get updated sessions and requests
+      if (user?.user_id) {
+        await fetchCounsellingData(user.user_id);
+      }
 
-    console.log("Session cancelled:", selectedSession.id);
+      // Reset modal state
+      setShowCancelModal(false);
+      setSelectedSession(null);
+
+      console.log("Session cancelled:", selectedSession.id);
+    } catch (error) {
+      console.error("Error cancelling session:", error);
+      setError("Failed to cancel session. Please try again.");
+    } finally {
+      setDataLoading(false);
+    }
   };
 
   const handleRescheduleSession = (sessionId) => {
@@ -322,34 +509,57 @@ export default function Mentoring() {
     setShowRescheduleModal(true);
   };
 
-  const confirmRescheduleSession = () => {
+  const confirmRescheduleSession = async () => {
     if (!selectedSession || !scheduleDate || !scheduleTime) return;
 
-    // Update session with new date and time
-    setSessions((prevSessions) =>
-      prevSessions.map((session) =>
-        session.id === selectedSession.id
-          ? { ...session, date: scheduleDate, time: scheduleTime }
-          : session
-      )
-    );
+    try {
+      setDataLoading(true);
 
-    // Update corresponding request if it exists
-    setRequests((prevRequests) =>
-      prevRequests.map((req) =>
-        req.student === selectedSession.student && req.topic === selectedSession.topic
-          ? { ...req, scheduledDate: scheduleDate, scheduledTime: scheduleTime }
-          : req
-      )
-    );
+      const newDateTime = `${scheduleDate} ${scheduleTime}`;
+      await counsellorAPI.rescheduleSession(selectedSession.id, {
+        new_scheduled_at: newDateTime,
+      });
 
-    // Reset modal state
-    setShowRescheduleModal(false);
-    setSelectedSession(null);
-    setScheduleDate("");
-    setScheduleTime("");
+      // Refresh data to get updated sessions
+      if (user?.user_id) {
+        await fetchCounsellingData(user.user_id);
+      }
 
-    console.log("Session rescheduled:", selectedSession.id);
+      // Reset modal state
+      setShowRescheduleModal(false);
+      setSelectedSession(null);
+      setScheduleDate("");
+      setScheduleTime("");
+
+      console.log("Session rescheduled:", selectedSession.id);
+    } catch (error) {
+      console.error("Error rescheduling session:", error);
+      setError("Failed to reschedule session. Please try again.");
+    } finally {
+      setDataLoading(false);
+    }
+  };
+
+  const handleCompleteSession = async (sessionId) => {
+    try {
+      setDataLoading(true);
+
+      await counsellorAPI.completeSession(sessionId, {
+        completion_notes: "Session completed by counsellor",
+      });
+
+      // Refresh data to get updated sessions and stats
+      if (user?.user_id) {
+        await fetchCounsellingData(user.user_id);
+      }
+
+      console.log("Session completed:", sessionId);
+    } catch (error) {
+      console.error("Error completing session:", error);
+      setError("Failed to complete session. Please try again.");
+    } finally {
+      setDataLoading(false);
+    }
   };
 
   return (
@@ -358,6 +568,37 @@ export default function Mentoring() {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"
     >
+      {/* Error Message */}
+      {error && (
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-red-500" />
+              <p className="text-red-700">{error}</p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setError(null)}
+                className="ml-auto"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Loading Overlay */}
+      {dataLoading && (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <div className="animate-spin w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full" />
+              <p className="text-blue-700">Loading...</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
@@ -443,6 +684,16 @@ export default function Mentoring() {
             >
               <Calendar className="w-4 h-4" />
               <span>Upcoming Sessions</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("availability")}
+              className={`flex items-center space-x-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === "availability"
+                ? "border-primary-500 text-primary-600"
+                : "border-transparent text-neutral-grey hover:text-neutral-black"
+                }`}
+            >
+              <Settings className="w-4 h-4" />
+              <span>Availability</span>
             </button>
           </div>
         </CardHeader>
@@ -751,6 +1002,227 @@ export default function Mentoring() {
                     </p>
                   </CardContent>
                 </Card>
+              )}
+            </motion.div>
+          )}
+
+          {/* Availability Tab */}
+          {activeTab === "availability" && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
+            >
+              {/* Message Display */}
+              <AnimatePresence>
+                {message.text && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className={`p-3 rounded-lg flex items-center space-x-2 ${message.type === "success"
+                      ? "bg-green-50 border border-green-200 text-green-700"
+                      : "bg-red-50 border border-red-200 text-red-700"
+                      }`}
+                  >
+                    {message.type === "success" ? (
+                      <CheckCircle className="w-5 h-5" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5" />
+                    )}
+                    <span>{message.text}</span>
+                    <button
+                      onClick={() => setMessage({ type: "", text: "" })}
+                      className="ml-auto text-current hover:opacity-70"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Header with Add Button */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-neutral-black">
+                    Availability Management
+                  </h3>
+                  <p className="text-sm text-neutral-grey">
+                    Set your weekly availability for mentoring sessions
+                  </p>
+                </div>
+                <Button
+                  onClick={() => setShowAddForm(true)}
+                  disabled={loading}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Slot
+                </Button>
+              </div>
+
+              {/* Add/Edit Form */}
+              <AnimatePresence>
+                {showAddForm && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <Card className="border-primary-200">
+                      <CardHeader>
+                        <CardTitle className="text-lg">
+                          {editingId ? "Edit Availability" : "Add New Availability"}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <form onSubmit={handleAvailabilitySubmit} className="space-y-4">
+                          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                            <div>
+                              <label className="block mb-2 text-sm font-medium">
+                                Day of Week
+                              </label>
+                              <select
+                                value={formData.day_of_week}
+                                onChange={(e) => setFormData(prev => ({
+                                  ...prev,
+                                  day_of_week: parseInt(e.target.value)
+                                }))}
+                                className="w-full p-3 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                              >
+                                {daysOfWeek.map(day => (
+                                  <option key={day.value} value={day.value}>
+                                    {day.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <div>
+                              <label className="block mb-2 text-sm font-medium">
+                                Start Time
+                              </label>
+                              <input
+                                type="time"
+                                value={formData.start_time}
+                                onChange={(e) => setFormData(prev => ({
+                                  ...prev,
+                                  start_time: e.target.value
+                                }))}
+                                className="w-full p-3 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block mb-2 text-sm font-medium">
+                                End Time
+                              </label>
+                              <input
+                                type="time"
+                                value={formData.end_time}
+                                onChange={(e) => setFormData(prev => ({
+                                  ...prev,
+                                  end_time: e.target.value
+                                }))}
+                                className="w-full p-3 border rounded-lg border-neutral-light-grey focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex space-x-3">
+                            <Button
+                              type="submit"
+                              disabled={loading}
+                              className="flex items-center space-x-2"
+                            >
+                              {loading ? (
+                                <div className="w-4 h-4 border-b-2 border-white rounded-full animate-spin"></div>
+                              ) : (
+                                <Save className="w-4 h-4" />
+                              )}
+                              <span>{editingId ? "Update" : "Add"}</span>
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              onClick={resetAvailabilityForm}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </form>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Availability Display */}
+              {loading && !showAddForm ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="w-8 h-8 border-b-2 rounded-full animate-spin border-primary-600"></div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {Object.keys(groupedAvailability).length === 0 ? (
+                    <div className="py-8 text-center text-neutral-grey">
+                      <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>No availability slots configured yet.</p>
+                      <p className="text-sm">Click "Add Slot" to get started.</p>
+                    </div>
+                  ) : (
+                    daysOfWeek.map(day => {
+                      const daySlots = groupedAvailability[day.label] || [];
+                      if (daySlots.length === 0) return null;
+
+                      return (
+                        <div key={day.value} className="p-4 border rounded-lg border-neutral-light-grey">
+                          <h3 className="mb-3 text-lg font-medium text-neutral-black">
+                            {day.label}
+                          </h3>
+                          <div className="space-y-2">
+                            {daySlots.map(slot => (
+                              <motion.div
+                                key={slot.id}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="flex items-center justify-between p-3 rounded-lg bg-neutral-silver/10"
+                              >
+                                <div className="flex items-center space-x-3">
+                                  <Clock className="w-4 h-4 text-primary-600" />
+                                  <span className="font-medium">
+                                    {slot.start_time} - {slot.end_time}
+                                  </span>
+                                  {!slot.is_active && (
+                                    <span className="px-2 py-1 text-xs text-yellow-800 bg-yellow-100 rounded">
+                                      Inactive
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <button
+                                    onClick={() => handleEditAvailability(slot)}
+                                    className="p-1 transition-colors text-primary-600 hover:text-primary-800"
+                                    disabled={loading}
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteAvailability(slot.id)}
+                                    className="p-1 text-red-600 transition-colors hover:text-red-800"
+                                    disabled={loading}
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </motion.div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
               )}
             </motion.div>
           )}

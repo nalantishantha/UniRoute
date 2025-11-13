@@ -66,17 +66,17 @@ const NewsFeed = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-200 to-blue-100">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white">
       {/* Navigation */}
       <StudentNavigation />
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-8">
-          <h1 className="font-display font-bold text-5xl text-blue-900 mb-4">
+          <h1 className="font-display font-bold text-3xl text-primary-600 mb-2">
             News & Updates
           </h1>
-          <p className="text-xl text-blue-800">
+          <p className="text-primary-400">
             Stay updated with the latest university news and announcements
           </p>
         </div>
@@ -84,7 +84,7 @@ const NewsFeed = () => {
         {/* Loading State */}
         {loading && (
           <div className="flex justify-center items-center py-12">
-            <Loader2 className="h-12 w-12 text-blue-900 animate-spin" />
+            <Loader2 className="h-12 w-12 text-primary-600 animate-spin" />
           </div>
         )}
 
@@ -100,8 +100,8 @@ const NewsFeed = () => {
           <div className="space-y-6">
             {announcements.length === 0 ? (
               <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-                <Bell className="h-16 w-16 text-blue-300 mx-auto mb-4" />
-                <p className="text-xl text-blue-800">No announcements available at the moment.</p>
+                <Bell className="h-16 w-16 text-primary-300 mx-auto mb-4" />
+                <p className="text-primary-300">No announcements available at the moment.</p>
               </div>
             ) : (
               announcements.map((announcement) => (
@@ -112,14 +112,14 @@ const NewsFeed = () => {
                   {/* Header with University Name and Date */}
                   <div className="flex items-start justify-between mb-4 pb-4 border-b border-accent-100">
                     <div className="flex items-center space-x-3">
-                      <div className="bg-blue-100 p-2 rounded-full">
-                        <GraduationCap className="h-6 w-6 text-blue-900" />
+                      <div className="bg-primary-100 p-2 rounded-full">
+                        <GraduationCap className="h-6 w-6 text-primary-600" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-lg text-blue-900">
+                        <h3 className="font-semibold text-lg text-primary-600">
                           {announcement.university_name}
                         </h3>
-                        <div className="flex items-center space-x-1 text-blue-600 text-sm">
+                        <div className="flex items-center space-x-1 text-primary-300 text-sm">
                           <Calendar className="h-4 w-4" />
                           <span>{formatDate(announcement.created_at)}</span>
                         </div>
@@ -129,11 +129,11 @@ const NewsFeed = () => {
 
                   {/* Announcement Content */}
                   <div className="mb-4">
-                    <h2 className="font-display font-semibold text-2xl text-blue-900 mb-3">
+                    <h2 className="font-display font-semibold text-xl text-primary-600 mb-2">
                       {announcement.title}
                     </h2>
 
-                    <p className="text-blue-800 leading-relaxed whitespace-pre-wrap">
+                    <p className="text-primary-300 leading-relaxed whitespace-pre-wrap">
                       {announcement.message}
                     </p>
                   </div>

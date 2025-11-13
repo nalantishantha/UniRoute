@@ -16,6 +16,10 @@ urlpatterns = [
     path('stats/<int:mentor_id>/', views.get_mentor_stats, name='mentor_stats'),
     path('feedback/<int:mentor_id>/', views.get_mentor_feedback, name='mentor_feedback'),
     
+    # Feedback submission
+    path('sessions/feedback/submit/', views.submit_session_feedback, name='submit_session_feedback'),
+    path('sessions/<int:session_id>/feedback/check/', views.check_session_feedback, name='check_session_feedback'),
+    
     # Availability management
     path('availability/<int:mentor_id>/', views.MentorAvailabilityView.as_view(), name='mentor_availability'),
     path('available-slots/<int:mentor_id>/', views.AvailableTimeSlotsView.as_view(), name='available_slots'),

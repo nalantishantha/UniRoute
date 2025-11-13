@@ -1,13 +1,110 @@
-from django.shortcuts import render
+from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password, check_password
+from django.core.mail import EmailMessage
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.db import transaction
 from django.utils import timezone
+from datetime import timedelta
 import json
+import random
+
+OTP_EXPIRATION_MINUTES = 10
+OTP_RESEND_INTERVAL_SECONDS = 60
+MAX_OTP_ATTEMPTS = 5
+ACADEMIC_EMAIL_SUFFIX = '.ac.lk'
+
+
+def _generate_otp_code(length: int = 6) -> str:
+    start = 10 ** (length - 1)
+    end = (10 ** length) - 1
+    return str(random.randint(start, end))
+
+
+def _is_academic_email(email: str) -> bool:
+    return email.endswith(ACADEMIC_EMAIL_SUFFIX)
+
+
+def _send_university_student_otp_email(email: str, otp: str, full_name: str = '') -> None:
+    recipient_name = full_name or 'there'
+    subject = 'UniRoute University Email Verification Code'
+    message = (
+        f"Hi {recipient_name},\n\n"
+        f"Your UniRoute verification code is {otp}. "
+        f"This code will expire in {OTP_EXPIRATION_MINUTES} minutes.\n\n"
+        "If you did not request this code, please ignore this email.\n\n"
+        "Thank you,\nUniRoute Team"
+    )
+    reply_to = getattr(settings, 'REPLY_TO_EMAIL', '')
+    email_message = EmailMessage(
+        subject=subject,
+        body=message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[email],
+        reply_to=[reply_to] if reply_to else None,
+    )
+    email_message.send(fail_silently=False)
+
+
+def _initiate_university_student_email_verification(email: str, first_name: str) -> JsonResponse:
+    now = timezone.now()
+    verification = EmailVerification.objects.filter(
+        email=email,
+        purpose=EmailVerification.Purpose.UNI_STUDENT_REGISTRATION
+    ).first()
+
+    if verification:
+        seconds_since_last_send = (now - verification.last_sent_at).total_seconds()
+        if seconds_since_last_send < OTP_RESEND_INTERVAL_SECONDS:
+            wait_seconds = OTP_RESEND_INTERVAL_SECONDS - int(seconds_since_last_send)
+            return JsonResponse({
+                'success': False,
+                'message': f'Please wait {wait_seconds} seconds before requesting a new verification code.',
+                'otp_required': True,
+                'resend_available_in_seconds': max(wait_seconds, 0)
+            }, status=429)
+
+    otp_code = _generate_otp_code()
+    try:
+        _send_university_student_otp_email(email, otp_code, first_name)
+    except Exception as mail_error:
+        print(f"OTP email send error for {email}: {mail_error}")
+        return JsonResponse({
+            'success': False,
+            'message': 'Could not send verification email. Please try again later.'
+        }, status=500)
+
+    expires_at = now + timedelta(minutes=OTP_EXPIRATION_MINUTES)
+
+    if verification:
+        verification.otp = otp_code
+        verification.expires_at = expires_at
+        verification.last_sent_at = now
+        verification.is_verified = False
+        verification.attempts = 0
+        verification.save(update_fields=['otp', 'expires_at', 'last_sent_at', 'is_verified', 'attempts'])
+    else:
+        EmailVerification.objects.create(
+            email=email,
+            otp=otp_code,
+            purpose=EmailVerification.Purpose.UNI_STUDENT_REGISTRATION,
+            expires_at=expires_at,
+            last_sent_at=now
+        )
+
+    print(f"OTP sent to {email} for university student registration")
+
+    return JsonResponse({
+        'success': True,
+        'message': 'Verification code sent to your university email. Please verify to continue.',
+        'otp_required': True,
+        'resend_available_in_seconds': OTP_RESEND_INTERVAL_SECONDS
+    })
 
 # Import your custom models
-from .models import Users, UserDetails, UserTypes
+from .models import Users, UserDetails, UserTypes, EmailVerification, UserDailyLogin
 from apps.students.models import Students
 from apps.university_students.models import UniversityStudents
 from apps.universities.models import Universities, UniversityRequests
@@ -156,6 +253,17 @@ def login_user(request):
                 if check_password(password, user.password_hash):
                     print("Password verified")
                     
+                    # Record daily login activity
+                    login_date = timezone.localdate()
+                    daily_login, created = UserDailyLogin.objects.get_or_create(
+                        user=user,
+                        login_date=login_date,
+                        defaults={'login_count': 1}
+                    )
+                    if not created:
+                        daily_login.login_count += 1
+                        daily_login.save(update_fields=['login_count'])
+
                     # Get user details
                     try:
                         user_details = UserDetails.objects.get(user=user)
@@ -459,74 +567,140 @@ def logout_user(request):
 
 @csrf_exempt
 def register_university_student(request):
-    if request.method == 'POST':
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'message': 'Only POST method allowed'
+        }, status=405)
+
+    try:
+        data = json.loads(request.body)
+        print("Received university student registration data:", data)
+
+        # Extract and normalize form data
+        first_name = (data.get('firstName') or '').strip()
+        last_name = (data.get('lastName') or '').strip()
+        email = (data.get('email') or '').strip().lower()
+        phone_number = (data.get('phoneNumber') or '').strip()
+        password = data.get('password')
+        confirm_password = data.get('confirmPassword')
+        university_id = data.get('universityId')
+        faculty_id = data.get('facultyId')
+        degree_program_id = data.get('degreeProgramId')
+        duration_id = data.get('durationId')
+        year_of_study = data.get('yearOfStudy')
+        registration_number = data.get('registrationNumber')
+        otp = (data.get('otp') or '').strip()
+
+        # Basic validation before triggering OTP flow
+        if not all([
+            first_name, last_name, email, password, confirm_password,
+            university_id, degree_program_id, duration_id, year_of_study, registration_number
+        ]):
+            return JsonResponse({
+                'success': False,
+                'message': 'All required fields must be filled'
+            }, status=400)
+
+        if password != confirm_password:
+            return JsonResponse({
+                'success': False,
+                'message': 'Passwords do not match'
+            }, status=400)
+
+        if len(password) < 8:
+            return JsonResponse({
+                'success': False,
+                'message': 'Password must be at least 8 characters long'
+            }, status=400)
+
         try:
-            data = json.loads(request.body)
-            print("Received university student registration data:", data)
-            
-            # Get form data
-            first_name = data.get('firstName')
-            last_name = data.get('lastName')
-            email = data.get('email')
-            phone_number = data.get('phoneNumber')
-            password = data.get('password')
-            confirm_password = data.get('confirmPassword')
-            university_id = data.get('universityId')
-            faculty_id = data.get('facultyId')
-            degree_program_id = data.get('degreeProgramId')
-            duration_id = data.get('durationId')
-            year_of_study = data.get('yearOfStudy')
-            registration_number = data.get('registrationNumber')
+            validate_email(email)
+        except ValidationError:
+            return JsonResponse({
+                'success': False,
+                'message': 'Please enter a valid email address'
+            }, status=400)
 
-            # Basic validation
-            if not all([
-                first_name, last_name, email, password, confirm_password,
-                university_id, degree_program_id, duration_id, year_of_study, registration_number
-            ]):
-                return JsonResponse({
-                    'success': False,
-                    'message': 'All required fields must be filled'
-                }, status=400)
+        if not _is_academic_email(email):
+            return JsonResponse({
+                'success': False,
+                'message': 'University student email must end with ".ac.lk"'
+            }, status=400)
 
-            if password != confirm_password:
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Passwords do not match'
-                }, status=400)
+        if Users.objects.filter(email=email).exists():
+            return JsonResponse({
+                'success': False,
+                'message': 'Email already exists'
+            }, status=400)
 
-            if len(password) < 8:
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Password must be at least 8 characters long'
-                }, status=400)
+        if not otp:
+            # Initial call - send OTP for verification
+            return _initiate_university_student_email_verification(email, first_name)
 
-            # Create username from first and last name
-            username = f"{first_name.lower()}.{last_name.lower()}".replace(' ', '')
+        # OTP supplied - verify and continue registration
+        verification = EmailVerification.objects.filter(
+            email=email,
+            purpose=EmailVerification.Purpose.UNI_STUDENT_REGISTRATION
+        ).first()
 
-            # Check if username already exists, if so add numbers
-            original_username = username
-            counter = 1
-            while Users.objects.filter(username=username).exists():
-                username = f"{original_username}{counter}"
-                counter += 1
+        if not verification:
+            return JsonResponse({
+                'success': False,
+                'message': 'Please request a verification code before completing registration.',
+                'otp_required': True
+            }, status=400)
 
-            # Check if email already exists
-            if Users.objects.filter(email=email).exists():
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Email already exists'
-                }, status=400)
+        now = timezone.now()
 
-            print("✅ Validation passed, creating university student...")
+        if verification.expires_at <= now:
+            return JsonResponse({
+                'success': False,
+                'message': 'The verification code has expired. Please request a new code.',
+                'otp_required': True
+            }, status=400)
 
-            # Create user with transaction
+        if verification.attempts >= MAX_OTP_ATTEMPTS:
+            return JsonResponse({
+                'success': False,
+                'message': 'Too many invalid attempts. Please request a new verification code.',
+                'otp_required': True
+            }, status=400)
+
+        if verification.otp != otp:
+            verification.attempts += 1
+            verification.save(update_fields=['attempts'])
+            attempts_left = max(MAX_OTP_ATTEMPTS - verification.attempts, 0)
+            return JsonResponse({
+                'success': False,
+                'message': 'Invalid verification code. Please check the code and try again.',
+                'otp_required': True,
+                'attempts_remaining': attempts_left
+            }, status=400)
+
+        verification.is_verified = True
+        verification.verified_at = now
+        verification.attempts = 0
+        verification.save(update_fields=['is_verified', 'verified_at', 'attempts'])
+
+        # Create username from first and last name
+        username = f"{first_name.lower()}.{last_name.lower()}".replace(' ', '')
+        original_username = username
+        counter = 1
+        while Users.objects.filter(username=username).exists():
+            username = f"{original_username}{counter}"
+            counter += 1
+
+        print("✅ OTP verified. Creating university student...")
+
+        try:
             with transaction.atomic():
                 # Get or create university student user type (use uni_student with type_id = 2)
                 uni_student_user_type, _ = UserTypes.objects.get_or_create(
                     type_name='uni_student'
                 )
                 print(f"Using user type: {uni_student_user_type.type_name} (ID: {uni_student_user_type.type_id})")
-                
+
                 # Create user
                 user = Users.objects.create(
                     username=username,
@@ -536,16 +710,17 @@ def register_university_student(request):
                     is_active=1,
                     created_at=timezone.now()
                 )
-                
+
                 # Create user details
+                full_name = f"{first_name} {last_name}".strip()
                 user_details = UserDetails.objects.create(
                     user=user,
-                    full_name=f"{first_name} {last_name}",
+                    full_name=full_name,
                     contact_number=phone_number or '',
-                    is_verified=0,
+                    is_verified=1,
                     updated_at=timezone.now()
                 )
-                
+
                 # Create university student record
                 university_student = UniversityStudents.objects.create(
                     user=user,
@@ -557,18 +732,18 @@ def register_university_student(request):
                     registration_number=registration_number
                 )
                 print(f"University student created with ID: {university_student.university_student_id}")
-                
+
                 # Create pre-mentor record (all university students start as pre-mentors)
                 pre_mentor = PreMentors.objects.create(
                     user=user,
                     university_student=university_student,
                     status='active',
-                    applied=0,  # Not applied for mentor status yet
+                    applied=0,
                     created_at=timezone.now(),
                     updated_at=timezone.now()
                 )
                 print(f"Pre-mentor record created with ID: {pre_mentor.pre_mentor_id}")
-                
+
                 # Create pending mentor record (approved=0)
                 from apps.mentoring.models import Mentors
                 mentor = Mentors.objects.create(
@@ -576,11 +751,14 @@ def register_university_student(request):
                     university_student=university_student,
                     expertise='',
                     bio='',
-                    approved=0,  # Pending approval
+                    approved=0,
                     created_at=timezone.now()
                 )
                 print(f"Pending mentor record created with ID: {mentor.mentor_id}")
-                
+
+                # Clear OTP record after successful registration
+                verification.delete()
+
                 return JsonResponse({
                     'success': True,
                     'message': 'University student registration successful! You can now login as a pre-mentor.',
@@ -603,18 +781,24 @@ def register_university_student(request):
                         'registration_number': registration_number
                     }
                 })
-            
-        except Exception as e:
-            print(f"University student registration error: {str(e)}")
+        except Exception as creation_error:
+            print(f"University student registration error: {creation_error}")
             return JsonResponse({
                 'success': False,
-                'message': f'Registration failed: {str(e)}'
+                'message': f'Registration failed: {creation_error}'
             }, status=500)
-    
-    return JsonResponse({
-        'success': False,
-        'message': 'Only POST method allowed'
-    }, status=405)
+
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid JSON data'
+        }, status=400)
+    except Exception as e:
+        print(f"University student registration error: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'message': f'Registration failed: {str(e)}'
+        }, status=500)
 
 
 @csrf_exempt

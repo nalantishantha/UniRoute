@@ -193,7 +193,7 @@ const EditProfile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-r from-blue-200 to-blue-100">
+      <div className="min-h-screen bg-gradient-to-r from-primary-50 to-white">
         <StudentNavigation />
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
@@ -207,7 +207,7 @@ const EditProfile = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-r from-blue-200 to-blue-100">
+      <div className="min-h-screen bg-gradient-to-r from-primary-50 to-white">
         <StudentNavigation />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-red-50 border border-red-200 rounded-lg p-6">
@@ -226,7 +226,7 @@ const EditProfile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-200 to-blue-100">
+    <div className="min-h-screen bg-gradient-to-r from-primary-50 to-white">
       <StudentNavigation />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -293,7 +293,7 @@ const EditProfile = () => {
               </div>
 
               {/* Upload Button */}
-              <label className="cursor-pointer bg-primary-400 text-white px-6 py-3 rounded-lg hover:bg-primary-500 transition-colors inline-flex items-center space-x-2">
+              <label className="cursor-pointer bg-primary-600 text-white px-6 py-3 rounded-xl hover:bg-primary-700 transition-colors inline-flex items-center space-x-2 font-semibold">
                 <Upload className="h-5 w-5" />
                 <span>Choose Profile Picture</span>
                 <input
@@ -478,7 +478,7 @@ const EditProfile = () => {
             <button
               type="button"
               onClick={() => navigate('/student/profile')}
-              className="px-6 py-3 border border-accent-200 text-primary-400 rounded-lg hover:bg-accent-50 transition-colors"
+              className="px-6 py-3 border border-accent-200 text-primary-600 rounded-xl font-semibold hover:bg-accent-50 transition-colors"
               disabled={saving}
             >
               Cancel
@@ -487,7 +487,7 @@ const EditProfile = () => {
             <button
               type="submit"
               disabled={saving}
-              className="bg-primary-400 text-white px-8 py-3 rounded-lg hover:bg-primary-500 transition-colors inline-flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-primary-600 text-white px-8 py-3 rounded-xl hover:bg-primary-700 transition-colors inline-flex items-center space-x-2 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? (
                 <>

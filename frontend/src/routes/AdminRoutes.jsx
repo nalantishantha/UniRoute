@@ -8,18 +8,21 @@ import { UsersList, UserForm, UserView } from '../pages/Admin/Users';
 import { StudentsList, StudentForm, StudentView } from '../pages/Admin/Students';
 import { UniversityStudentsList, UniversityStudentsForm, UniversityStudentsView } from '../pages/Admin/UniversityStudents';
 import { MentorsList, MentorForm, MentorView } from '../pages/Admin/Mentors';
+import { CounsellorsList, CounsellorForm, CounsellorView } from '../pages/Admin/Counsellors';
 import { TutorsList, TutorForm, TutorView } from '../pages/Admin/Tutors';
 import { UniversitiesList, UniversityForm, UniversityView } from '../pages/Admin/Universities';
 import { CompaniesList, CompanyForm, CompanyView } from '../pages/Admin/Companies';
 import { ProgramsList, ProgramForm, ProgramView } from '../pages/Admin/Programs';
 import { JobList, JobDetails, JobForm } from '../pages/Admin/Jobs';
-import { EventsList, EventView, EventForm } from '../pages/Admin/Events';
 import { Reports, ReportDetails } from '../pages/Admin/Reports'
-import { AdminSettings } from '../pages/Admin';
+import { AdminSettings, AdminReportGenerator } from '../pages/Admin';
 import { RequestsList, RequestDetails } from '../pages/Admin/Requests';
 import AdvertisementRequests from '../pages/Admin/Requests/AdvertisementRequests';
 import UniversityRequests from '../pages/Admin/Requests/UniversityRequests';
 import CompanyRequests from '../pages/Admin/Requests/CompanyRequests';
+import PublishedCourses from '../pages/Admin/Content/PublishedCourses';
+import MentoringSessions from '../pages/Admin/Content/MentoringSessions';
+import TutoringSessions from '../pages/Admin/Content/TutoringSessions';
 
 const AdminRoutes = () => {
   return (
@@ -52,6 +55,12 @@ const AdminRoutes = () => {
         <Route path="/mentors/:id" element={<MentorView />} />
         <Route path="/mentors/:id/edit" element={<MentorForm />} />
 
+  {/* Counsellors Management */}
+  <Route path="/counsellors" element={<CounsellorsList />} />
+  <Route path="/counsellors/new" element={<CounsellorForm />} />
+  <Route path="/counsellors/:id" element={<CounsellorView />} />
+  <Route path="/counsellors/:id/edit" element={<CounsellorForm />} />
+
         {/* Tutors Management */}
         <Route path="/tutors" element={<TutorsList />} />
         <Route path="/tutors/new" element={<TutorForm />} />
@@ -63,6 +72,9 @@ const AdminRoutes = () => {
         <Route path="/universities/new" element={<UniversityForm />} />
         <Route path="/universities/:id" element={<UniversityView />} />
         <Route path="/universities/:id/edit" element={<UniversityForm />} />
+
+  {/* Analytics & Reports */}
+  <Route path="/analytics" element={<AdminReportGenerator />} />
 
         {/* Companies Management */}
         <Route path="/companies" element={<CompaniesList />} />
@@ -76,17 +88,11 @@ const AdminRoutes = () => {
         <Route path="/programs/:id" element={<ProgramView />} />
         <Route path="/programs/:id/edit" element={<ProgramForm />} />
 
-        {/* Jobs Management */}
+  {/* Internships Management */}
         <Route path="/jobs" element={<JobList />} />
         <Route path="/jobs/create" element={<JobForm />} />
         <Route path="/jobs/:jobId/edit" element={<JobForm />} />
         <Route path="/jobs/:jobId/view" element={<JobDetails />} />
-
-        {/* Events Management */}
-        <Route path="/events" element={<EventsList />} />
-        <Route path="/events/new" element={<EventForm />} />
-        <Route path="/events/:id" element={<EventView />} />
-        <Route path="/events/:id/edit" element={<EventForm />} />
 
         {/* Requests Management */}
         <Route path="/requests" element={<RequestsList />} />
@@ -98,6 +104,11 @@ const AdminRoutes = () => {
         {/* Report Management */}
         <Route path="/reports" element={<Reports />} />
         <Route path="/reports/:reportId" element={<ReportDetails />} />
+
+  {/* Content Management */}
+  <Route path="/content/published-courses" element={<PublishedCourses />} />
+  <Route path="/content/mentoring-sessions" element={<MentoringSessions />} />
+  <Route path="/content/tutoring-sessions" element={<TutoringSessions />} />
 
         {/* Settings */}
         <Route path="/settings" element={< AdminSettings />} />

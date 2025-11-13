@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getCurrentUser } from '../../../utils/auth';
+import { fetchMentors } from '../../../utils/mentorsAPI';
 import AdminLayout from '../../../components/common/Admin/AdminLayout';
 import {
   Users,
@@ -8,232 +9,158 @@ import {
   Search,
   Filter,
   Eye,
-  Edit,
-  Trash2,
-  UserCheck,
-  UserX,
   ChevronLeft,
   ChevronRight,
+  Mail,
   Phone,
-  Calendar,
-  Award,
-  Building,
-  BookOpen,
   MapPin,
-  Star,
-  TrendingUp,
-  Briefcase,
-  GraduationCap
+  Clock
 } from 'lucide-react';
+
+const MENTORS_PER_PAGE = 10;
 
 const MentorsList = () => {
   const navigate = useNavigate();
   const [mentors, setMentors] = useState([]);
+  const [summary, setSummary] = useState(null);
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    total_pages: 1,
+    total_items: 0,
+    per_page: MENTORS_PER_PAGE,
+    has_next: false,
+    has_previous: false
+  });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterExpertise, setFilterExpertise] = useState('all');
-  const [filterCompany, setFilterCompany] = useState('all');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [approvedFilter, setApprovedFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [mentorsPerPage] = useState(10);
-
-  // Mock data for mentors
-  const mockMentors = [
-    {
-      id: 1,
-      first_name: 'Dilshan',
-      last_name: 'Rathnayake',
-      email: 'dilshan.rathnayake@techcorp.lk',
-      contact_number: '0771234567',
-      university: 'University of Moratuwa', // fixed key
-      degree_program: 'BSc in Artificial Intelligence', // fixed key
-      experience_years: 8,
-      expertise_areas: ['Software Development', 'Machine Learning', 'Cloud Computing'],
-      industry: 'Technology',
-      mentorship_capacity: 5,
-      current_mentees: 3,
-      linkedin_profile: 'https://linkedin.com/in/dilshan-rathnayake',
-      rating: 4.8,
-      total_reviews: 24,
-      bio: 'Experienced software engineer with expertise in full-stack development and machine learning.',
-      is_active: true,
-      is_verified: true,
-      joined_date: '2023-03-15',
-      last_login: '2024-07-03T14:20:00Z'
-    },
-    {
-      id: 2,
-      first_name: 'Priyanka',
-      last_name: 'Silva',
-      email: 'priyanka.silva@bankorp.lk',
-      contact_number: '0772345678',
-      university: 'University of Colombo School of Colombo', // fixed key
-      degree_program: 'BSc. in Information Technology', // fixed key
-      experience_years: 12,
-      expertise_areas: ['Finance', 'Investment Banking', 'Risk Management'],
-      industry: 'Banking & Finance',
-      mentorship_capacity: 4,
-      current_mentees: 4,
-      linkedin_profile: 'https://linkedin.com/in/priyanka-silva',
-      rating: 4.9,
-      total_reviews: 31,
-      bio: 'Senior financial analyst with extensive experience in investment banking and risk assessment.',
-      is_active: true,
-      is_verified: true,
-      joined_date: '2023-01-20',
-      last_login: '2024-07-02T16:45:00Z'
-    },
-    {
-      id: 3,
-      first_name: 'Roshan',
-      last_name: 'Fernando',
-      email: 'roshan.fernando@medtech.lk',
-      contact_number: '0773456789',
-      university: 'University of Kelaniya',
-      degree_program: 'BSc in Management and Information Technology',
-      experience_years: 6,
-      expertise_areas: ['Biomedical Engineering', 'Healthcare Technology', 'Research'],
-      industry: 'Healthcare',
-      mentorship_capacity: 3,
-      current_mentees: 2,
-      linkedin_profile: 'https://linkedin.com/in/roshan-fernando',
-      rating: 4.7,
-      total_reviews: 18,
-      bio: 'Innovative biomedical engineer focused on developing cutting-edge healthcare solutions.',
-      is_active: true,
-      is_verified: true,
-      joined_date: '2023-06-10',
-      last_login: '2024-07-01T10:30:00Z'
-    },
-    {
-      id: 4,
-      first_name: 'Chamila',
-      last_name: 'Wickramasinghe',
-      email: 'chamila.wickrama@marketing.lk',
-      contact_number: '0774567890',
-      university: 'University of Peradeniya',
-      degree_program: 'BSc. in Engineering(Hons)',
-      experience_years: 10,
-      expertise_areas: ['Digital Marketing', 'Brand Strategy', 'Content Creation'],
-      industry: 'Marketing & Advertising',
-      mentorship_capacity: 6,
-      current_mentees: 1,
-      linkedin_profile: 'https://linkedin.com/in/chamila-wickrama',
-      rating: 4.6,
-      total_reviews: 22,
-      bio: 'Creative marketing professional with a passion for building strong brand identities.',
-      is_active: false,
-      is_verified: true,
-      joined_date: '2023-02-28',
-      last_login: '2024-06-25T14:15:00Z'
-    },
-    {
-      id: 5,
-      first_name: 'Nuwan',
-      last_name: 'Perera',
-      email: 'nuwan.perera@startup.lk',
-      contact_number: '0775678901',
-      university: 'University of Colombo School of Computing',
-      degree_program: 'Computer Science',
-      experience_years: 5,
-      expertise_areas: ['Entrepreneurship', 'Product Management', 'Business Strategy'],
-      industry: 'Startup & Innovation',
-      mentorship_capacity: 8,
-      current_mentees: 6,
-      linkedin_profile: 'https://linkedin.com/in/nuwan-perera',
-      rating: 4.9,
-      total_reviews: 15,
-      bio: 'Serial entrepreneur with successful exits and passion for mentoring young entrepreneurs.',
-      is_active: true,
-      is_verified: false,
-      joined_date: '2023-08-05',
-      last_login: '2024-07-03T11:45:00Z'
-    }
-  ];
 
   useEffect(() => {
     const currentUser = getCurrentUser();
     if (!currentUser || currentUser.user_type !== 'admin') {
       navigate('/login');
-      return;
     }
-
-    // Simulate API call
-    setTimeout(() => {
-      setMentors(mockMentors);
-      setLoading(false);
-    }, 1000);
   }, [navigate]);
 
-  // Filter mentors
-  const filteredMentors = mentors.filter(mentor => {
-    const matchesSearch = 
-      mentor.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      mentor.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      mentor.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      mentor.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      mentor.position.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesExpertise = filterExpertise === 'all' || 
-      mentor.expertise_areas.some(area => area.toLowerCase().includes(filterExpertise.toLowerCase()));
-    const matchesCompany = filterCompany === 'all' || mentor.company === filterCompany;
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 400);
 
-    return matchesSearch && matchesExpertise && matchesCompany;
-  });
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
 
-  // Pagination
-  const indexOfLastMentor = currentPage * mentorsPerPage;
-  const indexOfFirstMentor = indexOfLastMentor - mentorsPerPage;
-  const currentMentors = filteredMentors.slice(indexOfFirstMentor, indexOfLastMentor);
-  const totalPages = Math.ceil(filteredMentors.length / mentorsPerPage);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, approvedFilter, statusFilter]);
 
-  // Get unique expertise areas and companies for filter
-  const expertiseAreas = [...new Set(mentors.flatMap(m => m.expertise_areas))];
-  const companies = [...new Set(mentors.map(m => m.company))];
+  useEffect(() => {
+    const loadMentors = async () => {
+      const currentUser = getCurrentUser();
+      if (!currentUser || currentUser.user_type !== 'admin') {
+        return;
+      }
 
-  const handleDeleteMentor = (mentorId) => {
-    if (window.confirm('Are you sure you want to delete this mentor?')) {
-      setMentors(prev => prev.filter(mentor => mentor.id !== mentorId));
+      setLoading(true);
+      setError('');
+
+      try {
+        const data = await fetchMentors({
+          page: currentPage,
+          perPage: MENTORS_PER_PAGE,
+          search: debouncedSearch,
+          approved: approvedFilter,
+          status: statusFilter
+        });
+
+        if (!data.success) {
+          throw new Error(data.message || 'Unable to load mentors');
+        }
+
+        setMentors(data.mentors || []);
+        setSummary(data.summary || null);
+        setPagination({
+          current_page: data.pagination?.current_page ?? currentPage,
+          total_pages: data.pagination?.total_pages ?? 1,
+          total_items: data.pagination?.total_items ?? (data.mentors ? data.mentors.length : 0),
+          per_page: data.pagination?.per_page ?? MENTORS_PER_PAGE,
+          has_next: data.pagination?.has_next ?? false,
+          has_previous: data.pagination?.has_previous ?? false
+        });
+      } catch (err) {
+        setError(err.message || 'Unable to load mentors');
+        setMentors([]);
+        setSummary(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMentors();
+  }, [currentPage, debouncedSearch, approvedFilter, statusFilter]);
+
+  const { startIndex, endIndex } = useMemo(() => {
+    if (!mentors.length) {
+      return { startIndex: 0, endIndex: 0 };
+    }
+
+    const start = (pagination.current_page - 1) * pagination.per_page + 1;
+    return {
+      startIndex: start,
+      endIndex: start + mentors.length - 1
+    };
+  }, [mentors.length, pagination.current_page, pagination.per_page]);
+
+  const handlePageChange = (pageNumber) => {
+    if (pageNumber < 1 || pageNumber > pagination.total_pages) {
+      return;
+    }
+    setCurrentPage(pageNumber);
+  };
+
+  const formatDate = (value) => {
+    if (!value) {
+      return '-';
+    }
+
+    try {
+      return new Date(value).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch (err) {
+      return value;
     }
   };
 
-  const handleToggleStatus = (mentorId) => {
-    setMentors(prev =>
-      prev.map(mentor =>
-        mentor.id === mentorId
-          ? { ...mentor, is_active: !mentor.is_active }
-          : mentor
-      )
+  const renderExpertise = (mentor) => {
+    if (mentor.expertise_tags && mentor.expertise_tags.length) {
+      return mentor.expertise_tags.slice(0, 3).map((tag, index) => (
+        <span
+          key={`${mentor.id}-expertise-${index}`}
+          className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800"
+        >
+          {tag}
+        </span>
+      ));
+    }
+
+    if (mentor.expertise) {
+      return (
+        <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600">
+          {mentor.expertise}
+        </span>
+      );
+    }
+
+    return (
+      <span className="text-xs text-gray-500">Not specified</span>
     );
-  };
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
-  const formatDateTime = (dateString) => {
-    return new Date(dateString).toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const getRatingColor = (rating) => {
-    if (rating >= 4.5) return 'text-green-600';
-    if (rating >= 4.0) return 'text-yellow-600';
-    return 'text-red-600';
-  };
-
-  const getCapacityColor = (current, total) => {
-    const percentage = (current / total) * 100;
-    if (percentage >= 80) return 'bg-red-100 text-red-800';
-    if (percentage >= 60) return 'bg-yellow-100 text-yellow-800';
-    return 'bg-green-100 text-green-800';
   };
 
   if (loading) {
@@ -241,7 +168,7 @@ const MentorsList = () => {
       <AdminLayout>
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4" />
             <p className="text-gray-600">Loading mentors...</p>
           </div>
         </div>
@@ -252,7 +179,6 @@ const MentorsList = () => {
   return (
     <AdminLayout>
       <div className="p-6">
-        {/* Header */}
         <div className="bg-white shadow-sm border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
@@ -279,210 +205,166 @@ const MentorsList = () => {
           </div>
         </div>
 
-        {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Search and Filter */}
+          {summary && (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <SummaryCard label="Total Mentors" value={summary.total} />
+              <SummaryCard label="Approved" value={summary.approved} variant="success" />
+              <SummaryCard label="Pending" value={summary.pending} variant="warning" />
+              <SummaryCard label="Active Accounts" value={summary.active_accounts} variant="info" />
+            </div>
+          )}
+
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-              {/* Search */}
-              <div className="relative flex-1 max-w-md">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+              <div className="relative w-full lg:max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search mentors..."
+                  placeholder="Search mentors by name, email, or university..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(event) => setSearchTerm(event.target.value)}
                   className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
-              {/* Filters */}
-              <div className="flex items-center space-x-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 <div className="flex items-center space-x-2">
                   <Filter className="h-4 w-4 text-gray-400" />
                   <select
-                    value={filterExpertise}
-                    onChange={(e) => setFilterExpertise(e.target.value)}
+                    value={approvedFilter}
+                    onChange={(event) => setApprovedFilter(event.target.value)}
                     className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option value="all">All Expertise</option>
-                    {expertiseAreas.map(area => (
-                      <option key={area} value={area}>{area}</option>
-                    ))}
+                    <option value="all">All approvals</option>
+                    <option value="approved">Approved</option>
+                    <option value="pending">Pending</option>
                   </select>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <select
-                    value={filterCompany}
-                    onChange={(e) => setFilterCompany(e.target.value)}
-                    className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="all">All Universities</option>
-                    {companies.map(company => (
-                      <option key={company} value={company}>{company}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="text-sm text-gray-500">
-                  {filteredMentors.length} of {mentors.length} mentors
+                <select
+                  value={statusFilter}
+                  onChange={(event) => setStatusFilter(event.target.value)}
+                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="all">All accounts</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+                <div className="text-sm text-gray-500 text-right">
+                  Showing {mentors.length ? `${startIndex}-${endIndex}` : 0} of {pagination.total_items} mentors
                 </div>
               </div>
             </div>
+
+            {error && (
+              <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {error}
+              </div>
+            )}
           </div>
 
-          {/* Mentors Table */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Mentor
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      University
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Degree Program
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Expertise
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Mentorship
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Rating
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Last Login
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mentor</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">University</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Degree Program</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expertise</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Approval</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {currentMentors.map((mentor) => (
+                  {mentors.length === 0 && (
+                    <tr>
+                      <td colSpan={8} className="px-6 py-10 text-center text-sm text-gray-500">
+                        No mentors found for the selected filters.
+                      </td>
+                    </tr>
+                  )}
+
+                  {mentors.map((mentor) => (
                     <tr key={mentor.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="bg-purple-100 p-2 rounded-lg mr-3">
-                            <GraduationCap className="h-5 w-5 text-purple-600" />
+                          <div className="bg-purple-100 h-10 w-10 rounded-full flex items-center justify-center mr-3">
+                            <Users className="h-5 w-5 text-purple-600" />
                           </div>
                           <div>
-                            <div className="flex items-center space-x-2">
-                              <span className="text-sm font-medium text-gray-900">
-                                {mentor.first_name} {mentor.last_name}
-                              </span>
-                              {mentor.is_verified && (
-                                <Award className="h-4 w-4 text-blue-500" title="Verified Mentor" />
-                              )}
+                            <div className="text-sm font-medium text-gray-900">{mentor.full_name}</div>
+                            <div className="flex items-center text-xs text-gray-500 space-x-2">
+                              <Mail className="h-3 w-3" />
+                              <span>{mentor.email}</span>
                             </div>
-                            <div className="text-sm text-gray-500">{mentor.email}</div>
-                            <div className="text-sm text-gray-500">{mentor.experience_years} years exp</div>
+                            {mentor.contact_number && (
+                              <div className="flex items-center text-xs text-gray-500 space-x-2">
+                                <Phone className="h-3 w-3" />
+                                <span>{mentor.contact_number}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {/* University */}
                         <div className="text-sm text-gray-900">{mentor.university || '-'}</div>
+                        {mentor.location && (
+                          <div className="flex items-center text-xs text-gray-500 space-x-1">
+                            <MapPin className="h-3 w-3" />
+                            <span>{mentor.location}</span>
+                          </div>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {/* Degree Program */}
                         <div className="text-sm text-gray-900">{mentor.degree_program || '-'}</div>
+                        {mentor.duration_years ? (
+                          <div className="flex items-center text-xs text-gray-500 space-x-1">
+                            <Clock className="h-3 w-3" />
+                            <span>{mentor.duration_years} year program</span>
+                          </div>
+                        ) : null}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{mentor.company}</div>
-                        <div className="text-sm text-gray-500">{mentor.industry}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{mentor.position}</div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-wrap gap-1">
-                          {mentor.expertise_areas.slice(0, 2).map((area, index) => (
-                            <span
-                              key={index}
-                              className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800"
-                            >
-                              {area}
-                            </span>
-                          ))}
-                          {mentor.expertise_areas.length > 2 && (
-                            <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600">
-                              +{mentor.expertise_areas.length - 2}
-                            </span>
-                          )}
+                        <div className="flex flex-wrap gap-1 items-center">
+                          {renderExpertise(mentor)}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {mentor.current_mentees}/{mentor.mentorship_capacity} mentees
-                        </div>
-                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getCapacityColor(mentor.current_mentees, mentor.mentorship_capacity)}`}>
-                          {mentor.current_mentees === mentor.mentorship_capacity ? 'Full' : 'Available'}
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                            mentor.approved
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}
+                        >
+                          {mentor.approved ? 'Approved' : 'Pending'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center space-x-1">
-                          <Star className={`h-4 w-4 ${getRatingColor(mentor.rating)}`} />
-                          <span className={`text-sm font-medium ${getRatingColor(mentor.rating)}`}>
-                            {mentor.rating}
-                          </span>
-                          <span className="text-sm text-gray-500">({mentor.total_reviews})</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                          mentor.is_active 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                            mentor.is_active
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}
+                        >
                           {mentor.is_active ? 'Active' : 'Inactive'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatDateTime(mentor.last_login)}
+                        {formatDate(mentor.created_at || mentor.user_created_at)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex items-center justify-end space-x-2">
-                          <Link
-                            to={`/admin/mentors/${mentor.id}`}
-                            className="text-blue-600 hover:text-blue-900 p-1 rounded"
-                            title="View"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Link>
-                          <Link
-                            to={`/admin/mentors/${mentor.id}/edit`}
-                            className="text-green-600 hover:text-green-900 p-1 rounded"
-                            title="Edit"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Link>
-                          <button
-                            onClick={() => handleToggleStatus(mentor.id)}
-                            className={`p-1 rounded ${
-                              mentor.is_active
-                                ? 'text-orange-600 hover:text-orange-900'
-                                : 'text-green-600 hover:text-green-900'
-                            }`}
-                            title={mentor.is_active ? 'Deactivate' : 'Activate'}
-                          >
-                            {mentor.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
-                          </button>
-                          <button
-                            onClick={() => handleDeleteMentor(mentor.id)}
-                            className="text-red-600 hover:text-red-900 p-1 rounded"
-                            title="Delete"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
+                        <Link
+                          to={`/admin/mentors/${mentor.id}`}
+                          className="text-blue-600 hover:text-blue-900 inline-flex items-center space-x-1"
+                        >
+                          <Eye className="h-4 w-4" />
+                          <span>View</span>
+                        </Link>
                       </td>
                     </tr>
                   ))}
@@ -490,48 +372,39 @@ const MentorsList = () => {
               </table>
             </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
+            {pagination.total_pages > 1 && (
               <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200">
-                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-sm text-gray-700">
-                      Showing <span className="font-medium">{indexOfFirstMentor + 1}</span> to{' '}
-                      <span className="font-medium">{Math.min(indexOfLastMentor, filteredMentors.length)}</span> of{' '}
-                      <span className="font-medium">{filteredMentors.length}</span> results
-                    </p>
-                  </div>
-                  <div>
-                    <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                      <button
-                        onClick={() => setCurrentPage(currentPage - 1)}
-                        disabled={currentPage === 1}
-                        className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
-                      >
-                        <ChevronLeft className="h-5 w-5" />
-                      </button>
-                      {[...Array(totalPages)].map((_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setCurrentPage(index + 1)}
-                          className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                            currentPage === index + 1
-                              ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                              : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                          }`}
-                        >
-                          {index + 1}
-                        </button>
-                      ))}
-                      <button
-                        onClick={() => setCurrentPage(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                        className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
-                      >
-                        <ChevronRight className="h-5 w-5" />
-                      </button>
-                    </nav>
-                  </div>
+                <div className="text-sm text-gray-600">
+                  Page {pagination.current_page} of {pagination.total_pages}
+                </div>
+                <div className="flex items-center space-x-1">
+                  <button
+                    onClick={() => handlePageChange(pagination.current_page - 1)}
+                    disabled={!pagination.has_previous}
+                    className="inline-flex items-center px-2 py-2 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  {[...Array(pagination.total_pages)].map((_, index) => (
+                    <button
+                      key={`mentor-page-${index}`}
+                      onClick={() => handlePageChange(index + 1)}
+                      className={`inline-flex items-center px-3 py-2 border text-sm font-medium ${
+                        pagination.current_page === index + 1
+                          ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                          : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                      }`}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => handlePageChange(pagination.current_page + 1)}
+                    disabled={!pagination.has_next}
+                    className="inline-flex items-center px-2 py-2 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
                 </div>
               </div>
             )}
@@ -539,6 +412,22 @@ const MentorsList = () => {
         </div>
       </div>
     </AdminLayout>
+  );
+};
+
+const SummaryCard = ({ label, value, variant = 'default' }) => {
+  const styles = {
+    default: 'bg-gray-50 border-gray-200 text-gray-900',
+    success: 'bg-green-50 border-green-200 text-green-800',
+    warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+    info: 'bg-blue-50 border-blue-200 text-blue-800'
+  };
+
+  return (
+    <div className={`rounded-lg border ${styles[variant]} p-4`}>
+      <p className="text-sm font-medium mb-1">{label}</p>
+      <p className="text-2xl font-semibold">{value ?? 0}</p>
+    </div>
   );
 };
 

@@ -9,7 +9,7 @@ import {
   Save,
   X,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card";
 import Button from "../ui/Button";
@@ -22,7 +22,7 @@ const AvailabilityManager = ({ mentorId }) => {
   const [formData, setFormData] = useState({
     day_of_week: 0,
     start_time: "09:00",
-    end_time: "17:00"
+    end_time: "17:00",
   });
   const [message, setMessage] = useState({ type: "", text: "" });
 
@@ -33,7 +33,7 @@ const AvailabilityManager = ({ mentorId }) => {
     { value: 3, label: "Wednesday" },
     { value: 4, label: "Thursday" },
     { value: 5, label: "Friday" },
-    { value: 6, label: "Saturday" }
+    { value: 6, label: "Saturday" },
   ];
 
   const fetchAvailability = useCallback(async () => {
@@ -41,8 +41,8 @@ const AvailabilityManager = ({ mentorId }) => {
       setLoading(true);
       const response = await fetch(`/api/mentoring/availability/${mentorId}/`);
       const data = await response.json();
-      
-      if (data.status === 'success') {
+
+      if (data.status === "success") {
         setAvailability(data.availability);
       } else {
         setMessage({ type: "error", text: data.message });
@@ -60,7 +60,7 @@ const AvailabilityManager = ({ mentorId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (formData.start_time >= formData.end_time) {
       setMessage({ type: "error", text: "Start time must be before end time" });
       return;
@@ -69,22 +69,22 @@ const AvailabilityManager = ({ mentorId }) => {
     try {
       setLoading(true);
       const url = `/api/mentoring/availability/${mentorId}/`;
-      const method = editingId ? 'PUT' : 'POST';
-      const body = editingId 
+      const method = editingId ? "PUT" : "POST";
+      const body = editingId
         ? { ...formData, availability_id: editingId }
         : formData;
 
       const response = await fetch(url, {
         method,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       });
 
       const data = await response.json();
-      
-      if (data.status === 'success') {
+
+      if (data.status === "success") {
         setMessage({ type: "success", text: data.message });
         fetchAvailability();
         resetForm();
@@ -99,23 +99,25 @@ const AvailabilityManager = ({ mentorId }) => {
   };
 
   const handleDelete = async (availabilityId) => {
-    if (!window.confirm("Are you sure you want to delete this availability slot?")) {
+    if (
+      !window.confirm("Are you sure you want to delete this availability slot?")
+    ) {
       return;
     }
 
     try {
       setLoading(true);
       const response = await fetch(`/api/mentoring/availability/${mentorId}/`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ availability_id: availabilityId })
+        body: JSON.stringify({ availability_id: availabilityId }),
       });
 
       const data = await response.json();
-      
-      if (data.status === 'success') {
+
+      if (data.status === "success") {
         setMessage({ type: "success", text: data.message });
         fetchAvailability();
       } else {
@@ -133,7 +135,7 @@ const AvailabilityManager = ({ mentorId }) => {
     setFormData({
       day_of_week: availability.day_of_week,
       start_time: availability.start_time,
-      end_time: availability.end_time
+      end_time: availability.end_time,
     });
     setShowAddForm(true);
   };
@@ -142,7 +144,7 @@ const AvailabilityManager = ({ mentorId }) => {
     setFormData({
       day_of_week: 0,
       start_time: "09:00",
-      end_time: "17:00"
+      end_time: "17:00",
     });
     setEditingId(null);
     setShowAddForm(false);
@@ -163,12 +165,9 @@ const AvailabilityManager = ({ mentorId }) => {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center space-x-2">
             <Calendar className="w-5 h-5" />
-            <span>Availability Management</span>
+            <span>Mentoring Availability</span>
           </CardTitle>
-          <Button
-            onClick={() => setShowAddForm(true)}
-            disabled={loading}
-          >
+          <Button onClick={() => setShowAddForm(true)} disabled={loading}>
             <Plus className="w-4 h-4 mr-2" />
             Add Slot
           </Button>
@@ -184,7 +183,7 @@ const AvailabilityManager = ({ mentorId }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               className={`p-3 rounded-lg flex items-center space-x-2 ${
-                message.type === "success" 
+                message.type === "success"
                   ? "bg-green-50 border border-green-200 text-green-700"
                   : "bg-red-50 border border-red-200 text-red-700"
               }`}
@@ -229,13 +228,15 @@ const AvailabilityManager = ({ mentorId }) => {
                         </label>
                         <select
                           value={formData.day_of_week}
-                          onChange={(e) => setFormData(prev => ({
-                            ...prev,
-                            day_of_week: parseInt(e.target.value)
-                          }))}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              day_of_week: parseInt(e.target.value),
+                            }))
+                          }
                           className="w-full p-3 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
                         >
-                          {daysOfWeek.map(day => (
+                          {daysOfWeek.map((day) => (
                             <option key={day.value} value={day.value}>
                               {day.label}
                             </option>
@@ -250,10 +251,12 @@ const AvailabilityManager = ({ mentorId }) => {
                         <input
                           type="time"
                           value={formData.start_time}
-                          onChange={(e) => setFormData(prev => ({
-                            ...prev,
-                            start_time: e.target.value
-                          }))}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              start_time: e.target.value,
+                            }))
+                          }
                           className="w-full p-3 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
                         />
                       </div>
@@ -265,10 +268,12 @@ const AvailabilityManager = ({ mentorId }) => {
                         <input
                           type="time"
                           value={formData.end_time}
-                          onChange={(e) => setFormData(prev => ({
-                            ...prev,
-                            end_time: e.target.value
-                          }))}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              end_time: e.target.value,
+                            }))
+                          }
                           className="w-full p-3 border border-neutral-light-grey rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
                         />
                       </div>
@@ -287,11 +292,7 @@ const AvailabilityManager = ({ mentorId }) => {
                         )}
                         <span>{editingId ? "Update" : "Add"}</span>
                       </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={resetForm}
-                      >
+                      <Button type="button" variant="ghost" onClick={resetForm}>
                         Cancel
                       </Button>
                     </div>
@@ -316,17 +317,20 @@ const AvailabilityManager = ({ mentorId }) => {
                 <p className="text-sm">Click "Add Slot" to get started.</p>
               </div>
             ) : (
-              daysOfWeek.map(day => {
+              daysOfWeek.map((day) => {
                 const daySlots = groupedAvailability[day.label] || [];
                 if (daySlots.length === 0) return null;
 
                 return (
-                  <div key={day.value} className="border border-neutral-light-grey rounded-lg p-4">
+                  <div
+                    key={day.value}
+                    className="border border-neutral-light-grey rounded-lg p-4"
+                  >
                     <h3 className="font-medium text-lg mb-3 text-neutral-black">
                       {day.label}
                     </h3>
                     <div className="space-y-2">
-                      {daySlots.map(slot => (
+                      {daySlots.map((slot) => (
                         <motion.div
                           key={slot.id}
                           initial={{ opacity: 0, x: -20 }}

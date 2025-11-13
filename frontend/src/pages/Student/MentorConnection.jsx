@@ -27,7 +27,7 @@ const MentorConnection = () => {
 
   if (!mentor) {
     return (
-      <div className="min-h-screen bg-gradient-to-r from-blue-200 to-primary-100">
+      <div className="min-h-screen bg-gradient-to-r from-primary-50 to-white">
         <StudentNavigation />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
@@ -40,7 +40,7 @@ const MentorConnection = () => {
             </p>
             <button
               onClick={() => navigate("/student/mentors")}
-              className="bg-primary-400 text-white px-6 py-3 rounded-lg hover:bg-primary-600 transition-colors"
+              className="bg-primary-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-700 transition-colors"
             >
               Back to Mentors
             </button>
@@ -52,7 +52,7 @@ const MentorConnection = () => {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-r from-blue-200 to-primary-100">
+      <div className="min-h-screen bg-gradient-to-r from-primary-50 to-white">
         <StudentNavigation />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="max-w-2xl mx-auto text-center">
@@ -71,13 +71,13 @@ const MentorConnection = () => {
             <div className="space-x-4">
               <button
                 onClick={() => navigate("/student/mentors")}
-                className="bg-primary-400 text-white px-6 py-3 rounded-lg hover:bg-primary-600 transition-colors"
+                className="bg-primary-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-700 transition-colors"
               >
-                Find More Mentors
+                Back to Mentors
               </button>
               <button
                 onClick={() => navigate("/student/dashboard")}
-                className="bg-accent-200 text-primary-400 px-6 py-3 rounded-lg hover:bg-accent-300 transition-colors"
+                className="bg-accent-200 text-primary-600 px-6 py-3 rounded-xl font-semibold hover:bg-accent-300 transition-colors"
               >
                 Go to Dashboard
               </button>
@@ -89,7 +89,7 @@ const MentorConnection = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-200 to-primary-100">
+    <div className="min-h-screen bg-gradient-to-r from-primary-50 to-white">
       <StudentNavigation />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -109,8 +109,8 @@ const MentorConnection = () => {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl shadow-lg border border-accent-100 overflow-hidden sticky top-8">
               {/* Mentor Header */}
-              <div className="relative h-32 bg-gradient-to-r from-blue-500 to-primary-500">
-                <div className="absolute inset-0 bg-black/20"></div>
+              <div className="relative h-32 bg-gradient-to-r from-primary-600 via-primary-700 to-primary-600">
+                <div className="absolute inset-0 bg-black/15"></div>
 
                 {/* Rating Badge */}
                 <div className="absolute top-3 right-3">

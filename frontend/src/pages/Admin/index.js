@@ -29,6 +29,13 @@ export {
   MentorView 
 } from './Mentors';
 
+// Counsellors Management
+export {
+  CounsellorsList,
+  CounsellorForm,
+  CounsellorView
+} from './Counsellors';
+
 // Tutors Management
 export { 
   TutorsList,
@@ -64,10 +71,8 @@ export {
   JobForm
 } from './Jobs';
 
-// // Analytics
-// export { 
-//   Analytics 
-// } from './Analytics';
+// Analytics
+export { AdminReportGenerator } from './Analytics';
 
 // Reports
 export { 

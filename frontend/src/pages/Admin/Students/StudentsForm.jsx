@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getCurrentUser } from '../../../utils/auth';
+import { studentsAPI } from '../../../utils/studentsAPI';
 import {
   Users,
   ChevronLeft,
@@ -27,16 +28,15 @@ const StudentForm = () => {
   const [message, setMessage] = useState({ type: '', text: '' });
 
   const [formData, setFormData] = useState({
-    first_name: '',
-    last_name: '',
+    full_name: '',
     email: '',
     contact_number: '',
-    student_stage: '',
+    current_stage: '',
     school: '',
     district: '',
-    grade: '',
-    stream: '',
-    preferred_subjects: [],
+    location: '',
+    bio: '',
+    gender: '',
     is_active: true
   });
 
@@ -46,7 +46,17 @@ const StudentForm = () => {
   const studentStages = [
     { value: 'O/L', label: 'O/L (Ordinary Level)' },
     { value: 'A/L', label: 'A/L (Advanced Level)' },
-    { value: 'University', label: 'University' }
+    { value: 'POST_A/L', label: 'Post A/L' },
+    { value: 'Grade 9', label: 'Grade 9' },
+    { value: 'Grade 10', label: 'Grade 10' },
+    { value: 'Grade 11', label: 'Grade 11' }
+  ];
+
+  // Gender options
+  const genderOptions = [
+    { value: 'male', label: 'Male' },
+    { value: 'female', label: 'Female' },
+    { value: 'other', label: 'Other' }
   ];
 
   // District options
@@ -74,6 +84,34 @@ const StudentForm = () => {
     'Technology', 'Mathematics'
   ];
 
+  // Load student data for editing
+  const loadStudentData = async () => {
+    if (!isEditMode) return;
+    
+    try {
+      setLoading(true);
+      const response = await studentsAPI.getStudentById(id);
+      const student = response.student;
+      
+      setFormData({
+        full_name: student.full_name || '',
+        email: student.email || '',
+        contact_number: student.contact_number || '',
+        current_stage: student.current_stage || '',
+        school: student.school || '',
+        district: student.district || '',
+        location: student.location || '',
+        bio: student.bio || '',
+        gender: student.gender || '',
+        is_active: student.is_active
+      });
+    } catch (error) {
+      setMessage({ type: 'error', text: `Failed to load student data: ${error.message}` });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     const currentUser = getCurrentUser();
     if (!currentUser || currentUser.user_type !== 'admin') {
@@ -81,24 +119,7 @@ const StudentForm = () => {
       return;
     }
 
-    if (isEditMode) {
-      // Mock data for editing
-      const mockStudent = {
-        id: 1,
-        first_name: 'Kasun',
-        last_name: 'Silva',
-        email: 'kasun.silva@gmail.com',
-        contact_number: '0771234567',
-        student_stage: 'A/L',
-        school: 'Royal College, Colombo',
-        district: 'Colombo',
-        grade: '12',
-        stream: 'Physical Science',
-        preferred_subjects: ['Physics', 'Chemistry', 'Combined Mathematics'],
-        is_active: true
-      };
-      setFormData(mockStudent);
-    }
+    loadStudentData();
   }, [id, isEditMode, navigate]);
 
   const handleInputChange = (e) => {
@@ -118,23 +139,15 @@ const StudentForm = () => {
   };
 
   const handleSubjectChange = (subject) => {
-    setFormData(prev => ({
-      ...prev,
-      preferred_subjects: prev.preferred_subjects.includes(subject)
-        ? prev.preferred_subjects.filter(s => s !== subject)
-        : [...prev.preferred_subjects, subject]
-    }));
+    // This functionality can be added later when we have subjects in the database
+    console.log('Subject selected:', subject);
   };
 
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.first_name.trim()) {
-      newErrors.first_name = 'First name is required';
-    }
-
-    if (!formData.last_name.trim()) {
-      newErrors.last_name = 'Last name is required';
+    if (!formData.full_name.trim()) {
+      newErrors.full_name = 'Full name is required';
     }
 
     if (!formData.email.trim()) {
@@ -143,26 +156,12 @@ const StudentForm = () => {
       newErrors.email = 'Email is invalid';
     }
 
-    if (!formData.contact_number.trim()) {
-      newErrors.contact_number = 'Contact number is required';
-    } else if (!/^[0-9]{10}$/.test(formData.contact_number.replace(/\s/g, ''))) {
-      newErrors.contact_number = 'Contact number must be 10 digits';
+    if (formData.contact_number && !/^[0-9+\-\s()]{10,15}$/.test(formData.contact_number.replace(/\s/g, ''))) {
+      newErrors.contact_number = 'Invalid contact number format';
     }
 
-    if (!formData.student_stage) {
-      newErrors.student_stage = 'Student stage is required';
-    }
-
-    if (!formData.school.trim()) {
-      newErrors.school = 'School is required';
-    }
-
-    if (!formData.district) {
-      newErrors.district = 'District is required';
-    }
-
-    if (formData.preferred_subjects.length === 0) {
-      newErrors.preferred_subjects = 'At least one preferred subject is required';
+    if (!formData.current_stage) {
+      newErrors.current_stage = 'Student stage is required';
     }
 
     setErrors(newErrors);
@@ -181,19 +180,21 @@ const StudentForm = () => {
     setMessage({ type: '', text: '' });
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      setMessage({ 
-        type: 'success', 
-        text: isEditMode ? 'Student updated successfully!' : 'Student created successfully!' 
-      });
+      if (isEditMode) {
+        // For now, we'll use a placeholder for the update API
+        // This would need to be implemented in the backend
+        setMessage({ type: 'success', text: 'Student update functionality coming soon!' });
+      } else {
+        // For now, we'll use a placeholder for the create API
+        // This would need to be implemented in the backend
+        setMessage({ type: 'success', text: 'Student creation functionality coming soon!' });
+      }
       
       setTimeout(() => {
         navigate('/admin/students');
       }, 1500);
     } catch (error) {
-      setMessage({ type: 'error', text: 'An error occurred. Please try again.' });
+      setMessage({ type: 'error', text: `Failed to ${isEditMode ? 'update' : 'create'} student: ${error.message}` });
     } finally {
       setLoading(false);
     }
@@ -230,47 +231,25 @@ const StudentForm = () => {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-medium text-gray-900 mb-6">Personal Information</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
+              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  First Name *
+                  Full Name *
                 </label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <input
                     type="text"
-                    name="first_name"
-                    value={formData.first_name}
+                    name="full_name"
+                    value={formData.full_name}
                     onChange={handleInputChange}
                     className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.first_name ? 'border-red-500' : 'border-gray-300'
+                      errors.full_name ? 'border-red-500' : 'border-gray-300'
                     }`}
-                    placeholder="Enter first name"
+                    placeholder="Enter full name"
                   />
                 </div>
-                {errors.first_name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.first_name}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Last Name *
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    type="text"
-                    name="last_name"
-                    value={formData.last_name}
-                    onChange={handleInputChange}
-                    className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.last_name ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    placeholder="Enter last name"
-                  />
-                </div>
-                {errors.last_name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.last_name}</p>
+                {errors.full_name && (
+                  <p className="mt-1 text-sm text-red-600">{errors.full_name}</p>
                 )}
               </div>
 
@@ -289,16 +268,20 @@ const StudentForm = () => {
                       errors.email ? 'border-red-500' : 'border-gray-300'
                     }`}
                     placeholder="Enter email address"
+                    disabled={isEditMode}
                   />
                 </div>
                 {errors.email && (
                   <p className="mt-1 text-sm text-red-600">{errors.email}</p>
                 )}
+                {isEditMode && (
+                  <p className="mt-1 text-xs text-gray-500">Email cannot be changed in edit mode</p>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Contact Number *
+                  Contact Number
                 </label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -317,6 +300,56 @@ const StudentForm = () => {
                   <p className="mt-1 text-sm text-red-600">{errors.contact_number}</p>
                 )}
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Gender
+                </label>
+                <select
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Select gender</option>
+                  {genderOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Location
+                </label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    type="text"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleInputChange}
+                    className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter location"
+                  />
+                </div>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Bio
+                </label>
+                <textarea
+                  name="bio"
+                  value={formData.bio}
+                  onChange={handleInputChange}
+                  rows={3}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter bio/description"
+                />
+              </div>
             </div>
           </div>
 
@@ -329,11 +362,11 @@ const StudentForm = () => {
                   Student Stage *
                 </label>
                 <select
-                  name="student_stage"
-                  value={formData.student_stage}
+                  name="current_stage"
+                  value={formData.current_stage}
                   onChange={handleInputChange}
                   className={`w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.student_stage ? 'border-red-500' : 'border-gray-300'
+                    errors.current_stage ? 'border-red-500' : 'border-gray-300'
                   }`}
                 >
                   <option value="">Select student stage</option>
@@ -343,14 +376,14 @@ const StudentForm = () => {
                     </option>
                   ))}
                 </select>
-                {errors.student_stage && (
-                  <p className="mt-1 text-sm text-red-600">{errors.student_stage}</p>
+                {errors.current_stage && (
+                  <p className="mt-1 text-sm text-red-600">{errors.current_stage}</p>
                 )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  School *
+                  School
                 </label>
                 <div className="relative">
                   <School className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -359,20 +392,15 @@ const StudentForm = () => {
                     name="school"
                     value={formData.school}
                     onChange={handleInputChange}
-                    className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.school ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Enter school name"
                   />
                 </div>
-                {errors.school && (
-                  <p className="mt-1 text-sm text-red-600">{errors.school}</p>
-                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  District *
+                  District
                 </label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -380,9 +408,7 @@ const StudentForm = () => {
                     name="district"
                     value={formData.district}
                     onChange={handleInputChange}
-                    className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.district ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">Select district</option>
                     {districts.map(district => (
@@ -392,65 +418,18 @@ const StudentForm = () => {
                     ))}
                   </select>
                 </div>
-                {errors.district && (
-                  <p className="mt-1 text-sm text-red-600">{errors.district}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Grade
-                </label>
-                <input
-                  type="text"
-                  name="grade"
-                  value={formData.grade}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter grade (e.g., 12, 13)"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Stream
-                </label>
-                <select
-                  name="stream"
-                  value={formData.stream}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Select stream</option>
-                  {streams.map(stream => (
-                    <option key={stream} value={stream}>
-                      {stream}
-                    </option>
-                  ))}
-                </select>
               </div>
             </div>
           </div>
 
-          {/* Preferred Subjects */}
+          {/* Preferred Subjects - Placeholder for future implementation */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-6">Preferred Subjects *</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {subjects.map(subject => (
-                <label key={subject} className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.preferred_subjects.includes(subject)}
-                    onChange={() => handleSubjectChange(subject)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-700">{subject}</span>
-                </label>
-              ))}
+            <h2 className="text-lg font-medium text-gray-900 mb-6">Additional Information</h2>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p className="text-sm text-gray-600">
+                📝 Subject preferences and additional academic information will be available in a future update.
+              </p>
             </div>
-            {errors.preferred_subjects && (
-              <p className="mt-2 text-sm text-red-600">{errors.preferred_subjects}</p>
-            )}
           </div>
 
           {/* Status */}
