@@ -29,4 +29,26 @@ urlpatterns = [
     path('requests/', views.university_requests_list, name='university_requests_list'),
     path('requests/<int:request_id>/approve/', views.approve_university_request, name='approve_university_request'),
     path('requests/<int:request_id>/reject/', views.reject_university_request, name='reject_university_request'),
+
+    # Announcements
+    path('announcements/', views.announcements_list_create,
+         name='announcements_list_create'),
+    path('announcements/<int:announcement_id>/',
+         views.announcement_update_delete, name='announcement_update_delete'),
+
+    # University Dashboard Admin
+    path('dashboard-admin/', views.get_university_dashboard_admin,
+         name='get_university_dashboard_admin'),
+    path('dashboard-admin/create/', views.create_university_dashboard_admin,
+         name='create_university_dashboard_admin'),
+    path('dashboard-admin/<int:dashboard_id>/update/',
+         views.update_university_dashboard_admin, name='update_university_dashboard_admin'),
+
+    # Manage Portfolio
+    path('manage-portfolio/', views.get_manage_portfolio,
+         name='get_manage_portfolio'),
+    path('manage-portfolio/create/', views.create_manage_portfolio,
+         name='create_manage_portfolio'),
+    path('manage-portfolio/<int:portfolio_id>/update/',
+         views.update_manage_portfolio, name='update_manage_portfolio'),
 ]

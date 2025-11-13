@@ -107,4 +107,94 @@ class CompanyRequests(models.Model):
     class Meta:
         managed = True
         db_table = 'company_requests'
+class Courses(models.Model):
+    course_id = models.AutoField(primary_key=True)
+    company = models.ForeignKey(Companies, models.DO_NOTHING)
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    category = models.CharField(max_length=100, blank=True, null=True)
+    level = models.CharField(max_length=50, blank=True, null=True)
+    duration = models.CharField(max_length=50, blank=True, null=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    instructor = models.CharField(max_length=255, blank=True, null=True)
+    prerequisites = models.CharField(max_length=255, blank=True, null=True)
+    status = models.CharField(max_length=20, blank=True, null=True)
+    enrollments = models.IntegerField(blank=True, null=True)
+    rating = models.FloatField(blank=True, null=True)
+    image = models.CharField(max_length=255, blank=True, null=True)
+    skills = models.CharField(max_length=255, blank=True, null=True)
+    start_date = models.DateField(blank=True, null=True)
+    end_date = models.DateField(blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'company_courses'
+
+
+class CompanyAnnouncement(models.Model):
+    announcement_id = models.AutoField(primary_key=True)
+    company = models.ForeignKey(Companies, models.DO_NOTHING)
+    title = models.CharField(max_length=255)
+    category = models.CharField(max_length=100)
+    priority = models.CharField(max_length=20)
+    date = models.DateField()
+    status = models.CharField(max_length=20)
+    author = models.CharField(max_length=100)
+    description = models.TextField(blank=True, null=True)
+    tags = models.CharField(max_length=255, blank=True, null=True)  # comma-separated
+    image_url = models.CharField(max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        managed = True
+        db_table = 'company_announcement'
+
+
+class CompanyDashboardEdit(models.Model):
+    dashboard_id = models.AutoField(primary_key=True)
+    company = models.ForeignKey(Companies, models.DO_NOTHING)
+    story_title = models.CharField(max_length=255)
+    story_subtitle = models.TextField(blank=True, null=True)
+    story_section_title = models.CharField(max_length=255, blank=True, null=True)
+    story_description = models.TextField(blank=True, null=True)
+    story_second_description = models.TextField(blank=True, null=True)
+    story_image = models.CharField(max_length=255, blank=True, null=True)
+    offers = models.JSONField(default=list)  # List of offer dicts
+    team = models.JSONField(default=list)    # List of team member dicts
+    testimonials = models.JSONField(default=list)  # List of testimonial dicts
+    contact_email = models.CharField(max_length=100, blank=True, null=True)
+    contact_phone = models.CharField(max_length=50, blank=True, null=True)
+    contact_address = models.CharField(max_length=255, blank=True, null=True)
+    announcements = models.JSONField(default=list)  # Add this line
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        managed = True
+        db_table = 'company_dashboard_edit'
+
+
+class CompanyAd(models.Model):
+    ad_id = models.AutoField(primary_key=True)
+    company = models.ForeignKey(Companies, models.DO_NOTHING)
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    category = models.CharField(max_length=100)
+    target_audience = models.CharField(max_length=100)
+    budget = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    duration = models.IntegerField()  # days
+    ad_type = models.CharField(max_length=50)
+    image_url = models.CharField(max_length=255, blank=True, null=True)
+    video_url = models.CharField(max_length=255, blank=True, null=True)
+    website_url = models.CharField(max_length=255, blank=True, null=True)
+    contact_email = models.CharField(max_length=100)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    keywords = models.CharField(max_length=255, blank=True, null=True)
+    status = models.CharField(max_length=20, default='pending')  # pending, active, completed
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        managed = True
+        db_table = 'company_ads'
 

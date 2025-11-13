@@ -489,6 +489,15 @@
   transition: all 0.3s ease;
   border: 1px solid #e5e7eb;
   position: relative;
+  /* Add these lines for fixed size */
+  width: 340px;
+  min-width: 380px;
+  max-width: 380px;
+  height: 540px;
+  min-height: 540px;
+  max-height: 540px;
+  display: flex;
+  flex-direction: column;
 }
 
 .course-card-unique:hover {
@@ -499,29 +508,29 @@
 
 .btn-delete-course {
   position: absolute;
-  top: 2px;
-  left: 350px;
-  
-color: rgb(195, 34, 34);
+  top: 10px;      /* Increased for better spacing */
+  right: 10px;    /* Use right instead of left for top-right placement */
+  color: #ff0000;
   border: none;
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
+  font-size: 1.2rem;
   font-weight: bold;
   z-index: 10;
   transition: all 0.2s ease;
-  opacity: 0.9;
+  opacity: 1;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 
 .btn-delete-course:hover {
   background: #dc2626;
-  transform: scale(1.1);
-  opacity: 1;
+  transform: scale(1.15);
+  box-shadow: 0 4px 16px rgba(239,68,68,0.25);
 }
 
 .course-card-image-container {
@@ -1426,8 +1435,8 @@ color: rgb(195, 34, 34);
     padding: 1.5rem 1.5rem 0.75rem 1.5rem;
   }
   
-  .company-course-admin-modal-body {
-    padding: 1rem 1.5rem 1.5rem 1.5rem;
+  .company-course-admin-modal_body {
+    padding: 0.75rem 1.25rem 1.25rem 1.25rem;
   }
   
   .company-course-admin-modal-header h2 {

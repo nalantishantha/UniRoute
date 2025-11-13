@@ -1,9 +1,11 @@
 from django.db import models
 
+
 class MentoringPayments(models.Model):
     payment_id = models.AutoField(primary_key=True)
     student = models.ForeignKey('students.Students', models.DO_NOTHING)
-    session = models.ForeignKey('mentoring.MentoringSessions', models.DO_NOTHING)
+    session = models.ForeignKey(
+        'mentoring.MentoringSessions', models.DO_NOTHING)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_method = models.CharField(max_length=50, blank=True, null=True)
     paid_at = models.DateTimeField(blank=True, null=True)
@@ -12,6 +14,7 @@ class MentoringPayments(models.Model):
     class Meta:
         managed = True
         db_table = 'mentoring_payments'
+
 
 class TutoringPayments(models.Model):
     payment_id = models.AutoField(primary_key=True)
@@ -29,3 +32,21 @@ class TutoringPayments(models.Model):
     class Meta:
         managed = True
         db_table = 'tutoring_payments'
+
+
+class CompanyAdPayments(models.Model):
+    """Payment records for company advertisements."""
+    payment_id = models.AutoField(primary_key=True)
+    ad = models.ForeignKey('companies.CompanyAd', models.DO_NOTHING)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_method = models.CharField(
+        max_length=50)  # e.g., credit-card, paypal
+    transaction_id = models.CharField(max_length=100, blank=True, null=True)
+    status = models.CharField(
+        max_length=20, default='success')  # success, failed
+    paid_at = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        managed = True
+        db_table = 'company_ad_payments'

@@ -36,4 +36,16 @@ urlpatterns = [
     path('video-call/<str:room_id>/join/', video_call_views.join_video_room, name='join_video_room'),
     path('video-call/<str:room_id>/end/', video_call_views.end_video_room, name='end_video_room'),
     path('video-call/session/<int:session_id>/', video_call_views.get_room_by_session, name='get_room_by_session'),
+    # Mentors
+    path('mentors/', views.get_mentors, name='get_mentors'),
+
+    # University Mentor Admin
+    path('university/mentor-requests/', views.university_mentor_requests, name='university_mentor_requests'),
+    path('university/active-mentors/', views.university_active_mentors, name='university_active_mentors'),
+    path('university/mentor-requests/<int:pre_mentor_id>/accept/', views.accept_pre_mentor, name='accept_pre_mentor'),
+    path('university/mentor-requests/<int:pre_mentor_id>/reject/', views.reject_pre_mentor, name='reject_pre_mentor'),
+
+    # Student-facing status
+    path('pre-mentor/status/', views.pre_mentor_status, name='pre_mentor_status'),
+    path('pre-mentor/submit/', views.submit_pre_mentor_application, name='submit_pre_mentor_application'),
 ]

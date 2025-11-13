@@ -721,7 +721,7 @@ const Internship = () => {
         </div>
       )}
 
-      {/* Edit Modal - ADDED IMAGE URL FIELD */}
+      {/* Edit Modal - Make it match the Create Modal */}
       {showEditModal && selectedInternship && (
         <div className="company-internship-user-modal-overlay" onClick={() => setShowEditModal(false)}>
           <div className="company-internship-user-modal-content" onClick={e => e.stopPropagation()}>
@@ -741,6 +741,7 @@ const Internship = () => {
                       onChange={handleInputChange}
                       required
                       className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="e.g., Software Development Intern"
                     />
                   </div>
                   <div>
@@ -751,11 +752,12 @@ const Internship = () => {
                       value={formData.location}
                       onChange={handleInputChange}
                       className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="e.g., New York, NY or Remote"
                     />
                   </div>
                 </div>
 
-                {/* IMAGE URL FIELD IN EDIT FORM */}
+                {/* IMAGE URL FIELD */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Image URL</label>
                   <input
@@ -766,6 +768,7 @@ const Internship = () => {
                     className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="https://example.com/image.jpg"
                   />
+                  <small className="text-gray-500">Optional: Add an image URL to display on the internship card</small>
                 </div>
 
                 <div>
@@ -776,7 +779,80 @@ const Internship = () => {
                     onChange={handleInputChange}
                     rows="3"
                     className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Describe the internship role and responsibilities"
                   />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Start Date *</label>
+                    <input
+                      type="date"
+                      name="start_date"
+                      value={formData.start_date}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">End Date *</label>
+                    <input
+                      type="date"
+                      name="end_date"
+                      value={formData.end_date}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Application Deadline *</label>
+                    <input
+                      type="date"
+                      name="application_deadline"
+                      value={formData.application_deadline}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Stipend</label>
+                    <input
+                      type="text"
+                      name="stipend"
+                      value={formData.stipend}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="e.g., $15/hour or $2000/month"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Contact Email</label>
+                    <input
+                      type="email"
+                      name="contact_email"
+                      value={formData.contact_email}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="hr@company.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Contact Phone</label>
+                    <input
+                      type="tel"
+                      name="contact_phone"
+                      value={formData.contact_phone}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="+1 (555) 123-4567"
+                    />
+                  </div>
                 </div>
 
                 <div className="flex justify-end space-x-3 pt-4">
