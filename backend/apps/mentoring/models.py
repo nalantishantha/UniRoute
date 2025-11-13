@@ -97,8 +97,8 @@ class PreMentors(models.Model):
     We only read from this table to detect applied=1 submissions.
     """
     pre_mentor_id = models.AutoField(primary_key=True)
-    user = models.ForeignKey('accounts.Users', models.DO_NOTHING, db_column='user_id')
-    university_student = models.ForeignKey('university_students.UniversityStudents', models.DO_NOTHING, db_column='university_student_id', blank=True, null=True)
+    user = models.ForeignKey('accounts.Users', models.DO_NOTHING, db_column='user_id', related_name='mentoring_prementors')
+    university_student = models.ForeignKey('university_students.UniversityStudents', models.DO_NOTHING, db_column='university_student_id', blank=True, null=True, related_name='mentoring_prementors')
     status = models.CharField(max_length=20, blank=True, null=True)
     applied = models.IntegerField(blank=True, null=True)
     recommendation = models.TextField(blank=True, null=True)

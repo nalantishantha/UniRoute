@@ -37,7 +37,8 @@ urlpatterns = [
     path('video-call/<str:room_id>/end/', video_call_views.end_video_room, name='end_video_room'),
     path('video-call/session/<int:session_id>/', video_call_views.get_room_by_session, name='get_room_by_session'),
     # Mentors
-    path('mentors/', views.get_mentors, name='get_mentors'),
+    # TODO: Implement get_mentors view if needed
+    # path('mentors/', views.get_mentors, name='get_mentors'),
 
     # University Mentor Admin
     path('university/mentor-requests/', views.university_mentor_requests, name='university_mentor_requests'),
